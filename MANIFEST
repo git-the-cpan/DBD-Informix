@@ -1,18 +1,18 @@
-Announce                                        58.3
-ChangeLog                                       58.9
+Announce                                        59.1
+ChangeLog                                       59.5
 Informix.Licence                                58.1
 Informix.h                                      57.2
-Informix.pm                                     58.3
+Informix.pm                                     59.2
 Informix.xs                                     58.1
 InformixTest.pm                                 58.1
-MANIFEST                                        $Revision: 58.6 $
-Makefile.PL                                     58.16
-README                                          58.4
+MANIFEST                                        $Revision: 59.3 $
+Makefile.PL                                     59.4
+README                                          59.2
 README.olipcshm                                 56.2
 Working.Versions                                58.1
 chkbuild.sh                                     1.8
 dbdattr.ec                                      58.1
-dbdimp.ec                                       58.4
+dbdimp.ec                                       59.3
 dbdimp.h                                        58.1
 dbdixmap.h                                      58.1
 decsci.c                                        1.11
@@ -52,6 +52,7 @@ t/dblist.t                                      56.2
 t/decgen.pl                                     54.1
 t/dratt01.t                                     57.1
 t/dtgen.pl                                      54.1
+t/dtime01.t                                     59.2
 t/error01.t                                     57.1
 t/metadata.t                                    57.4
 t/multiconn01.t                                 54.3

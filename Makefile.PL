@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 58.16 1998/01/15 19:53:07 johnl Exp $ 
+# @(#)$Id: Makefile.PL,v 59.4 1998/03/11 17:38:50 jleffler Exp $ 
 #
 # Portions Copyright (c) 1996-98 Jonathan Leffler
 # Portions Copyright (c) 1996    Alligator Descartes
@@ -89,7 +89,7 @@ did_not_read("DBI is out of date") unless ($DBI::VERSION >= 0.90);
 # Compare installed version of DBI with version which DBD::Informix was
 # last tested with.
 # The required and reference versions are different for this release.
-my $dbi_ref_ver = "0.91";
+my $dbi_ref_ver = "0.93";
 warn "*** Ideally, you should upgrade to DBI version $dbi_ref_ver.\n\n"
 	unless ($DBI::VERSION >= $dbi_ref_ver);
 
@@ -578,6 +578,10 @@ elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 	print "\n";
 }
 
+# @(#)KLUDGE - Experimental -R flags
+${$opts{dynamic_lib}}{OTHERLDFLAGS} .= " -R$ID/lib -R$ID/lib/esql"
+	if ($Config{osname} eq 'solaris');
+
 # Ensure that esqlcc, esqlld, esqlsed are executable
 my $file;
 for $file (qw(esqlcc esqlld esqlsed))
@@ -636,7 +640,7 @@ exit 0;
 # not -- it would be OK to place .ec in front of the standard list.
 
 sub MY::postamble {
-my ($p1, $p2, $p3, $p4, $p5);
+my ($p1, $p2, $p3, $p4, $p5, $p6);
 
 $p1 = 
 "
@@ -686,7 +690,20 @@ clean::
 # template from DBI (Driver.xst).  dbd_postamble() is defined by DBI::DBD.
 $p5 = dbd_postamble();
 
-return $p1 . $p2 . $p3 . $p4 . $p5;
+if ($DBI::VERSION == 0.92)
+{
+	print q%
+
+You're using DBI 0.92.  I've patched the generated Makefile to work with it,
+but you should upgrade to at least DBI 0.93, please.  ASAP!
+
+%;
+	$p6 = q%
+$(BASEEXT)$(OBJ_EXT): $(BASEEXT).xsi
+%;
+}
+
+return $p1 . $p2 . $p3 . $p4 . $p5 . $p6;
 }
 
 __END__

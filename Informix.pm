@@ -1,4 +1,4 @@
-#	@(#)$Id: Informix.pm,v 58.3 1998/01/15 18:50:27 johnl Exp $ 
+#	@(#)$Id: Informix.pm,v 59.2 1998/03/11 17:42:33 jleffler Exp $ 
 #
 #   Portions Copyright (c) 1994-95 Tim Bunce
 #   Portions Copyright (c) 1996-98 Jonathan Leffler
@@ -13,10 +13,10 @@
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.58";
+	$VERSION     = "0.59";
 	$ATTRIBUTION = 'By Jonathan Leffler';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 58.3 $ ($Date: 1998/01/15 18:50:27 $)@, 3);
-	$Revision =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
+	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 59.2 $ ($Date: 1998/03/11 17:42:33 $)@, 3);
+	$Revision    =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
 
 	require_version DBI 0.90;	# Requires features from DBI 0.90 release
 

@@ -3,6 +3,25 @@ Change Log for DBD::Informix for DBI
 - Written by Alligator Descartes <descarte@arcana.co.uk>
 - Rewritten by Jonathan Leffler <j.leffler@acm.org>
 
+0.59 Release
+------------
+98-03-11: Make a release to try and resolve ongoing problems at AirTouch.
+98-03-04: Chuck Collins <Chuck.Collins@AirTouch.COM> discovered that the
+          dbd_ix_preparse() routine gets confused by DATETIME and INTERVAL
+          literals -- it was treating '30:20:10' as '30??' because the
+          literals are not inside a string.  Fixed by not recognizing
+          Oracle-style numeric place-holders (Oracle-style named place-holders
+          were already ignored because they can be confused with dbase:table).
+98-02-20: Chuck Collins <Chuck.Collins@AirTouch.COM> discovered an assertion
+          failing in MODE ANSI databases when an UPDATE didn't update any
+          rows.  Fix assertion to cover this case.  Testing reveals that if
+          you create a database, the logging status, etc, are not set
+          correctly.  This also causes an assertion to fire.
+98-02-17: DBI 0.93 released with fix for '.xsi' problem.
+98-02-11: Problem with Informix.xsi resolved.  Needs extra dependency in
+          generated Makefile, which is triggered by the DBI version.
+98-02-06: Document problems with DBI 0.92 (no Informix.xsi file).
+
 0.58 Release
 ------------
 98-01-15: Finish up NT build work, and release in time for the Win32 Perl
@@ -440,4 +459,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <johnl@informix.com>
-@(#)$Id: ChangeLog,v 58.9 1998/01/15 18:51:28 johnl Exp $
+@(#)$Id: ChangeLog,v 59.5 1998/03/11 17:43:01 jleffler Exp $

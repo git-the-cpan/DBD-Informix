@@ -1,14 +1,9 @@
 To: dbi-announce@fugue.com, dbi-dev@fugue.com, dbi-users@fugue.com,
         informix-list@rmy.emory.edu, descarte@arcana.co.uk
-Subject: ANNOUNCE: DBD::Informix Version 0.58 released
+Subject: ANNOUNCE: DBD::Informix Version 0.59 released
 
-The next release of DBD::Informix, version 0.58, has been uploaded to CPAN.
+The next release of DBD::Informix, version 0.59, has been uploaded to CPAN.
 It will be available worldwide in a day or three.
-
-Please note the change of contact address.  As of 17th January 1998, I do
-not actually work for Informix.  Email sent to johnl@informix.com will not
-be delivered to me -- it will bounce or vanish into the great bit bucket in
-the sky (aka /dev/null).
 
 DBD::Informix is the driver code that enables Perl 5.003 or 5.004 to access
 Informix databases via the DBI module (you'll need the code for both DBI
@@ -18,14 +13,7 @@ http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
 http://www.arcana.co.uk/technologia/perl/DBI
 
 New in this release:
-* Corrected README file (0.57 had the wrong files released as READMEs; sorry).
-* Integrated support for NT into Makefile.PL (with trivial changes elsewhere).
-* Amended README to be more stringent on using C compiler to create shared
-  libraries.
-* Fix bug for logged (non-ANSI) databases on BEGIN WORK when AutoCommit Off.
-* Amend the place-holder parsing routine to ignore ':alpha' place-holders
-  because they are syntactically indistinguishable from Informix's
-  database:table notation.
+* 
 
 Still to do:
 * Add support for IUS data types.
@@ -49,4 +37,4 @@ Jonathan Leffler (j.leffler@acm.org) #include <disclaimer.h>
 
 PS: Read the README file.  Also read the Informix.Licence file.
 
-@(#)$Id: Announce,v 58.3 1998/01/15 18:52:32 johnl Exp $
+@(#)$Id: Announce,v 59.1 1998/02/06 17:52:59 jleffler Exp $

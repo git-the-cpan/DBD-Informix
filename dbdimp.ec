@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.ec,v 58.4 1998/01/15 18:46:24 johnl Exp $ 
+ * @(#)$Id: dbdimp.ec,v 59.3 1998/03/11 17:25:27 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 58.4 1998/01/15 18:46:24 johnl Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 59.3 1998/03/11 17:25:27 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -246,6 +246,13 @@ static void     new_connection(imp_dbh_t *imp_dbh)
 	connection_num++;
 }
 
+static void dbd_ix_setdbtype(imp_dbh_t *imp_dbh)
+{
+	imp_dbh->is_onlinedb = (sqlca.sqlwarn.sqlwarn3 == 'W');
+	imp_dbh->is_modeansi = (sqlca.sqlwarn.sqlwarn2 == 'W');
+	imp_dbh->is_loggeddb = (sqlca.sqlwarn.sqlwarn1 == 'W');
+}
+
 int
 dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 {
@@ -286,9 +293,7 @@ dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 	/* Examine sqlca to see what sort of database we are hooked up to */
 	dbd_ix_savesqlca(imp_dbh);
 	imp_dbh->database = name;
-	imp_dbh->is_onlinedb = (sqlca.sqlwarn.sqlwarn3 == 'W');
-	imp_dbh->is_modeansi = (sqlca.sqlwarn.sqlwarn2 == 'W');
-	imp_dbh->is_loggeddb = (sqlca.sqlwarn.sqlwarn1 == 'W');
+	dbd_ix_setdbtype(imp_dbh);
 	imp_dbh->is_connected = conn_ok;
 
 	/* Record extra active connection and name of current connection */
@@ -1005,6 +1010,8 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 ** input) so that ? parameters are counted and :xx (x = digit) positional
 ** parameters are converted to ?.  Note that :abc notation is not
 ** converted; it causes problems with Informix's FROM dbase:table notation.
+** Note that this version does not accept :x notation (where x is a digit)
+** either, because it gets confused by DATETIME and INTERVAL literals!
 ** The code handles single-quoted literals and double-quoted delimited
 ** identifiers and ANSI SQL "--.*\n" comments and Informix "{.*}" comments.
 ** Note that it does nothing with "#.*\n" Perl/Shell comments.  Also note
@@ -1026,6 +1033,7 @@ static int dbd_ix_preparse(char *statement)
 	int             param = 0;
 	char            ch;
 
+	dbd_ix_debug(4, "dbd_ix_preparse-in: <<%s>>\n", statement);
 	src = statement;
 	dst = statement;
 	while ((ch = *src++) != '\0')
@@ -1045,11 +1053,6 @@ static int dbd_ix_preparse(char *statement)
 		{
 			end_quote = '\n';
 		}
-		if (ch != ':' && ch != '?')
-		{
-			*dst++ = ch;
-			continue;
-		}
 		if (ch == '?')
 		{
 			/* X/Open standard	 */
@@ -1057,18 +1060,10 @@ static int dbd_ix_preparse(char *statement)
 			idx++;
 			style = 3;
 		}
-		else if (isDIGIT(*src))
-		{
-			/* ':1'		 */
-			*dst++ = '?';
-			while (isDIGIT(*src))
-				src++;
-			idx++;
-			style = 1;
-		}
 		else
 		{
-			/* perhaps ':=' PL/SQL construct or dbase:table in Informix */
+			/* Perhaps ':=' PL/SQL construct or dbase:table in Informix */
+			/* Or it could be :2 or :22 as part of a DATETIME/INTERVAL */
 			*dst++ = ch;
 			continue;
 		}
@@ -1098,6 +1093,7 @@ static int dbd_ix_preparse(char *statement)
 		}
 	}
 	*dst = '\0';
+	dbd_ix_debug(4, "dbd_ix_preparse-out: <<%s>>\n", statement);
 	return(idx);
 }
 
@@ -1139,6 +1135,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 		return 0;
 	}
 
+	dbd_ix_debug(4, "dbd_ix_st_prepare -- <<%s>>\n", statement);
 	EXEC SQL PREPARE :nm_stmnt FROM :statement;
 	dbd_ix_savesqlca(imp_dbh);
 	dbd_ix_sqlcode(imp_dbh);
@@ -1224,7 +1221,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 
 	/* Get number of fields and space needed for field names      */
 	if (DBIS->debug >= 2)
-		printf("%s'imp_sth->n_columns: %d\n", function, imp_sth->n_columns);
+		warn("%s'imp_sth->n_columns: %d\n", function, imp_sth->n_columns);
 
 	dbd_ix_exit(function);
 	return rc;
@@ -1567,6 +1564,10 @@ static int dbd_ix_open(imp_sth_t *imp_sth)
 	return 1;
 }
 
+static void dbd_ix_getdbname(const char *kw1, const char *kw2, imp_sth_t *sth)
+{
+}
+
 static int dbd_ix_exec(imp_sth_t *imp_sth)
 {
 	static const char function[] = DBD_IX_MODULE "::dbd_ix_exec";
@@ -1656,18 +1657,22 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 		break;
 	case SQ_DATABASE:
 		dbh->is_txactive = False;
+		dbd_ix_setdbtype(dbh);
 		/* Analyse new database name and record it */
 		break;
 	case SQ_CREADB:
 		dbh->is_txactive = False;
+		dbd_ix_setdbtype(dbh);
 		/* Analyse new database name and record it */
 		break;
 	case SQ_STARTDB:
 		dbh->is_txactive = False;
+		dbd_ix_setdbtype(dbh);
 		/* Analyse new database name and record it */
 		break;
 	case SQ_RFORWARD:
 		dbh->is_txactive = False;
+		dbd_ix_setdbtype(dbh);
 		/* Analyse new database name and record it */
 		break;
 	case SQ_CLSDB:
@@ -1727,13 +1732,19 @@ dbd_ix_st_execute(SV *sth, imp_sth_t *imp_sth)
 	/* Map returned values from dbd_ix_exec and dbd_ix_open */
 	if (rc == 0)
 	{
+		/* Statement failed -- return the error code */
 		assert(sqlca.sqlcode < 0);
 		rv = sqlca.sqlcode;
 	}
 	else
 	{
+		/*
+		 * Statement succeeded.  Don't forget about MODE ANSI database and
+		 * an UPDATE which does not alter any rows returning SQLNOTFOUND.
+		 * MODE ANSI problem found by Chuck.Collins@zool.Airtouch.com
+		 */
 		rv = sqlca.sqlerrd[2];
-		assert(sqlca.sqlcode == 0 && rv >= 0);
+		assert((sqlca.sqlcode == 0 || sqlca.sqlcode == SQLNOTFOUND) && rv >= 0);
 	}
 
 	dbd_ix_exit(function);
