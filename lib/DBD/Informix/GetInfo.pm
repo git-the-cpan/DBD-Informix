@@ -14,7 +14,7 @@
 #
 #-------------------------------------------------------------------------
 # Code and explanations follow for DBD::Informix
-# (IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04))
+# (IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04))
 #-------------------------------------------------------------------------
 #
 # NB: The Informix CLI (ODBC) driver did not provide a list of keywords.
@@ -30,7 +30,7 @@ use DBI::Const::GetInfoType qw(%GetInfoType);
 use DBI::Const::GetInfoReturn qw(%GetInfoReturnTypes %GetInfoReturnValues);
 
 my
-$VERSION = "2003.03.0400";
+$VERSION = "2003.03.0401";
 $VERSION = "2003.00.0000" if ($VERSION =~ m%[:]VERSION[:]%);
 
 my $sql_driver = 'Informix';

@@ -1,8 +1,8 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04) released
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04) released
 
-IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
 the driver code that enables Perl 5.005 or later to access Informix
@@ -19,12 +19,12 @@ http://dbi.perl.org/
 ** Jonathan Leffler) at jleffler@us.ibm.com.  Note that ItWorks does not
 ** send email to anybody; you have to do that yourself.
 
-New in release 2003.03.0400:
+New in release 2003.03.0401:
 * Minor bug fix release.
 * Installs Bundle::DBD::Informix to keep CPAN and CPANPLUS modules happy
   that DBD::Informix is properly installed and up-to-date.
 * Remove data_sources from Informix.xs since it is defined by DBI.
-* Add version information to DBD::Informix::GetInfo.
+* Sort out version information in DBD::Informix::* sub-modules.
 * Minor amendments and additions to history in ChangeLog.
 
 New in release 2003.03.0303:
@@ -71,4 +71,4 @@ As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce,v 2003.4 2003/03/04 19:49:40 jleffler Exp $
+@(#)$Id: Announce,v 2003.5 2003/03/04 22:55:05 jleffler Exp $
