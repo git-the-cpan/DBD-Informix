@@ -1,10 +1,45 @@
 Change Log for DBD::Informix for DBI
 
 - Written by Alligator Descartes <descarte@arcana.co.uk>
-- Rewritten by Jonathan Leffler <johnl@informix.com>
+- Rewritten by Jonathan Leffler <j.leffler@acm.org>
+
+0.58 Release
+------------
+98-01-15: Finish up NT build work, and release in time for the Win32 Perl
+          Resource Book deadline (phew) and also just before switching jobs
+          from Informix to Visa.  Fix Makefile.PL and README file to make
+          warnings about using ld to create shared libraries with gcc more
+          stringent.  Kevin White <kwhite@redroof.com> and Michael Chandler
+          <mpchandler@fedex.com> both had major problems on HP-UX 10.20
+          with this, and the problems were not fully resolved at release
+          time.  One issue was that the notation 'ENVVAR=value command' did
+          not seem to be setting the environment variable, but Makefile.PL
+          assumes this will work.  Maybe it should use Perl's %ENV instead.
+98-01-14: More work on NT builds with help from Ken Scott <ken@apisys.net>
+          and Patrick-James Dionisio <dionisio@netscape.com>.
+98-01-13: Use warn instead of die to report lower than ideal DBI version in
+          Makefile.PL.  Also make corrections for NT builds based on
+          feedback from Ken Scott <kscott@pcisys.net>.
+98-01-12: Fix dbd_ix_preparse() so it does not convert :alpha into ? after
+          Chuck Collins <Chuck.Collins@AirTouch.COM> pointed out that
+          SELECT * FROM sysmaster:systabnames gives a syntax error in 0.57.
+98-01-07: Initial attempt at integrating Makefile.NT into Makefile.PL.
+98-01-06: Modify Makefile.PL to give a reason for failure when stating that
+          you did not read the README file after Michael Chandler
+          <mpchandler@fedex.com> ran into problems identifying the source
+          of such a failure.
+98-01-05: Update copyright dates.  Change email address for maintainer.
+97-12-03: Simplify the version testing to ignore the lists of libraries.
+          The test compilation ensures that everything is OK, or not.
+          Also, simply use the local copy of odbctype.h, without checking
+          whether any ODBC is available or not.
+97-11-18: Steven Hronek <hronek@lsil.com> asked whether ESQL/C was still
+          necessary.  Ensure that README is absolutely clear that it is,
+          and mention DBD::ODBC as a possible alternative.
 
 0.57 Release
 ------------
+97-11-17: Final clean up and testing.  Version 0.56 released.
 97-10-19: Handle the 'esql -libs' process rather differently, because of
           the bug in older versions of the esql script which do not echo
           the name of the netstub library when necessary (a problem found
@@ -405,4 +440,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <johnl@informix.com>
-@(#)$Id: ChangeLog,v 57.8 1997/10/28 02:50:37 johnl Exp $
+@(#)$Id: ChangeLog,v 58.9 1998/01/15 18:51:28 johnl Exp $

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlperl.h,v $
-@(#)Version:         $Revision: 56.2 $
-@(#)Last changed:    $Date: 1997/07/13 01:09:22 $
+@(#)Version:         $Revision: 58.1 $
+@(#)Last changed:    $Date: 1998/01/06 02:53:23 $
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) Jonathan Leffler 1996,1997
-@(#)Product:         $Product: DBD::Informix Version 0.57 (1997-11-13) $
+@(#)Copyright:       (C) Jonathan Leffler 1996-98
+@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 56.2 1997/07/13 01:09:22 johnl Exp $";
+static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 58.1 1998/01/06 02:53:23 johnl Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

@@ -1,23 +1,24 @@
 /*
 @(#)File:            $RCSfile: sqltype.ec,v $
-@(#)Version:         $Revision: 56.1 $
-@(#)Last changed:    $Date: 1997/07/08 21:56:43 $
+@(#)Version:         $Revision: 1.12 $
+@(#)Last changed:    $Date: 1997/07/08 19:52:44 $
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
-@(#)Product:         $Product: DBD::Informix Version 0.57 (1997-11-13) $
+@(#)Copyright:       (C) JLSS 1988-1993,1995-97
+@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
 */
 
 /*TABSTOP=4*/
 /*LINTLIBRARY*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltype.ec,v 56.1 1997/07/08 21:56:43 johnl Exp $";
+static const char rcs[] = "@(#)$Id: sqltype.ec,v 1.12 1997/07/08 19:52:44 johnl Exp $";
 #endif
 
 #include <string.h>
 #include <sqltypes.h>
 #include <varchar.h>
-#include "esqlperl.h"
+#include "esqlutil.h"
 
 static const char * const sqltypes[] = 
 {
@@ -94,6 +95,22 @@ static const char * const dt_to_ext[] =
 	dt_fraction5
 };
 
+static char	typestr[SQLTYPENAME_BUFSIZ];
+static int sqlmode = 0;
+
+/*
+** Get/Set Type Formatting mode
+** If the mode is set to 1, then sqltypename() formats
+** INTERVAL HOUR(6) TO HOUR as INTERVAL HOUR(6).
+** Otherwise it uses the standard Informix type name.
+*/
+int sqltypemode(int mode)
+{
+	int	oldmode = sqlmode;
+	sqlmode = mode;
+	return(oldmode);
+}
+
 char	*sqltypename(int coltype, int collen, char *buffer)
 {
 	int		precision;
@@ -149,16 +166,32 @@ char	*sqltypename(int coltype, int collen, char *buffer)
 	case SQLDTIME:
 		dt_fr = TU_START(collen);
 		dt_to = TU_END(collen);
-		sprintf(buffer, "%s %s TO %s", sqltypes[coltype], dt_fr_ext[dt_fr],
-				dt_to_ext[dt_to]);
+		if (sqlmode != 1)
+			sprintf(buffer, "%s %s TO %s", sqltypes[coltype], dt_fr_ext[dt_fr],
+					dt_to_ext[dt_to]);
+		else if (dt_fr == TU_FRAC)
+			sprintf(buffer, "%s %s", sqltypes[coltype], dt_to_ext[dt_to]);
+		else if (dt_fr == dt_to)
+			sprintf(buffer, "%s %s", sqltypes[coltype], dt_to_ext[dt_to]);
+		else
+			sprintf(buffer, "%s %s TO %s", sqltypes[coltype], dt_fr_ext[dt_fr],
+					dt_to_ext[dt_to]);
 		break;
 	case SQLINTERVAL:
 		dt_fr = TU_START(collen);
 		dt_to = TU_END(collen);
 		dt_ld = TU_FLEN(collen);
-		if (dt_fr == TU_FRAC)
+		if (sqlmode != 1 && dt_fr == TU_FRAC)
 			sprintf(buffer, "%s %s TO %s", sqltypes[coltype],
 					dt_fr_ext[dt_fr], dt_to_ext[dt_to]);
+		else if (sqlmode != 1)
+			sprintf(buffer, "%s %s(%d) TO %s", sqltypes[coltype],
+					dt_fr_ext[dt_fr], dt_ld, dt_to_ext[dt_to]);
+		else if (dt_fr == TU_FRAC)
+			sprintf(buffer, "%s %s", sqltypes[coltype], dt_to_ext[dt_to]);
+		else if (dt_fr == dt_to)
+			sprintf(buffer, "%s %s(%d)", sqltypes[coltype], dt_to_ext[dt_to],
+					dt_ld);
 		else
 			sprintf(buffer, "%s %s(%d) TO %s", sqltypes[coltype],
 					dt_fr_ext[dt_fr], dt_ld, dt_to_ext[dt_to]);
@@ -168,6 +201,13 @@ char	*sqltypename(int coltype, int collen, char *buffer)
 		break;
 	}
 	return(buffer);
+}
+
+/* For backwards compatability only */
+/* Not thread-safe because it uses static return data */
+const char	*sqltype(int coltype, int collen)
+{
+	return(sqltypename(coltype, collen, typestr));
 }
 
 #ifdef TEST
@@ -228,24 +268,25 @@ static Typelist	types[] =
 	{	"interval fraction to fraction(5)", 14,			1487	},
 };
 
-static void printtypes()
+static void printtypes(int mode)
 {
 	int             i;
-	char typestr[SQLTYPENAME_BUFSIZ];
 
+	sqltypemode(mode);
 	printf("%-32s %4s %6s   %s\n", "Code", "Type", "Length", "Full type");
 	for (i = 0; i < DIM(types); i++)
 	{
 		printf("%-32s %4d %6d = %s\n",
 			   types[i].code, types[i].coltype, types[i].collen,
-			   sqltypename(types[i].coltype, types[i].collen, typestr));
+			   sqltype(types[i].coltype, types[i].collen));
 		fflush(stdout);
 	}
 }
 
 int main()
 {
-	printtypes();
+	printtypes(0);
+	printtypes(1);
 	return (0);
 }
 

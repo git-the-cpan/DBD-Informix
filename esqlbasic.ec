@@ -1,7 +1,16 @@
 /*
- * @(#)$Id: esqltest.ec,v 58.3 1998/01/15 18:46:24 johnl Exp $ 
+ * @(#)$Id: esqlbasic.ec,v 58.2 1998/01/06 02:53:23 johnl Exp $
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
+ *
+ * This is a stripped down version of the esqltest.ec program, but it is
+ * a pure ESQL/C program which is completely self-contained (it does not
+ * require any source or headers other than those which come with ESQL/C).
+ * Used when people really run into problems.  Compile using the following
+ * command line (ensuring that there is no esql script modified by
+ * DBD::Informix in the way of the official esql script):
+ *
+ *     esql -o esqlbasic esqlbasic.ec
  *
  * Copyright (c) 1997-98 Jonathan Leffler
  *
@@ -14,20 +23,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "esqlperl.h"
-
-#ifndef WIN32
-/* NT's MSVC does not necessarily define __STDC__ but does handle prototypes */
-/* Maybe the __STDC__ test is obsolete; do all C compilers always handle     */
-/* prototypes?  Probably ... but maybe the HP-UX basic compiler is K&R only? */
-/* Since esqlperl.h is included before this and it declares some prototypes, */
-/* the damage is already done, so the whole test should probably go, which   */
-/* may, in turn, allow us to simplify Makefile.PL.  Leave intact pro tem...  */
-#ifndef __STDC__
-/* Using this is more reliable than using #error */
-error "Please read the README file, and Makefile.PL, and get __STDC__ defined"
-#endif /* __STDC__ */
-#endif /* WIN32 */
 
 /* SunOS 4.1.3 <stdlib.h> does not provide EXIT_SUCCESS/EXIT_FAILURE */
 #ifndef EXIT_FAILURE
@@ -40,7 +35,7 @@ error "Please read the README file, and Makefile.PL, and get __STDC__ defined"
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 58.3 1998/01/15 18:46:24 johnl Exp $";
+static const char rcs[] = "@(#)$Id: esqlbasic.ec,v 58.2 1998/01/06 02:53:23 johnl Exp $";
 #endif
 
 /*
@@ -63,10 +58,7 @@ void            ix_printerr(FILE *fp, long rc)
 	if (rc < 0)
 	{
 		/* Format SQL (primary) error */
-		/* The int cast on 3rd argument to rgetmsg() prevents warning */
-		/* C4761: integral size mismatch in argument; conversion supplied */
-		/* on NT (MSVC 5.0) compiler */
-		if (rgetmsg(rc, errbuf, (int)sizeof(errbuf)) != 0)
+		if (rgetmsg(rc, errbuf, sizeof(errbuf)) != 0)
 			strcpy(errbuf, "<<Failed to locate SQL error message>>");
 		sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
 		sprintf(sql_buf, "SQL: %ld: %s", rc, fmtbuf);
@@ -74,7 +66,7 @@ void            ix_printerr(FILE *fp, long rc)
 		/* Format ISAM (secondary) error */
 		if (sqlca.sqlerrd[1] != 0)
 		{
-			if (rgetmsg(sqlca.sqlerrd[1], errbuf, (int)sizeof(errbuf)) != 0)
+			if (rgetmsg(sqlca.sqlerrd[1], errbuf, sizeof(errbuf)) != 0)
 				strcpy(errbuf, "<<Failed to locate ISAM error message>>");
 			sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
 			sprintf(isambuf, "ISAM: %ld: %s", sqlca.sqlerrd[1], fmtbuf);
@@ -125,32 +117,14 @@ static void test_permissions(char *dbname)
 	EXEC SQL ROLLBACK WORK;
 }
 
-void dbd_ix_debug(int level, char *fmt, const char *arg)
-{
-	putchar('\t');
-	printf(fmt, arg);
-}
-
-void dbd_ix_debug_l(int level, char *fmt, long arg)
-{
-	putchar('\t');
-	printf(fmt, arg);
-}
-
 int main(int argc, char **argv)
 {
 	/* Command-line arguments are ignored at the moment */
 	char *dbidsn = getenv("DBI_DSN");
 	char *dbase0 = getenv("DBI_DBNAME");
-	char *dbase1 = getenv("DBD_INFORMIX_DATABASE");
-	char *dbase2 = getenv("DBD_INFORMIX_DATABASE2");
-	char *user = getenv("DBD_INFORMIX_USERNAME");
-	char *pass =  getenv("DBD_INFORMIX_PASSWORD");
+	$char *dbase1 = getenv("DBD_INFORMIX_DATABASE");
 	char *server =  getenv("DBD_INFORMIX_SERVER");
 	char  dbname[60];
-	Boolean conn_ok;
-	static char  conn1[20] = "connection_1";
-	static char  conn2[20] = "connection_2";
 
 	/* Check whether the default connection variable is set */
 	if (dbidsn != 0 && *dbidsn != '\0')
@@ -180,15 +154,6 @@ int main(int argc, char **argv)
 	else
 		printf("\t$DBD_INFORMIX_DATABASE set to '%s'.\n", dbase1);
 
-	/* Test for the secondary database for multi-connection testing */
-	if (dbase2 == 0 || *dbase2 == '\0')
-	{
-		dbase2 = dbase1;
-		printf("\t$DBD_INFORMIX_DATABASE2 unset - defaulting to '%s'.\n", dbase2);
-	}
-	else
-		printf("\t$DBD_INFORMIX_DATABASE2 set to '%s'.\n", dbase2);
-
 	/* Test whether the server name should be set. */
 	if (server == 0 || *server == '\0')
 	{
@@ -208,55 +173,16 @@ int main(int argc, char **argv)
 		dbase1 = dbname;
 	}
 
-	/* Report whether username is set, and what it is */
-	if (user == 0 || *user == '\0')
-		printf("\t$DBD_INFORMIX_USERNAME is unset.\n");
-	else
-		printf("\t$DBD_INFORMIX_USERNAME is set to '%s'.\n", user);
-
-	/* Report whether password is set, but not what it is */
-	if (pass == 0 || *pass == '\0')
-		printf("\t$DBD_INFORMIX_PASSWORD is unset.\n");
-	else
-		printf("\t$DBD_INFORMIX_PASSWORD is set.\n");
-
 	printf("Testing connection to %s\n", dbase1);
-#if ESQLC_VERSION >= 600
-    /* 6.00 and later versions of Informix-ESQL/C support CONNECT */
-	printf("\tDBD_INFORMIX_USERNAME & DBD_INFORMIX_PASSWORD are ignored\n");
-	printf("\t\tunless both variables are set.\n");
-    conn_ok = dbd_ix_connect(conn1, dbase1, user, pass);
-#else
-    /* Pre-6.00 versions of Informix-ESQL/C do not support CONNECT */
-    /* Use DATABASE statement */
-	printf("\tDBD_INFORMIX_USERNAME & DBD_INFORMIX_PASSWORD are ignored.\n");
-    conn_ok = dbd_ix_opendatabase(dbase1);
-#endif  /* ESQLC_VERSION >= 600 */
+
+	EXEC SQL DATABASE :dbase1;
 
 	if (sqlca.sqlcode < 0)
 	{
 		ix_printerr(stderr, sqlca.sqlcode);
 	}
-	else
-		test_permissions(dbase1);
 
-#if ESQLC_VERSION >= 600
-	printf("Testing concurrent connection to %s\n", dbase2);
-    /* 6.00 and later versions of Informix-ESQL/C support CONNECT */
-    conn_ok = dbd_ix_connect(conn2, dbase2, user, pass);
-#else
-    /* Pre-6.00 versions of Informix-ESQL/C do not support CONNECT */
-    /* Use DATABASE statement */
-	printf("Testing connection to %s\n", dbase2);
-    conn_ok = dbd_ix_opendatabase(dbase2);
-#endif  /* ESQLC_VERSION >= 600 */
-
-	if (sqlca.sqlcode < 0)
-	{
-		ix_printerr(stderr, sqlca.sqlcode);
-	}
-	else
-		test_permissions(dbase2);
+	test_permissions(dbase1);
 
 	if (estat == EXIT_SUCCESS)
 		printf("Your Informix environment is OK\n\n");

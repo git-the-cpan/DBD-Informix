@@ -1,14 +1,14 @@
 /*
- * @(#)$Id: dbdimp.ec,v 57.10 1997/11/18 06:03:42 johnl Exp $ 
+ * @(#)$Id: dbdimp.ec,v 58.4 1998/01/15 18:46:24 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
  * Portions Copyright
- *           (c) 1994,1995 Tim Bunce
- *           (c) 1995,1996 Alligator Descartes
- *           (c) 1994      Bill Hailes
- *           (c) 1996      Terry Nightingale
- *           (c) 1996,1997 Jonathan Leffler
+ *           (c) 1994-95 Tim Bunce
+ *           (c) 1995-96 Alligator Descartes
+ *           (c) 1994    Bill Hailes
+ *           (c) 1996    Terry Nightingale
+ *           (c) 1996-98 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 57.10 1997/11/18 06:03:42 johnl Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 58.4 1998/01/15 18:46:24 johnl Exp $";
 #endif
 
 #include <stdio.h>
@@ -675,9 +675,9 @@ static void del_statement(imp_sth_t *imp_sth)
 #if ESQLC_VERSION < 724
 #define DBD_IX_RELEASE_BLOBS
 #endif
-#ifdef _WIN32
+#ifdef WIN32
 #undef DBD_IX_RELEASE_BLOBS
-#endif /* _WIN32 */
+#endif /* WIN32 */
 
 #ifdef DBD_IX_RELEASE_BLOBS
 		if (imp_sth->n_blobs > 0)
@@ -1002,14 +1002,16 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 ** dbd_ix_preparse() -- based on dbd_preparse() in DBD::ODBC 0.15
 **
 ** Edit string in situ (because the output will never be longer than the
-** input) so that ? parameters are counted and :xx positional parameters
-** are converted to ?.  Handles single-quoted literals and double-quoted
-** delimited identifiers and ANSI SQL "--.*\n" comments and Informix
-** "{.*}" comments.  Note that it does nothing with "#.*\n" Perl/Shell
-** comments.  Also note that it does not handle ODBC-style extensions.
-** The shorthand notation for these is identical to an Informix {}
-** comment; longhand notation looks like "--*(details*)--" without the
-** quotes.  Returns the number of input parameters.
+** input) so that ? parameters are counted and :xx (x = digit) positional
+** parameters are converted to ?.  Note that :abc notation is not
+** converted; it causes problems with Informix's FROM dbase:table notation.
+** The code handles single-quoted literals and double-quoted delimited
+** identifiers and ANSI SQL "--.*\n" comments and Informix "{.*}" comments.
+** Note that it does nothing with "#.*\n" Perl/Shell comments.  Also note
+** that it does not handle ODBC-style extensions.  The shorthand notation
+** for these is identical to an Informix {} comment; longhand notation
+** looks like "--*(details*)--" without the quotes.  Returns the number of
+** input parameters.
 */
 
 static int dbd_ix_preparse(char *statement)
@@ -1049,29 +1051,24 @@ static int dbd_ix_preparse(char *statement)
 			continue;
 		}
 		if (ch == '?')
-		{						/* X/Open standard	 */
+		{
+			/* X/Open standard	 */
 			*dst++ = '?';
 			idx++;
 			style = 3;
 		}
 		else if (isDIGIT(*src))
-		{						/* ':1'		 */
+		{
+			/* ':1'		 */
 			*dst++ = '?';
 			while (isDIGIT(*src))
 				src++;
 			idx++;
 			style = 1;
 		}
-		else if (isALNUM(*src))
-		{						/* ':foo'	 */
-			*dst++ = '?';
-			while (isALNUM(*src))	/* includes '_'	 */
-				src++;
-			idx++;
-			style = 2;
-		}
 		else
-		{						/* perhaps ':=' PL/SQL construct */
+		{
+			/* perhaps ':=' PL/SQL construct or dbase:table in Informix */
 			*dst++ = ch;
 			continue;
 		}
@@ -1579,16 +1576,37 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 	EXEC SQL END DECLARE SECTION;
 	imp_dbh_t *dbh = imp_sth->dbh;
 	int rc = 1;
+	Boolean exec_stmt = True;
 
 	dbd_ix_enter(function);
-	if (imp_sth->n_bound > 0)
+
+	if (imp_sth->st_type == SQ_BEGWORK)
 	{
-		EXEC SQL EXECUTE :nm_stmnt USING SQL DESCRIPTOR :nm_ibind;
+		/* BEGIN WORK in a logged non-ANSI database with AutoCommit Off */
+		/* will fail because we're already in a transaction. */
+		/* Pretend it succeeded. */
+		if (dbh->is_loggeddb == True && dbh->is_modeansi == False)
+		{
+			if (DBI_AutoCommit(dbh) == False)
+			{
+				exec_stmt = False;
+				sqlca.sqlcode = 0;
+			}
+		}
 	}
-	else
+
+	if (exec_stmt == True)
 	{
-		EXEC SQL EXECUTE :nm_stmnt;
+		if (imp_sth->n_bound > 0)
+		{
+			EXEC SQL EXECUTE :nm_stmnt USING SQL DESCRIPTOR :nm_ibind;
+		}
+		else
+		{
+			EXEC SQL EXECUTE :nm_stmnt;
+		}
 	}
+
 	dbd_ix_sqlcode(dbh);
 	dbd_ix_savesqlca(dbh);
 	if (sqlca.sqlcode < 0)

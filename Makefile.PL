@@ -1,14 +1,14 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 57.6 1997/11/14 03:13:08 johnl Exp $ 
+# @(#)$Id: Makefile.PL,v 58.16 1998/01/15 19:53:07 johnl Exp $ 
 #
-# Portions Copyright (c) 1996,1997 Jonathan Leffler (johnl@informix.com)
-# Portions Copyright (c) 1996 Alligator Descartes (descarte@arcana.co.uk)
-# From an original by Tim Bunce (Tim.Bunce@ig.co.uk)
-# DEC OSF/1 fix based on Dave Thomas' (Dave@Thomases.com) solution.
+# Portions Copyright (c) 1996-98 Jonathan Leffler
+# Portions Copyright (c) 1996    Alligator Descartes
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
+
+#TABSTOP=4
 
 # A sufficiently recent version of Perl and DBI must be installed before we
 # can build the DBD module.  The code in DBD::Informix needs the features
@@ -21,19 +21,21 @@ use DBI 0.90;
 use DBI::DBD;
 
 # Configure for Unix vs Windows 95/NT
-my($split,$objext);
-$objext = $Config{obj_ext};
-$split = $Config{path_sep};
-if ($Config{archname} eq 'MSWin32')
+my $objext = $Config{obj_ext};
+my $split = $Config{path_sep};
+my $NTConfiguration = $Config{archname} eq 'MSWin32';
+
+if ($NTConfiguration)
 {
 	# NT configuration...
-	# Tested for Config: archname='MSWin32' osname='MSWin32' osvers='4.0'
-	# Run the Makefile.NT script.  Not as neat as incorporating it into
-	# this script (it's a double maintenance nightmare), but I haven't
-	# worked out how to deal with the complete incompatabilities in the way
-	# NT does things and the way civilized operating systems do them.
-	system("perl Makefile.NT");
-	exit 0;
+	print q[
+	This is a semi-experimental version of Makefile.PL with Win32 (NT)
+	support.  This version has been tested on NT, but there could still
+	be bugs in it.  Please help save the world by trying to debug the
+	NT code and report the results back to the DBI Users mail list.
+
+	Thanks!
+	]
 }
 
 $| = 1;     # Ensure that Perl output is interleaved with test output.
@@ -71,99 +73,123 @@ sub version_info
 }
 
 my $dbd_ix = &version_info($opts{VERSION_FROM});
-print "\nConfiguring DBD::Informix version $dbd_ix...\n";
+print "\nConfiguring $opts{NAME} version $dbd_ix...\n";
 print "\tYou are using DBI version $DBI::VERSION and Perl version $]\n";
 print "Remember to actually read the README file!\n\n";
 
-my $ID = $ENV{INFORMIXDIR};
+sub did_not_read
+{
+	my ($reason) = @_;
+	die "\n*** You didn't read the README file!\n$reason\n\n";
+}
 
-die "\n*** You didn't read the README file!\n\n"
-	unless ($] >= 5.004 && $DBI::VERSION >= 0.90 && $ID);
+did_not_read("Perl is out of date") unless ($] >= 5.004);
+did_not_read("DBI is out of date") unless ($DBI::VERSION >= 0.90);
 
 # Compare installed version of DBI with version which DBD::Informix was
 # last tested with.
-# The required and reference versions are the same for this release.
-my $dbi_ref_version = "0.90";
-die "\n*** You must upgrade to DBI version $dbi_ref_version or later.\n\n"
-	unless ($DBI::VERSION >= $dbi_ref_version);
+# The required and reference versions are different for this release.
+my $dbi_ref_ver = "0.91";
+warn "*** Ideally, you should upgrade to DBI version $dbi_ref_ver.\n\n"
+	unless ($DBI::VERSION >= $dbi_ref_ver);
 
-my $IDB = "$ID/bin";
+sub find_informixdir_and_esql
+{
+	my ($esql, $ID);
+	if ($NTConfiguration)
+	{
+		# NT configuration
+		# Tested for Config: archname='MSWin32' osname='MSWin32' osvers='4.0'
+		my ($p);
+		# Trying to find ESQL (and determining INFORMIXDIR too)
+		foreach $p (split( /;/, $ENV{PATH}))
+		{
+			if( -x "$p/ESQL.EXE")
+			{
+				# HUMS: \\ needed, because string goes into Makefile (via postamble)
+				$esql="$p\\ESQL.EXE"; 
+				# HUMS: \\ necessary because string comes from ENV
+				$p  =~ s/\\BIN//i;
+				$ID=$p;
+				last;
+			}
+		}
+		did_not_read('No executable ESQL/C compiler found in $PATH')
+			unless defined $esql;
+		print "Using INFORMIXDIR=$ID and ESQL/C compiler $esql\n";
+	}
+	else
+	{
+		# Unix configuration
+		$ID = $ENV{INFORMIXDIR};
+		did_not_read('$INFORMIXDIR is not set') unless ($ID);
+		$esql = $ENV{ESQL};
+		$esql = "esql" unless $esql;
+		if ($esql =~ m%/%)
+		{
+			# ESQL/C program specified with path name
+			did_not_read("No executable ESQL/C compiler $esql")
+				unless (-x $esql);
+		}
+		else
+		{
+			# ESQL/C program specified without any path name
+			did_not_read("No executable ESQL/C compiler $ID/bin/$esql")
+				unless (-x "$ID/bin/$esql");
+		}
+		did_not_read('$INFORMIXDIR/bin is not in $PATH')
+			unless ($ENV{PATH} =~ m%:$ID/bin:% ||
+					$ENV{PATH} =~ m%^$ID/bin:% ||
+					$ENV{PATH} =~ m%:$ID/bin$%);
+	}
+	return $ID, $esql;
+}
 
-my $esqlprog = $ENV{ESQL};
-$esqlprog = "esql" unless $esqlprog;
+my ($ID, $esqlprog) = find_informixdir_and_esql();
+
 my $auxincl = "";
 $auxincl = " -I$ID/incl/tools" if ($esqlprog =~ /\bc4gl\b/);
 
-die "\n*** You didn't read the README file!\n\n"
-	unless (($ENV{PATH} =~ m%:$IDB:% ||
-			 $ENV{PATH} =~ m%^$IDB:% ||
-			 $ENV{PATH} =~ m%:$IDB$%) &&
-			-x "$IDB/$esqlprog");
-
 # --- Find out which version of Informix ESQL/C by running 'esql -V'
-open(ESQL, "$IDB/$esqlprog -V|") || die;
-die "Failed to read anything from 'esql -V'\n"
-	unless defined (my $infversion = <ESQL>);
-while(<ESQL>) { }		# Rest of input (1 line) to avoid Broken Pipe messages
-close ESQL;
-
-chomp($infversion);
-$infversion =~ s/[ 	]+$//;
-(my $version = $infversion) =~ s/INFORMIX.* Version (....).*/$1/;
-die "Unexpected message from esql script -- $version\n"
-	unless ($version =~ /[0-9]\.[0-9][0-9]/);
-(my $vernum = $version) =~ s/^([0-9])\./$1/;
-
-print "Using $infversion from $ID\n";
-
-# --- Check whether Informix is installed OK for us.
-sub chk_libs
+# NB: Argument should be name of esql program which can be executed.
+#     The checks for Unix in find_informixdir_and_esql should be OK.
+sub get_esqlc_version
 {
-	my (@libs) = @_;
-	my ($ixlib1, $ixlib2, $ixlib3, $ok) = ("$ID/lib/", "$ID/lib/esql/", "$ID/lib/tools/", 1);
-	my ($lib);
-	for $lib (@libs)
-	{
-		my ($lib1) = $ixlib1 . $lib;
-		if (! -f $lib1)
-		{
-			my ($lib2) = $ixlib2 . $lib;
-			if (! -f $lib2)
-			{
-				my ($lib3) = $ixlib3 . $lib;
-				if (! -f $lib3)
-				{
-				$ok = 0;
-				warn "Cannot locate $lib under $ixlib1\n";
-				}
-			}
-		}
-	}
-	warn "*** Warning: ESQL/C does not appear to be installed correctly!\n\n"
-		if ! $ok;
+	my ($esql) = @_;
+	my ($infv, $vers);
+
+	open(ESQL, "$esql -V|") || die;
+	die "Failed to read anything from 'esql -V'\n"
+		unless defined ($infv = <ESQL>);
+	# Read the rest of the input (1 line) to avoid Broken Pipe messages
+	while(<ESQL>) { }
+	close ESQL;
+
+	chomp($infv);
+	$infv =~ s/[ 	]+$//;
+	($vers = $infv) =~ s/INFORMIX.* Version (....).*/$1/;
+	die "Unexpected message from esql script -- $vers\n"
+		unless ($vers =~ /[0-9]\.[0-9][0-9]/);
+	$vers =~ s/^([0-9])\./$1/;
+
+	return $infv, $vers;
 }
 
-my $esql = "$esqlprog";
-my $vercode = "esqlc_v6";
-my $multiconn = 1;
-if ($vernum >= 500 && $vernum < 600)
+my ($infversion, $vernum) = get_esqlc_version($esqlprog);
+print "Using $infversion from $ID\n";
+
+sub customize_esql
 {
-	&chk_libs(qw{libgen.a libos.a libsql.a});
-	$vercode = "esqlc_v5";
-	$multiconn = 0;
-	print "You need to use a customized ESQL/C compiler script\n";
-	print "which recognizes the INFORMIXC environment variable.\n";
-	print "I'll create a local version and ensure that make uses it.\n\n";
-	open(ESQL, "<$ID/bin/$esqlprog") ||
-		die "Unable to open $ID/bin/$esqlprog for reading";
-	$esql = "./esql";
-	open(LOCAL, ">$esql") ||
-		die "Unable to open $esql for writing";
+	my ($src, $dst) = @_;
+	open(ESQL, "<$src") ||
+		die "Unable to open $src for reading";
+	open(LOCAL, ">$dst") ||
+		die "Unable to open $dst for writing";
 	while (<ESQL>)
 	{
 		if (/^CC=/o && !/INFORMIXC/o)
 		{
-			print LOCAL "# INFORMIXC added by Makefile.PL for DBD::Informix.\n";
+			print LOCAL "# INFORMIXC added by Makefile.PL for $opts{NAME}.\n";
 			chop;
 			s/^CC=//;
 			s/"(.*)"/$1/ if (/".*"/);
@@ -179,52 +205,85 @@ if ($vernum >= 500 && $vernum < 600)
 	}
 	close(ESQL);
 	close(LOCAL);
-	chmod 0755, $esql;
+	chmod 0755, $dst;
+}
+
+# --- Check whether Informix is installed OK for us.
+my $warning = qq{
+Beware: $opts{NAME} is not yet aware of the new IUS data types.
+It will work with traditional data types, but will fail badly
+on any data types which were not in earlier versions of OnLine.
+
+};
+
+# NB: If using ESQL/C 4.xy, use -I$ID/incl, not -I$ID/incl/esql!
+# However, you've got other major work to do to handle 4.xy ESQL/C.
+# Also, it appears that NT ESQL/C 5.x used -I$ID/incl, too.
+my $INC1 = "-I$ID/incl/esql$auxincl";
+
+my $esql = "$esqlprog";
+my $vercode = "esqlc_v6";
+my $multiconn = 1;
+if ($vernum >= 500 && $vernum < 600)
+{
+	$vercode = "esqlc_v5";
+	$multiconn = 0;
+	if ($NTConfiguration)
+	{
+		# NT configuration
+		# We have to assume that ESQL/C will use the correct C compiler
+		$opts{DEFINE} .= " -DWINNT -Dfar=";
+		$INC1 = "-I$ID/incl";
+	}
+	else
+	{
+		# Unix configuration
+		print "You need to use a customized ESQL/C compiler script\n";
+		print "which recognizes the INFORMIXC environment variable.\n";
+		print "I'll create a local version and ensure that we use it.\n\n";
+		$esql = "./esql";
+		customize_esql("$ID/bin/$esqlprog", $esql);
+	}
 }
 elsif (($vernum >= 600 && $vernum < 700) or ($vernum >= 710 && $vernum < 720))
 {
-	&chk_libs(qw{libgen.a libos.a libsql.a libasf.a});
+	print "Ideally, you should upgrade to a more recent version of ESQL/C.\n";
 }
 elsif ($vernum >= 720 && $vernum < 800)
 {
 	# 7.2x is already released; 7.3x is in the pipeline
-	&chk_libs(qw{libixgen.a libixos.a libixsql.a libixgls.a libixasf.a});
 }
-elsif ($version =~ /[1-4]\.[01][0-9]/)
+elsif ($vernum >= 100 && $vernum < 500)
 {
 	die qq{
 	$infversion does not support string-named cursors.
-	This version of DBD::Informix requires this facility.
-	Please report your requirement to the DBD::Informix maintenance team.
+	This version of $opts{NAME} requires this facility.
+	Please report your requirement to the $opts{NAME} maintenance team.
 	}
 }
 elsif ($vernum >= 900 && $vernum < 912)
 {
-	# 9.00 through 9.11 are released.
-	&chk_libs(qw{libixgen.a libixos.a libixsql.a libixcss.a libixglx.a
-				 libixgls.a libixasf.a});
+	print "Ideally, you should upgrade to a more recent version of ESQL/C.\n";
+	print $warning;
 }
 elsif ($vernum >= 912 && $vernum < 1000)
 {
-	# 9.12 is released; 9.20 is in the pipeline
-	# The libraries got renamed extensively...
-	&chk_libs(qw{libifgen.a libifos.a libifsql.a libifcss.a libifglx.a
-				 libifgls.a libifasf.a});
+	# 9.12 is released; 9.13 and 9.20 are in the pipeline.
+	print $warning;
 }
 else
 {
 	die qq{
 	I do not know anything about $infversion.
-	Please report this to the DBD::Informix maintenance team.
+	Please report this to the $opts{NAME} maintenance team.
 	However, if it is later than 5.00, there is a fair chance that
-	DBD::Informix will work if you modify the code in Makefile.PL which
+	$opts{NAME} will work if you modify the code in Makefile.PL which
 	contains this message to recognize your version.  If you have a
 	5.1x release, then you should be fine treating it as a 5.0x
 	release.  If you have an 8.0x release, you may need to treat it as
 	7.1x or 7.2x; if you have 9.0x or later, there is likely to be a lot
-	of functionality in the database which DBD::Informix does not know
-	how to handle, but you should try treating it like 7.2x.  You might
-	need to update (or remove) the library check.
+	of functionality in the database which $opts{NAME} does not know
+	how to handle, but you should try treating it like 7.2x.
 	}
 }
 
@@ -233,57 +292,9 @@ else
 # Define the version of ESQL/C for the object code.
 $opts{DEFINE}  = " -DESQLC_VERSION=$vernum";
 
-# Can we locate the CLI headers qeodbc.h, sqlext.h and sql.h?
-# If so, we'll use them.  If not, we use inc/odbctype.h instead.
-# The code in odbctype.c expects to be given SQLEXT_H_FILENAME
-print "\nChecking to see whether you have Informix-CLI (ODBC) installed.\n";
-my @hdrs = ("qeodbc.h", "sqlext.h", "sql.h");
-my @dirs = ("cli/include", "incl", "incl/esql", "odbc/include");
-my $fcnt = 0;
-my ($hdr, $dir, $name, %subd, %incd, $inst_odbc);
-foreach $hdr (@hdrs)
-{
-	foreach $dir (@dirs)
-	{
-		$name = "$ID/$dir/$hdr";
-		if (-r $name)
-		{
-			$fcnt++;
-			$subd{$hdr} = $dir;
-			print "\tFound $name\n";
-			last;
-		}
-	}
-}
-if ($fcnt == @hdrs)
-{
-	print "You've got Informix-CLI or equivalent ODBC software installed.\n";
-	print "$opts{NAME} will use the headers @hdrs.\n";
-	$opts{INC} = "-I$ID/$subd{$hdrs[0]}";
-	$incd{$subd{$hdrs[0]}} = 1;
-	for (my $i = 1; $i < @hdrs; $i++)
-	{
-		if ($subd{$hdrs[0]} ne $subd{$hdrs[$i]})
-		{
-			print "...That's odd; $hdrs[0] is in a different";
-			print " directory from $hdrs[$i]\n";
-			unless ($incd{$subd{$hdrs[$i]}})
-			{
-				$opts{INC} .= " -I$ID/$subd{$hdrs[$i]}";
-				$incd{$subd{$hdrs[$i]}} = 1;
-			}
-		}
-	}
-	$inst_odbc = 1;
-}
-else
-{
-	print "You don't seem to have the Informix-CLI software installed.\n";
-	print "Never mind; I'll use the home-brew header odbctype.h instead.\n";
-	$inst_odbc = 0;
-	$opts{INC} = " ";
-}
-print "\n";
+print "\n$opts{NAME} doesn't check whether ODBC or Informix-CLI software\n";
+print "is installed any more.  It uses a home-brew odbctype.h instead.\n\n";
+$opts{INC} = " ";
 
 # The ESQL/C script does not handle options with spaces and quotes, dammit!
 # Hence, create $versionfile to contain ESQLC_VERSION_STRING.
@@ -294,12 +305,9 @@ unlink $versionfile;
 die "Unable to open $versionfile for writing\n"
 	unless open(VERSION, ">$versionfile");
 print VERSION "#define ESQLC_VERSION_STRING \"$infversion\"\n";
-if (defined $inst_odbc)
-{
-	print VERSION "#ifndef USE_INSTALLED_ODBC\n";
-	print VERSION "#define USE_INSTALLED_ODBC $inst_odbc\n";
-	print VERSION "#endif /* USE_INSTALLED_ODBC */\n";
-}
+print VERSION "#ifndef USE_INSTALLED_ODBC\n";
+print VERSION "#define USE_INSTALLED_ODBC 0\n";
+print VERSION "#endif /* USE_INSTALLED_ODBC */\n";
 close VERSION;
 }
 
@@ -363,16 +371,12 @@ else
 
 my $objects = "Informix.o dbdimp.o dbdattr.o";
 $objects .= " sqltype.o ixblob.o decsci.o odbctype.o link.o $vercode.o";
+# Map object file names on non-Unix platforms
 $objects =~ s/\.o\w/$objext/g if ($objext ne ".o");
 
 # Need to pick up the DBI headers.
-# NB: If using ESQL/C 4.xy, use -I$ID/incl, not -I$ID/incl/esql!
-# However, you've got other major work to do to handle 4.xy ESQL/C.
-# With DBI-0.77 and up, DBIXS.h is in an auto sub-directory.
-
-my $INC1 = "-I$ID/incl/esql$auxincl";
-my $inc_pad = "/auto" if ($DBI::VERSION >= 0.77);
-my $INC2 = "-I\$(INSTALLSITEARCH)$inc_pad/DBI";
+# Prior to DBI-0.77, the /auto sub-directory in $INC2 was not used.
+my $INC2 = "-I\$(INSTALLSITEARCH)/auto/DBI";
 
 $opts{INC} .= " $INC1 $INC2";
 $opts{OBJECT} = $objects;
@@ -381,30 +385,80 @@ $opts{OBJECT} = $objects;
 # - Start of ESQLTEST code - #
 ##############################
 
-###########################################################################
-# Check that the ESQL/C program esqltest can be compiled and run OK.
-# NB: test does not need any Perl headers (but don't pollute esqlperl.h)
-#     with anything that needs a Perl header.
-# Remove this code if you run into irresolvable problems with shared memory
-# connections after you've read the README.olipcshm file.
-print "Testing whether your Informix test environment will work...\n";
-my $sx = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? "set -x;" : "";
-my $nr = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? "set -x; :" : "";
-my $ESQL = "INFORMIXC='$Config{perlpath} esqlcc' ESQLCC='$Config{cc}' $esql";
-die "Failed to compile basic test program esqltest" unless
-	((system "$sx $ESQL -c $Config{ccflags} $opts{DEFINE} esqltest.ec") == 0 &&
-	 (system "$sx $ESQL -c $Config{ccflags} $opts{DEFINE} $vercode.ec") == 0 &&
-	 (system "$sx $ESQL -o esqltest esqltest.o $vercode.o") == 0 &&
-	 (system "$nr rm -f esqltest.o esqltest.c $vercode.c $vercode.o") == 0);
-if ((system "./esqltest") != 0)
+my $unsuccessful_test = qq%
+The test program did not complete successfully.
+Either ESQL/C programs do not work automatically, or you do not
+have enough permissions in your Informix environment.
+Try to compile and run the simple ESQL/C program esqlbasic.ec.
+If you can't get that to work, then the problem is with ESQL/C
+and not with $opts{NAME} per se.
+Make sure you've read the whole README file before asking the
+DBI/DBD community for help!
+%;
+
+my $sx = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? 1 : 0;
+
+sub execute_command
 {
-	die "You do not have enough permissions in your Informix environment.\n" .
-		"Make sure you've read the whole README file before asking the\n" .
-		"DBI/DBD community for help!\n";
+	my ($cmd, $msg) = @_;
+	print "+ $cmd\n" if ($sx);
+	die $msg unless system($cmd) == 0;
 }
-die "Failed to remove esqltest program" unless
-	(system "$nr rm -f esqltest") == 0;
-###########################################################################
+
+if ($ENV{DBD_INFORMIX_NO_ESQLTEST})
+{
+	print q%
+	Because DBD_INFORMIX_NO_ESQLTEST is set in your environment, you
+	have chosen not to run the test which verifies that your ESQL/C
+	setup will allow DBD::Informix to compile and the tests to run.  If
+	you run into *ANY* problems, you must verify that the esqltest
+	program can be compiled and run successfully before you even think
+	of asking for help.  Also make sure you've read the whole README
+	file before asking the DBI/DBD community for help!
+
+%;
+}
+else
+{
+	# Check that the ESQL/C program esqltest can be compiled and run OK.
+	# NB: test does not need any Perl headers (but don't pollute esqlperl.h
+	#     with anything that needs a Perl header).
+	# Remove this code if you run into irresolvable problems with shared
+	# memory connections after you've read the README.olipcshm file.
+	# On Unix, it is conceivable that someone who uses C Shell (or equivalent)
+	# will run into problems because of the environment setting on the command
+	# line.  Possible cure: ensure that $SHELL=/bin/ksh or /bin/sh.
+	# There have also been problems on HP-UX 10.20 with environment setting
+	# on the command line which may affect this test and/or the main build.
+	print "Testing whether your Informix test environment will work...\n";
+	my ($EQ, $RM, $EX);
+	if ($NTConfiguration)
+	{
+		$EX = ".exe";
+		$EQ = $esql;
+		$RM = "del /q";
+	}
+	else
+	{
+		$EX = "";
+		$RM = "rm -f";
+		$EQ = "INFORMIXC='$Config{perlpath} esqlcc' ESQLCC='$Config{cc}' $esql";
+	}
+
+	execute_command("$EQ -c $Config{ccflags} $opts{DEFINE} esqltest.ec",
+					"Failed to compile esqltest.ec to esqltest$objext\n");
+	execute_command("$EQ -c $Config{ccflags} $opts{DEFINE} $vercode.ec",
+					"Failed to compile $vercode.ec to $vercode$objext\n");
+	execute_command("$EQ -o esqltest esqltest$objext $vercode$objext",
+					"Failed to link test program esqltest\n");
+	execute_command("$RM esqltest$objext esqltest.c $vercode.c $vercode$objext",
+					"Failed to remove compilation debris\n")
+		unless ($sx);
+	execute_command("./esqltest", $unsuccessful_test);
+	execute_command("$RM esqltest$EX",
+					"Failed to remove esqltest$EX program\n")
+		unless ($sx);
+}
 
 ##############################
 # -- End of ESQLTEST code -- #
@@ -441,10 +495,45 @@ die "Failed to remove esqltest program" unless
 $opts{LD} = "INFORMIXC='\$(FULLPERL) esqlld' " .
 			"ESQLLD='$Config{ld} \$(LDDLFLAGS)' \$(ESQL)";
 
-if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
+my $esql_nt;
+if ($NTConfiguration)
 {
-	print "Uh oh!  We're on a machine which does not use the C compiler to\n";
-	print "create shared libraries.\n";
+	# NT configuration
+	$esql_nt = "-cc";	# Not sure what this does; ask Harold.
+	if ($vernum >= 500 && $vernum < 600)
+	{
+		my $libs=" ISQLI501.LIB LMCSQLW.LIB ";
+		$opts{dynamic_lib} = { OTHERLDFLAGS => "/LIBPATH:$ID/lib $libs"};
+	}
+	elsif ($vernum >= 600)
+	{
+		print "Fortunately, you are using a new version of ESQL/C and\n";
+		print "we can use 'esql -libs' to tell us which libraries to use.\n\n";
+		my $libs = `$esql -libs` || die "Couldn't execute 'esql -libs'";
+		$libs =~ s/Libraries to be used://gm;
+		$libs =~ s/esql: error -55923: No source or object file\.//gm;
+		$libs =~ s/\n/ /gm;
+		$opts{dynamic_lib} =
+			{ OTHERLDFLAGS => "/LIBPATH:$ID/lib /LIBPATH:$ID/lib/esql $libs"};
+	}
+	else
+	{
+		print "Unfortunately, you are also using a version of ESQL/C which\n";
+		print "cannot tell us which libraries it needs.\n";
+		print "We'll assume that esqlld can sort things out for you.\n";
+		print "Contact the DBD::Informix maintenance team if it doesn't.\n\n";
+		# Do not override default version of $opts{LD}
+	}
+}
+elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
+{
+	# Unix configuration (awkward squad subset of Unix configurations)
+	print qq{
+	Uh oh!  We're on a machine which does not use the C compiler to
+	create shared libraries.  Please consider recompiling Perl using
+	the C compiler to create shared libraries; it makes life easier for
+	everyone!
+	};
 	if ($vernum >= 600)
 	{
 		print "Fortunately, you are using a new version of ESQL/C and\n";
@@ -465,11 +554,15 @@ if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 		# Linking it once gives an undefined.  So we link once and
 		# export. -- AWH et al. 4/18/97
 		# Andrew Hunt (andy@toolshed.com)
-		$libs .= " $ID/lib/esql/checkapi.o"
-			if (-f "$ID/lib/esql/checkapi.o") &&
-				!($vernum >= 722 && $Config{osname} eq 'dec_osf');
+# JL 98-01-13:
+# Do not need to add checkapi.o because the hacked ESQL/C script above will
+# have listed it.  Still need the -exported_symbol on DEC, though.  Probably.
+#		$libs .= " $ID/lib/esql/checkapi.o"
+#			if (-f "$ID/lib/esql/checkapi.o") &&
+#				!($vernum >= 722 && $Config{osname} eq 'dec_osf');
 		# Override default version of $opts{LD}
-		$opts{dynamic_lib} = { OTHERLDFLAGS => "-L$ID/lib -L$ID/lib/esql $libs"};
+		$opts{dynamic_lib} =
+			{ OTHERLDFLAGS => "-L$ID/lib -L$ID/lib/esql $libs"};
 		$opts{LD} = "$Config{ld} \$(LDDLFLAGS)";
 		$opts{LD} .= " -exported_symbol ifx_checkAPI"
 			if ($vernum >= 722 && $Config{osname} eq 'dec_osf');
@@ -479,7 +572,7 @@ if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 		print "Unfortunately, you are also using a version of ESQL/C which\n";
 		print "cannot tell us which libraries it needs.\n";
 		print "We'll assume that esqlld can sort things out for you.\n";
-		print "Contact the DBD::Informix maintenance team if it doesn't.\n";
+		print "Contact the $opts{NAME} maintenance team if it doesn't.\n";
 		# Do not override default version of $opts{LD}
 	}
 	print "\n";
@@ -500,11 +593,14 @@ for $file (qw(esqlcc esqlld esqlsed))
 print "Perl:     perl$] @Config{qw(archname dlsrc)}\n";
 print "System:   @Config{qw(myuname)}\n";
 print "Compiler: @Config{qw(cc optimize ccflags)}\n";
+print "Loader:   $Config{ld}\n"
+	if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc});
 
 # which: report the name of an executable command.
 sub which
 {
 	my ($cmd, $path) = @_;
+	my ($dir, $name);
 	$path = $ENV{PATH} if (!$path);
 	my @path = split /$split/, $path;
 	for $dir (@path)
@@ -540,12 +636,13 @@ exit 0;
 # not -- it would be OK to place .ec in front of the standard list.
 
 sub MY::postamble {
-my ($p1, $p2, $p3);
+my ($p1, $p2, $p3, $p4, $p5);
 
 $p1 = 
 "
 # ESQL/C compilation rules
-ESQL = $esql
+ESQL    = $esql
+ESQL_NT = $esql_nt
 .SUFFIXES:
 .SUFFIXES: .xs .ec .c .C .cpp .cxx .cc $objext .sh
 
@@ -558,12 +655,25 @@ $p2 = '
 # Cribbed from the definition of CCCMD (MakeMaker const_cccmd) and the
 # rules for compiling object files (MakeMakerc_o) in the Makefile.
 # May need fixing if the corresponding rules change.
-ESQLFLAGS = $(INC) $(CCFLAGS) $(OPTIMIZE) \
+ESQLFLAGS = $(INC) $(ESQL_NT) $(CCFLAGS) $(OPTIMIZE) \
 		$(PERLTYPE) $(LARGE) $(SPLIT) $(DEFINE_VERSION) \
-		$(XS_DEFINE_VERSION) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE)
-ESQL_CC     = INFORMIXC="$(FULLPERL) esqlcc" ESQLCC="${CC}" $(ESQL)
-# ESQL_LD is not used (but ideally should be)
-ESQL_LD     = INFORMIXC="$(FULLPERL) esqlld" ESQLLD="${LD}" $(ESQL)
+		$(XS_DEFINE_VERSION) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE)';
+
+if ($NTConfiguration)
+{
+	$p3 = q%
+	ESQL_CC     = $(ESQL)
+	%;
+}
+else
+{
+	$p3 = q%
+	ESQL_CC     = INFORMIXC="$(FULLPERL) esqlcc" ESQLCC="$(CC)" $(ESQL)
+	%;
+}
+$p3 =~ s/\t//g;
+
+$p4 = '
 MAP_LINKCMD = $(ESQL_CC)
 
 # Need to move the esql script created locally (in case the next build
@@ -574,9 +684,9 @@ clean::
 
 # Standardised code to generate Informix.xs from Informix.xsi and the
 # template from DBI (Driver.xst).  dbd_postamble() is defined by DBI::DBD.
-$p3 = dbd_postamble();
+$p5 = dbd_postamble();
 
-return $p1 . $p2 . $p3;
+return $p1 . $p2 . $p3 . $p4 . $p5;
 }
 
 __END__

@@ -5,7 +5,7 @@
 @(#)Purpose:         JLSS Functions to manipulate DECIMAL values
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1996-97
-@(#)Product:         $Product: DBD::Informix Version 0.57 (1997-11-13) $
+@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
 */
 
 /*TABSTOP=4*/

@@ -1,9 +1,14 @@
 To: dbi-announce@fugue.com, dbi-dev@fugue.com, dbi-users@fugue.com,
         informix-list@rmy.emory.edu, descarte@arcana.co.uk
-Subject: ANNOUNCE: DBD::Informix Version 0.57 released
+Subject: ANNOUNCE: DBD::Informix Version 0.58 released
 
-The next release of DBD::Informix, version 0.57, has been uploaded to CPAN.
+The next release of DBD::Informix, version 0.58, has been uploaded to CPAN.
 It will be available worldwide in a day or three.
+
+Please note the change of contact address.  As of 17th January 1998, I do
+not actually work for Informix.  Email sent to johnl@informix.com will not
+be delivered to me -- it will bounce or vanish into the great bit bucket in
+the sky (aka /dev/null).
 
 DBD::Informix is the driver code that enables Perl 5.003 or 5.004 to access
 Informix databases via the DBI module (you'll need the code for both DBI
@@ -13,24 +18,19 @@ http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
 http://www.arcana.co.uk/technologia/perl/DBI
 
 New in this release:
-* Old-style Informix-specific attributes without the 'ix_' prefix are no
-  longer supported at all.
-* Based on the DBI driver template introduced with DBI 0.86, but actually
-  requires DBI 0.90.
-* Add _tables and _columns metadata methods (previously advertised as
-  info_cols and info_tables).
-* Add support for NT, thanks to Harald Ums <Harald.Ums@sevensys.de>.  It
-  isn't his fault that it isn't tested, and that I had to botch the system
-  with Makefile.NT.  I just needed to get this release out, and I'm left
-  hoping that what I've assembled will work.
-* Add Working.Versions file which documents known working versions.
-  Contributions are sought from you, the user, and will be added as the
-  information becomes available.
+* Corrected README file (0.57 had the wrong files released as READMEs; sorry).
+* Integrated support for NT into Makefile.PL (with trivial changes elsewhere).
+* Amended README to be more stringent on using C compiler to create shared
+  libraries.
+* Fix bug for logged (non-ANSI) databases on BEGIN WORK when AutoCommit Off.
+* Amend the place-holder parsing routine to ignore ':alpha' place-holders
+  because they are syntactically indistinguishable from Informix's
+  database:table notation.
 
 Still to do:
+* Add support for IUS data types.
 * Try to reproduce the problems reported by Kenji Hino <kenji@alcatraz.net>
   and then fix them.  It is related null blobs and SQL error -608.
-* Get rid of Makefile.NT by integrating it into Makefile.PL.
 * Resolve -R option on Solaris and equivalents for getting path name of
   Informix shared libraries into DBD::Informix shared library, so you don't
   need as much environment set at run-time.
@@ -45,8 +45,8 @@ Let me know of problems, as usual, and solutions too when you have them.
 
 Enjoy!
 
-Jonathan Leffler (johnl@informix.com) #include <disclaimer.h>
+Jonathan Leffler (j.leffler@acm.org) #include <disclaimer.h>
 
 PS: Read the README file.  Also read the Informix.Licence file.
 
-@(#)$Id: Announce,v 57.5 1997/11/14 05:08:40 johnl Exp $
+@(#)$Id: Announce,v 58.3 1998/01/15 18:52:32 johnl Exp $

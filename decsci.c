@@ -5,7 +5,7 @@
 @(#)Purpose:         Fixed, Exponential and Engineering formatting of DECIMALs
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1991-93,1996-97
-@(#)Product:         $Product: DBD::Informix Version 0.57 (1997-11-13) $
+@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
 */
 
 #include "esqlc.h"

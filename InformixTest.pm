@@ -1,8 +1,8 @@
-#	@(#)$Id: InformixTest.pm,v 57.3 1997/07/29 01:28:35 johnl Exp $ 
+#	@(#)$Id: InformixTest.pm,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
-#   Copyright (c) 1996,1997 Jonathan Leffler
+#   Copyright (c) 1996-98 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -380,10 +380,15 @@ the following is also valid:
 
 =head1 AUTHOR
 
+At various times:
+
 =over 2
 
 =item *
 Jonathan Leffler (johnl@informix.com)
+
+=item *
+Jonathan Leffler (j.leffler@acm.org)
 
 =back
 

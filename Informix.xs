@@ -1,9 +1,9 @@
 /*
- * @(#)$Id: Informix.xs,v 57.1 1997/07/30 03:18:03 johnl Exp $ 
+ * @(#)$Id: Informix.xs,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
  *
- * Portions Copyright (c) 1994,1995 Tim Bunce
- * Portions Copyright (c) 1995,1996 Alligator Descartes
- * Portions Copyright (c) 1996,1997 Jonathan Leffler
+ * Portions Copyright (c) 1994-95 Tim Bunce
+ * Portions Copyright (c) 1995-96 Alligator Descartes
+ * Portions Copyright (c) 1996-98 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -18,7 +18,7 @@ DBISTATE_DECLARE;
 /* Assume string concatenation is available */
 #ifndef lint
 static const char rcs[] =
-	"@(#)$Id: Informix.xs,v 57.1 1997/07/30 03:18:03 johnl Exp $";
+	"@(#)$Id: Informix.xs,v 58.1 1998/01/06 02:53:23 johnl Exp $";
 static const char esqlc_ver[] =
 	"@(#)" ESQLC_VERSION_STRING;
 #endif

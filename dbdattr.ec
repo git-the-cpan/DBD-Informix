@@ -1,9 +1,9 @@
 /*
- * @(#)$Id: dbdattr.ec,v 57.5 1997/10/09 03:04:22 johnl Exp $ 
+ * @(#)$Id: dbdattr.ec,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- attribute handling
  *
- * Copyright (c) 1997 Jonathan Leffler
+ * Copyright (c) 1997-98 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -12,7 +12,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec,v 57.5 1997/10/09 03:04:22 johnl Exp $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 58.1 1998/01/06 02:53:23 johnl Exp $";
 #endif
 
 #include <stdio.h>

@@ -1,7 +1,7 @@
 /*
- *	@(#)$Id: dbdixmap.h,v 57.2 1997/07/30 02:35:57 johnl Exp $ 
+ *	@(#)$Id: dbdixmap.h,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
  *
- * Copyright (c) 1997 Jonathan Leffler
+ * Copyright (c) 1997-98 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.

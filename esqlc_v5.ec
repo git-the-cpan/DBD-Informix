@@ -1,11 +1,11 @@
 /*
- * @(#)$Id: esqlc_v5.ec,v 56.3 1997/11/18 06:03:12 johnl Exp $ 
+ * @(#)$Id: esqlc_v5.ec,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
  * Code acceptable to ESQL/C Version 5.0x
  *
- * Copyright (c) 1996,1997 Jonathan Leffler
+ * Copyright (c) 1996-98 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -17,7 +17,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v5.ec,v 56.3 1997/11/18 06:03:12 johnl Exp $";
+static const char rcs[] = "@(#)$Id: esqlc_v5.ec,v 58.1 1998/01/06 02:53:23 johnl Exp $";
 #endif
 
 /* ================================================================= */

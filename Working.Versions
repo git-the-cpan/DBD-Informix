@@ -1,7 +1,7 @@
 Working Versions of DBD::Informix
 =================================
 
-@(#)$Id: Working.Versions,v 57.5 1997/11/18 04:11:43 johnl Exp $
+@(#)$Id: Working.Versions,v 58.1 1998/01/15 18:59:20 johnl Exp $
 
 This file documents combinations of machine, operating system, Perl, DBI,
 DBD::Informix and Informix-ESQL/C which have been reported as working,
@@ -25,6 +25,10 @@ Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            6.00.UE1    
 Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            7.23.UC1    1997-11-17  Jonathan Leffler <johnl@informix.com>
 Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            7.24.UC1    1997-11-17  Jonathan Leffler <johnl@informix.com>
 Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            9.12.UC2    1997-11-17  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_04    0.91    0.58            5.08.UD1    1998-01-15  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_04    0.91    0.58            6.00.UE1    1998-01-15  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_04    0.91    0.58            7.24.UC1    1998-01-15  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_04    0.91    0.58            9.12.UC2    1998-01-15  Jonathan Leffler <johnl@informix.com>
 
 Known Non-Working Versions of DBD::Informix
 
@@ -48,5 +52,9 @@ DBD::Informix   v0.52       1997-02-28          1997-07-12
 DBD::Informix   v0.53       1997-03-12          1997-07-12
 DBD::Informix   v0.54       1997-05-14          1997-07-12
 DBD::Informix   v0.55       1997-05-20          Supported but upgrade recommended
-DBD::Informix   v0.56       1997-07-12          Supported
-DBD::Informix   v0.57       1997-11-14          Current
+DBD::Informix   v0.56       1997-07-12          Supported but upgrade recommended
+DBD::Informix   v0.57       1997-11-14          Supported
+DBD::Informix   v0.58       1998-01-15          Current
+
+NB: Perl Unix  Resource Kit does contain DBD::Informix v0.55.
+    Perl Win32 Resource Kit will contain DBD::Informix v0.58.

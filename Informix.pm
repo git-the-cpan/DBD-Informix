@@ -1,7 +1,7 @@
-#	@(#)$Id: Informix.pm,v 57.10 1997/11/14 03:13:45 johnl Exp $ 
+#	@(#)$Id: Informix.pm,v 58.3 1998/01/15 18:50:27 johnl Exp $ 
 #
-#   Portions Copyright (c) 1994,1995 Tim Bunce
-#   Portions Copyright (c) 1996,1997 Jonathan Leffler
+#   Portions Copyright (c) 1994-95 Tim Bunce
+#   Portions Copyright (c) 1996-98 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -13,12 +13,12 @@
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.57";
+	$VERSION     = "0.58";
 	$ATTRIBUTION = 'By Jonathan Leffler';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 57.10 $ ($Date: 1997/11/14 03:13:45 $)@, 3);
+	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 58.3 $ ($Date: 1998/01/15 18:50:27 $)@, 3);
 	$Revision =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
 
-	require_version DBI 0.89;	# Requires features from DBI 0.89 release
+	require_version DBI 0.90;	# Requires features from DBI 0.90 release
 
 	bootstrap DBD::Informix $VERSION;
 
@@ -1210,10 +1210,16 @@ At various times:
 Tim Bunce (Tim.Bunce@ig.co.uk)
 
 =item *
-Alligator Descartes (descartes@arcana.co.uk)
+Alligator Descartes (descarte@hermetica.com)
+
+=item *
+Alligator Descartes (descarte@arcana.co.uk)
 
 =item *
 Jonathan Leffler (johnl@informix.com)
+
+=item *
+Jonathan Leffler (j.leffler@acm.org)
 
 =back
 
