@@ -1,7 +1,10 @@
 /*
- *	@(#)$Id: dbdixmap.h version /main/3 1998-01-06 02:53:23 $ 
+ * @(#)$Id: dbdixmap.h,v 100.2 2002/02/08 22:49:05 jleffler Exp $ 
  *
- * Copyright (c) 1997-98 Jonathan Leffler
+ * @(#)$Product: Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) $
+ *
+ * Copyright 1997-98 Jonathan Leffler
+ * Copyright 2001-02 IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -25,7 +28,8 @@
 #define dbd_db_destroy      dbd_ix_db_destroy
 #define dbd_db_disconnect   dbd_ix_db_disconnect
 #define dbd_db_do           dbd_ix_db_do
-#define dbd_db_login        dbd_ix_db_login
+#define dbd_db_login6       dbd_ix_db_connect
+#define dbd_db_login        dbd_ix_db_version_of_dbi_is_too_old
 #define dbd_db_rollback     dbd_ix_db_rollback
 
 /* Note inconsistent name (no st_) for dbd_bind_ph */
@@ -39,11 +43,5 @@
 #define dbd_st_finish       dbd_ix_st_finish
 #define dbd_st_prepare      dbd_ix_st_prepare
 #define dbd_st_rows         dbd_ix_st_rows
-
-/*
-** Although dbd_xsh.h declares dbd_describe(), it isn't called anywhere.
-** Note inconsistent name (no st_) for dbd_describe
-** #define dbd_describe        dbd_ix_describe
-*/
 
 #endif /* DBDIXMAP_H */

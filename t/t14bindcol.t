@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t14bindcol.t version /main/1 2000-02-24 19:22:16 $ 
+#	@(#)$Id: t14bindcol.t,v 100.3 2002/02/08 22:50:39 jleffler Exp $ 
 #
 #	Test handling of bind_col and bind_columns for DBD::Informix
 #

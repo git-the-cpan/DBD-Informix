@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: esql4_00.h,v $
-@(#)Version:         $Revision: 1.7 $
-@(#)Last changed:    $Date: 1997/06/02 16:24:26 $
 @(#)Purpose:         Function prototypes for ESQL/C Version 4.00
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1992-93,1995-97 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002            IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -22,7 +20,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql4_00_h[] = "@(#)$Id: esql4_00.h version /main/7 1997-06-02 16:24:26 $";
+static const char esql4_00_h[] = "@(#)$Id: esql4_00.h,v 100.1 2002/02/08 22:49:09 jleffler Exp $";
 #endif	/*lint */
 #endif	/*MAIN_PROGRAM */
 

@@ -1,8 +1,12 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: examples/x13cgi_noform.pl version /main/4 1999-05-14 00:33:09 $
+# @(#)$Id: x13cgi_noform.pl,v 100.1 2002/02/08 22:50:16 jleffler Exp $
 #
 # Slightly more sophisticated post-processing example CGI script
+#
+# Copyright 1998 Jonathan Leffler
+# Copyright 2000 Informix Software Inc
+# Copyright 2002 IBM
 
 # load standard Perl modules
 use strict;

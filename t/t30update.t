@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t30update.t version /main/6 2000-01-27 16:20:52 $ 
+#	@(#)$Id: t30update.t,v 100.3 2002/02/08 22:50:48 jleffler Exp $ 
 #
 #	Test script for DBD::Informix
 #
-#	Copyright (C) 1998-99 Jonathan Leffler
-#	Copyright (C) 2000    Informix Software Inc
-#	Copyright (C) 2002    IBM
+#	Copyright 1998-99 Jonathan Leffler
+#	Copyright 2000    Informix Software Inc
+#	Copyright 2002    IBM
 
 use DBD::Informix::TestHarness;
 use strict;

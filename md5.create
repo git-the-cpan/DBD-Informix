@@ -1,9 +1,0 @@
-# @(#)$Id: md5.create version /main/5 2000-02-17 13:40:23 $
-#
-# Generate MD5-DIGEST for files listed in MANIFEST
-
-: ${PERL:=perl}
-
-rm -f MD5-DIGEST MD5-DIGEST.MD5
-$PERL md5.chksum `grep -v MD5-DIGEST MANIFEST` > MD5-DIGEST
-$PERL md5.chksum MD5-DIGEST > MD5-DIGEST.MD5

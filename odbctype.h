@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: odbctype.h,v $
-@(#)Version:         $Revision: 54.3 $
-@(#)Last changed:    $Date: 1997/04/01 16:22:30 $
 @(#)Purpose:         Surrogate ODBC header for DBD::Informix
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1997
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1997 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002 IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char odbctype_h[] = "@(#)$Id: odbctype.h version /main/4 1997-04-01 16:22:30 $";
+static const char odbctype_h[] = "@(#)$Id: odbctype.h,v 100.1 2002/02/08 22:49:36 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

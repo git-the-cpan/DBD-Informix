@@ -1,8 +1,8 @@
-# @(#)$Id: lib/Bundle/DBD/Informix.pm version /main/4 2000-01-25 12:20:09 $
+# @(#)$Id: Informix.pm,v 100.4 2002/02/08 22:50:19 jleffler Exp $
 
 package Bundle::DBD::Informix;
 
-$VERSION = '1.00.PC2';
+$VERSION = '1.03.PC1';
 
 1;
 
@@ -19,6 +19,8 @@ C<perl -MCPAN -e 'install Bundle::DBD::Informix'>
 =head1 CONTENTS
 
 Digest::MD5  - Perl interface to the MD5 Algorithm by GAAS (Gisle Aas)
+
+Time::HiRes  - High Resolution Timing by DEWEG (Douglas Wegscheid)
 
 Bundle::DBI  - Bundle for DBI by TIMB (Tim Bunce)
 
@@ -46,6 +48,8 @@ original, or you'll be required to provide the diffs between the original
 and what you are using.  The shell script md5.verify and Perl script
 md5.check will be used to do this.
 
+DBD::Informix uses the Time::HiRes module for timing insert cursors.
+
 =head1 SEE ALSO
 
 Bundle::DBI
@@ -59,5 +63,9 @@ Jonathan Leffler E<lt>F<jleffler@informix.com>E<gt>
 This bundle was created by ripping off Bundle::libnet created by 
 Graham Barr E<lt>F<gbarr@ti.com>E<gt>, and radically simplified
 with some information from Jochen Wiedmann E<lt>F<joe@ispsoft.de>E<gt>.
+
+  Copyright 1998-1999 Jonathan Leffler
+  Copyright 2000      Informix Software Inc
+  Copyright 2002      IBM
 
 =cut

@@ -1,24 +1,8 @@
-From owner-informix-list@iiug.org Fri Jul 24 20:42:40 PDT 1998
-Received: from kingcrab.informix.com (kingcrab.informix.com [158.58.16.26])
-	by lynx.informix.com (8.8.5/8.8.5) with ESMTP id UAA23030
-	for <jleffler@lynx.informix.com>; Fri, 24 Jul 1998 20:42:40 -0700 (PDT)
-Received: from mail1ext.informix.com (mail1ext.informix.com [158.58.16.24]) by kingcrab.informix.com (8.8.5/8.7.3) with ESMTP id UAA10692; Fri, 24 Jul 1998 20:42:23 -0700 (PDT)
-Received: from iiug.iiug.org (www.iiug.org [206.175.175.254])
-	by mail1ext.informix.com (8.8.8/8.8.8) with ESMTP id UAA11117;
-	Fri, 24 Jul 1998 20:41:45 -0700 (PDT)
-Received: (from majordom@localhost) by iiug.iiug.org (8.7.5/8.7.3) id WAA23727; Fri, 24 Jul 1998 22:25:03 -0500 (CDT)
 From: "Tommi Mäkitalo" <tommi@eckpart.de>
 To: informix-list@iiug.org
 Subject: Re: Perl DBI-0.93 DBD-Informix-0.58 on SCO
 Date: Tue, 21 Jul 1998 12:22:43 +0100
-Organization: Dr. Eckhardt + Partner GmbH
-Message-Id: <35B47A03.80EBFA5A@eckpart.de>
-Reply-To: "Tommi Mäkitalo" <tommi@eckpart.de>
 X-List-Gateway: comp.databases.informix
-Sender: owner-informix-list@iiug.org
-Precedence: bulk
-Status: RO
-X-Status: 
 
 Hi
 
@@ -34,18 +18,10 @@ t.maekitalo@eckpart.de
 
 
 
-From jleffler@informix.com Wed Jul 29 11:16:42 1998
-Status: O
-X-Status: 
 Date: Wed, 29 Jul 1998 11:16:42 -0700 (PDT)
 From: Jonathan Leffler <jleffler@informix.com>
 To: =?ISO-8859-1?Q?Tommi_M=E4kitalo?= <tommi@eckpart.de>
 Subject: Re: Perl DBI-0.93 DBD-Informix-0.58 on SCO
-In-Reply-To: <35B47A03.80EBFA5A@eckpart.de>
-Message-ID: <Pine.GSO.3.96.980729111342.295G-100000@osiris.informix.com>
-MIME-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 
 On Tue, 21 Jul 1998, Tommi M=E4kitalo wrote:
 > We have SCO-OpenServer 5.0.4. I compiled my own perl with the optimizing
@@ -69,5 +45,4 @@ to set your mind at ease...
 Yours,
 Jonathan Leffler (jleffler@informix.com) #include <witticism.h>
 Guardian of DBD::Informix v0.59 -- see http://www.perl.com/CPAN
-
 

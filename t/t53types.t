@@ -1,11 +1,11 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t53types.t version /main/3 2000-02-08 15:50:35 $ 
+#	@(#)$Id: t53types.t,v 100.6 2002/02/08 22:50:58 jleffler Exp $ 
 #
-#   Test NAME, TYPE, NULLABLE, SCALE, PRECISION attributes
+#	Test NAME, TYPE, NULLABLE, SCALE, PRECISION attributes
 #	No testing for UDTs
 #
-#   Copyright 2000 Informix Software Inc
+#	Copyright 2000 Informix Software Inc
 #	Copyright 2002 IBM
 
 use strict;

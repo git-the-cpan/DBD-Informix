@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t60unlog.t version /main/12 2000-02-10 16:53:48 $ 
+#	@(#)$Id: t60unlog.t,v 100.6 2002/02/08 22:51:03 jleffler Exp $ 
 #
-# Portions Copyright 1997,1999 Jonathan Leffler
-# Portions Copyright 2000      Informix Software Inc
-# Portions Copyright 2002      IBM
+#	Test that unlogged databases refuse to connect with AutoCommit => 0
 #
-# Test that unlogged databases refuse to connect with AutoCommit => 0
+#	Copyright 1997,1999 Jonathan Leffler
+#	Copyright 2000      Informix Software Inc
+#	Copyright 2002      IBM
 
 use DBD::Informix::TestHarness;
 

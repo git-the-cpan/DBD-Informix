@@ -1,37 +1,68 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: esqlld version /main/10 2000-02-03 16:04:35 $ 
+# @(#)$Id: esqlld,v 100.5 2002/11/20 19:05:31 jleffler Exp $ 
 #
-# IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+# Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 #
 # Surrogate Linker for Informix ESQL/C versions 4.10.UC1 upwards
 # -- Used to create shared libraries.
 #
-# Portions Copyright 1996-99 Jonathan Leffler
-# Portions Copyright 2000    Informix Software Inc
+# Copyright 1996-99 Jonathan Leffler
+# Copyright 2000    Informix Software Inc
+# Copyright 2002    IBM
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
 
+# Ensure we use distributed version of DBD::Informix::Configuration,
+# not pre-installed out-of-date version of it.
+BEGIN { unshift @INC, "lib"; }
+
 use strict;
 use DBD::Informix::Configuration;
-
-my $arg;
-my $cmd;
-my @cmd;
 
 my $map = ($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR}) ? 0 : 1;
 my @ARGS = $map ? &map_informix_lib_names(@ARGV) : @ARGV;
 
+push @ARGS, "-lc";
+
 # Remove C preprocessor options from linker command line
 @ARGS = grep { !m/^-[DIU]/o } @ARGS;
+
+# Roderick Schertler <roderick@argon.org> 1999-07-27:
+# I got "SEVERE LIBC ERROR: CALL TO __mutex_unlock FAILED" when
+# linked with -lthread under dgux 4.11.mu05 on m88k.  According
+# to DG (ticket l574314) that can happen if you use a shared
+# library which uses -lthread with one which doesn't.  I don't
+# know why this never came up before.
+if ($^O eq 'dgux')
+{
+	@ARGS = grep { !m/^-lthread/o } @ARGS;
+}
+
+# Remove -g option from linker command line when requested.
+# Problem found on SCO 3.2v5.0.2 by Brad Huan-Ming Kao
+# <proton@iiidns.iii.org.tw>
+@ARGS = grep { !m/^-g$/o } @ARGS
+	if ($ENV{DBD_INFORMIX_ESQLLD_NO_G_OPTION});
+
+# Generalization of DBD_INFORMIX_ESQLLD_NO_G_OPTION...
+if ($ENV{DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX})
+{
+	my($env) = $ENV{DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX};
+	print STDERR "# DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX set.\n";
+	print STDERR "# Removing options that match regex m%$env%\n";
+	print STDERR "# Before: @ARGS\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLLD};
+	@ARGS = grep { !m%$env%o } @ARGS;
+	print STDERR "# After: @ARGS\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLLD};
+}
 
 # Sort out the real compiler.
 # Note that if $ENV{ESQLLD} contains, for example, 'cc -G', then we
 # need to split this into two words for the exec to work correctly.
-$cmd = $ENV{ESQLLD};
-$cmd = 'cc' unless ($cmd);
-@cmd = split /\s+/, $cmd;
+my $cmd = $ENV{ESQLLD};
+   $cmd = 'cc' unless ($cmd);
+my @cmd = split /\s+/, $cmd;
 
-print STDERR "@cmd @ARGS -lc\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLLD};
-exec @cmd, @ARGS, "-lc";
+print STDERR "@cmd @ARGS\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLLD};
+exec @cmd, @ARGS;

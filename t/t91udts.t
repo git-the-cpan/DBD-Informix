@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t91udts.t version /main/2 2000-02-07 17:40:16 $
+#	@(#)$Id: t91udts.t,v 100.9 2002/11/19 17:32:42 jleffler Exp $
 #
 #	Test basic handling of user-defined data types
 #
@@ -15,6 +15,11 @@ my ($dbh) = &test_for_ius;
 $dbh->{ChopBlanks} = 1;
 
 &stmt_note("1..16\n");
+
+my ($noslobs) = $ENV{DBD_INFORMIX_NO_SBSPACE};
+
+my ($sbspace) = $ENV{DBD_INFORMIX_SBSPACE};
+$sbspace = "sbspace" unless $sbspace;
 
 sub do_stmt
 {
@@ -41,8 +46,7 @@ stmt_test $dbh, "create distinct type dbd_ix_distofbool as boolean";
 stmt_test $dbh, "create distinct type dbd_ix_distoflvc as lvarchar";
 stmt_test $dbh, "create distinct type dbd_ix_distofnamed as dbd_ix_udts_named";
 
-stmt_test $dbh,
-    qq%
+my ($stmt) = qq%
      create table dbd_ix_udts
      (s8 serial8,
       i8 int8,
@@ -56,26 +60,27 @@ stmt_test $dbh,
       di8 dbd_ix_distofi8,
       db dbd_ix_distofbool,
       dlvc dbd_ix_distoflvc,
-      dnamed dbd_ix_distofnamed,
-      cl clob)
-     %;
+      dnamed dbd_ix_distofnamed%;
+$stmt .= ($noslobs) ? ")" : ", cl clob) put cl in ($sbspace)";
+stmt_test $dbh, $stmt;
 
 # Insert some data into the table.  NB: $0 refers to this script file!
 my ($longstr) = "1234567890" x 30;
+my ($slobval) = ($noslobs) ? "" : ", filetoclob('$0', 'client')";
 stmt_test $dbh,
     qq%
      insert into dbd_ix_udts values
      (1, 1, 't', '$longstr', row(1, '$longstr'), row(1)::dbd_ix_udts_named,
       set{1, 10, 100}, list{row(1, 'one')}, multiset{row(1)::dbd_ix_udts_named},
-      '1', 't', '$longstr', row(1)::dbd_ix_distofnamed,
-      filetoclob('$0', 'client'))
+      '1', 't', '$longstr', row(1)::dbd_ix_distofnamed $slobval)
      %;
 
-# Check that fetch truncates udts longer than 256 (rather than blow)
+# Check that fetch truncates udts longer than 256 (rather than blowing up)
 my ($inserted) = 1;
-my ($ins) = q%
+$slobval = ($noslobs) ? "" : ", filetoclob(?, 'client')";
+my ($ins) = qq%
      insert into dbd_ix_udts values
-     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, filetoclob(?, 'client'))
+     (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? $slobval)
      %;
 $ins =~ s/\s+/ /gm;
 stmt_note("# PREPARE: $ins\n");
@@ -83,13 +88,26 @@ my ($sth) = $dbh->prepare($ins)
     or stmt_fail;
 stmt_ok;
 
+# Check inserting nulls...
 my ($null);
 undef $null;
-$sth->execute
-    (2, $null, $null, $null, $null, $null, $null,
-      $null, $null, $null, $null, $null, $null, $null)
-    or stmt_fail;
+# This is lazy - there has to be a better way!
+if ($noslobs)
+{
+	$sth->execute
+		(2, $null, $null, $null, $null, $null, $null,
+		  $null, $null, $null, $null, $null, $null)
+		or stmt_fail;
+}
+else
+{
+	$sth->execute
+		(2, $null, $null, $null, $null, $null, $null,
+		  $null, $null, $null, $null, $null, $null, $null)
+		or stmt_fail;
+}
 stmt_ok;
+stmt_note "# inserted nulls OK\n";
 
 $inserted += $sth->rows;
 stmt_fail unless $inserted == 2;
@@ -98,19 +116,34 @@ stmt_fail unless $inserted == 2;
 # syntactically wrong (ex. row(3, '$longstr')), insert will fail and
 # report invalid syntax (rather than blow up).  NB: $0 refers to this
 # script file!
-$sth->execute
-    (3, 3, "f", "$longstr", "row(3, 'three')", "row(3)", "set{3, 30, 300}",
-     "list{row(3, 'three'), row(30, 'thirty')}",
-     "multiset{row(3), row(30)}", "3", "f", "$longstr", "row(3)", "$0")
-    or die;
+# This is lazy - there has to be a better way!
+if ($noslobs)
+{
+	$sth->execute
+		(3, 3, "f", "$longstr", "row(3, 'three')", "row(3)", "set{3, 30, 300}",
+		 "list{row(3, 'three'), row(30, 'thirty')}",
+		 "multiset{row(3), row(30)}", "3", "f", "$longstr", "row(3)")
+		or die;
+}
+else
+{
+	$sth->execute
+		(3, 3, "f", "$longstr", "row(3, 'three')", "row(3)", "set{3, 30, 300}",
+		 "list{row(3, 'three'), row(30, 'thirty')}",
+		 "multiset{row(3), row(30)}", "3", "f", "$longstr", "row(3)", "$0")
+		or die;
+}
 $inserted += $sth->rows;
 $sth->finish;
 stmt_note "# inserted $inserted \n";
 
+# Record basename of extracted file names...
+my ($filename) = "dbd_ix_udts.pl";
 my ($fetched) = 0;
+$slobval = ($noslobs) ? "" : ", lotofile(cl, '$filename', 'client')";
 my ($sel) = qq%
      select s8, i8, b, lvc, unnamed, named, sint, lunnamed, mnamed, di8,
-     db, dlvc, dnamed, lotofile(cl, 'dbd_ix_udts.pl', 'client')
+     db, dlvc, dnamed $slobval
      from dbd_ix_udts
      %;
 $sel =~ s/\s+/ /gm;
@@ -132,10 +165,11 @@ $sth->finish;
 # Need to verify fetched data
 stmt_note "# fetched $fetched \n";
 
+$slobval = ($noslobs) ? "" : ", cl = filetoclob(?, 'client')"; 
 my ($upd) = qq%
      update dbd_ix_udts set i8 = ?, b = ?, lvc = ?, unnamed = ?, named = ?,
          sint = ?, lunnamed = ?, mnamed = ?, di8 = ?, db = ?, dlvc = ?,
-         dnamed = ?, cl = filetoclob(?, 'client')
+         dnamed = ? $slobval
      where s8 = ? and i8 = ? and b = ? and lvc = ?
          and named = ? and sint = ? and lunnamed = ?
          and mnamed = ? and di8::int8 = ? and db::boolean = ?
@@ -148,14 +182,29 @@ $sth = $dbh->prepare($upd)
 stmt_ok;
 
 stmt_note "# EXECUTE\n";
-$sth->execute
-     (10, "f", "$longstr", "row(10, 'ten')", "row(10)",
-      "set{10000, 100000, 1000000}", "list{row(10, 'ten')}",
-      "multiset{row(10)}", "10", "f", "$longstr", "row(10)", "$0",
-      1, 1, "t", "$longstr", "row(1)", "set{1, 10, 100}",
-      "list{row(1, 'one')}", "multiset{row(1)}", "1", "t",
-      "$longstr", "row(1)")
-    or stmt_fail;
+# This is lazy - there has to be a better way!
+if ($noslobs)
+{
+	$sth->execute
+		 (10, "f", "$longstr", "row(10, 'ten')", "row(10)",
+		  "set{10000, 100000, 1000000}", "list{row(10, 'ten')}",
+		  "multiset{row(10)}", "10", "f", "$longstr", "row(10)",
+		  1, 1, "t", "$longstr", "row(1)", "set{1, 10, 100}",
+		  "list{row(1, 'one')}", "multiset{row(1)}", "1", "t",
+		  "$longstr", "row(1)")
+		or stmt_fail;
+}
+else
+{
+	$sth->execute
+		 (10, "f", "$longstr", "row(10, 'ten')", "row(10)",
+		  "set{10000, 100000, 1000000}", "list{row(10, 'ten')}",
+		  "multiset{row(10)}", "10", "f", "$longstr", "row(10)", "$0",
+		  1, 1, "t", "$longstr", "row(1)", "set{1, 10, 100}",
+		  "list{row(1, 'one')}", "multiset{row(1)}", "1", "t",
+		  "$longstr", "row(1)")
+		or stmt_fail;
+}
 my ($nrows) = $sth->rows;
 stmt_note "# updated $nrows \n";
 stmt_ok;
@@ -193,5 +242,8 @@ stmt_ok;
 
 $dbh->disconnect or die;
 stmt_ok;
+
+# Remove the files created by LOTOFILE.
+unlink <$filename.*> unless $noslobs;
 
 all_ok;

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t10sqlca.t version /main/6 2000-01-27 16:20:28 $ 
+#	@(#)$Id: t10sqlca.t,v 100.3 2002/02/08 22:50:36 jleffler Exp $ 
 #
 #	Test SQLCA Record Handling for DBD::Informix
 #
-#	Copyright (C) 1997,1999 Jonathan Leffler
-#	Copyright (C) 2000      Informix Software Inc
-#	Copyright (C) 2002      IBM
+#	Copyright 1997,1999 Jonathan Leffler
+#	Copyright 2000      Informix Software Inc
+#	Copyright 2002      IBM
 
 use DBD::Informix::TestHarness;
 

@@ -1,8 +1,12 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: examples/x12cgi_noform.pl version /main/6 1999-05-14 00:33:09 $
+# @(#)$Id: x12cgi_noform.pl,v 100.1 2002/02/08 22:50:15 jleffler Exp $
 #
 # Simple example CGI script using DBI and DBD::Informix
+#
+# Copyright 1998 Jonathan Leffler
+# Copyright 2000 Informix Software Inc
+# Copyright 2002 IBM
 
 # load standard Perl modules
 use strict;

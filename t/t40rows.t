@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t40rows.t version /main/7 2000-01-27 16:21:00 $ 
+#	@(#)$Id: t40rows.t,v 100.3 2002/02/08 22:50:51 jleffler Exp $ 
 #
 #	Test $sth->rows1 for DBD::Informix
 #
-#	Copyright (C) 1997,1999 Jonathan Leffler
-#	Copyright (C) 2000      Informix Software Inc
-#	Copyright (C) 2002      IBM
+#	Copyright 1997,1999 Jonathan Leffler
+#	Copyright 2000      Informix Software Inc
+#	Copyright 2002      IBM
 
 use DBD::Informix::TestHarness;
 

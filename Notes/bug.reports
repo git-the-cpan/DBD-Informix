@@ -14,19 +14,21 @@ either are doing this or already have done this.  Thank you!
 Next, check the Frequently Asked Questions, Known Bugs and any other
 pertinent documents at:
 
-    http://www.symbolstone.org/technology/perl/DBI
+    http://dbi.perl.org/
 
-Note that the version numbers recorded at this site have historically been
-a little out of date at times, but they are now (September 1999) usually
-correct.  The other information there is valuable, though.  In case of
-doubt, go to CPAN (http://www.perl.com/CPAN/modules/by-module) for the
-latest versions of any of the DBI or DBD files.
+At one time, the version numbers recorded at this site were out of date
+at times, but they are now (since September 1999) usually correct.  The
+other information there is valuable, though.  In case of doubt, go to
+CPAN (http://www.perl.com/CPAN/modules/by-module) for the latest
+versions of any of the DBI or DBD files.
 
 If this does *not* resolve your problem, please post the details of your
 problem to dbi-users@perl.org and CC them to the maintainers at either
 dbd-informix@informix.com (up to 2002-06-30) or to
 dbd-informix@us.ibm.com (from 2002-07-01, though you may try this
-address now if you wish), using one of the two methods outlined below.
+address before then if you wish), using one of the two methods outlined
+below.  For information on how to subscribe to (and unsubscribe from)
+the dbi-users mailing list, send a message to dbi-users-help@perl.org.
 
 Please ensure that any email message has DBD::Informix in the subject line.
 Thanks!
@@ -158,8 +160,10 @@ For information on Informix Technical Support, please run:
 
 	perldoc DBD::Informix::TechSupport
 
-If you are not currently subscribed to the mailing list please subscribe
-via http://dbi.perl.org/.  There are 3 mailing lists:
+If you are not currently subscribed to the DBI users' mailing list, then
+please subscribe via http://dbi.perl.org/, or for information on how to
+subscribe via email, send email to dbi-users-help@perl.org.
+There are 3 mailing lists:
 
        dbi-announce@perl.org
        dbi-users@perl.org
@@ -169,19 +173,20 @@ You should probably subscribe to dbi-users and probably do not need to
 subscribe to dbi-dev unless you are planning to write your own DBD driver.
 
 Please don't post problems with DBD::Informix to comp.lang.perl.misc or
-comp.lang.perl.modules news groups, nor the perl5-porters mailing list,
-if you expect answers from the DBD::Informix maintenance team.  You may
-ask questions in the comp.databases.informix.  Please don't try to email
-Tim Bunce directly, either.  He's an expert in many fields, but Informix
-is not one of those fields.  Go through the proper channels, which means
-the dbi-users@perl.org mailing list.
+perl5-porters because they probably will not be seen by anyone able to
+answer them (but comp.lang.perl.modules might provide an answer).
+Questions asked in comp.databases.informix will usually be answered.
+Please don't try to email Tim Bunce directly, either.  He's an expert in
+many fields, but Informix is not one of those fields.  Go through the
+proper channels, which means the dbi-users@perl.org mailing list or the
+dbd-informix@us.ibm.com (or dbd-informix@informix.com) mail alias.
 
 ---------------------------------------------------------------------------
 
-Portions Copyright 1999 Jonathan Leffler
-Portions Copyright 2000 Informix Software Inc
-Portions Copyright 2002 IBM
+Copyright 1999 Jonathan Leffler
+Copyright 2000 Informix Software Inc
+Copyright 2002 IBM
 
-Jonathan Leffler (j.leffler@acm.org)
+Jonathan Leffler (jleffler@us.ibm.com)
 
-@(#)$Id: Notes/bug.reports version /main/4 2000-02-17 12:13:44 $
+@(#)$Id: bug.reports,v 100.5 2002/02/08 22:49:52 jleffler Exp $

@@ -1,12 +1,13 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t05dbase.t version /main/13 2000-02-03 15:53:54 $ 
+#	@(#)$Id: t05dbase.t,v 100.4 2002/02/08 22:50:34 jleffler Exp $ 
 #
-# Portions Copyright 1997,1999 Jonathan Leffler
-# Portions Copyright 2000      Informix Software Inc
-# Portions Copyright 2002      IBM
+#	Test database creation and default connections.
 #
-# Test database creation and default connections.
+#	Copyright 1997,1999 Jonathan Leffler
+#	Copyright 2000      Informix Software Inc
+#	Copyright 2002      IBM
+#
 # Note that database statements cannot be used with an explicit connection
 # with ESQL/C 6.0x and up.
 

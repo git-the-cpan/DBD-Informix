@@ -1,12 +1,96 @@
-Change Log for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) (aka DBD::Informix)
+Change Log for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) (aka DBD::Informix)
+
+1.03.PC1 Release
+----------------
+2002-??-??: Upload to PAUSE and CPAN.
+2002-11-19: Remove MD5 checksum material (added for Informix Tech Support).
+            Move DBD::Informix::* files from DBD to lib/DBD.
+2002-11-18: Add support for ix_WithoutReplication based on work by Bryan
+            Castillo <Bryan_Castillo@eFunds.com> (who called it
+            ix_Replicated with the opposite logic).  Clean up some of the
+            documentation in Informix.pm, removing references to behaviour
+            in versions prior to 1.00.
+2002-11-06: Retrofit INSTALLVENDORARCH (courtesy Roderick Schertler
+            <roderick@argon.org> circa 2002-07) and SITEARCHEXP (courtesy
+            Joachim Schrod <jscrod@acm.org> circa 1998-01) into list of
+            directories that might contain the DBI headers.  Add
+            DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX to parallel
+            DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX, and fix that so it
+            works.  Partly inspired by an old email from Roderick Schertler
+            again, and partly by testing I4GL compilation.  Note that the
+            tests claim that I4GL 7.3x cannot handle IUS data types -
+            technically true but also slightly misleading (because the
+            ESQL/C that is used with I4GL 7.3x can handle them).  Added
+            DBD_INFORMIX_NO_SBSPACE for IDS 9.x systems with no smart blob
+            spaces defined (see also DBD_INFORMIX_SBSPACE).
+2002-11-05: Guy Fawkes Night - gunpowder, treason and plot (1605-11-05).
+            Add new function date_as_string to TestHarness.pm to ensure
+            that dates are handled properly when client does not set DBDATE
+            and server has DBDATE set to non-default value - a problem
+            previously reported by others, but fixed in response to bug
+            report by Arlene Gelbolingo <Gelbolingo.Arlene@menlolog.com>.
+2002-10-17: Rework release sequence on master machine.
+2002-09-13: Handle CSDK 2.80 (ESQL/C 9.52) revised output from 'esql -V'.
+2002-08-12: Migrate code back to RCS from Atria.
+
+1.02.PC1 Release
+----------------
+2002-06-01: Release 1.02.PC1 stalled.
+2002-02-12: Generate DBD::Informix::Defaults from Makefile.PL to avoid the
+            need for the pause_hack.  Renames Informix.pm.PL as a result.
+2002-01-31: Fix memory leak when statements with input parameters (eg
+            SELECT * FROM SomeTable WHERE SomeColumn = ?) are released
+            without being used.  Problem reported by Polak Michal
+            <Michal.Polak@tconsult.cz> on 2002-01-30, but essentially a
+            repeat of other previous memory leak reports.  Trouble was in
+            dbdimp.ec allocating a descriptor which is not released.
+2002-01-30: Various changes made last year committed.
+2001-08-xx: Some changes made but not committed until 2002.
 
 1.00.PC2 Release
 ----------------
 2002-01-31: Update email addresses, web sites, copyright information.
-            Purely repackaging; no functional changes whatsoever.
+            Purely repackaging; no functional changes whatsoever.  Change
+            official name to "IBM Informix Database Driver for Perl".
+
+1.01.PC1 Release
+----------------
+2001-05-04: Semi-official release of 1.01.PC1 - not sent to PAUSE and CPAN.
+2001-04-04: Add DBD_INFORMIX_SBSPACE environment variable, defaulting to
+            sbspace, to locate smart blobs for t/t91udts.t test.
+2001-02-26: Change documentation because DBI mailing lists moved from
+            isc.org to perl.org and DBI home page moved from
+            symbolstone.org to dbi.perl.org.
+2001-01-29: Update the esqlc.h header to use esqltypes.h, and the
+            esql7_20.h to work with HP ANSI C compiler.
+2001-01-22: Remove warnings from Makefile.PL when $Config{optimizer} or
+            $Config{ccflags} undefined; problem found by Mike Steinfeld
+             <mikes@openbsdbox.com>.
+2000-09-29: Add support for blob update via use DBD::Informix qw(:ix_types)
+            and $sth->bind_param($n, $val, { ix_type => IX_BYTE }); or
+            $sth->bind_param($n, $val, { ix_type => IX_TEXT });  Yea!
+2000-09-25: Add $DBD_INFORMIX_ESQLLD_NO_G_OPTION to fix problem found on
+            SCO 3.2v5.0.2 by Brad Huan-Ming Kao <proton@iiidns.iii.org.tw>,
+            and $DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX to provide a
+            general solution to problems with unwanted linker options.
+2000-09-20: Install INSERT CURSOR code from Paul Palacios <paul@c-group.com>.
+2000-06-08: Add notes on DATABASE EXCLUSIVE, etc, after questions from
+            Jenny Liu <Jenny.Liu@medic.com>.
+2000-05-24: Add FAQ on error -369 from Kevin Brannen.
+2000-05-15: Clarify README file and mention Perl 5.6.x after questions from
+            Georg Schlykow <georg.schlykow@fashy.blackbox-rz.de>.
+2000-05-12: Add LVARCHAR bug fix from Franky Wong <fwong@seattletimes.com>.
+2000-05-12: Rewrite MD5 check sum code using Perl to work on Unix or NT.
+2000-03-28: Add optional fourth argument to TestHarness select_some_data()
+            to map nulls to a visible string.  Avoid dereferencing undefs.
+2000-03-22: Fix decimal formatting (especially for zero); a bug report from
+            Keith Johnson <keith@netcentral.net>
+2000-03-22: Remove drh from private data in database handle.
 
 1.00.PC1 Release
 ----------------
+2000-03-17: Upload to PAUSE and CPAN.
+2000-03-03: Code frozen.
 2000-02-29: Bug fix for crash on free() under ActiveState Perl.  Finalize
             for release to Informix operations and PAUSE/CPAN.
 2000-02-25: Improve build for NT and ActiveState Perl.  Fix memory leak
@@ -48,7 +132,7 @@ Change Log for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-0
             shared library names from relative to absolute when using 'ld'
             well as when using 'cc'.
 2000-02-01: Generate error -402, not core dump, on $dbh->prepare(undef).
-2000-02-01: Change official name to "IBM Informix Database Driver for Perl" to
+2000-02-01: Change official name to "Informix Database Driver for Perl" to
             avoid trademark problems.  The acronym DBD is claimed by two
             other companies in the USA, DBD Group (http://www.dbd.com) and
             Digital By Design (http://www.digitalbydesign.net).  Upgrades
@@ -843,5 +927,5 @@ Pre-Release
 
 --------------
 
-Jonathan Leffler <jleffler@informix.com>
-@(#)$Id: ChangeLog version /main/116 2000-02-29 14:15:19 $
+Jonathan Leffler <jleffler@us.ibm.com>
+@(#)$Id: ChangeLog,v 100.41 2002/11/19 19:41:31 jleffler Exp $

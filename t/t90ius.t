@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t90ius.t version /main/5 2000-01-27 16:22:00 $ 
+#	@(#)$Id: t90ius.t,v 100.3 2002/02/08 22:51:12 jleffler Exp $ 
 #
 #	Test basic handling of IUS data types
 #
-#	Copyright (C) 1998-1999 Jonathan Leffler
-#	Copyright (C) 2000      Informix Software Inc
-#	Copyright (C) 2002      IBM
+#	Copyright 1998-99 Jonathan Leffler
+#	Copyright 2000    Informix Software Inc
+#	Copyright 2002    IBM
 
 use DBD::Informix::TestHarness;
 

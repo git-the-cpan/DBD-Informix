@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t12bindval.t version /main/2 2000-02-29 15:43:32 $ 
+#	@(#)$Id: t12bindval.t,v 100.4 2002/02/08 22:50:37 jleffler Exp $ 
 #
 #	Test handling of bind_param for DBD::Informix
 #

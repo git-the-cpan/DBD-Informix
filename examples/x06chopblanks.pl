@@ -2,9 +2,11 @@
 #
 # DBD::Informix Example 6 - ChopBlanks attribute (cf Example 1)
 #
-# @(#)$Id: examples/x06chopblanks.pl version /main/2 1998-10-27 19:14:59 $
+# @(#)$Id: x06chopblanks.pl,v 100.1 2002/02/08 22:50:11 jleffler Exp $
 #
-# Jonathan Leffler (j.leffler@acm.org)
+# Copyright 1998 Jonathan Leffler
+# Copyright 2000 Informix Software Inc
+# Copyright 2002 IBM
 
 use DBI;
 $dbh = DBI->connect("DBI:Informix:stores7");

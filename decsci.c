@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: decsci.c,v $
-@(#)Version:         $Revision: 1.13 $
-@(#)Last changed:    $Date: 1999/12/06 19:31:05 $
 @(#)Purpose:         Fixed, Exponential and Engineering formatting of DECIMALs
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1991-93,1996-97,1999
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1991-93,1996-97,1999 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002                 IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 #include "esqlc.h"
@@ -45,7 +43,7 @@ extern char *decfcvt(dec_t *np, int ndigit, int *decpt, int *sign);
 static char     buffer[166];
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: decsci.c version /main/13 1999-12-06 19:31:05 $";
+static const char rcs[] = "@(#)$Id: decsci.c,v 100.1 2002/02/08 22:49:06 jleffler Exp $";
 #endif
 
 /*

@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlbasic.ec version /main/4 1999-12-30 23:08:49 $
+ * @(#)$Id: esqlbasic.ec,v 100.1 2002/02/08 22:49:13 jleffler Exp $
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -12,7 +12,8 @@
  *
  *     esql -o esqlbasic esqlbasic.ec
  *
- * Copyright (c) 1997-99 Jonathan Leffler
+ * Copyright 1997-99 Jonathan Leffler
+ * Copyright 2002    IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -35,7 +36,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlbasic.ec version /main/4 1999-12-30 23:08:49 $";
+static const char rcs[] = "@(#)$Id: esqlbasic.ec,v 100.1 2002/02/08 22:49:13 jleffler Exp $";
 #endif
 
 /*

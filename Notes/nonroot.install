@@ -1,4 +1,3 @@
-
 From: David Alt <David.Alt@mailhost.bellhow.com>
 Subject: Re: compiling/installing DBI/DBD modules in home directory tree
 To: matthew@nocturnal.org
@@ -98,4 +97,4 @@ or for earlier perls (5.000 and 5.001)
 
 to indicate where your private library is.
 
-@(#)$Id: Notes/nonroot.install version /main/1 1998-07-30 23:17:24 $
+@(#)$Id: nonroot.install,v 100.2 2002/02/08 22:49:58 jleffler Exp $

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t72blob.t version /main/21 2000-01-27 16:21:35 $ 
+#	@(#)$Id: t72blob.t,v 100.4 2002/10/19 00:27:50 jleffler Exp $ 
 #
 #	Test Basic Blobs (INSERT & SELECT) for DBD::Informix
 #
-#	Copyright (C) 1996-97,1999 Jonathan Leffler
-#	Copyright (C) 2000         Informix Software Inc
-#	Copyright (C) 2002         IBM
+#	Copyright 1996-97,1999 Jonathan Leffler
+#	Copyright 2000         Informix Software Inc
+#	Copyright 2002         IBM
 
 use DBD::Informix::TestHarness;
 
@@ -15,8 +15,7 @@ $dbh = connect_to_test_database();
 
 if (!$dbh->{ix_BlobSupport})
 {
-	print("1..0\n");
-	&stmt_note("# No blob support -- no blob testing\n");
+	print("1..0 # Skip: No blob support -- no blob testing\n");
 	$dbh->disconnect;
 	exit(0);
 }

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t46chpblk.t version /main/8 2000-01-27 16:21:14 $ 
+#	@(#)$Id: t46chpblk.t,v 100.3 2002/02/08 22:50:56 jleffler Exp $ 
 #
-#	ChopBLanks attribute test script for DBD::Informix
+#	ChopBlanks attribute test script for DBD::Informix
 #
-#	Copyright (C) 1997,1999 Jonathan Leffler
-#	Copyright (C) 2000      Informix Software Inc
-#	Copyright (C) 2002      IBM
+#	Copyright 1997,1999 Jonathan Leffler
+#	Copyright 2000      Informix Software Inc
+#	Copyright 2002      IBM
 
 use DBD::Informix::TestHarness;
 

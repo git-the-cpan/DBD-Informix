@@ -1,7 +1,8 @@
 /*
- * @(#)$Id: link.h version /main/2 1998-10-29 19:30:58 $ 
+ * @(#)$Id: link.h,v 100.1 2002/02/08 22:49:31 jleffler Exp $ 
  *
- * Copyright (c) 1998 Jonathan Leffler
+ * Copyright 1998 Jonathan Leffler
+ * Copyright 2002 IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.

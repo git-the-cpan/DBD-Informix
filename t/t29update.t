@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t29update.t version /main/6 2000-01-27 16:20:49 $ 
+#	@(#)$Id: t29update.t,v 100.3 2002/02/08 22:50:47 jleffler Exp $ 
 #
 #	Simple test for UPDATE with attributes listed in execute call
 #
-#	Copyright (C) 1998-99 Jonathan Leffler
-#	Copyright (C) 2000    Informix Software Inc
-#	Copyright (C) 2002    IBM
+#	Copyright 1998-99 Jonathan Leffler
+#	Copyright 2000    Informix Software Inc
+#	Copyright 2002    IBM
 
 use DBD::Informix::TestHarness;
 

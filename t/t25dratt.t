@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t25dratt.t version /main/8 2000-01-27 16:20:44 $ 
+#	@(#)$Id: t25dratt.t,v 100.5 2002/02/12 18:12:38 jleffler Exp $ 
 #
 #	Driver Attribute test script for DBD::Informix
 #
-#	Portions Copyright (C) 1997-99 Jonathan Leffler
-#	Portions Copyright (C) 2000    Informix Software Inc
-#	Portions Copyright (C) 2002    IBM
+#	Copyright 1997-99 Jonathan Leffler
+#	Copyright 2000    Informix Software Inc
+#	Copyright 2002    IBM
 
 use DBD::Informix::TestHarness;
 
@@ -31,7 +31,6 @@ print "#     Product Version:       $drh->{ix_ProductVersion}\n";
 print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
 print "#     Active Connections:    $drh->{ix_ActiveConnections}\n";
 print "#     Current Connection:    $drh->{ix_CurrentConnection}\n";
-print "#     DBD::Informix Licence: $drh->{ix_InformixLicence}\n";
 print "# \n";
 
 &stmt_fail() unless $drh->{ix_ActiveConnections} == 0;

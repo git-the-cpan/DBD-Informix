@@ -1,10 +1,10 @@
-#   @(#)$Id: DBD/Informix/TestHarness.pm version /main/6 2000-02-25 10:40:27 $ 
+#   @(#)$Id: TestHarness.pm,v 100.12 2002/11/05 18:40:47 jleffler Exp $ 
 #
-#   Pure Perl Test Harness for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+#   Pure Perl Test Harness for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 #
-#   Portions Copyright 1996-99 Jonathan Leffler
-#   Portions Copyright 2000    Informix Software Inc
-#   Portions Copyright 2002    IBM
+#   Copyright 1996-99 Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002    IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -20,6 +20,7 @@
 		connect_noisily
 		connect_quietly
 		connect_to_test_database
+		date_as_string
 		is_shared_memory_connection
 		memory_leak_test
 		primary_connection
@@ -28,6 +29,7 @@
 		secondary_connection
 		select_some_data
 		select_zero_data
+		stmt_comment
 		stmt_err
 		stmt_fail
 		stmt_note
@@ -41,7 +43,7 @@
 	use Config;
 	require_version DBI 1.02;
 
-	$VERSION = "1.00.PC2";
+	$VERSION = "1.03.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
@@ -71,8 +73,13 @@
 		my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME};
 		my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD};
 
+		# Clear undefs
 		$dbpass = "" unless ($dbpass);
 		$dbuser = "" unless ($dbuser);
+		# Either both username and password are set or neither are set
+		$dbpass = "" unless ($dbuser && $dbpass);
+		$dbuser = "" unless ($dbuser && $dbpass);
+
 		# Respect $DBI_DBNAME since the esqltest code does.
 		# Problem reported by Paul Watson <paulw@wfsoftware.com>
 		$dbname = $ENV{DBI_DBNAME} if (!$dbname);
@@ -86,8 +93,21 @@
 		my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME2};
 		my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD2};
 
-		($dbname, $dbuser, $dbpass) = &primary_connection()
-			unless (defined $dbname);
+		if (!defined $dbname || !defined $dbuser || !defined $dbpass)
+		{
+			($dbname1, $dbuser1, $dbpass1) = &primary_connection();
+			$dbname = $dbname1 unless defined $dbname;
+			$dbuser = $dbuser1 unless defined $dbuser;
+			$dbpass = $dbpass1 unless defined $dbpass;
+		}
+
+		# Clear undefs
+		$dbpass = "" unless ($dbpass);
+		$dbuser = "" unless ($dbuser);
+		# Either both username and password are set or neither are set
+		$dbpass = "" unless ($dbuser && $dbpass);
+		$dbuser = "" unless ($dbuser && $dbpass);
+
 		return ($dbname, $dbuser, $dbpass);
 	}
 
@@ -127,6 +147,31 @@
 		# Override in test cases as necessary.
 		$dbh->{ChopBlanks} = 1;
 		$dbh;
+	}
+
+	sub date_as_string
+	{
+		my ($dbh, $mm, $dd, $yyyy) = @_;
+		my ($sth, $sel1, @row);
+
+		$dd = 10 unless defined $dd;
+		$mm = 20 unless defined $mm;
+		$yyyy = 1930 unless defined $yyyy;
+		# How to insert date values even when you cannot be bothered to sort out
+		# what DBDATE will do...  You cannot insert an MDY() expression directly.
+		# JL 2002-11-05: String concatenation is available in all supported
+		# servers.  Date value has to be returned as string - otherwise, you run
+		# into problems when server has DBDATE set to non-default value (such as
+		# "Y4MD-") and client side does not set DBDATE at all.  Problem reported
+		# previously by others, but this fix introduced in response to questions
+		# from Arlene Gelbolingo <Gelbolingo.Arlene@menlolog.com>.  Note that if
+		# none of the date components are specified, the returned string will be
+		# unambiguous.
+		$sel1 = qq% SELECT MDY($mm,$dd,$yyyy) || '' FROM "informix".SysTables WHERE Tabid = 1%;
+		&stmt_fail() unless ($sth = $dbh->prepare($sel1));
+		&stmt_fail() unless ($sth->execute);
+		&stmt_fail() unless (@row = $sth->fetchrow_array);
+		return $row[0];
 	}
 
 	sub print_dbinfo
@@ -206,6 +251,15 @@
 		exit(0);
 	}
 
+	sub stmt_comment
+	{
+		my($str) = @_;
+		$str =~ s/^[^#]/# $&/gmo;
+		$str =~ s/^$/#/gmo;
+		chomp $str;
+		stmt_note("$str\n");
+	}
+
 	sub stmt_note
 	{
 		print STDOUT @_;
@@ -215,7 +269,7 @@
 	{
 		my ($dbh, $stmt, $ok, $test) = @_;
 		$test = "Test" unless $test;
-		&stmt_note("# $test: do('$stmt'):\n");
+		&stmt_comment("$test: do('$stmt'):\n");
 		if ($dbh->do($stmt)) { &stmt_ok(0); }
 		elsif ($ok)          { &stmt_ok(1); }
 		else                 { &stmt_fail(); }
@@ -229,9 +283,10 @@
 
 	sub select_some_data
 	{
-		my ($dbh, $num, $stmt) = @_;
+		my ($dbh, $num, $stmt, $mapnulls) = @_;
 		my ($count, $st2) = (0);
 		my (@row);
+		my ($mapto) = (defined $mapnulls && $mapnulls) ? "<<NULL>>" : "";
 
 		&stmt_note("# $stmt\n");
 		# Check that there is some data
@@ -240,6 +295,7 @@
 		while  (@row = $st2->fetchrow)
 		{
 			my($pad, $i) = ("# ", 0);
+			@row = map { defined $_ ? $_ : $mapto } @row;
 			for ($i = 0; $i < @row; $i++)
 			{
 				&stmt_note("$pad$row[$i]");
@@ -257,7 +313,7 @@
 	# Check that there is no data
 	sub select_zero_data
 	{
-		&select_some_data($_[0], 0, $_[1]);
+		&select_some_data($_[0], 0, $_[1], 1);
 	}
 
 	# Check that both the ESQL/C and the database server are IUS-aware
@@ -280,9 +336,9 @@
 		print "#     Product Version:       $drh->{ix_ProductVersion}\n";
 		if ($drh->{ix_ProductVersion} < 900)
 		{
-		&stmt_note("1..0\n");
+			&stmt_note("1..0\n");
 			&stmt_note("# IUS data types are not supported by $drh->{ix_ProductName}\n");
-		exit(0);
+			exit(0);
 		}
 
 		my ($dbh, $sth, $numtabs);
@@ -295,10 +351,10 @@
 		&stmt_fail() unless (($numtabs) = $sth->fetchrow_array);
 		if ($numtabs < 40)
 		{
-		&stmt_note("1..0\n");
+			&stmt_note("1..0\n");
 			&stmt_note("# IUS data types are not supported by database server.\n");
-		$dbh->disconnect;
-		exit(0);
+			$dbh->disconnect;
+			exit(0);
 		}
 		&stmt_note("# IUS data types can be tested!\n");
 		return $dbh;
@@ -616,23 +672,61 @@ your use.
 
     &stmt_note("Some string or other");
 
+=head2 Using stmt_comment
+
+This routine writes a string (prepending hash symbols to line and
+appending a newline if necessary).
+This routine is used internally by stmt_test() but is also available
+for your use.
+
+    &stmt_comment("Some string or other");
+
+=head2 Using date_as_string
+
+This routine takes one to four arguments:
+
+    my($date) = &date_as_string($dbh [, $mm [, $dd [, $yyyy]]]);
+
+The first argument is the database handle.
+The optional second argument is the month number (1..12).
+The optional third argument is the day number (1..31).
+The optional fourth argument is the year number (1..9999).
+If the date values are omitted, then values from 1930-10-20 are
+substituted.
+No direct validation is done; if the conversion operations fail, stmt_fail
+is called.
+The date value is converted to a string by the database server, and the
+result returned to the calling function.
+The string can be enclosed in quotes and will be accepted by the server as
+a valid date.
+
+Note: the code assumes that the database server supports the '||' string
+concatenation operator; this is believed to be valid for OnLine 5.00 and
+above, and DBD::Informix does not support earlier server versions so it is
+immaterial that it won't work with them.
+
 =head2 Using select_some_data
 
-This routine takes three arguments:
+This routine takes four arguments:
 
-    &select_some_data($dbh, $nrows, $stmt);
+    &select_some_data($dbh, $nrows, $stmt, $mapnulls);
 
-The first argument is the database handle.  The second is the number of
-rows that should be returned.  The third is a string containing the SELECT
-statement to be executed.  It prints all the data returned with a '#'
-preceding the first field and two colons separating the fields.  It reports
-OK if the select succeeds and the correct number of rows are returned; it
-fails otherwise.
+The first argument is the database handle.
+The second is the number of rows that should be returned.
+The third is a string containing the SELECT statement to be executed.
+The fourth argument is optional but if defined and true, any nulls in
+the data will be mapped to the string '<<NULL>>'.
+Otherwise, they will most likely generate a warning when referenced.
+It routine prints all the data returned with a '#' preceding the first
+field and two colons separating the fields.
+It reports OK if the select succeeds and the correct number of rows
+are returned; it fails otherwise.
 
 =head2 Using select_zero_data
 
-This routine takes a database handle and a SELECT statement and invokes
-&select_some_data with 0 rows expected.
+This routine takes a database handle and a SELECT statement and
+invokes &select_some_data with 0 rows expected and null mapping
+enabled.
 
     &select_zero_data($dbh, $stmt);
 
@@ -732,7 +826,10 @@ Jonathan Leffler (johnl@informix.com) # obsolete email address
 Jonathan Leffler (j.leffler@acm.org)
 
 =item *
-Jonathan Leffler (jleffler@informix.com)
+Jonathan Leffler (jleffler@informix.com) # obsolete email address
+
+=item *
+Jonathan Leffler (jleffler@us.ibm.com)
 
 =back
 

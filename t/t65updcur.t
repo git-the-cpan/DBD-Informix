@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t65updcur.t version /main/10 2000-01-27 16:21:32 $ 
+#	@(#)$Id: t65updcur.t,v 100.4 2002/11/05 18:40:58 jleffler Exp $ 
 #
 #	Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
 #
-#	Copyright (C) 1997,1999 Jonathan Leffler
-#	Copyright (C) 2000      Informix Software Inc
-#	Copyright (C) 2002      IBM
+#	Copyright 1997,1999 Jonathan Leffler
+#	Copyright 2000      Informix Software Inc
+#	Copyright 2002      IBM
 
 use DBD::Informix::TestHarness;
 
@@ -29,15 +29,7 @@ CREATE TEMP TABLE $table
 )
 };
 
-# How to insert date values even when you can't be bothered to sort out
-# what DBDATE will do...  You cannot insert an MDY() expression directly.
-$sel1 = "SELECT MDY(12,25,1996) FROM 'informix'.SysTables WHERE Tabid = 1";
-&stmt_fail() unless ($st1 = $dbh->prepare($sel1));
-&stmt_fail() unless ($st1->execute);
-&stmt_fail() unless (@row = $st1->fetchrow);
-undef $st1;
-
-$date = $row[0];
+$date = &date_as_string($dbh, 12, 25, 1996);
 $tag1  = $dbh->quote('Mornington Crescent');
 $insert01 = qq{INSERT INTO $table
 VALUES(0, $tag1, '$date', CURRENT YEAR TO FRACTION(5))};

@@ -1,12 +1,13 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t50update.t version /main/8 2000-02-11 10:44:27 $
+#	@(#)$Id: t50update.t,v 100.5 2002/02/08 22:50:57 jleffler Exp $
 #
-# Portions Copyright 1998-99 Jonathan Leffler
-# Portions Copyright 2000    Informix Software Inc
-# Portions Copyright 2002    IBM
+#	Test for UPDATE on zero rows in MODE ANSI database.
 #
-# Test for UPDATE on zero rows in MODE ANSI database.
+#	Copyright 1998-99 Jonathan Leffler
+#	Copyright 2000    Informix Software Inc
+#	Copyright 2002    IBM
+#
 # Note that database statements cannot be used with an explicit connection
 # with ESQL/C 6.0x and up.
 

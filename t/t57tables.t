@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t57tables.t version /main/5 2000-01-27 16:21:26 $ 
+#	@(#)$Id: t57tables.t,v 100.3 2002/02/08 22:51:02 jleffler Exp $ 
 #
 #	Test tables
 #
-#	Copyright (C) 1999 Jonathan Leffler
-#	Copyright (C) 2000 Informix Software Inc
-#	Copyright (C) 2002 IBM
+#	Copyright 1999 Jonathan Leffler
+#	Copyright 2000 Informix Software Inc
+#	Copyright 2002 IBM
 
 use DBD::Informix::TestHarness;
 use strict;

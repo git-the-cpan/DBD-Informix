@@ -1,12 +1,12 @@
 /*
- * @(#)$Id: esqlc_v6.ec version /main/26 2000-02-24 15:51:57 $ 
+ * @(#)$Id: esqlc_v6.ec,v 100.5 2002/02/08 22:49:16 jleffler Exp $ 
  *
  * IBM Informix Database Driver for Perl (DBD::Informix)
  * Connection Management for ESQL/C Version 6.0x and later
  *
- * Portions Copyright 1996-98 Jonathan Leffler
- * Portions Copyright 2000    Informix Software Inc
- * Portions Copyright 2002    IBM
+ * Copyright 1996-98 Jonathan Leffler
+ * Copyright 2000    Informix Software Inc
+ * Copyright 2002    IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -19,7 +19,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v6.ec version /main/26 2000-02-24 15:51:57 $";
+static const char rcs[] = "@(#)$Id: esqlc_v6.ec,v 100.5 2002/02/08 22:49:16 jleffler Exp $";
 #endif
 
 /* ================================================================= */

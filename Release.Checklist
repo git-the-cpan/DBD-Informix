@@ -9,7 +9,7 @@ Checklist for Releasing a New Version of DBD::Informix
     - Correct pre-requisite version of Perl
     - Correct pre-requisite version of DBI
     - Correct latest version of DBI
-3.  Informix.pm.PL
+3.  Informix.pm
     - Correct version number
     - Correct pre-requisite version of DBI
 4.  ChangeLog
@@ -21,12 +21,7 @@ Checklist for Releasing a New Version of DBD::Informix
     - Correct information
     - Correct pre-requisites
     - Correct cross-references
-7.  MD5 Check Sums
-    - Checkout MD5-DIGEST
-    - Create NMD (version stamped code)
-    - Run md5.create in NMD
-    - Check in MD5-DIGEST
-8.  QA Tests
+7.  QA Tests
     - Run some tests specifying username and password via
       DBD_INFORMIX_USERNAME and DBD_INFORMIX_PASSWORD environment
       variables.
@@ -36,13 +31,20 @@ Checklist for Releasing a New Version of DBD::Informix
       Note that this only works reliably if you're using the same compiler
       that the c4gl script expects to use.  For example, on Solaris 7,
       using Perl built with GCC fails because the '-K PIC' options passed
-      by c4gl are not understood by GCC.
+      by c4gl are not understood by GCC.  You can fix this with the two
+	  environment variables:
+	  DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX
+	  DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX
     - Ensure that username and password are not always the same to spot
       test failures better.
+    - Run regression tests from regression sub-directory.
 
 Note: with an Atria-based CM system, you can probably simplify some of
 the versioning stuff.  In fact, we could probably do so with RCS, too.
 
+Much of this is automated by the NewRelease script, but not all of it
+can be automated by the NewRelease script.
+
 --
 
-@(#)$Id: Release.Checklist version /main/5 2000-02-11 11:37:14 $
+@(#)$Id: Release.Checklist,v 100.4 2002/11/19 19:37:42 jleffler Exp $

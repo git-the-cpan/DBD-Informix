@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: InformixTechSupport version /main/5 2000-02-01 16:59:48 $
+#   @(#)$Id: InformixTechSupport,v 100.9 2002/11/20 01:24:42 jleffler Exp $
 #
-#   Tech Support Tool for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+#   Tech Support Tool for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 #
-#   Portions Copyright (c) 1999 Jonathan Leffler
-#   Portions Copyright (c) 2000 Informix Software Inc
-#	Portions Copyright (C) 2002 IBM
+#   Copyright 1999 Jonathan Leffler
+#   Copyright 2000 Informix Software Inc
+#   Copyright 2002 IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -15,11 +15,13 @@ use strict;
 use Config;
 use DBD::Informix::TechSupport;
 
-use vars qw($opt_l $opt_b $opt_w $opt_v $opt_V);
+use vars qw($opt_l $opt_b $opt_w $opt_v $opt_V $usage);
 use Getopt::Std;
 
-print STDERR "Usage: $0 [-b bugtype | -l licence | -w | -V | -v product]\n" and exit 1
-	if (getopts('b:l:v:wV') == 0);
+$usage = "Usage: $0 [-b bugtype | -w | -V | -v product]\n";
+
+print STDERR $usage and exit 1
+	if ($#ARGV < 0 || getopts('b:v:wV') == 0);
 
 if ($opt_V)
 {
@@ -28,10 +30,6 @@ if ($opt_V)
 elsif ($opt_v)
 {
 	&print_versions($opt_v);
-}
-elsif ($opt_l)
-{
-	&set_licence_number($opt_l);
 }
 elsif ($opt_b)
 {
@@ -46,6 +44,7 @@ elsif ($opt_w)
 else
 {
 	print STDERR "$0: misunderstood your command/options @ARGV\n";
+	print STDERR "$usage";
 	exit 1;
 }
 
@@ -55,15 +54,13 @@ __END__
 
 =head1 NAME
 
-InformixTechSupport - Technical Support tool for IBM Informix Database Driver for Perl
+InformixTechSupport - Technical Support tool for Informix Database Driver for Perl
 
 =head1 SYNOPSIS
 
 C<InformixTechSupport -V>
 
-C<InformixTechSupport -v [ Perl | DBI | DBD::Informix | ESQL/C | Licence ]>
-
-C<InformixTechSupport -l new#licence>
+C<InformixTechSupport -v [ Perl | DBI | DBD::Informix | ESQL/C ]>
 
 C<InformixTechSupport -b [ABCD] [test ...]>
 
@@ -72,7 +69,7 @@ C<InformixTechSupport -w>
 =head1 DESCRIPTION
 
 The InformixTechSupport script is used for a variety of purposes
-related to technical support of IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01).
+related to technical support of Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21).
 
 =head2 CHECKING SOFTWARE VERSIONS
 
@@ -104,26 +101,9 @@ DBD::Informix
 
 ESQL/C
 
-=item *
-
-Licence
-
 =back
 
 Other component names are silently ignored.
-If you do not have a supported licence number, it will not be reported.
-
-=head2 STORING A NEW LICENCE NUMBER
-
-Use C<InformixTechSupport -l new#licence> to stamp your software with
-the licence number you are given when you buy a support contract from
-Informix Software Inc.
-This number will then be reported when you make a bug report (see
-below) or list all the versions (see above).
-
-You must be able to write in the directory where the Informix.pm file
-was installed to stamp the software, which will often require root
-privileges.
 
 =head2 CREATING A BUG REPORT
 
@@ -142,19 +122,19 @@ with your bug report.
 
 =head2 CREATING A REPORT THAT IT WORKS
 
-Use C<InformixTechSupport -w> to create a report that IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) works.
+Use C<InformixTechSupport -w> to create a report that Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) works.
 You may need to edit the output; you may certainly add comments in the
 'Optional comments' section.
 The output is written to standard output only.
 It is never sent anywhere unless you actually choose to send it.
 
 If you do send the report, please put "DBD::Informix - It Works" in the
-subject line and send the report to C<dbd-informix@informix.com> (up to
-2002-06-30) or to C<dbd-informix@us.ibm.com> (from 2002-07-01, though
-you may try this address now if you wish).
+subject line and send the report to C<dbdinfmx@us.ibm.com> (this is a
+change of email address from the instructions in the 1.00.PC2 version of
+DBD::Informix).
 
 =head1 AUTHOR
 
-Jonathan Leffler <jleffler@informix.com>
+Jonathan Leffler <jleffler@us.ibm.com>
 
 =cut

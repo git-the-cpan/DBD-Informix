@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: ixblob.h,v $
-@(#)Version:         $Revision: 50.3 $
-@(#)Last changed:    $Date: 1998/04/09 21:48:10 $
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) Jonathan Leffler 1997-98
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1997-98 Jonathan Leffler
+@(#)Copyright:       2002    IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char ixblob_h[] = "@(#)$Id: ixblob.h version /main/4 1998-04-09 21:48:10 $";
+static const char ixblob_h[] = "@(#)$Id: ixblob.h,v 100.1 2002/02/08 22:49:28 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

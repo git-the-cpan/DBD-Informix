@@ -1,18 +1,16 @@
 /*
-@(#)File:            $RCSfile: sqltype.ec,v $
-@(#)Version:         $Revision: 2.2 $
-@(#)Last changed:    $Date: 1998/11/17 21:30:43 $
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1988-1993,1995-98
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1988-1993,1995-98 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002              IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
 /*LINTLIBRARY*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltype.ec version /main/16 1998-11-17 21:30:43 $";
+static const char rcs[] = "@(#)$Id: sqltype.ec,v 100.1 2002/02/08 22:49:39 jleffler Exp $";
 #endif
 
 #include <string.h>

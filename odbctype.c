@@ -1,11 +1,9 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil -*-
-@(#)File:            $RCSfile: odbctype.c,v $
-@(#)Version:         $Revision: 61.3 $
-@(#)Last changed:    $Date: 1998/10/27 20:58:37 $
+/*
 @(#)Purpose:         Map Informix SQL Types to ODBC Types
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1997-98
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1997-98 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002    IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -49,7 +47,7 @@ typedef enum IxSQLType
 } IxSQLType;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: odbctype.c version /main/10 2000-02-08 15:23:56 $";
+static const char rcs[] = "@(#)$Id: odbctype.c,v 100.2 2002/02/08 22:49:35 jleffler Exp $";
 #endif
 
 /* Map Informix DATETIME types to equivalent ODBC types */

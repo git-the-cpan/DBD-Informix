@@ -1,10 +1,10 @@
 /*
- * @(#)$Id: dbdimp.h version /main/57 2000-02-25 10:02:32 $ 
+ * @(#)$Id: dbdimp.h,v 100.8 2002/11/18 23:22:00 jleffler Exp $ 
  *
- * Portions Copyright 1994-95 Tim Bunce
- * Portions Copyright 1996-99 Jonathan Leffler
- * Portions Copyright 2000    Informix Software Inc
- * Portions Copyright 2002    IBM
+ * Copyright 1994-95 Tim Bunce
+ * Copyright 1996-99 Jonathan Leffler
+ * Copyright 2000    Informix Software Inc
+ * Copyright 2001-02 IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -50,10 +50,18 @@
 #define NAMESIZE 19				/* 18 character name plus '\0' */
 #define DEFAULT_DATABASE	".DEFAULT."
 
+/*
+** IUS BLOB and CLOB types need special treatment, but are 
+** of type SQLUDTFIXED in the Informix system catalogue.
+** Hence invent a pair of numbers to represent them.
+*/
+#define DBD_IX_SQLBLOB	(1000+SQLBYTES)
+#define DBD_IX_SQLCLOB	(1000+SQLTEXT)
+
 /* Different states for a statement */
 enum State
 {
-	Unused, Prepared, Allocated, Described, Declared, Opened, NoMoreData, Finished
+	Unused, Prepared, Allocated, Described, Declared, Opened, NoMoreData
 };
 
 typedef enum State State;		/* Cursor/Statement states */
@@ -82,6 +90,7 @@ struct imp_dbh_st
 	Boolean         is_modeansi;    /* Is MODE ANSI Database */
 	Boolean         is_loggeddb;    /* Has transaction log */
 	Boolean         is_txactive;    /* Is inside transaction */
+	Boolean         no_replication;	/* Use BEGIN WORK WITHOUT REPLICATION? */
 	Boolean         has_procs;      /* Has stored procedures (not 8.[012]x) */
 	Boolean         has_blobs;      /* Has blobs (not SE nor 8.[012]x) */
 	int             srvr_vrsn;      /* Server version number (eg 510 or 731) */
@@ -89,7 +98,6 @@ struct imp_dbh_st
 	Sqlca           ix_sqlca;       /* Last SQLCA record for connection */
 	Link            chain;          /* Link in list of connections */
 	Link            head;           /* Head of list of statements */
-	imp_drh_t      *drh;            /* Driver handle for connection */
 };
 
 /* Define sth implementor data structure */
@@ -111,6 +119,7 @@ struct imp_sth_st
 	int             n_rows;     /* Number of rows processed */
 	Boolean         is_holdcursor;  /* Using a hold Cursor */
 	Boolean         is_scrollcursor;    /* Using a scroll Cursor */
+	Boolean         is_insertcursor;    /* Using a insert Cursor */
 	imp_dbh_t      *dbh;        /* Database handle for statement */
 	Link            chain;      /* Link in list of statements */
 };
@@ -134,7 +143,7 @@ extern SV *dbd_ix_db_FETCH_attrib(SV *, imp_dbh_t *, SV *);
 extern int dbd_ix_db_STORE_attrib(SV *, imp_dbh_t *, SV *, SV *);
 extern int dbd_ix_db_commit(SV *, imp_dbh_t *);
 extern int dbd_ix_db_disconnect(SV *, imp_dbh_t *imp_dbh);
-extern int dbd_ix_db_login(SV *, imp_dbh_t *, char *, char *, char *);
+extern int dbd_ix_db_connect(SV *, imp_dbh_t *, char *, char *, char *, SV *);
 extern int dbd_ix_db_rollback(SV *, imp_dbh_t *imp_dbh);
 extern void dbd_ix_db_destroy(SV *, imp_dbh_t *imp_dbh);
 

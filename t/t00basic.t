@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t00basic.t version /main/31 2000-01-27 16:20:17 $ 
+#	@(#)$Id: t00basic.t,v 100.7 2002/02/12 18:12:36 jleffler Exp $ 
 #
 #	Initial test script for DBD::Informix
 #
-#	Portions Copyright (C) 1996-99 Jonathan Leffler
-#	Portions Copyright (C) 2000    Informix Software
-#	Portions Copyright (C) 2002    IBM
+# Copyright 1996-99 Jonathan Leffler
+# Copyright 2000    Informix Software
+# Copyright 2002    IBM
 
 use DBD::Informix::TestHarness;
 
@@ -29,7 +29,6 @@ print "#     Attribution:            $dbh->{Driver}->{Attribution}\n";
 #     driver requests to dbd_ix_dr_FETCH_attrib, because there isn't
 #     an easy way to get the information otherwise.
 print  "# Informix Driver Handle Information\n";
-print  "#     DBD::Informix Licence: $dbh->{Driver}->{ix_InformixLicence}\n";
 print  "#     Product:               $dbh->{ix_ProductName}\n";
 print  "#     Product Version:       $dbh->{ix_ProductVersion}\n";
 print  "#     Server  Version:       $dbh->{ix_ServerVersion}\n";

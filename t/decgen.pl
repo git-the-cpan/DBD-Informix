@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#       @(#)$Id: t/decgen.pl version /main/5 2000-02-10 11:51:15 $
+#	@(#)$Id: decgen.pl,v 100.5 2002/02/08 22:50:29 jleffler Exp $
 #
-#       Create exhaustive list of DECIMAL & MONEY types for DBD::Informix
+#	Create exhaustive list of DECIMAL & MONEY types for DBD::Informix
 #
-# Portions Copyright 1997 Jonathan Leffler
-# Portions Copyright 2000 Informix Software Inc
-# Portions Copyright 2002 IBM
+# Copyright 1997 Jonathan Leffler
+# Copyright 2000 Informix Software Inc
+# Copyright 2002 IBM
 
 foreach $type ('DECIMAL', 'MONEY')
 {

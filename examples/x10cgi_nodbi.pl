@@ -1,9 +1,13 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: examples/x10cgi_nodbi.pl version /main/3 1998-11-17 00:28:10 $
+# @(#)$Id: x10cgi_nodbi.pl,v 100.1 2002/02/08 22:50:13 jleffler Exp $
 #
 # Simple example of self-populating (self-regenerating) CGI Form
 # Cribbed from CGI.pm documentation.
+#
+# Copyright 1998 Jonathan Leffler
+# Copyright 2000 Informix Software Inc
+# Copyright 2002 IBM
 
 use strict;
 use CGI qw/:standard/;

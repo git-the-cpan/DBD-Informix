@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t44trans.t version /main/13 2000-01-27 16:21:12 $ 
+#	@(#)$Id: t44txansi.t,v 100.5 2002/11/05 18:40:58 jleffler Exp $ 
 #
 #	Test AutoCommit On for DBD::Informix
 #
-#	Copyright (C) 1996-97,1999 Jonathan Leffler
-#	Copyright (C) 2000         Informix Software Inc
-#	Copyright (C) 2002         IBM
-
+#	Copyright 1996-97,1999 Jonathan Leffler
+#	Copyright 2000         Informix Software Inc
+#	Copyright 2002         IBM
+#
 # AutoCommit On => Each statement is a self-contained transaction
 # Ensure MODE ANSI databases use cursors WITH HOLD
 
@@ -18,9 +18,7 @@ $dbh = &connect_to_test_database();
 
 if (!$dbh->{ix_ModeAnsiDatabase})
 {
-	&stmt_note("1..0\n");
-	&stmt_note("# This test is for MODE ANSI databases only\n");
-	&stmt_note("# Database '$dbh->{Name}' is not a MODE ANSI database\n");
+	&stmt_note("1..0 # Skip: MODE ANSI test - database '$dbh->{Name}' is not MODE ANSI\n");
 	$dbh->disconnect;
 	exit(0);
 }
@@ -47,18 +45,7 @@ CREATE TEMP TABLE $trans01
 )
 };
 
-# How to insert date values even when you can't be bothered to sort out
-# what DBDATE will do...  You cannot insert an MDY() expression directly.
-my $date;
-{
-my $sel1 = "SELECT MDY(12,25,1996) FROM 'informix'.SysTables WHERE Tabid = 1";
-my @row;
-my $st1;
-&stmt_fail() unless ($st1 = $dbh->prepare($sel1));
-&stmt_fail() unless ($st1->execute);
-&stmt_fail() unless (@row = $st1->fetchrow);
-$date = $row[0];
-}
+my $date = &date_as_string($dbh, 12, 25, 1996);
 
 # Confirm that table exists but is empty.
 select_zero_data $dbh, $select;

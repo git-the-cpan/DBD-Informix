@@ -1,9 +1,10 @@
 /*
- *	@(#)$Id: Informix.h version /main/9 1999-12-23 18:42:00 $ 
+ *	@(#)$Id: Informix.h,v 100.1 2002/02/08 22:48:45 jleffler Exp $ 
  *
- * Portions Copyright (c) 1994,1995 Tim Bunce
- * Portions Copyright (c) 1995,1996 Alligator Descartes
- * Portions Copyright (c) 1996,1997,1999 Jonathan Leffler
+ * Copyright 1994-95      Tim Bunce
+ * Copyright 1995-96      Alligator Descartes
+ * Copyright 1996-97,1999 Jonathan Leffler
+ * Copyright 2002         IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.

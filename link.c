@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: link.c,v $
-@(#)Version:         $Revision: 61.1 $
-@(#)Last changed:    $Date: 1998/10/29 19:30:58 $
 @(#)Purpose:         Specialized doubly-linked list management routines
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) Jonathan Leffler 1996-98
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1996-98 Jonathan Leffler
+@(#)Copyright:       2002    IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -24,7 +22,7 @@
 #endif /* DBD_IX_DEBUG_LINK */
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: link.c version /main/9 1998-10-29 19:30:58 $";
+static const char rcs[] = "@(#)$Id: link.c,v 100.1 2002/02/08 22:49:30 jleffler Exp $";
 #endif
 
 #ifdef DBD_IX_DEBUG_LINK

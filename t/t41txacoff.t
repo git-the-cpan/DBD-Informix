@@ -1,15 +1,15 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t41trans.t version /main/16 2000-01-27 16:21:03 $ 
+#	@(#)$Id: t41txacoff.t,v 100.5 2002/11/05 18:40:58 jleffler Exp $ 
 #
 #	Test Transactions with AutoCommit Off for DBD::Informix
 #
-#   Simple transaction testing setting AutoCommit Off.
-#   Not significantly different from the testing in transact03.t.
+#	Copyright 1996-97,1999 Jonathan Leffler
+#	Copyright 2000         Informix Software Inc
+#	Copyright 2002         IBM
 #
-#	Copyright (C) 1996-97,1999 Jonathan Leffler
-#	Copyright (C) 2000         Informix Software Inc
-#	Copyright (C) 2002         IBM
+# Simple transaction testing setting AutoCommit Off.
+# Not significantly different from the testing in t43trans.t.
 
 use DBD::Informix::TestHarness;
 
@@ -18,8 +18,7 @@ $dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });
 
 if ($dbh->{ix_LoggedDatabase} == 0)
 {
-	&stmt_note("1..0\n");
-	&stmt_note("# No transactions on unlogged database '$dbh->{Name}'\n");
+	&stmt_note("1..0 # Skip: No transactions on unlogged database '$dbh->{Name}'\n");
 	$dbh->disconnect;
 	exit(0);
 }
@@ -74,20 +73,12 @@ CREATE TEMP TABLE $trans01
 stmt_note "# InTransaction = $dbh->{ix_InTransaction}\n";
 stmt_fail unless $dbh->{ix_InTransaction};
 
-# How to insert date values even when you can't be bothered to sort out
-# what DBDATE will do...  You cannot insert an MDY() expression directly.
-$sel1 = "SELECT MDY(12,25,1996) FROM 'informix'.SysTables WHERE Tabid = 1";
-stmt_fail unless ($st1 = $dbh->prepare($sel1));
-stmt_fail unless ($st1->execute);
-stmt_fail unless (@row = $st1->fetchrow);
-stmt_fail unless ($st1->finish);
-undef $st1;
+$date = &date_as_string($dbh, 12, 25, 1996);
 
 stmt_fail unless ($dbh->commit());
 test_conn_tx($dbh);
 
 # This transaction will be rolled back.
-$date = $row[0];
 $tag1  = 'Elfdom';
 $insert01 = qq{INSERT INTO $trans01
 VALUES(0, '$tag1', '$date', CURRENT YEAR TO FRACTION(5))};

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t55mdata.t version /main/9 2000-01-28 16:25:58 $ 
+#	@(#)$Id: t55mdata.t,v 100.4 2002/02/08 22:51:00 jleffler Exp $ 
 #
-#   Test MetaData functions _tables, _columns for DBD::Informix
+#	Test MetaData functions _tables, _columns for DBD::Informix
 #
-#   Portions Copyright 1997,1999 Jonathan Leffler
-#   Portions Copyright 2000      Informix Software Inc
-#	Portions Copyright 2002      IBM
+#	Copyright 1997,1999 Jonathan Leffler
+#	Copyright 2000      Informix Software Inc
+#	Copyright 2002      IBM
 
 use DBD::Informix::TestHarness;
 

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t56tabinfo.t version /main/5 2000-01-27 16:21:23 $ 
+#	@(#)$Id: t56tabinfo.t,v 100.3 2002/02/08 22:51:01 jleffler Exp $ 
 #
 #	Test table_info
 #
-#	Copyright (C) 1999 Jonathan Leffler
-#	Copyright (C) 2000 Informix Software Inc
-#	Copyright (C) 2002 IBM
+#	Copyright 1999 Jonathan Leffler
+#	Copyright 2000 Informix Software Inc
+#	Copyright 2002 IBM
 
 use DBD::Informix::TestHarness;
 use strict;

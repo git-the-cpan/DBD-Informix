@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t99clean.t version /main/7 2000-01-27 16:22:03 $ 
+#	@(#)$Id: t99clean.t,v 100.3 2002/02/08 22:51:15 jleffler Exp $ 
 #
 #	Clean up DBD::Informix testing debris from the test database
-#   NB: Running with AutoCommit on.
+#	NB: Running with AutoCommit on.
 #
-#	Copyright (C) 1998-99 Jonathan Leffler
-#	Copyright (C) 2000    Informix Software Inc
-#	Copyright (C) 2002    IBM
+#	Copyright 1998-99 Jonathan Leffler
+#	Copyright 2000    Informix Software Inc
+#	Copyright 2002    IBM
 
 use DBD::Informix::TestHarness;
 

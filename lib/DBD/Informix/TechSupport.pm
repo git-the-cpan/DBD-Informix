@@ -1,9 +1,9 @@
-#   @(#)$Id: DBD/Informix/TechSupport.pm version /main/7 2000-02-23 13:09:56 $
+#   @(#)$Id: TechSupport.pm,v 100.13 2002/11/20 01:12:08 jleffler Exp $
 #
-#	Technical Support Tools for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+#	Technical Support Tools for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 #
-#   Copyright 2000 Informix Software Inc
-#   Copyright 2002 IBM
+#   Copyright 2000-01 Informix Software Inc
+#   Copyright 2002    IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -13,9 +13,9 @@
 
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(print_versions set_licence_number bug_report it_works);
+	@EXPORT = qw(print_versions bug_report it_works);
 
-	$VERSION = "1.00.PC2";
+	$VERSION = "1.03.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -24,62 +24,18 @@
 	use DBD::Informix::Configuration;
 	use DBD::Informix::TestHarness;
 
-	sub set_licence_number
-	{
-		my ($opt_l) = @_;
-
-		# Map @ to # for convenience of make, and vi.
-		$opt_l =~ s%^([A-Z][A-Z][A-Z])@([A-Z]\d\d\d\d\d\d)$%$1#$2%;
-		print STDERR "$0: invalid licence number $opt_l\n" and exit 1
-			unless $opt_l =~ m%^[A-Z][A-Z][A-Z]#[A-Z]\d\d\d\d\d\d$%;
-
-		my $PM_IFILE = qq[$Config{installsitearch}/DBD/Informix.pm];
-
-		print STDERR "$0: file $PM_IFILE missing ($@)\n" and exit 1
-			unless (-f $PM_IFILE);
-
-		my $PM_NFILE = "$PM_IFILE.tmp";
-
-		open(PM_OLD, "<$PM_IFILE") or die "$0: $@\n";
-		open(PM_NEW, ">$PM_NFILE") or die "$0: $@\n";
-
-		while (<PM_OLD>)
-		{
-			s/\$INFORMIX_LICENCE\s*=\s*".*";/\$INFORMIX_LICENCE = "$opt_l";/;
-			print PM_NEW $_;
-		}
-
-		close PM_OLD;
-		close PM_NEW;
-
-		my $PM_OFILE = "$PM_IFILE.old";
-
-		unlink $PM_OFILE or die "$0: $@\n"
-			if -f $PM_OFILE;
-		rename $PM_IFILE, $PM_OFILE or die "$0: $@\n";
-		rename $PM_NFILE, $PM_IFILE or die "$0: $@\n";
-	}
-
-	# Print version numbers for one or more of Perl, DBI, DBD::Informix or
-	# ESQL/C, or the DBD::Informix licence number
+	# Print version numbers for Perl, DBI, DBD::Informix or ESQL/C
 	sub print_versions
 	{
 		my ($items) = @_;
+		$items = "Perl DBI DBD::Informix ESQL/C" if ! defined($items) || $items eq "";
 
 		my $drh = DBI->install_driver('Informix');
 		print "Perl Version $]\n" if ($items =~ m%\bperl\b%i);
 		print "DBI Version $DBI::VERSION\n" if ($items =~ m%\bDBI\b%i);
 		print "DBD::Informix Version $drh->{Version}\n" if ($items =~ m%\bDBD::Informix\b%i);
 		print "$drh->{ix_ProductName}\n" if ($items =~ m%\bESQL/C\b%i);
-		if ($items =~ m%\bLicence\b%i)
-		{
-			# Should only be null with pre-1.00 versions of DBD::Informix
-			my $licence = $drh->{ix_InformixLicence};
-			$licence = "**unknown**" unless $licence;
-			print "DBD::Informix Licence Number $licence\n";
-		}
 	}
-
 
 	# Produce a Bug Report
 	# * By default (no arguments), produces just the most basic bug
@@ -317,14 +273,14 @@ use DBD::Informix::TechSupport;
 =head1 DESCRIPTION
 
 This document describes how to obtain technical support for
-IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 (which is also known as DBD::Informix).
 It also describes how to use the Perl module to report information to
 any of technical support channels.
 
 =head1 INFORMIX TECHNICAL SUPPORT
 
-IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 is a supported product of Informix Software, Inc.,
 provided that you are using a supported configuration.
 
@@ -336,14 +292,17 @@ working day (California time).
 
 =head1 OTHER SUPPORT
 
-You can also submit questions by subscribing to the dbi-users@perl.org
-mailing list (use http//dbi.perl.org/ to sign up), and email your
-questions to dbi-users@perl.org.  This may provide quicker support,
-especially over holiday weekends.
+The mailing list for Perl DBI and DBD::Informix is dbi-users@perl.org.
+For information on how to subscribe to (and unsubscribe from) the dbi-users
+mailing list, send a message to dbi-users-help@perl.org.
+You could also consider using the news groups comp.lang.perl.modules (for
+Perl and DBI) and comp.databases.informix (for DBD::Informix).
+These channels may provide quicker support, especially over holiday
+weekends.
 
 =head1 CONFIGURATIONS SUPPORTED BY INFORMIX
 
-Informix Technical Support will only support IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+Informix Technical Support will only support Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 if you are using certain supported versions of ESQL/C or Client SDK:
 
 =over 2
@@ -362,12 +321,11 @@ Client SDK Version 2.30 (ESQL/C 9.21) or later
 
 =back
 
-You may use Perl Version 5.004_04, but you should be using Perl
-Version 5.005_03 or a later, stable version of Perl.
-Note that Perl Version 5.005_50 and above are unstable development
-versions of Perl.
+You may use Perl Version 5.004_04 as long as your version of DBI is
+1.20 or earlier, but you should be using at least Perl
+Version 5.005_03 or a later, stable version of Perl (for example, Version 5.8.0).
 
-You must be using DBI Version 1.13 or later.
+You must be using DBI Version 1.14 or later.
 
 If you are using some other version of ESQL/C, or some other version
 of Perl or DBI, you must use the other support channels documented
@@ -375,7 +333,7 @@ above.
 
 =head1 OTHER CONFIGURATIONS WHICH PROBABLY WORK
 
-IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) is believed to work with all versions of ESQL/C and
+Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) is believed to work with all versions of ESQL/C and
 ClientSDK from ESQL/C 5.00.UC1 upwards.
 However, you may run into problems with shared libraries if you use
 versions of ESQL/C which are not explicitly supported.
@@ -431,7 +389,7 @@ builds it (classes B, C, D) and tests it (classes C, D).
 =head2 Using it_works
 
 This generates the information needed for a report that you have managed
-to get IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) working.
+to get Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) working.
 
 	it_works;
 
@@ -440,7 +398,7 @@ to get IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) worki
 This function is called with a string containing the names of the
 items for which you need the version.
 
-	print_versions("Perl DBI DBD::Informix ESQL/C Licence");
+	print_versions("Perl DBI DBD::Informix ESQL/C");
 
 The valid items are:
 
@@ -462,25 +420,7 @@ DBD::Informix
 
 ESQL/C
 
-=item *
-
-Licence
-
 =back
-
-=head2 Using set_licence_number
-
-By default, the licence number associated with the product will is
-ACN#J334912, and this does not have any support.
-If you buy support for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01), then you will be given a new licence
-number and you should install that number in the software so that bug
-reports will contain a valid licence number.
-Normally, you'd do this with the InformixTechSupport script, but that
-uses the set_licence_number method.
-The set_licence_number method can be used by a suitably privileged
-user to record this new number:
-
-	set_licence_number($new_number);
 
 =head1 AUTHOR
 

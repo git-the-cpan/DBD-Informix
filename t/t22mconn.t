@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t22mconn.t version /main/22 2000-02-24 15:50:50 $ 
+#	@(#)$Id: t22mconn.t,v 100.6 2002/10/19 00:27:50 jleffler Exp $ 
 #
 #	Test DISCONNECT ALL for DBD::Informix
 #
-#	Portions Copyright 1996-99 Jonathan Leffler
-#	Portions Copyright 2000    Informix Software Inc
-#	Portions Copyright 2002    IBM
+#	Copyright 1996-99 Jonathan Leffler
+#	Copyright 2000    Informix Software Inc
+#	Copyright 2002    IBM
 
 use DBD::Informix::TestHarness;
 
@@ -16,8 +16,7 @@ my ($dbase2, $user2, $pass2) = &secondary_connection();
 if (&is_shared_memory_connection($dbase1) &&
 	&is_shared_memory_connection($dbase2))
 {
-	&stmt_note("1..0\n");
-	&stmt_note("# Two shared memory connections - test skipped\n");
+	&stmt_note("1..0 # Skip: Two shared memory connections - multi-connection test skipped\n");
 	exit(0);
 }
 
@@ -34,8 +33,7 @@ print "# \n";
 
 if ($dbh1->{ix_MultipleConnections} == 0)
 {
-	&stmt_note("1..0\n");
-	&stmt_note("# Multiple connections are not supported\n");
+	&stmt_note("1..0 # Skip: Multiple connections are not supported\n");
 	&all_ok();
 }
 

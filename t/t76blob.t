@@ -1,14 +1,13 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 #
-# Copyright (C) 1999 Bibliotech Ltd., 631-633 Fulham Rd., London SW6 5UQ.
-# Copyright (C) 2000 Informix Software Inc
-# Copyright (C) 2002 IBM
+#	@(#)$Id: t76blob.t,v 100.4 2002/10/19 00:27:50 jleffler Exp $
 #
-# Amended to fit into DBD::InformixTest harness: J Leffler
+#	Reproduce 451 errors with Perl.
 #
-# Reproduce 451 errors with Perl.
-#
-# @(#)$Id: t/t76blob.t version /main/8 2000-01-27 16:21:46 $
+#	Copyright 1999 Bibliotech Ltd., 631-633 Fulham Rd., London SW6 5UQ.
+#	Copyright 1999 Jonathan Leffler
+#	Copyright 2000 Informix Software Inc
+#	Copyright 2002 IBM
 
 use DBD::Informix::TestHarness;
 
@@ -19,8 +18,7 @@ $dbh = connect_to_test_database();
 
 if (!$dbh->{ix_BlobSupport})
 {
-	print("1..0\n");
-	&stmt_note("# No blob support -- no blob testing\n");
+	print("1..0 # Skip: No blob support -- no blob testing\n");
 	$dbh->disconnect;
 	exit(0);
 }

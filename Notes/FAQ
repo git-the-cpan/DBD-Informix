@@ -1,23 +1,23 @@
 Frequently Asked Questions about IBM Informix Database Driver for Perl
-==================================================================
+======================================================================
 
-IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 
 --------------------------------------------------------------------------
 
-WHAT IS THE DIFFERENCE BETWEEN INFORMIX DATABASE DRIVER FOR PERL AND
+WHAT IS THE DIFFERENCE BETWEEN IBM INFORMIX DATABASE DRIVER FOR PERL AND
 DBD::INFORMIX?
 
 Spelling.
 
-The official product name had to be changed from DBD::Informix to
-IBM Informix Database Driver for Perl because the acronym DBD is a contested
-trademark of two other companies in the USA, so Informix could not
-release the product as DBD::Informix without potentially infringing on
-this trademark.  Internally, Perl and DBI still uses the name
-DBD::Informix to access the driver, and much of the documentation still
-references DBD::Informix because that is how Perl references it, and
-because it is less of a mouthful than IBM Informix Database Driver for Perl.
+The official product name had to be changed from DBD::Informix to IBM
+Informix Database Driver for Perl because the acronym DBD is a contested
+trademark of two other companies in the USA, so Informix could not release
+the product as DBD::Informix without potentially infringing on this
+trademark.  Internally, Perl and DBI still uses the name DBD::Informix to
+access the driver, and much of the documentation still references
+DBD::Informix because that is how Perl references it, and because it is
+less of a mouthful than IBM Informix Database Driver for Perl.
 
 --------------------------------------------------------------------------
 
@@ -27,41 +27,30 @@ See the information available via "perldoc DBD::Informix::TechSupport".
 
 --------------------------------------------------------------------------
 
-WHY IS INFORMIX ESQL/C A PRODUCT PREREQUISITE FOR DBD::INFORMIX?
+WHY IS IBM INFORMIX ESQL/C A PRODUCT PREREQUISITE FOR DBD::INFORMIX?
 
 DBD::Informix is freely available software that is licensed on the same
 terms as Perl, under the GNU General Public License or the Perl Artistic
 License.
 
-However, to compile or use DBD::Informix, you need some Informix software
-on your computer -- specifically, you need either Informix ESQL/C or
-Informix Client SDK.  This provides a compiler and the supporting libraries
-necessary to connect to Informix databases.  This software must be licenced
-from Informix Software Inc.
+However, to compile or use DBD::Informix, you need some IBM Informix
+software on your computer -- specifically, you need either IBM Informix
+ESQL/C or IBM Informix Client SDK.  This provides a compiler and the
+supporting libraries necessary to connect to Informix databases.  This
+software must be licenced from Informix Software Inc.
 
-To purchase any Informix software, contact your local Informix Sales
-Office, the Informix Web site (http://www.informix.com), or the address
-below to ask for the address of the nearest Informix sales office.
-
-    Informix Software, Inc
-    4100 Bohannon Drive
-    Menlo Park, CA 94025
-    USA
-
-    Tel: +1 650-926-6300
-    Fax: +1 650-926-6006
-
-Once you are a subscriber, you can download Informix Client SDK from
-Intraware (http://www.intraware.com).  It costs nothing to become a
-subscriber to Intraware.
+To purchase any IBM Informix software, look in the the IBM Informix Web
+site (http://www.ibm.com/software/data/informix), or contact your local
+IBM Sales Office.
 
 --------------------------------------------------------------------------
 
-WHERE CAN I FIND DOCUMENTATION FOR INFORMIX PRODUCTS?
+WHERE CAN I FIND DOCUMENTATION FOR IBM INFORMIX PRODUCTS?
 
-You can download PDF files for most Informix product manuals at the
-Informix web-site:
+You can download PDF files for most IBM Informix product manuals at the
+IBM Informix web-site:
 
+	http://www.ibm.com/software/data/informix/pubs
     http://www.informix.com/answers
 
 Electronic manuals are not available for some of the older product
@@ -78,7 +67,7 @@ consult the documentation:
 
 --------------------------------------------------------------------------
 
-WHICH OTHER VERSIONS OF INFORMIX ESQL/C EXIST?
+WHICH OTHER VERSIONS OF IBM INFORMIX ESQL/C EXIST?
 
 Informix ESQL/C exists in versions 5.0x (obsolete), 5.1x, 6.0x (obsolete),
 7.0x (obsolete), 7.1x (obsolete), 7.2x, 8.0x (obsolete), 8.1x, and 9.x.
@@ -90,21 +79,26 @@ obsolete, and the other available versions are mostly part of Client SDK.
     -----------       ----------------------
     ESQL/C 9.11     - ESQL/C 9.11 (obsolete)
     ESQL/C 9.12     - DevSDK 9.12 (obsolete)
-    ESQL/C 9.13     - Client SDK 2.00
-    ESQL/C 9.14     - Client SDK 2.01
-    ESQL/C 9.15     - Client SDK 2.02
-    ESQL/C 9.16     - Client SDK 2.10
-    ESQL/C 9.20     - Client SDK 2.20
-    ESQL/C 9.21     - Client SDK 2.30
+    ESQL/C 9.13     - Client SDK 2.00 (obsolete)
+    ESQL/C 9.14     - Client SDK 2.01 (obsolete)
+    ESQL/C 9.15     - Client SDK 2.02 (obsolete)
+    ESQL/C 9.16     - Client SDK 2.10 (obsolete)
+    ESQL/C 9.20     - Client SDK 2.20 (obsolete)
+    ESQL/C 9.21     - Client SDK 2.30 (obsolete)
     ESQL/C 9.30     - Client SDK 2.40
+    ESQL/C 9.40     - Client SDK 2.50
+    ESQL/C 9.50     - Client SDK 2.60
+    ESQL/C 9.51     - Client SDK 2.70
+    ESQL/C 9.52     - Client SDK 2.80
 
-With the 7.3x servers, you would normally use Client SDK 2.10 or greater.
-With the 8.2x servers, you would normally use Client SDK 2.30 or greater.
-With the 9.1x servers, you would normally use Client SDK.  If you have 9.11
-or 9.12 servers, you are long overdue for an upgrade.  If you have a 9.2x
-server, you would normally use Client SDK 2.40.  Finally, note that Client
-SDK is available free of charge, so you should use it if at all possible.
-You can make Client SDK talk to the 7.x and even 5.x servers.
+With the 7.3x servers, you would normally use Client SDK 2.40 or later.
+With the 8.2x or later servers, you would normally use Client SDK 2.40
+or later.  With the 9.1x servers, you would normally use some version of
+Client SDK, but you are long overdue for an upgrade.  If you have a 9.2x
+server, you would normally use Client SDK 2.40 or later.  Finally, note
+that Client SDK is available free of charge, so you should use it if at
+all possible.  You can make Client SDK talk to the 7.x and even 5.x
+servers.
 
 ---------------------------------------------------------------------------
 
@@ -119,34 +113,35 @@ every platform.
 
 ---------------------------------------------------------------------------
 
-DO I NEED AN INFORMIX DATABASE SERVER ON MY DEVELOPMENT MACHINE?
+DO I NEED AN IBM INFORMIX DATABASE SERVER ON MY DEVELOPMENT MACHINE?
 
-You do not need an Informix database server on the computer where you build
-or use DBD::Informix.  However, to compile DBD::Informix, or to make any
-meaningful use of it after it is compiled, you must have access to a
-computer with an Informix database server installed and running on it.  One
-step of the configuration process for DBD::Informix validates your Informix
-ESQL/C and database environments and checks that you have access to at
-least one database.  If this step fails, the makefile is not generated, so
-DBD::Informix cannot be compiled.
+You do not need an IBM Informix database server on the computer where you
+build or use DBD::Informix.  However, to compile DBD::Informix, or to make
+any meaningful use of it after it is compiled, you must have access to a
+computer with an IBM Informix database server installed and running on it.
+One step of the configuration process for DBD::Informix validates your IBM
+Informix ESQL/C and database environments and checks that you have access
+to at least one database.  If this step fails, the makefile is not
+generated, so DBD::Informix cannot be compiled.
 
-If you do not have the Informix database system set up already, you need to
-do so before you try to compile DBD::Informix.  If you do not know how to
-do the setup, you must obtain the necessary training.  Informix Software
-does provide training courses in such matters; consult the Web site or your
+If you do not have the IBM Informix database system set up already, you
+need to do so before you try to compile DBD::Informix.  If you do not know
+how to do the setup, you must obtain the necessary training.  IBM does
+provide training courses in such matters; consult the Web site or your
 local sales office as mentioned above.
 
 --------------------------------------------------------------------------
 
-WHICH INFORMIX DATABASE SERVERS ARE AVAILABLE?
+WHICH IBM INFORMIX DATABASE SERVERS ARE AVAILABLE?
 
-Informix provides a large family of products, many of which are available
-in a number of versions.  Database storage is managed by a program separate
-from user applications (such as Perl + DBI + DBD::Informix).  Such a
-database management program is called the database server.  The main
-Informix database servers are listed below.
+IBM Informix provides a large family of products, many of which are
+available in a number of versions.  Database storage is managed by a
+program separate from user applications (such as Perl + DBI +
+DBD::Informix).  Such a database management program is called the database
+server.  The main Informix database servers are listed below.
 
-Refer to http://www.informix.com for additional product information.
+Refer to http://www.ibm.com/software/data/informix for additional
+product information.
 
     Informix Standard Engine (SE)                   5.x and up
     Informix OnLine                                 5.x
@@ -167,6 +162,8 @@ In July 1999, the new Informix Internet Foundation.2000 products were
 released and included:
     Informix Dynamic Server.2000 (IDS.2000) 9.2x
     Informix Internet Foundation.2000 (IIF.2000) 9.2x
+
+In 2001, the 2000 appellation was dropped.
 
 Version 9.2x merges the 7.x and 9.x code streams.  Basically, Informix
 Dynamic Server.2000 is the direct upgrade path if you use Informix Dynamic
@@ -196,28 +193,37 @@ Version 4.1x or earlier versions of the database servers.
 
 --------------------------------------------------------------------------
 
-CAN DBD::INFORMIX BE COMPILED WITHOUT INFORMIX ESQL/C?
+CAN DBD::INFORMIX BE COMPILED WITHOUT IBM INFORMIX ESQL/C?
 
-To compile DBD::Informix, you should have an Informix ESQL/C compiler.
+To compile DBD::Informix, you should have an IBM Informix ESQL/C
+compiler.
 
-If you built Perl with the same C compiler as the Informix Classic 4GL
-c-code compiler uses, then you may be able to build DBD::Informix with a
-version 6.00 or later C4GL compiler.  You would configure the build with
-the command:
+If you built Perl with the same C compiler as the IBM Informix Classic
+4GL c-code compiler uses, then you may be able to build DBD::Informix
+with a version 6.00 or later C4GL compiler.  You would configure the
+build with the command:
 
     ESQL=c4gl perl Makefile.PL
     make
     make test
 
-This is not supported by Informix Software; it is not a good option and it
-should only be used as a last resort.  The resulting executable code might
-be much larger than if you use a pure ESQL/C version.  You cannot use
-Informix 4GL Version 4.1x because it uses the ESQL/C Version 4.1x compiler,
-which does not provide the features that DBD::Informix needs.
+This is not supported by IBM; it is not a good option and it should only
+be used as a last resort.  The resulting executable code might be much
+larger than if you use a pure ESQL/C version.  You cannot use IBM
+Informix 4GL Version 4.1x because it uses the ESQL/C Version 4.1x
+compiler, which does not provide the features that DBD::Informix needs.
 
 This compilation technique was shown to work in 1997 using DBD::Informix
-Version 0.56 (with Perl 5.004 and DBI Version 0.90) with Informix 4GL
-6.05.UC1 on a Sun Sparc 20 running Solaris 2.5.1.
+Version 0.56 (with Perl 5.004 and DBI Version 0.90) with IBM Informix
+4GL 6.05.UC1 on a Sun Sparc 20 running Solaris 2.5.1.  It was also shown
+to work in 2002 on a Sun UltraSparc running Solaris 7 with DBD::Informix
+1.03.PC1, Perl 5.8.0, DBI 1.30, IBM Informix 4GL 7.31.UC3, with both
+Sun's WorkShop 6 update 2 C 5.3 2001/05/15 C compiler and with the GNU C
+Compiler (GCC) 3.1.  Note that you should set the environment variable
+DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX to "^-KPIC$" to avoid warnings
+from GCC, and DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX to the same value
+to prevent linkage warnings.  Note that Solaris is a simple environment
+to handle; other environments such as HP-UX are less easy.
 
 --------------------------------------------------------------------------
 
@@ -231,34 +237,44 @@ the other computer must have the same architecture as the computer used for
 compiling.  However, the computers need not be identical; for example, code
 compiled on a Sun Sparc 20 can be run on a Sun Sparc 10.
 
-Every computer where you will use DBD::Informix must have either an
-Informix ESQL/C development license, or an Informix runtime license.
-Otherwise, you violate the terms of your license agreement with Informix.
-Either way, the license on the other computer should be the same version as
-the development license used to compile the software.  (If you know enough
-about the compatability requirements for different versions of Informix
-products to argue about the finer points ignored by the "same version"
-criterion, you probably do not need to read this.)
+Every computer where you will use DBD::Informix must have either an IBM
+Informix ESQL/C development license, or an IBM Informix runtime license.
+Otherwise, you violate the terms of your license agreement with IBM
+(Informix).  Either way, the license on the other computer should be the
+same version as the development license used to compile the software.
+(If you know enough about the compatability requirements for different
+versions of Informix products to argue about the finer points ignored by
+the "same version" criterion, you probably do not need to read this.)
 
-If you use a 5.0x database server (OnLine or SE), you need an Informix
-ESQL/C RunTime license.  If you will use a database on a remote computer,
-you will also need an Informix Net (or Informix Star) license.
+If you use a 5.x database server (OnLine or SE), you need an Informix
+ESQL/C RunTime license.  If you will use a database on a remote
+computer, you will also need an Informix Net (or Informix Star) license.
+Note that OnLine 5.2x is distributed with Informix Star functionality.
 
-If you use a 6.0x or 7.1x database server, you also need an Informix ESQL/C
-RunTime license.  However, you do not need a separate license for remote
-database access because the remote database access technology is part of
-the basic product.  If you use 6.0x, it is time to consider an upgrade.
+If you are using a 5.0x server, you should upgrade.  In particular,
+using OnLine 5.0x is dangerous as the archives might not be restorable,
+which is not something you want to find out after the system has crashed
+and you need to restore it.
+
+If you use a 6.0x or 7.1x database server, you also need an Informix
+ESQL/C RunTime license.  However, you do not need a separate license for
+remote database access because the remote database access technology is
+part of the basic product.  If you use a 6.0x, 7.0x or 7.1x server, it
+is long past time to upgrade.
 
 If you use a 7.2x, 9.0x or 9.1x database server, you need an Informix
-Connect license, and you do not need a separate license for remote database
-access because the remote database access technology is part of the basic
-product.
+Connect license, and you do not need a separate license for remote
+database access because the remote database access technology is part of
+the basic product.  If you use a 7.2x server earlier than 7.24, you
+should upgrade.
 
 If you use an 8.0x or 8.1x database server, you need either an Informix
 ESQL/C RunTime license or an Informix Connect license.  The initial 8.00
-version was released shortly after the 7.10 version was released, and the
-changes made in 7.20 for Informix Connect might not have been propagated to
-Version 8.0x.
+version was released shortly after the 7.10 version was released, and
+the changes made in 7.20 for Informix Connect might not have been
+propagated to Version 8.0x.  This has not been tested; you may have to
+extemporize to get DBD::Informix to work.  If you are using an 8.0x or
+8.1x server, you should upgrade.
 
 Further, both the DBI and DBD::Informix modules will need to be installed
 on the second machine, and should go into the same directory on both
@@ -270,7 +286,7 @@ the Informix software installed in the same place on both machines.
 --------------------------------------------------------------------------
 
 MY PROGRAM WORKS OK WHEN I RUN IT FROM THE COMMAND LINE BUT FAILS WHEN I
-RUN IT VIA A WEB SERVER (CGI, MOD_PERL, ETC)?
+RUN IT VIA A WEB SERVER (CGI, MOD_PERL, ETC), OR FROM A CRON JOB?
 
 The answer is the environment - almost invariably.
 
@@ -283,13 +299,18 @@ Other web servers will have equivalents.  You could also consider trying to
 set the environment in a BEGIN block, but it may well set the environment
 too late to be useful.
 
-Note that DBD::Informix versions 0.95 and later normally build the
+Note that DBD::Informix version 1.00 and later normally build the
 DBD::Informix shared library so that it references the Informix shared
 libraries with absolute pathnames.  This should mean that the web server
 does not need to set LD_LIBRARY_PATH or the local equivalent environment
 variable.  The configuration process records a default value for
 INFORMIXDIR and INFORMIXSERVER; these may be adequate for your production
 environment.
+
+Similar comments apply to jobs run by cron.  Unlike jobs run with the
+'at' command, cron jobs get only the most minimal environment set.  You
+should ensure that the environment is set correctly by a script before
+it attempts to access DBD::Informix.
 
 --------------------------------------------------------------------------
 
@@ -360,32 +381,94 @@ it is set in the ESQLLD environment variable, and INFORMIXC is set to run
 the esqlld Perl script.  If you modify esql to ignore INFORMIXC, you make
 it ignore a lot of hard work -- and cause the build to fail.
 
+See also the information about DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX
+and DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX in the file
+Notes/environment.variables.
+
 --------------------------------------------------------------------------
 
 HOW CAN I UPDATE BLOBS
 
-You cannot update BYTE and TEXT blobs automatically with DBD::Informix.
-You can insert them.  You can delete them.  You can select them.  You
-cannot update them.
+You cannot update BYTE and TEXT blobs fully automatically with
+DBD::Informix.  You can insert them; you can delete them; you can select
+them; all without paying very much attention to the issues.  You cannot
+update them without using special measures.
 
-Technically, the DESCRIBE request must give DBD::Informix information about
-the types of the paramaters on the RHS of the SET clause in an UPDATE
-statement.  Without that type information, DBD::Informix does not know that
-it needs to treat the parameter specially.
+Technically, the DESCRIBE request must give DBD::Informix information
+about the types of the paramaters on the RHS of the SET clause in an
+UPDATE statement.  Without that type information, DBD::Informix does not
+know that it needs to treat the parameter specially.  [This should
+change in 2003 when IBM releases IBM Informix ClientSDK 2.81 - ESQL/C
+9.53 - and IBM IDS 9.40, but the feature won't be available on older
+versions of the servers.]
 
-One of the new features in IDS 7.30 was the ability to describe update
-statements.  Unfortunately, the feature (a) has to be explicitly enabled
-when you start the server, and (b) does not give DBD::Informix the
-information it needs.
+On the other hand, starting with version 1.03.PC1, you can update them.
+See the code in test file t/t73blobupd.t for an illustration of how to
+do it using the Informix type support with bind_param (and, one day,
+bind_param_inout).  See also 'perldoc DBD::Informix'.
 
-In due course, the type support with bind_param (and bind_param_inout) will
-allow you the DBI programmer to work around the problem.  Until then, you
-have to use a combination of DELETE and INSERT to achieve the effect of
-UPDATE.
+--------------------------------------------------------------------------
+
+WHEN I DO "perl makefile.PL" IT FAILS WITH ERROR -369.  IT ALSO FAILS
+WITH THAT ERROR IF I TRY TO RUN esqlbasic.  WHAT DOES IT MEAN AND WHAT
+MUST I DO TO FIX IT?
+
+Error -369 always means that the ESQL/C you are using is not installed
+correctly.  Usually it means that: 1) although you copied off the distribution
+media, you did not run the installesql script.  You need to provide a
+serial number (eg AAA#A123456) and an activation key (eg ABCDEF).  Until
+you do this, the software will not let you use the libraries at runtime,
+even if you can compile with it.  Or, 2) if you installed ESQL/C correctly,
+something else was subsequently installed incorrectly and wrote over one of
+the ESQL/C libraries.  Either way, the corrective action is to reinstall
+either the ESQL/C product or the other product which overwrote the ESQL/C
+libraries.
+
+The other circumstance under which this can occur with ClientSDK 2.80 or
+later is if there is an internal error in the installation process.  The
+licence number for such versions should be supplied automatically; if
+you get this error, then there is probably a bug in the installation
+code.
+
+--------------------------------------------------------------------------
+
+HOW DO I CONFIGURE DBD::INFORMIX TO CONNECT TO A REMOTE DATABASE?
+
+How do you connect using DB-Access across the network?  That's how you
+connect using DBD::Informix, too.  For example, you will create an entry
+in your local sqlhosts file that references the remote system:
+
+    remote_tcp  oltlitcp    remote  service_name
+
+You will then simply do:
+
+    $dbh = DBI->connect("dbi:Informix:dbase\@remote_tcp", "", "")
+                or die "A horrible death!";
+
+Note that if you also had a local database, you'd have an entry in the
+sqlhosts file such as:
+
+    local_shm   olipcshm    local   service_name
+
+And your connect statement will be:
+
+    $dbh = DBI->connect("dbi:Informix:dbase\@local_shm", "", "")
+                or die "A horrible death!";
+
+Or, in other words, there is essentially no difference between the local
+and remote connections.  If you need to specify username and password,
+do so in place of the empty strings.  If you want to omit the '\@server'
+part, you can set $INFORMIXSERVER to the correct value.
+
+NB: The default value of $INFORMIXSQLHOSTS is $INFORMIXDIR/etc/sqlhosts.
+
+NB: On Linux in particular, you often need the FQDN (fully qualified
+domain name) of the server in place of 'local' or 'remote'.  Usually,
+what 'uname -n' gives is what you need for the local machine.
 
 ===========================================================================
 
 Jonathan Leffler
-Informix Software Inc
+Informix Database Engineering, IBM Data Management Solutions
 
-@(#)$Id: Notes/FAQ version /main/9 2000-02-17 12:13:42 $
+@(#)$Id: FAQ,v 100.10 2002/11/20 01:41:16 jleffler Exp $

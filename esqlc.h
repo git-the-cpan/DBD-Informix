@@ -1,11 +1,24 @@
 /*
-@(#)File:            $RCSfile: esqlc.h,v $
-@(#)Version:         $Revision: 3.10 $
-@(#)Last changed:    $Date: 1999/12/06 18:32:54 $
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992-93,1995-99
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1992-93,1995-2001 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002              IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
+*/
+
+/*
+** Include all ESQL/C Headers with prototypes where possible.
+** Support for ESQL/C Versions 4.x, 5.x, 6.x, 7.1x, 7.2x, 9.x is
+** believed to be sound.
+** Support for ESQL/C Versions 7.0x, 8.0x or 8.1x is unproven; support
+** for 8.2x is dubious.
+**
+** Support for ESQL/C 4.x will dropped at the end of 2001.
+** Versions of ESQL/C prior to 4.00 are not supported.
+**
+** Note that the ESQL/C 4.x and earlier versions place the headers
+** directly in $INFORMIXDIR/incl, but ESQL/C versions 5.00 and later
+** place the headers in $INFORMIXDIR/incl.
 */
 
 #ifndef ESQLC_H
@@ -13,7 +26,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h version /main/31 1999-12-06 18:32:54 $";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 100.2 2002/02/08 22:49:14 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -74,6 +87,13 @@ extern "C" {
 
 /* -- Include Files	*/
 
+/*
+** Note that an earlier version of this file protected varchar.h with
+** #if ESQLC_VERSION >= 400, but did not protect either datetime.h or
+** locator.h in the same way, even though neither of those files was
+** present prior to version 4.00.
+*/
+
 #include <datetime.h>
 #include <decimal.h>
 #include <locator.h>
@@ -81,10 +101,7 @@ extern "C" {
 #include <sqlda.h>
 #include <sqlstype.h>
 #include <sqltypes.h>
-
-#if ESQLC_VERSION >= 400
 #include <varchar.h>
-#endif /* ESQLC_VERSION >= 400 */
 
 /* _WIN32 (Windows 95/NT code from Harald Ums <Harald.Ums@sevensys.de> */
 
@@ -161,10 +178,11 @@ extern int      sqgetdbs(int *ret_fcnt,
 ** The problem was found by David Edge <dedge@ak.blm.gov> in 7.10.UC1
 ** on AIX 4.2.1 and was confirmed on Solaris 2.6 with ESQL/C versions
 ** 5.08, 4.12, and 6.00.  Robert E Wyrick <rob@wyrick.org> had the
-** problem version 8.11.  Versions 8.00 through 8.1x probably had the
-** same problem.  XPS 8.20 uses ClientSDK and hence ESQL/C 9.x.  And
-** the 7.23 version of sqlhdr.h only includes <value.h> when __STDC__
-** is defined, which makes the version-specific testing too complex.
+** problem with version 8.11.  Versions 8.00 through 8.1x probably had
+** the same problem.  XPS 8.20 uses ClientSDK and hence ESQL/C 9.x.
+** And the 7.2x version of sqlhdr.h only includes <value.h> when
+** __STDC__ is defined, which makes the version-specific testing too
+** complex.
 **
 ** The symbol MAXADDR is defined in value.h.  The 4.12 and 5.08
 ** versions of value.h do not prevent multiple includes, leading to
@@ -185,6 +203,18 @@ extern int      sqgetdbs(int *ret_fcnt,
 #if ESQLC_VERSION < 900
 #include "esql_ius.h"
 #endif
+
+/*
+** JL 2001-01-23:
+** Supply machine and version independent type names and printing
+** macros.  Use the ixType names in code that should port to 64-bit
+** environments with minimal fuss.  Note that int4 etc are defined
+** with CSDK 2.30 (ESQL/C 9.21) and later versions.
+** Note that the version-dependent headers such as esql4_00.h do not
+** need to be modified to use these types -- they are not version
+** independent, by definition.
+*/
+#include "esqltype.h"
 
 /* -- Constant Definitions */
 

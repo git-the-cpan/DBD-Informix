@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: kludge.h,v $
-@(#)Version:         $Revision: 1.6 $
-@(#)Last changed:    $Date: 1999/11/24 22:07:44 $
 @(#)Purpose:         Provide support for KLUDGE macro
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1995,1997-99
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1995,1997-99 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002         IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char kludge_h[] = "@(#)$Id: kludge.h version /main/6 1999-11-24 22:07:44 $";
+static const char kludge_h[] = "@(#)$Id: kludge.h,v 100.1 2002/02/08 22:49:29 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

@@ -1,32 +1,38 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, descarte@symbolstone.org
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) released
+Subject: ANNOUNCE: Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) released
 
-IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) has been uploaded to CPAN.
+Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) has been uploaded to CPAN.
 
 This is a purely administrative release.  It changes the version number
-from 1.00.PC1 to 1.00.PC2 solely to fix the email addresses for
-reporting problems.  Functionally, it is identical to 1.00.PC1 - bugs
-and all.  All previous releases of DBD::Informix are scheduled to be
-removed from CPAN on 2002-02-04.  Copyright information has been changed
-to recognize that IBM owns Informix.
+from 1.00.PC1 to 1.00.PC2 solely to fix the email addresses for reporting
+problems.  Functionally, it is identical to 1.00.PC1 - bugs and all.  All
+previous releases of DBD::Informix are scheduled to be removed from CPAN on
+2002-02-04.  The copyright information has been extended to recognize that
+IBM owns Informix.
 
 IBM Informix Database Driver for Perl (previously known as DBD::Informix)
 is the driver code that enables Perl 5.004 or 5.005 to access Informix
-databases via the DBI module.  You will need the code for DBI version
-1.13 as well.  You should be planning to upgrade to at least version
-Perl 5.004_04 as some software in the DBI family will require this
-version (eg DBI::Shell).  The code is available for download via:
+databases via the DBI module.  You will need the code for DBI version 1.14
+as well.  You should be planning to upgrade to at least version Perl
+5.004_04 as some software in the DBI family will require this version (eg
+DBI::Shell).  The code is available for download via:
 
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
-http://www.symbolstone.org/technology/perl/DBI
+http://dbi.perl.org/
 
-** When you successfully build IBM Informix Database Driver for Perl,
+** When you successfully build Informix Database Driver for Perl,
 ** use the ItWorks (Perl) script to report your configuration to the
 ** maintenance team at either dbd-informix@informix.com (up to
 ** 2002-06-30) or to dbd-informix@us.ibm.com (from 2002-07-01, though
 ** you may try this address now if you wish).  Note that ItWorks does
 ** not send email to anybody; you have to do that yourself.
+
+New in release 1.10:
+* This release is supported by Informix. That means that Informix
+  R&D engineers will both add new features and fix problems. 
+* This release provides support for INSERT cursors.
+* This release provides support for UPDATE of blobs (BYTE and TEXT).
 
 New in release 1.00:
 * This is the first release supported by Informix. That means that Informix
@@ -38,4 +44,4 @@ New in release 1.00:
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce version /main/36 2000-02-09 14:01:07 - hacked $
+@(#)$Id: Announce,v 100.7 2002/02/08 22:48:40 jleffler Exp $

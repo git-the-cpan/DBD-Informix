@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t43trans.t version /main/14 2000-01-27 16:21:09 $ 
+#	@(#)$Id: t43trans.t,v 100.5 2002/11/05 18:40:58 jleffler Exp $ 
 #
 #	Test AutoCommit Off for DBD::Informix
 #
-#	Copyright (C) 1996-97,1999 Jonathan Leffler
-#	Copyright (C) 2000         Informix Software Inc
-#	Copyright (C) 2002         IBM
+#	Copyright 1996-97,1999 Jonathan Leffler
+#	Copyright 2000         Informix Software Inc
+#	Copyright 2002         IBM
 
 # AutoCommit Off => Explicit transactions in force
 
@@ -19,20 +19,20 @@ if ($dbh->{ix_LoggedDatabase} == 0)
 {
 	&stmt_note("1..1\n");
 	&stmt_note("# No transactions on unlogged database '$dbh->{Name}'\n");
-	&stmt_note("# Expect warning about failing to unset AutoCommit mode.\n");
-	# This should generate a warning (but not an error)
+	&stmt_note("# Expect error about failing to unset AutoCommit mode.\n");
+	# This should generate an error (not a warning as in versions 1.00.PC1 and earlier).
 	# Set AutoCommit to Off
 	$ac = $dbh->{AutoCommit} ? "On" : "Off";
 	print "# Default AutoCommit is $ac\n";
 	my $msg;
-	$SIG{__WARN__} = sub { $msg = $_[0]; };
+	$SIG{__DIE__} = sub { $msg = "Die: $_[0]"; &stmt_note("# $msg"); stmt_ok(0); &all_ok(); exit(0); };
+	$SIG{__WARN__} = sub { $msg = "Warn: $_[0]"; };
 	$dbh->{AutoCommit} = 0;
+	# Should not reach here!
 	$SIG{__WARN__} = 'DEFAULT';
-	stmt_fail() unless $msg;
-	&stmt_note("# $msg");
-	$ac = $dbh->{AutoCommit} ? "On" : "Off";
-	print "# AutoCommit was set to $ac\n";
-	&stmt_ok(0);
+	&stmt_note("# *** $msg");
+	&stmt_note("# *** unexpected return from die/croak code!");
+	&stmt_fail();
 	&all_ok();
 }
 
@@ -63,18 +63,11 @@ CREATE TEMP TABLE $trans01
 )
 };
 
-# How to insert date values even when you can't be bothered to sort out
-# what DBDATE will do...  You cannot insert an MDY() expression directly.
-$sel1 = "SELECT MDY(12,25,1996) FROM 'informix'.SysTables WHERE Tabid = 1";
-&stmt_fail() unless ($st1 = $dbh->prepare($sel1));
-&stmt_fail() unless ($st1->execute);
-&stmt_fail() unless (@row = $st1->fetchrow);
-undef $st1;
+$date = &date_as_string($dbh, 12, 25, 1996);
 
 # Ensure that temp table survives...
 &stmt_fail() unless ($dbh->commit());
 
-$date = $row[0];
 $tag1  = 'Elfdom';
 $insert01 = qq{INSERT INTO $trans01
 VALUES(0, '$tag1', '$date', CURRENT YEAR TO FRACTION(5))};

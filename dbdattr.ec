@@ -1,11 +1,11 @@
 /*
- * @(#)$Id: dbdattr.ec version /main/40 2000-02-25 10:02:30 $ 
+ * @(#)$Id: dbdattr.ec,v 100.8 2002/11/18 23:19:42 jleffler Exp $ 
  *
- * @(#)$Product: IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) $ -- attribute handling
+ * @(#)$Product: Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) $ -- attribute handling
  *
- * Portions Copyright 1997-99 Jonathan Leffler
- * Portions Copyright 2000    Informix Software Inc
- * Portions Copyright 2002    IBM
+ * Copyright 1997-99 Jonathan Leffler
+ * Copyright 2000    Informix Software Inc
+ * Copyright 2002    IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -14,7 +14,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec version /main/40 2000-02-25 10:02:30 $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 100.8 2002/11/18 23:19:42 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -28,10 +28,38 @@ static const char rcs[] = "@(#)$Id: dbdattr.ec version /main/40 2000-02-25 10:02
 */
 #define KEY_MATCH(kl, kv, kw) ((kl) == (sizeof(kw) - 1) && strEQ((kv), (kw)))
 
+static const char ix_actconn[] = "ix_ActiveConnections";
+static const char ix_blobloc[] = "ix_BlobLocation";
+static const char ix_blobsup[] = "ix_BlobSupport";
+static const char ix_colleng[] = "ix_ColLength";
+static const char ix_coltype[] = "ix_ColType";
+static const char ix_conname[] = "ix_ConnectionName";
+static const char ix_csrhold[] = "ix_CursorWithHold";
+static const char ix_curconn[] = "ix_CurrentConnection";
+static const char ix_dbsname[] = "ix_DatabaseName";
+static const char ix_fetchab[] = "ix_Fetchable";
+static const char ix_instcsr[] = "ix_InsertCursor";
+static const char ix_intrans[] = "ix_InTransaction";
+static const char ix_ixonlin[] = "ix_InformixOnLine";
+static const char ix_loggedb[] = "ix_LoggedDatabase";
+static const char ix_modeans[] = "ix_ModeAnsiDatabase";
+static const char ix_mulconn[] = "ix_MultipleConnections";
+static const char ix_prodnam[] = "ix_ProductName";
+static const char ix_prodver[] = "ix_ProductVersion";
+static const char ix_scrlcsr[] = "ix_ScrollCursor";
+static const char ix_srvrvsn[] = "ix_ServerVersion";
+static const char ix_stoproc[] = "ix_StoredProcedures";
+static const char ix_typenam[] = "ix_NativeTypeName";
+static const char ix_worepln[] = "ix_WithoutReplication";
+
+static const char ix_sqlcode[] = "ix_sqlcode";
+static const char ix_sqlerrd[] = "ix_sqlerrd";
+static const char ix_sqlerrm[] = "ix_sqlerrm";
+static const char ix_sqlerrp[] = "ix_sqlerrp";
+static const char ix_sqlwarn[] = "ix_sqlwarn";
+
 static const char esql_prodname[] = ESQLC_VERSION_STRING;
 static const int  esql_prodvrsn   = ESQLC_VERSION;
-
-#define USE_DEPRECATED
 
 #ifdef USE_DEPRECATED
 /* Print message deprecating old attribute and indicating new */
@@ -87,26 +115,26 @@ SV *dbd_ix_dr_FETCH_attrib(imp_drh_t *imp_drh, SV *keysv)
 
 	dbd_ix_enter(function);
 
-	if (KEY_MATCH(kl, key, "ix_MultipleConnections"))
+	if (KEY_MATCH(kl, key, ix_mulconn))
 	{
 		retsv = newSViv((IV)imp_drh->multipleconnections);
 	}
-	else if (KEY_MATCH(kl, key, "ix_ActiveConnections"))
+	else if (KEY_MATCH(kl, key, ix_actconn))
 	{
 		retsv = newSViv((IV)imp_drh->n_connections);
 	}
-	else if (KEY_MATCH(kl, key, "ix_CurrentConnection"))
+	else if (KEY_MATCH(kl, key, ix_curconn))
 	{
 		char *conn = (char *)imp_drh->current_connection;	/* const_cast<char*> */
 		if (conn == 0)
 			conn = "<<no current connection>>";
 		retsv = newSVpv(conn, 0);
 	}
-	else if (KEY_MATCH(kl, key, "ix_ProductVersion"))
+	else if (KEY_MATCH(kl, key, ix_prodver))
 	{
 		retsv = newSViv((IV)esql_prodvrsn);
 	}
-	else if (KEY_MATCH(kl, key, "ix_ProductName"))
+	else if (KEY_MATCH(kl, key, ix_prodnam))
 	{
 		retsv = newSVpv((char *)esql_prodname, 0);	/* const_cast<char *> */
 	}
@@ -138,10 +166,11 @@ int dbd_ix_db_STORE_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 		if (imp_dbh->is_loggeddb == False)
 		{
 			assert(DBI_AutoCommit(imp_dbh));
-			if (newval == False)
-				dbd_ix_debug(0,
-					"%s - Cannot unset AutoCommit for unlogged databases\n",
-					dbd_ix_module());
+			if (newval == False && SvTRUE(imp_dbh->database))
+			{
+				croak("%s - Cannot unset AutoCommit for unlogged databases\n",
+						dbd_ix_module());
+			}
 		}
 		else
 		{
@@ -165,14 +194,15 @@ int dbd_ix_db_STORE_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 			}
 		}
 	}
-	else if (KEY_MATCH(kl, key, "ix_BlobLocation"))
+	else if (KEY_MATCH(kl, key, ix_blobloc))
 	{
 		imp_dbh->blob_bind = blob_bindtype(valuesv);
 	}
-	else if (KEY_MATCH(kl, key, "ix_AutoErrorReport"))
+	else if (KEY_MATCH(kl, key, ix_worepln))
 	{
-		warn("Attempt to set obsolete attribute - ix_AutoErrorReport\n"); 
-		retval = FALSE;
+		/* Bryan Castillo: set flag for replication */
+		imp_dbh->no_replication = SvTRUE(valuesv); 
+		dbd_ix_db_commit(dbh, imp_dbh); /* start new tran (with|w/o) repl. */
 	}
 	else
 	{
@@ -223,23 +253,23 @@ static SV *dbd_ix_getsqlca(imp_dbh_t *imp_dbh, STRLEN kl, char *key)
 	SV *retsv = NULL;
 
 	/* Preferred versions */
-	if (KEY_MATCH(kl, key, "ix_sqlcode"))
+	if (KEY_MATCH(kl, key, ix_sqlcode))
 	{
 		retsv = newSViv((IV)imp_dbh->ix_sqlca.sqlcode);
 	}
-	else if (KEY_MATCH(kl, key, "ix_sqlerrm"))
+	else if (KEY_MATCH(kl, key, ix_sqlerrm))
 	{
 		retsv = newSVpv(imp_dbh->ix_sqlca.sqlerrm, 0);
 	}
-	else if (KEY_MATCH(kl, key, "ix_sqlerrp"))
+	else if (KEY_MATCH(kl, key, ix_sqlerrp))
 	{
 		retsv = newSVpv(imp_dbh->ix_sqlca.sqlerrp, 0);
 	}
-	else if (KEY_MATCH(kl, key, "ix_sqlerrd"))
+	else if (KEY_MATCH(kl, key, ix_sqlerrd))
 	{
 		retsv = newSqlerrd(&imp_dbh->ix_sqlca);
 	}
-	else if (KEY_MATCH(kl, key, "ix_sqlwarn"))
+	else if (KEY_MATCH(kl, key, ix_sqlwarn))
 	{
 		retsv = newSqlwarn(&imp_dbh->ix_sqlca);
 	}
@@ -260,47 +290,48 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 	{
 		retsv = newSViv((IV)DBI_AutoCommit(imp_dbh));
 	}
-	else if (KEY_MATCH(kl, key, "ix_InformixOnLine"))
+	else if (KEY_MATCH(kl, key, ix_ixonlin))
 	{
 		retsv = newSViv((IV)imp_dbh->is_onlinedb);
 	}
-	else if (KEY_MATCH(kl, key, "ix_LoggedDatabase"))
+	else if (KEY_MATCH(kl, key, ix_loggedb))
 	{
 		retsv = newSViv((IV)imp_dbh->is_loggeddb);
 	}
-	else if (KEY_MATCH(kl, key, "ix_InTransaction"))
+	else if (KEY_MATCH(kl, key, ix_intrans))
 	{
 		retsv = newSViv((IV)imp_dbh->is_txactive);
 	}
-	else if (KEY_MATCH(kl, key, "ix_ModeAnsiDatabase"))
+	else if (KEY_MATCH(kl, key, ix_modeans))
 	{
 		retsv = newSViv((IV)imp_dbh->is_modeansi);
 	}
-	else if (KEY_MATCH(kl, key, "ix_ServerVersion"))
+	else if (KEY_MATCH(kl, key, ix_srvrvsn))
 	{
 		retsv = newSViv((IV)imp_dbh->srvr_vrsn);
 	}
-	else if (KEY_MATCH(kl, key, "ix_StoredProcedures"))
+	else if (KEY_MATCH(kl, key, ix_stoproc))
 	{
 		retsv = newSViv((IV)imp_dbh->has_procs);
 	}
-	else if (KEY_MATCH(kl, key, "ix_BlobSupport"))
+	else if (KEY_MATCH(kl, key, ix_blobsup))
 	{
 		retsv = newSViv((IV)imp_dbh->has_blobs);
 	}
-	else if (KEY_MATCH(kl, key, "ix_BlobLocation"))
+	else if (KEY_MATCH(kl, key, ix_blobloc))
 	{
 		retsv = newSVpv(blob_bindname(imp_dbh->blob_bind), 0);
 	}
-	else if (KEY_MATCH(kl, key, "ix_AutoErrorReport"))
-	{
-		warn("Attempt to get obsolete attribute - ix_AutoErrorReport\n"); 
-	}
-	else if (KEY_MATCH(kl, key, "ix_ConnectionName"))
+	else if (KEY_MATCH(kl, key, ix_conname))
 	{
 		retsv = newSVpv(imp_dbh->nm_connection, 0);
 	}
-	else if (KEY_MATCH(kl, key, "ix_DatabaseName"))
+	else if (KEY_MATCH(kl, key, ix_worepln))
+	{
+		/* Bryan Castillo: return value for replication */
+		retsv = newSViv((IV)imp_dbh->no_replication);
+	}
+	else if (KEY_MATCH(kl, key, ix_dbsname))
 	{
 		char *dbname = "";
 		if (imp_dbh->database)
@@ -314,8 +345,9 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 	else
 	{
 		/* Treat it as a driver query */
+		D_imp_drh_from_dbh;
 		dbd_ix_exit(function);
-		return dbd_ix_dr_FETCH_attrib(imp_dbh->drh, keysv);
+		return dbd_ix_dr_FETCH_attrib(imp_drh, keysv);
 	}
 
 	dbd_ix_exit(function);
@@ -333,7 +365,7 @@ int dbd_ix_st_STORE_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv, SV *valuesv)
 
 	dbd_ix_enter(function);
 
-	if (KEY_MATCH(kl, key, "ix_BlobLocation"))
+	if (KEY_MATCH(kl, key, ix_blobloc))
 	{
 		imp_sth->blob_bind = blob_bindtype(valuesv);
 	}
@@ -444,13 +476,10 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	}
 
 	/* Informix specific attributes */
-	else if (KEY_MATCH(kl, key, "ix_NativeTypeName") ||
-			 KEY_MATCH(kl, key, "ix_NativeTypeNames"))
+	else if (KEY_MATCH(kl, key, ix_typenam))
 	{
 		char buffer[SQLTYPENAME_BUFSIZ];
 		SV		*sv;
-		if (KEY_MATCH(kl, key, "ix_NativeTypeNames"))
-			dbd_ix_deprecate("ix_NativeTypeNames", "ix_NativeTypeName");
 		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= imp_sth->n_ocols; i++)
@@ -461,13 +490,13 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 			av_store(av, i - 1, sv);
 		}
 	}
-	else if (KEY_MATCH(kl, key, "ix_Fetchable"))
+	else if (KEY_MATCH(kl, key, ix_fetchab))
 	{
 		Boolean rv = DBD_IX_BOOLEAN((imp_sth->st_type == SQ_SELECT) ||
 						(imp_sth->st_type == SQ_EXECPROC && imp_sth->n_ocols > 0));
 		retsv = newSViv((IV)rv);
 	}
-	else if (KEY_MATCH(kl, key, "ix_BlobLocation"))
+	else if (KEY_MATCH(kl, key, ix_blobloc))
 	{
 		retsv = newSVpv(blob_bindname(imp_sth->dbh->blob_bind), 0);
 	}
@@ -475,7 +504,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	{
 		/* Nothing specific to do */
 	}
-	else if (KEY_MATCH(kl, key, "ix_ColType"))
+	else if (KEY_MATCH(kl, key, ix_coltype))
 	{
 		av = newAV();
 		retsv = newRV((SV *)av);
@@ -486,7 +515,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 			av_store(av, i - 1, newSViv((IV)coltype));
 		}
 	}
-	else if (KEY_MATCH(kl, key, "ix_ColLength"))
+	else if (KEY_MATCH(kl, key, ix_colleng))
 	{
 		av = newAV();
 		retsv = newRV((SV *)av);
@@ -497,21 +526,17 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 			av_store(av, i - 1, newSViv((IV)collength));
 		}
 	}
-	else if (KEY_MATCH(kl, key, "ix_StatementText"))
-	{
-		char *text = "";
-		dbd_ix_deprecate("ix_StatementText", "Statement");
-		if (imp_sth->st_text)
-			text = SvPV(imp_sth->st_text, na);
-		retsv = newSVpv(text, 0);
-	}
-	else if (KEY_MATCH(kl, key, "ix_CursorWithHold"))
+	else if (KEY_MATCH(kl, key, ix_csrhold))
 	{
 		retsv = newSViv((IV)imp_sth->is_holdcursor);
 	}
-	else if (KEY_MATCH(kl, key, "ix_ScrollCursor"))
+	else if (KEY_MATCH(kl, key, ix_scrlcsr))
 	{
 		retsv = newSViv((IV)imp_sth->is_scrollcursor);
+	}
+	else if (KEY_MATCH(kl, key, ix_instcsr))
+	{
+		retsv = newSViv((IV)imp_sth->is_insertcursor);
 	}
 	else
 	{

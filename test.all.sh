@@ -1,6 +1,10 @@
-:	"@(#)$Id: test.all.sh version /main/9 1998-08-06 01:52:48 $"
+:	"@(#)$Id: test.all.sh,v 100.1 2002/02/08 22:49:40 jleffler Exp $"
 #
 #	Run tests against logged, unlogged and mode_ansi databases
+#
+# Copyright 1997-98 Jonathan Leffler
+# Copyright 2000    Informix Software Inc
+# Copyright 2002    IBM
 
 dblist=${DBD_INFORMIX_DBLIST:-"logged unlogged mode_ansi"}
 

@@ -1,11 +1,11 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t54native.t version /main/4 2000-02-08 15:50:38 $ 
+#	@(#)$Id: t54native.t,v 100.7 2002/02/08 22:50:59 jleffler Exp $ 
 #
-#   Test NAME, ix_NativeTypeName, ix_ColType, ix_ColLength attributes.
+#	Test NAME, ix_NativeTypeName, ix_ColType, ix_ColLength attributes.
 #	No testing for UDTs.
 #
-#   Copyright 2000 Informix Software Inc
+#	Copyright 2000 Informix Software Inc
 #	Copyright 2002 IBM
 
 use strict;

@@ -1,17 +1,16 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t13bindref.t version /main/2 2000-02-29 15:43:34 $ 
+#	@(#)$Id: t13bindref.t,v 100.5 2002/10/19 00:27:50 jleffler Exp $ 
 #
 #	Test handling of bind_param_inout for DBD::Informix
 #
-#	Copyright (C) 2000 Informix Software Inc
-#	Copyright (C) 2002 IBM
+#	Copyright 2000 Informix Software Inc
+#	Copyright 2002 IBM
 
 use strict;
 use DBD::Informix::TestHarness;
 
-# Currently, bind_param_inout is not supported by DBD::Informix
-stmt_note "1..0\n";
+stmt_note "1..0 # Skip: bind_param_inout not supported by DBD::Informix\n";
 exit;
 
 # Test install...

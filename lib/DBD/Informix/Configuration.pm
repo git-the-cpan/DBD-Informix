@@ -1,10 +1,10 @@
-#   @(#)$Id: DBD/Informix/Configuration.pm version /main/5 2000-02-10 19:36:21 $ 
+#   @(#)$Id: Configuration.pm,v 100.10 2002/11/06 21:45:14 jleffler Exp $ 
 #
-#   Informix ESQL/C Support Routines for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+#   Informix ESQL/C Support Routines for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 #
-#   Portions Copyright 1999 Jonathan Leffler
-#   Portions Copyright 2000 Informix Software Inc
-#   Portions Copyright 2002 IBM
+#   Copyright 1999 Jonathan Leffler
+#   Copyright 2000 Informix Software Inc
+#   Copyright 2002 IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -24,7 +24,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(find_informixdir_and_esql get_esqlc_version map_informix_lib_names);
 
-	$VERSION = "1.00.PC2";
+	$VERSION = "1.03.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -105,9 +105,22 @@
 		$infv =~ s/\s+$//;	# Delete trailing white space
 		$infv =~ s/\s+/ /g;	# Replace white space with single blanks
 		$vers = $infv;
-		$vers =~ s/INFORMIX.* Version (\d+[.]\d+).*/$1/;
+		# JL 2002-11-06:
+		# CSDK 2.70 and earlier produces:
+		#     INFORMIX-ESQL Version 9.51.UC1  
+		# CSDK 2.80 (and later) produces:
+		#     IBM Informix CSDK Version 2.80, IBM Informix-ESQL Version 9.52.UC1  
+		# I4GL produces (note the extra spaces between Version and the number):
+		#     IBM INFORMIX-4GL Version   7.31.UC3   
+		# (I4GL issue reported by Roderick Schertler <roderick@argon.com>
+		# on 1999-07-25).  The s/// expression below picks up the I4GL or
+		# ESQL/C version correctly from all three formats, relying on
+		# case-insensitivity, the '-', and a string of alphanumerics to
+		# identify the correct codewords prior to Version.  Fortunately,
+		# the ESQL/C support code treats I4GL 7.31 the same as ESQL/C 9.x.
+		$vers =~ s/.*INFORMIX-\w+ Version\s+(\d+[.]\d+).*/$1/i;
 		die "Unexpected message from esql script -- $infv\n"
-			unless ($vers =~ /\d+[.]\d+/);
+			unless ($vers =~ /^\d+[.]\d+$/);
 		$vers =~ s/^([0-9])\./$1/;
 
 		return $infv, $vers;
@@ -207,7 +220,7 @@ use DBD::Informix::Configuration;
 
 =head1 DESCRIPTION
 
-This module is used by IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) in the build and bug reporting code.
+This module is used by Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) in the build and bug reporting code.
 You will seldom if ever have cause to use this module directly.
 
 =head2 Using find_informixdir_and_esql

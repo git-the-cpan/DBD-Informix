@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: esqllib.h,v $
-@(#)Version:         $Revision: 1.10 $
-@(#)Last changed:    $Date: 1997/06/02 16:24:26 $
 @(#)Purpose:         ESQL/C Library Function Prototypes
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1992-93,1995-97 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002            IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqllib_h[] = "@(#)$Id: esqllib.h version /main/10 1997-06-02 16:24:26 $";
+static const char esqllib_h[] = "@(#)$Id: esqllib.h,v 100.1 2002/02/08 22:49:20 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

@@ -1,12 +1,13 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t28dtlit.t version /main/7 2000-01-27 16:20:47 $
+#	@(#)$Id: t28dtlit.t,v 100.3 2002/02/08 22:50:46 jleffler Exp $
 #
-# Copyright (C) 1998-99 Jonathan Leffler
-# Copyright (C) 2000    Informix Software Inc
-# Copyright (C) 2002    IBM
+#	Test for handling DATETIME literals in SQL statements
 #
-# Test for handling DATETIME literals in SQL statements
+#	Copyright 1998-99 Jonathan Leffler
+#	Copyright 2000    Informix Software Inc
+#	Copyright 2002    IBM
+#
 # Note that DBD::Informix used to mangle a time such as '12:30:23' to '12??'
 # because dbd_ix_preparse() would treat the :30 as a positional parameter
 # (in a misguided attempt to accommodate Oracle scripts).

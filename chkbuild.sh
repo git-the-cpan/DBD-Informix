@@ -1,8 +1,12 @@
 #!/bin/ksh
 #
-#	@(#)$Id: chkbuild.sh version /main/8 1997-11-18 03:42:39 $
+#	@(#)$Id: chkbuild.sh,v 100.1 2002/02/08 22:49:00 jleffler Exp $
 #
 #	Test DBD::Informix for compatability with different ESQL/C versions
+#
+#   Copyright 1996-1999 Jonathan Leffler
+#   Copyright 2000      Informix Software
+#   Copyright 2002      IBM
 
 : ${PERL:=perl}
 : ${MAKE:=make}
@@ -15,20 +19,26 @@ if [ ! -f test.all ]
 then ${MAKE} -f /dev/null test.all
 fi
 
-config_list="${@:-${DBD_INFORMIX_CONFIG_LIST:-508UD1 601UD1 724UC1 912UC2}}"
+case $# in
+0)	if [ -z "$DBD_INFORMIX_CONFIG_LIST" ]
+	then
+		echo 'Specify the environment setting scripts on the command line' 1>&2
+		echo 'or in $DBD_INFORMIX_CONFIG_LIST' 1>&2
+		exit 1
+	fi
+	config_list="${DBD_INFORMIX_CONFIG_LIST}";;
+*)	config_list="$*";;
+esac
 
 for config in $config_list
 do
 	(
 	echo
 	date
-	echo "Testing ESQL/C $config with DBD::Informix"
-	case "$config" in
-	9*)	. $config.IUS;;
-	*)	. $config.OnLine;;
-	esac
-	esql_vers=`expr $config : '\(...\).*'`
+	echo "Testing DBD::Informix with configuration $config"
+	esql_vers=`esql -V | sed -e '2,$d' -e 's/.*Version //' -e 's/\([0-9][0-9]*\)\.\([0-9][0-9]\).*/\1\2/'`
 	export ESQLC_VERSION=$esql_vers
+	# JLSS command - environ
 	environ -a -u -b
 	echo
 	rm -f esql
@@ -43,6 +53,7 @@ do
 	else status="FAILED"
 	fi
 	echo
+	# JLSS command - boxecho
 	boxecho "$config -- $status"
 	echo
 	sleep 2

@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: esql_ius.h,v $
-@(#)Version:         $Revision: 3.1 $
-@(#)Last changed:    $Date: 1998/11/05 21:03:26 $
 @(#)Purpose:         Supply key macros from IUS version of sqltypes.h
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1998
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1998 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002 IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql_ius_h[] = "@(#)$Id: esql_ius.h version /main/1 1998-11-05 21:03:26 $";
+static const char esql_ius_h[] = "@(#)$Id: esql_ius.h,v 100.1 2002/02/08 22:49:13 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

@@ -1,15 +1,18 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: esqlcc version /main/9 1998-01-06 02:53:23 $ 
+# @(#)$Id: esqlcc,v 100.3 2002/11/20 19:05:09 jleffler Exp $ 
 #
 # DBD::Informix for Perl Version 5
 #
 # Surrogate C Compiler for Informix ESQL/C versions 4.10.UC1 upwards
 #
-# Copyright (c) 1996-98 Jonathan Leffler
+# Copyright 1996-98 Jonathan Leffler
+# Copyright 2002    IBM
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
+
+# NB: Uses esqlsed script
 
 @ARGS = ();
 $libs = 1;
@@ -29,7 +32,10 @@ for ($i = 0; $i < @ARGV; $i++)
 	if ($arg =~ /^[^-].*\.c$/o)
 	{
 		# C file
-		system "perl esqlsed $arg"
+		# Use $^X rather than perl to avoid problems with
+		# inappropriate versions of perl in system directories
+		# (Roderick Schertler <roderick@argon.org> 1999-07-25).
+		system "$^X esqlsed $arg"
 			if (-w $arg && &firstline($arg) eq "#include <sqlhdr.h>");
 		push @ARGS, $arg;
 	}
@@ -61,6 +67,17 @@ for ($i = 0; $i < @ARGV; $i++)
 		# Copy argument to new argument list
 		push @ARGS, $arg;
 	}
+}
+
+# Generalization of DBD_INFORMIX_ESQLLD_NO_G_OPTION...
+if ($ENV{DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX})
+{
+	my($env) = $ENV{DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX};
+	print STDERR "# DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX set.\n";
+	print STDERR "# Removing options that match regex m%$env%\n";
+	print STDERR "# Before: @ARGS\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLCC};
+	@ARGS = grep { !m%$env%o } @ARGS;
+	print STDERR "# After: @ARGS\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLCC};
 }
 
 # Sort out the real compiler.

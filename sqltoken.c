@@ -1,11 +1,9 @@
 /*
-@(#)File:            $RCSfile: sqltoken.c,v $
-@(#)Version:         $Revision: 1.9 $
-@(#)Last changed:    $Date: 1999/03/12 18:53:55 $
 @(#)Purpose:         Identify SQL token in string
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1998-99
-@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Copyright:       1998-99 Jonathan Leffler (JLSS)
+@(#)Copyright:       2002    IBM
+@(#)Product:         Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -20,7 +18,7 @@
 #define RCURLY '}'
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltoken.c version /main/9 1999-03-12 18:53:55 $";
+static const char rcs[] = "@(#)$Id: sqltoken.c,v 100.1 2002/02/08 22:49:38 jleffler Exp $";
 #endif
 
 /*

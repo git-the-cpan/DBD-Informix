@@ -1,13 +1,13 @@
 /*
- * @(#)$Id: esqltest.ec version /main/20 2000-02-08 16:57:02 $
+ * @(#)$Id: esqltest.ec,v 100.3 2002/02/08 22:49:23 jleffler Exp $
  *
- * IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+ * Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
  *
  * Test Informix-ESQL/C environment
  *
- * Portions Copyright 1997-99 Jonathan Leffler
- * Portions Copyright 2000    Informix Software Inc
- * Portions Copyright 2002    IBM
+ * Copyright 1997-99 Jonathan Leffler
+ * Copyright 2000    Informix Software Inc
+ * Copyright 2002    IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -34,7 +34,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec version /main/20 2000-02-08 16:57:02 $";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 100.3 2002/02/08 22:49:23 jleffler Exp $";
 #endif
 
 /*
@@ -131,9 +131,8 @@ void dbd_ix_debug_l(int level, char *fmt, long arg)
 	printf(fmt, arg);
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
-	/* Command-line arguments are ignored at the moment */
 	char *dbidsn = getenv("DBI_DSN");
 	char *dbase0 = getenv("DBI_DBNAME");
 	char *dbase1 = getenv("DBD_INFORMIX_DATABASE");
@@ -143,6 +142,8 @@ int main(int argc, char **argv)
 	char *srvr1 =  getenv("DBD_INFORMIX_SERVER");	/* Obsolete */
 	char *user2 = getenv("DBD_INFORMIX_USERNAME2");
 	char *pass2 =  getenv("DBD_INFORMIX_PASSWORD2");
+	char *ixdir = getenv("INFORMIXDIR");
+	char *ixsrv = getenv("INFORMIXSERVER");
 	Boolean conn_ok;
 	static char  conn1[20] = "connection_1";
 	static char  conn2[20] = "connection_2";
@@ -155,6 +156,15 @@ int main(int argc, char **argv)
 		printf("!!!\tFYI: $DBI_DSN is set to '%s'.\n", dbidsn);
 		printf("\t\tIt is not used by any of the DBD::Informix tests.\n");
 		printf("\t\tIt is unset by the tests which would otherwise break.\n");
+	}
+
+	if (ixdir != 0 && *ixdir != '\0')
+	{
+		printf("\t$INFORMIXDIR is set to '%s'.\n", ixdir);
+	}
+	if (ixsrv != 0 && *ixsrv != '\0')
+	{
+		printf("\t$INFORMIXSERVER is set to '%s'.\n", ixsrv);
 	}
 
 	/* Test whether the server name is set. */

@@ -1,19 +1,14 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t75blob.t version /main/10 2000-01-27 16:21:44 $ 
+#	@(#)$Id: t75blob.t,v 100.5 2002/10/19 01:01:35 jleffler Exp $ 
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
-#	Copyright (C) 1996-97,1999 Jonathan Leffler
-#	Copyright (C) 2000         Informix Software Inc
-#	Copyright (C) 2002         IBM
+#	Copyright 1996-97,1999 Jonathan Leffler
+#	Copyright 2000         Informix Software Inc
+#	Copyright 2002         IBM
 
 use DBD::Informix::TestHarness;
-
-# KLUDGE - of the worst type!
-print("1..0\n");
-&stmt_note("# Test disabled - because it routinely fails!\n");
-exit(0);
 
 $tablename = "DBD_IX_BlobTest2";
 
@@ -22,8 +17,7 @@ $dbh = connect_to_test_database();
 
 if (!$dbh->{ix_BlobSupport})
 {
-	print("1..0\n");
-	&stmt_note("# No blob support -- no blob testing\n");
+	print("1..0 # Skip: No blob support -- no blob testing\n");
 	$dbh->disconnect;
 	exit(0);
 }

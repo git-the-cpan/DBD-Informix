@@ -1,12 +1,12 @@
 /*
-@(#)File:           $Id: ixblob.ec version /main/15 2000-03-03 11:02:33 $
+@(#)File:           $Id: ixblob.ec,v 100.2 2002/02/08 22:49:27 jleffler Exp $
 @(#)Based on:       ixblob.ec 50.9 1998-10-28 18:42:12
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
 @(#)Copyright:      1996-98 Jonathan Leffler
 @(#)Copyright:      2000    Informix Software Inc
 @(#)Copyright:      2002    IBM
-@(#)Product:        IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
+@(#)Product:        Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
 */
 
 /*TABSTOP=4*/
@@ -37,7 +37,7 @@
 static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec version /main/15 2000-03-03 11:02:33 $";
+static const char rcs[] = "@(#)$Id: ixblob.ec,v 100.2 2002/02/08 22:49:27 jleffler Exp $";
 #endif
 
 BlobLocn blob_getlocmode(void)

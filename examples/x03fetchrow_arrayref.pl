@@ -2,9 +2,11 @@
 #
 # DBD::Informix Example 3 - fetchrow_arrayref
 #
-# @(#)$Id: examples/x03fetchrow_arrayref.pl version /main/2 1998-10-27 19:14:59 $
+# @(#)$Id: x03fetchrow_arrayref.pl,v 100.1 2002/02/08 22:50:08 jleffler Exp $
 #
-# Jonathan Leffler (j.leffler@acm.org)
+# Copyright 1998 Jonathan Leffler
+# Copyright 2000 Informix Software Inc
+# Copyright 2002 IBM
 
 use DBI;
 printf("DEMO1 Sample DBD::Informix Program running.\n");

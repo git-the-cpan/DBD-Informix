@@ -115,7 +115,7 @@ connections, then (as of version 0.95) you no longer have to modify
 anything.  The esqltest program will report that you are using two shared
 memory connections and that the multiple connection tests will be skipped.
 The actual multiple connection tests attempt to detect the use of two
-shared memory connections befor making either connection, and skip the test
+shared memory connections before making either connection, and skip the test
 if both connections will use shared memory.  The multiple connection tests
 are t/t2[123]mconn.t.  Note that the code that identifies shared memory
 connections may fail (especially on NT) and therefore the multiple
@@ -125,4 +125,4 @@ passes, you can install the product).
 
 --
 
-@(#)$Id: Notes/olipcshm version /main/3 1999-11-27 08:16:12 $
+@(#)$Id: olipcshm,v 100.1 2002/02/08 22:50:00 jleffler Exp $

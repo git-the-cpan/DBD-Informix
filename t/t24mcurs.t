@@ -1,14 +1,13 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t24mcurs.t version /main/14 2000-01-27 16:20:42 $ 
+#	@(#)$Id: t24mcurs.t,v 100.3 2002/02/08 22:50:45 jleffler Exp $ 
 #
-# (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#	Tests multiple simultaneous cursors being open
 #
-#	Portions Copyright (C) 1996-97,1999 Jonathan Leffler
-#	Portions Copyright (C) 2000         Informix Software Inc
-#	Portions Copyright (C) 2002         IBM
-#
-# Tests multiple simultaneous cursors being open
+#	Copyright 1996         Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#	Copyright 1996-97,1999 Jonathan Leffler
+#	Copyright 2000         Informix Software Inc
+#	Copyright 2002         IBM
 
 use DBD::Informix::TestHarness;
 

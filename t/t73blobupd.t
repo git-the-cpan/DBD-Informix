@@ -1,33 +1,27 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t73blob.t version /main/18 2000-01-27 16:21:38 $ 
+#	@(#)$Id: t73blobupd.t,v 100.5 2002/10/19 01:03:58 jleffler Exp $ 
 #
 #	Test Basic Blobs (INSERT & UPDATE) for DBD::Informix
 #
-#	Copyright (C) 1999 Jonathan Leffler
-#	Copyright (C) 2000 Informix Software Inc
-#	Copyright (C) 2002 IBM
+#	Copyright 1999 Jonathan Leffler
+#	Copyright 2000 Informix Software Inc
+#	Copyright 2002 IBM
 
+use DBD::Informix qw(:ix_types);
 use DBD::Informix::TestHarness;
 
 $dbh = &connect_to_test_database();
 
 if (!$dbh->{ix_BlobSupport})
 {
-	print("1..0\n");
-	&stmt_note("# No blob support -- no blob testing\n");
+	print("1..0 # Skip: No blob support -- no blob testing\n");
 	$dbh->disconnect;
 	exit(0);
 }
-elsif ($dbh->{ix_ProductVersion} < 915)
-{
-	print("1..2\n");
-	&stmt_note("# DESCRIBE for UPDATE not available -- no blob UPDATE\n");
-	&stmt_ok(0);
-}
 else
 {
-	print("1..15\n");
+	print("1..19\n");
 	&stmt_ok(0);
 
 	$blob_table = "DBD_IX_BlobTest";
@@ -97,32 +91,35 @@ else
 		}
 	}
 
-#	# BLOB Update - known not to work
-#	$stmt5 = qq{UPDATE $blob_table SET T = ?, B = ? WHERE I = ?};
-#	&stmt_note("# Testing: \$upd = \$dbh->prepare('$stmt5')\n");
-#	&stmt_fail() unless ($upd = $dbh->prepare($stmt5));
-#
-#	$blob3 = "This, too, is a TEXT blob\n" x 2;
-#	$blob4 = "This, too, is a pseudo-BYTE blob\n" x 2;
-#	&stmt_fail() unless $upd->execute($blob3, $blob4, 3);
-#
-#	&stmt_note("# Re-testing: \$cursor->execute\n");
-#	&stmt_fail() unless ($cursor->execute);
-#	&stmt_ok(0);
-#
-#	&stmt_note("# Re-testing: \$cursor->fetch\n");
-#	# Fetch returns a reference to an array!
-#	while ($ref = $cursor->fetchrow_arrayref)
-#	{
-#		&stmt_ok(0);
-#		@row = @{$ref};
-#		# Verify returned data!
-#		&stmt_note("# Values returned: ", $#row + 1, "\n");
-#		for ($i = 0; $i <= $#row; $i++)
-#		{
-#			&stmt_note("# Row value $i: $row[$i]\n");
-#		}
-#	}
+	# BLOB Update - must use bind_param
+	$stmt5 = qq{UPDATE $blob_table SET T = ?, B = ? WHERE I = ?};
+	&stmt_note("# Testing: \$upd = \$dbh->prepare('$stmt5')\n");
+	&stmt_fail() unless ($upd = $dbh->prepare($stmt5));
+
+	$blob3 = "This, too, is a TEXT blob\n" x 2;
+	$blob4 = "This, too, is a pseudo-BYTE blob\n" x 2;
+	$upd->bind_param(1, $blob3, { ix_type => IX_TEXT });
+	$upd->bind_param(2, $blob4, { ix_type => IX_BYTE });
+	$upd->bind_param(3, 3, { ix_type => IX_INTEGER });
+	&stmt_fail() unless $upd->execute();
+
+	&stmt_note("# Re-testing: \$cursor->execute\n");
+	&stmt_fail() unless ($cursor->execute);
+	&stmt_ok(0);
+
+	&stmt_note("# Re-testing: \$cursor->fetch\n");
+	# Fetch returns a reference to an array!
+	while ($ref = $cursor->fetchrow_arrayref)
+	{
+		&stmt_ok(0);
+		@row = @{$ref};
+		# Verify returned data!
+		&stmt_note("# Values returned: ", $#row + 1, "\n");
+		for ($i = 0; $i <= $#row; $i++)
+		{
+			&stmt_note("# Row value $i: $row[$i]\n");
+		}
+	}
 
 	&stmt_note("# Testing: \$cursor->finish\n");
 	&stmt_fail() unless ($cursor->finish);
