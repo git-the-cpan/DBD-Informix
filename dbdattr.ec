@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdattr.ec,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
+ * @(#)$Id: dbdattr.ec,v 60.1 1998/07/30 04:03:22 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- attribute handling
  *
@@ -12,7 +12,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec,v 58.1 1998/01/06 02:53:23 johnl Exp $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 60.1 1998/07/30 04:03:22 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -273,6 +273,13 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 	{
 		retsv = newSVpv(imp_dbh->nm_connection, 0);
 	}
+	else if (KEY_MATCH(kl, key, "ix_DatabaseName"))
+	{
+		char *dbname = "";
+		if (imp_dbh->database)
+			dbname = SvPV(imp_dbh->database, na);
+		retsv = newSVpv(dbname, 0);
+	}
 	else if ((retsv = dbd_ix_getsqlca(imp_dbh, kl, key)) != NULL)
 	{
 		/* Nothing to do */
@@ -450,6 +457,13 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 				:collength = LENGTH;
 			av_store(av, i - 1, newSViv((IV)collength));
 		}
+	}
+	else if (KEY_MATCH(kl, key, "ix_StatementText"))
+	{
+		char *text = "";
+		if (imp_sth->st_text)
+			text = SvPV(imp_sth->st_text, na);
+		retsv = newSVpv(text, 0);
 	}
 	else
 	{

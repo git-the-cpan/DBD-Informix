@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: decsci.h,v $
-@(#)Version:         $Revision: 1.4 $
-@(#)Last changed:    $Date: 1997/07/08 19:47:10 $
+@(#)Version:         $Revision: 1.5 $
+@(#)Last changed:    $Date: 1998/04/09 21:24:00 $
 @(#)Purpose:         JLSS Functions to manipulate DECIMAL values
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1996-97
-@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
+@(#)Copyright:       (C) JLSS 1996-98
+@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char decsci_h[] = "@(#)$Id: decsci.h,v 1.4 1997/07/08 19:47:10 johnl Exp $";
+static const char decsci_h[] = "@(#)$Id: decsci.h,v 1.5 1998/04/09 21:24:00 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -24,7 +24,7 @@ static const char decsci_h[] = "@(#)$Id: decsci.h,v 1.4 1997/07/08 19:47:10 john
 extern int decabs(const dec_t *x, dec_t *r1);
 extern int decneg(const dec_t *x, dec_t *r1);
 extern int decpower(const dec_t *x, int n, dec_t *r1);
-extern int decsqrt(const dec_t *x, dec_t *r1);
+extern int decsqrt(dec_t *x, dec_t *r1);
 
 /* NB: these routines are not thread-safe and share common return storage */
 extern char *decfix(const dec_t *d, int ndigit, int plus);

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 59.4 1998/03/11 17:38:50 jleffler Exp $ 
+# @(#)$Id: Makefile.PL,v 60.3 1998/08/13 00:47:02 jleffler Exp $ 
 #
 # Portions Copyright (c) 1996-98 Jonathan Leffler
 # Portions Copyright (c) 1996    Alligator Descartes
@@ -43,7 +43,7 @@ $| = 1;     # Ensure that Perl output is interleaved with test output.
 my %opts = (
     NAME         => 'DBD::Informix',
     VERSION_FROM => 'Informix.pm',
-    clean        => { FILES        => 'Informix.xsi' },
+    clean        => { FILES        => 'Informix.xsi esqlvrsn.h' },
     realclean    => { FILES        => 'esql' },
     dist         => { DIST_DEFAULT => 'clean distcheck disttest tardist',
                       PREOP        => '$(MAKE) -f Makefile.old distdir',
@@ -89,7 +89,7 @@ did_not_read("DBI is out of date") unless ($DBI::VERSION >= 0.90);
 # Compare installed version of DBI with version which DBD::Informix was
 # last tested with.
 # The required and reference versions are different for this release.
-my $dbi_ref_ver = "0.93";
+my $dbi_ref_ver = "0.95";
 warn "*** Ideally, you should upgrade to DBI version $dbi_ref_ver.\n\n"
 	unless ($DBI::VERSION >= $dbi_ref_ver);
 
@@ -290,7 +290,8 @@ else
 # -- Configure the make process
 
 # Define the version of ESQL/C for the object code.
-$opts{DEFINE}  = " -DESQLC_VERSION=$vernum";
+$opts{DEFINE} = " -DESQLC_VERSION=$vernum";
+$opts{DEFINE} .= " -DNDEBUG" if defined($ENV{DBD_INFORMIX_DISABLE_ASSERT});
 
 print "\n$opts{NAME} doesn't check whether ODBC or Informix-CLI software\n";
 print "is installed any more.  It uses a home-brew odbctype.h instead.\n\n";
@@ -369,8 +370,9 @@ else
 	print "Don't you need to upgrade your compiler?\n";
 }
 
-my $objects = "Informix.o dbdimp.o dbdattr.o";
+my $objects = "Informix.o dbdimp.o dbdattr.o sqltoken.o";
 $objects .= " sqltype.o ixblob.o decsci.o odbctype.o link.o $vercode.o";
+$objects .= " eprintf.o" if defined $ENV{DBD_INFORMIX_USE_EPRINTF_CODE};
 # Map object file names on non-Unix platforms
 $objects =~ s/\.o\w/$objext/g if ($objext ne ".o");
 
@@ -386,12 +388,32 @@ $opts{OBJECT} = $objects;
 ##############################
 
 my $unsuccessful_test = qq%
-The test program did not complete successfully.
-Either ESQL/C programs do not work automatically, or you do not
-have enough permissions in your Informix environment.
-Try to compile and run the simple ESQL/C program esqlbasic.ec.
+The test program esqltest compiled successfully (which is good).
+However, it did not run successfully (which is bad).
+
+If the esqltest program did not produce any output:
+    This suggests that there is a problem with the ESQL/C runtime
+    environment, or with the database permissions (in which case, you
+    should have seen diagnostics from the esqltest program itself).
+    Consider whether the shared library path environment variable (eg
+    LD_LIBRARY_PATH or SHLIB_PATH) is set correctly.
+
+If the esqltest program did produce some output:
+    This suggests that you do not have enough permissions in your
+    Informix environment.  You really need DBA (at least RESOURCE)
+    level privileges on the database you are using.
+
+If you might be having problems with ESQL/C, try to compile and run
+the simple ESQL/C program esqlbasic.ec, which has no Perl related
+code in it at all -- it is a pure ESQL/C program:
+
+        esql -o esqlbasic esqlbasic.ec && esqlbasic
+
 If you can't get that to work, then the problem is with ESQL/C
-and not with $opts{NAME} per se.
+and not with $opts{NAME} per se, and you need to get your ESQL/C
+installation fixed so that you can compile and run the esqlbasic
+program successfully.
+
 Make sure you've read the whole README file before asking the
 DBI/DBD community for help!
 %;
@@ -578,7 +600,8 @@ elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 	print "\n";
 }
 
-# @(#)KLUDGE - Experimental -R flags
+# On Solaris, setting -R flags allows DBD::Informix to be used in
+# CGI scripts or cron tasks more easily.
 ${$opts{dynamic_lib}}{OTHERLDFLAGS} .= " -R$ID/lib -R$ID/lib/esql"
 	if ($Config{osname} eq 'solaris');
 

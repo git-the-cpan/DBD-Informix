@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqltest.ec,v 58.3 1998/01/15 18:46:24 johnl Exp $ 
+ * @(#)$Id: esqltest.ec,v 60.2 1998/06/16 16:45:28 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -40,7 +40,7 @@ error "Please read the README file, and Makefile.PL, and get __STDC__ defined"
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 58.3 1998/01/15 18:46:24 johnl Exp $";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 60.2 1998/06/16 16:45:28 jleffler Exp $";
 #endif
 
 /*
@@ -152,6 +152,8 @@ int main(int argc, char **argv)
 	static char  conn1[20] = "connection_1";
 	static char  conn2[20] = "connection_2";
 
+	printf("ESQLTEST Program Running:\n%s\n", rcs);
+
 	/* Check whether the default connection variable is set */
 	if (dbidsn != 0 && *dbidsn != '\0')
 	{
@@ -210,21 +212,30 @@ int main(int argc, char **argv)
 
 	/* Report whether username is set, and what it is */
 	if (user == 0 || *user == '\0')
+	{
+		user = 0;
 		printf("\t$DBD_INFORMIX_USERNAME is unset.\n");
+	}
 	else
 		printf("\t$DBD_INFORMIX_USERNAME is set to '%s'.\n", user);
 
 	/* Report whether password is set, but not what it is */
 	if (pass == 0 || *pass == '\0')
+	{
+		pass = 0;
 		printf("\t$DBD_INFORMIX_PASSWORD is unset.\n");
+	}
 	else
 		printf("\t$DBD_INFORMIX_PASSWORD is set.\n");
 
 	printf("Testing connection to %s\n", dbase1);
 #if ESQLC_VERSION >= 600
     /* 6.00 and later versions of Informix-ESQL/C support CONNECT */
-	printf("\tDBD_INFORMIX_USERNAME & DBD_INFORMIX_PASSWORD are ignored\n");
-	printf("\t\tunless both variables are set.\n");
+	if ((user == 0 && pass != 0) || (user != 0 && pass == 0))
+	{
+		printf("\tDBD_INFORMIX_USERNAME & DBD_INFORMIX_PASSWORD are ignored\n");
+		printf("\t\tunless both variables are set.\n");
+	}
     conn_ok = dbd_ix_connect(conn1, dbase1, user, pass);
 #else
     /* Pre-6.00 versions of Informix-ESQL/C do not support CONNECT */

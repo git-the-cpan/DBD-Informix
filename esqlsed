@@ -1,6 +1,6 @@
 #!/usr/bin/perl -pi
 #
-# @(#)$Id: esqlsed,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
+# @(#)$Id: esqlsed,v 60.2 1998/06/15 22:04:08 jleffler Exp $ 
 #
 # DBD::Informix for Perl Version 5
 #
@@ -12,9 +12,22 @@
 # License or the Artistic License, as specified in the Perl README file.
 
 $mode = 1 if ($line++ == 0 && /^#include <sqlhdr\.h>$/o);
-print "/* Processed by $RCSfile: esqlsed,v $ version $Revision: 58.1 $ ($Date: 1998/01/06 02:53:23 $) */\n#include \"esqlc.h\"\n"
-	if ($mode == 1 && $line == 1);
-$_ = "" if ($mode == 1 && /^#include <sqlca\.h>$/o);
-$_ = "" if ($mode == 1 && /^#include <sqlhdr\.h>$/o);
-$_ = "" if ($mode == 1 && /^extern _SQCURSOR \*_iqnprep\(\);$/o);
-s/\(char\s*\*\)\s*0/0/og if ($mode == 1 && /\b_iq\w+\(/o);
+if ($mode == 1)
+{
+	if ($line == 1)
+	{
+		my ($info) =
+			'/* Processed by $RCSfile: esqlsed,v $' .
+			' version $Revision: 60.2 $' .
+			' ($Date: 1998/06/15 22:04:08 $) */';
+		$info =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;   # Remove RCS!
+		$info =~ s/,v//g;
+		print "$info\n#include \"esqlc.h\"\n";
+		$_ = "";
+	}
+	$_ = "" if (/^#include\s+<sqlca\.h>\s*$/o);
+	$_ = "" if (/^#include\s+<sqlhdr\.h>\s*$/o);
+	$_ = "" if (/^extern\s+_SQCURSOR\s*\*_iqnprep\(\);\s*$/o);
+	$_ = "" if (/^#define\s+const\s*$/o);
+	s/\(char\s*\*\)\s*0/0/og if (/\b_iq\w+\(/o);
+}

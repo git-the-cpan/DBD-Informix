@@ -1,33 +1,70 @@
 To: dbi-announce@fugue.com, dbi-dev@fugue.com, dbi-users@fugue.com,
         informix-list@rmy.emory.edu, descarte@arcana.co.uk
-Subject: ANNOUNCE: DBD::Informix Version 0.59 released
+Subject: ANNOUNCE: DBD::Informix Version 0.60 released
 
-The next release of DBD::Informix, version 0.59, has been uploaded to CPAN.
+The next release of DBD::Informix, version 0.60, has been uploaded to CPAN.
 It will be available worldwide in a day or three.
 
-DBD::Informix is the driver code that enables Perl 5.003 or 5.004 to access
-Informix databases via the DBI module (you'll need the code for both DBI
-version 0.90 and DBD::Informix).  The code is available for download via:
+DBD::Informix is the driver code that enables Perl 5.003, 5.004 or 5.005 to
+access Informix databases via the DBI module (you'll need the code for both
+DBI version 0.93 and DBD::Informix).  You should be planning to upgrade to
+at least version Perl 5.004_04 as some software in the DBI family will
+require this version (eg DBI::Shell).  The DBD::Informix and DBI code is
+available for download via:
 
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
 http://www.arcana.co.uk/technologia/perl/DBI
 
+   *******************************************************************
+   **    When you successfully build DBD::Informix v0.60, please    **
+   ** report your configuration so I can add it to Working.Versions **
+   *******************************************************************
+
 New in this release:
-* 
+* Added -R option to link lines on Solaris so that the pathname of the
+  Informix shared libraries is embedded into the DBD::Informix shared
+  library, which in turn means that you don't need as much environment set
+  at run-time.  This is particularly valuable for CGI scripts run from web
+  servers, though you still need to relay the key Informix environment
+  variables (INFORMIXDIR and INFORMIXSERVER for 6.00 and later versions of
+  the database).
+* Dropped sqlcmd.sh -- DBI::Shell should be used.
+* Add various notes on how to build DBD::Informix on various platforms,
+  including how to work around __eprintf() problems.  There are two new
+  environment variables, DBD_INFORMIX_DISABLE_ASSERT and
+  DBD_INFORMIX_USE_EPRINTF_CODE, which do what their names suggest.  By
+  default, the code is compiled with assertions enabled.
+* Implicitly finish a SELECT statement when no row is fetched, as required
+  by the DBI specification.
+* Add $dbh->{ix_DatabaseName} attribute and track the name of the current
+  database.  Note that $dbh->{Name} only gives the name used when the
+  connection was established, whereas $dbh->{ix_DatabaseName} tracks CLOSE
+  DATABASE statements and database creation.
+* Add $sth->{ix_StatementText}, primarily because the code needs to do so
+  to handle database names properly and it was almost painless to make the
+  information available to the user.
+* The DBI->data_sources('Informix') method now includes the 'dbi:Informix:'
+  prefix mandated by the DBI specification.
+* Add some more files to the hints directory.  These are not just building
+  hints (so maybe they belong somewhere else), but they may help you with
+  fixing common problems (and misconceptions).
+* Fix one source of the problems reported by Kenji Hino <kenji@alcatraz.net>
+  related null blobs and SQL error -608.
 
 Still to do:
-* Add support for IUS data types.
-* Try to reproduce the problems reported by Kenji Hino <kenji@alcatraz.net>
-  and then fix them.  It is related null blobs and SQL error -608.
-* Resolve -R option on Solaris and equivalents for getting path name of
-  Informix shared libraries into DBD::Informix shared library, so you don't
-  need as much environment set at run-time.
+* Add support for IUS data types.  Being worked on by two noble volunteers,
+  David Meyer <dmeyer9@email.msn.com> and Rocky Bernstein
+  <rocky@thewire.ap.org>.
 * Investigate whether using sqlda structures in place of SQL descriptors
   makes a significant difference to the performance of DBD::Informix.
-* Integrate sqlcmd.sh into the build more thoroughly.  Document it.  Make
-  it bomb-proof (for example, it fails horribly if you don't have a '-d'
-  option on the command line because there isn't a way to connect to a
-  database.
+  Being worked on by another noble volunteer, Wes Gamble
+  <Wes.Gamble@chron.com>.  Note that this work is a necessary precursor to
+  providing support for Informix-ESQL/C v4.x or earlier versions.
+* Use the output from DESCRIBE of an UPDATE statement in ClientSDK 2.00 and
+  the 7.30 servers.
+* Ensure that the tests clean up behind themselves.  Also ensure that the
+  tests always use DBD_INFORMIX_USERNAME and DBD_INFORMIX_PASSWORD when
+  they are provided.
 
 Let me know of problems, as usual, and solutions too when you have them.
 
@@ -37,4 +74,4 @@ Jonathan Leffler (j.leffler@acm.org) #include <disclaimer.h>
 
 PS: Read the README file.  Also read the Informix.Licence file.
 
-@(#)$Id: Announce,v 59.1 1998/02/06 17:52:59 jleffler Exp $
+@(#)$Id: Announce,v 60.4 1998/08/13 00:43:11 jleffler Exp $

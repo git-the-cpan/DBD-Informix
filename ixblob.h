@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: ixblob.h,v $
-@(#)Version:         $Revision: 50.2 $
-@(#)Last changed:    $Date: 1997/05/05 16:52:06 $
+@(#)Version:         $Revision: 50.3 $
+@(#)Last changed:    $Date: 1998/04/09 21:48:10 $
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) Jonathan Leffler 1997
-@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
+@(#)Copyright:       (C) Jonathan Leffler 1997-98
+@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char ixblob_h[] = "@(#)$Id: ixblob.h,v 50.2 1997/05/05 16:52:06 johnl Exp $";
+static const char ixblob_h[] = "@(#)$Id: ixblob.h,v 50.3 1998/04/09 21:48:10 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -35,8 +35,7 @@ typedef enum BlobLocn BlobLocn;
 ** If you are using blobs in memory, the space allocated for the
 ** blob needs to be released by blob_locate().  Blob files may or
 ** may not need to be deleted; if dflag is non-zero, then the file
-** is deleted.  Note that blob_locate() does not handle BLOB_DUMMY_VALUE
-** or BLOB_NULL_VALUE.
+** is deleted.
 */
 extern BlobLocn blob_getlocmode(void);
 extern int blob_locate(Blob *blob, BlobLocn locn);

@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: Informix.xs,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
+ * @(#)$Id: Informix.xs,v 60.1 1998/07/30 22:38:07 jleffler Exp $ 
  *
  * Portions Copyright (c) 1994-95 Tim Bunce
  * Portions Copyright (c) 1995-96 Alligator Descartes
@@ -18,7 +18,7 @@ DBISTATE_DECLARE;
 /* Assume string concatenation is available */
 #ifndef lint
 static const char rcs[] =
-	"@(#)$Id: Informix.xs,v 58.1 1998/01/06 02:53:23 johnl Exp $";
+	"@(#)$Id: Informix.xs,v 60.1 1998/07/30 22:38:07 jleffler Exp $";
 static const char esqlc_ver[] =
 	"@(#)" ESQLC_VERSION_STRING;
 #endif
@@ -54,11 +54,13 @@ void
 data_sources(drh)
 	SV *drh
 	PPCODE:
-# Note that a database name could consist of up to 18 characters in OnLine,
-# plus the name of the server (no limit defined, assume 18 again), plus the
-# at sign and the NUL at the end.
+# Up until recently, a database name could consist of up to 18 characters
+# in OnLine, plus the name of the server (no limit defined, assume 18
+# again), plus the at sign and the NUL at the end.  With the 9.2 release,
+# the server and database names will be able to go to 128 characters, hence
+# the increased limits.
 #define MAXDBS 100
-#define MAXDBSSIZE	(18+18+2)
+#define MAXDBSSIZE	(128+128+2)
 #define FASIZE (MAXDBS * MAXDBSSIZE)
 	int sqlcode;
 	int ndbs;
@@ -74,8 +76,9 @@ data_sources(drh)
 	{
 		for (i = 0; i < ndbs; ++i)
 		{
+			SV *sv = newSVpvf("dbi:Informix", 0);
 			# Let Perl calculate the length of the name
-			XPUSHs(sv_2mortal((SV*)newSVpv(dbsname[i], 0)));
+			XPUSHs(sv_2mortal(newSVpvf("dbi:Informix:%s", dbsname[i])));
 		}
 	}
 

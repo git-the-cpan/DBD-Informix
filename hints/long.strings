@@ -1,0 +1,64 @@
+Date: Tue, 07 Jul 1998 23:05:31 -0700
+From: Jonathan Leffler <jleffler@earthlink.net>
+To: ktnguyen@cerf.net
+Subject: Re: DBD::Informix error -280 (limit on size of field)
+
+ktnguyen@cerf.net wrote:
+> I believe the field of table is char.  I used different tool (isql,
+> ARSperl) to access Informix field which has long size (greater than
+> 256 chars) with no problem.
+
+Yes, you can handle them without particular problems as long as you
+understand precisely what the error is complaining about and you know
+how to work around it.
+
+Incidentally, DB-Access and ISQL do not allow you to insert literal
+values of more 256 characters directly in an INSERT statement either.
+
+And note that the problem is not created by DBD::Informix; it is
+foisted on DBD::Informix by the underlying ESQL/C and Engines.
+
+> I looked for error message corresponding to error code 280 and found
+> out that informix does not accept a long quoted string in a
+> statement. I just wonder how people using DBI/DBD can get around to
+> make a long quoted string or is there anyone get in this situation?
+> [...]
+> Error message from informix.
+> -280    A quoted string exceeds 256 bytes.
+>
+> A character literal in this statement exceeds the maximum length.
+
+OK - you realize that it is a literal string that causes the problem.
+
+The normal way that this arises is a variant on the theme of:
+
+$longvalue = q{ He said, 'Hi There, "Darling"!' } x 32;
+$longquoted = $dbh->quote($longvalue);
+$stmt = qq"INSERT INTO SomeTable(VeryLongColumn) VALUES($longquote)";
+
+If you don't use $dbh->quote(), the embedded quotes in the string
+$longvalue will give you errors.  As you have now found out, this
+technique does not work when the length of $longvalue is more than
+256 characters.
+
+The way to deal with this to avoid passing long string literals to
+your INSERT statement -- use a place-holder '?' (unquoted) in the
+VALUES list and supply the value as a variable when the INSERT is
+executed:
+
+$longvalue = "Hi There! " x 64;
+$sth = $dbh->prepare(q"INSERT INTO SomeTable(VeryLongColumn)
+			 VALUES (?)");
+$sth->execute($longvalue);
+
+Your code will error check the DBI operations, of course.
+
+You run into a variant on this problem (with the same solution) when you
+try to insert a string with embedded newlines.  This doesn't work either;
+you have to use a placeholder to get such values into a table.
+
+--
+Jonathan Leffler (jleffler@informix.com, jleffler@earthlink.net)
+Guardian of DBD::Informix -- see http://www.perl.com/CPAN
+#include <disclaimer.h>
+

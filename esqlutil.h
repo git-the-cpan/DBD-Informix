@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlutil.h,v $
-@(#)Version:         $Revision: 1.7 $
-@(#)Last changed:    $Date: 1997/04/29 15:09:25 $
+@(#)Version:         $Revision: 1.11 $
+@(#)Last changed:    $Date: 1998/04/21 17:27:58 $
 @(#)Purpose:         ESQL/C Utility Functions
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1995-97
-@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
+@(#)Copyright:       (C) JLSS 1995-98
+@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 1.7 1997/04/29 15:09:25 johnl Exp $";
+static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 1.11 1998/04/21 17:27:58 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -66,5 +66,39 @@ extern void dumpsqlca(FILE *fp, const char *tag);
 */
 extern int jtypmsize(int type, int len);
 extern int jtypalign(int offset, int type);
+
+/*
+** sqltoken() -- Extract an SQL token from the given string
+** Return value points to start of token; *end points one beyond end
+** If *end == return value, there are no more tokens in the string
+** Understands and ignores {...}, # and -- comments.  Understands
+** character strings, and unsigned numbers with optional fractions and
+** exponents -- any leading sign is treated as a separate token.
+*/
+extern char *sqltoken(char *string, char **end);
+
+/* sql_printerror() -- print error in global sqlca on specified file */
+extern void sql_printerror(FILE *fp);
+
+/* sql_tabid -- return tabid of table, regardless of database type, etc.
+**
+** NB: returns -1 on any error; SQL error info is in sqlca record.  The
+** owner name can be in quotes or not, and the results may differ
+** depending on whether the owner is quoted or not.  It does not matter
+** whether the quotes are single or double.  If the first character is a
+** quote, the last character is assumed to be the matching quote.  The
+** table name must be a valid string; the other parts can be empty
+** strings or null pointers.  This code does not handle delimited
+** identifiers as table names.  It uses statement IDs p_sql_tabid_q001,
+** p_sql_tabid_q002 and c_sql_tabid_q002.
+** The function used functions vstrcpy(), strlower(), strupper() from jlss.h.
+*/
+
+extern long     sql_tabid(const char *table, const char *owner,
+						  const char *dbase, const char *server);
+extern char    *sql_mktablename(const char *table, const char *owner,
+								const char *dbase, char *output, size_t outlen);
+extern char    *sql_mkdbasename(const char *dbase, const char *server,
+								char *output, size_t outlen);
 
 #endif	/* ESQLUTIL_H */

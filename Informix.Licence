@@ -215,17 +215,19 @@ help with problems with DBD::Informix.  You should subscribe to the
 dbi-users@fugue.com mailing list (sign up from http://www.fugue.com/dbi)
 and then mail your questions to dbi-users@fugue.com.
 
-Although the current developer, Jonathan Leffler (j.leffler@acm.org) used
-work for Informix Software, DBD::Informix was not (and is not) a part of
-his job description and any development of it is done in his 'spare' time.
-Consequently, none of the Informix Technical Support channels are available
-to support DBD::Informix.  If you ask Informix Technical Support any
-questions about DBD::Informix, you can reasonably expect a completely blank
-response from them -- it is not in their job description either.
+Although the current developer, Jonathan Leffler (jleffler@informix.com)
+does indeed work for Informix Software, DBD::Informix is not a part of
+his job description and any development of it is done in his 'spare'
+time.  Consequently, none of the Informix Technical Support channels are
+available to support DBD::Informix.  If you ask Informix Technical
+Support any questions about DBD::Informix, you can reasonably expect a
+completely blank response from them -- it is not in their job description
+either.
 
 See also the README file.
 
 ===========================================================================
 
-Jonathan Leffler (j.leffler@acm.org)
-@(#)$Id: Informix.Licence,v 58.1 1998/01/06 02:53:23 johnl Exp $
+Jonathan Leffler (jleffler@informix.com aka j.leffler@acm.org)
+Informix Software Inc
+@(#)$Id: Informix.Licence,v 60.1 1998/06/16 16:51:21 jleffler Exp $

@@ -1,4 +1,4 @@
-#	@(#)$Id: Informix.pm,v 59.2 1998/03/11 17:42:33 jleffler Exp $ 
+#	@(#)$Id: Informix.pm,v 60.6 1998/08/13 00:44:25 jleffler Exp $ 
 #
 #   Portions Copyright (c) 1994-95 Tim Bunce
 #   Portions Copyright (c) 1996-98 Jonathan Leffler
@@ -13,9 +13,9 @@
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.59";
+	$VERSION     = "0.60";
 	$ATTRIBUTION = 'By Jonathan Leffler';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 59.2 $ ($Date: 1998/03/11 17:42:33 $)@, 3);
+	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 60.6 $ ($Date: 1998/08/13 00:44:25 $)@, 3);
 	$Revision    =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
 
 	require_version DBI 0.90;	# Requires features from DBI 0.90 release
@@ -465,10 +465,9 @@ do nothing about it because it wasn't loaded successfully).
 
 =head2 "New Style"
 
-    $dbh = DBI->connect("dbi:Informix:$database", $user, $pass, %attr);
-    $dbh = DBI->connect("dbi:Informix:$database", $user, $pass);
-    $dbh = DBI->connect("dbi:Informix:$database", $user);
     $dbh = DBI->connect("dbi:Informix:$database");
+    $dbh = DBI->connect("dbi:Informix:$database", $user, $pass);
+    $dbh = DBI->connect("dbi:Informix:$database", $user, $pass, %attr);
 
 The 'new style' connections are distinguished by the presence of the
 'dbi:Informix:' portion at the front of the first argument.
@@ -510,22 +509,24 @@ later in this document.
 
 =over 4
 
-Note that there are problems with the new style connection syntax is
+Note that there are problems with the new style connection syntax if
 the connection fails; DBI does not give the correct error indications.
 This means that the tests do not, in general, exploit the new syntax.
 
 =back
-
 =head2 "Old Style"
 
 The older style of connection does not use the string "dbi:Informix:"
 at the start of the first argument (or uses a string as the fourth
 argument).
+This style is strongly deprecated, notwithstanding the fact that many of
+the tests use it.
 
     $dbh = DBI->connect($database, $username, $password, 'Informix');
 
 Note that if you omit the fourth argument ('Informix'), then DBI will
-load the driver specified by $ENV{DBI_DRIVER}.
+may load any driver it chooses, according to its rules -- the actual
+driver loaded is not controlled by DBD::Informix.
 If you omit the fourth argument, you can also omit the $password and
 $username arguments if desired.
 If you specify the fourth argument, you can leave the $password and
@@ -535,10 +536,12 @@ $username arguments empty and they will be ignored.
     $dbh = DBI->connect($database, $username);
     $dbh = DBI->connect($database);
 
-The 5.0x versions ignore the username and password data, and the
-statement is equivalent to "EXEC SQL DATABASE :database;".
-The 6.0x versions only use the username and password if both are
-supplied, but it is then equivalent to:
+If you are using 5.0x versions of ESQL/C, then DBD::Informix ignores
+the username and password data, and the statement is equivalent to
+"EXEC SQL DATABASE :database;".
+If you are using 6.0x or later versions of ESQL/C, then DBD::Informix
+will only use the username and password if both are supplied, but it
+is then equivalent to:
 
     EXEC SQL CONNECT TO :database AS :connection
         USER :username USING :password
@@ -549,6 +552,7 @@ The connection is given a name by DBD::Informix.
 For DBD::Informix using either the old or new style of connection
 syntax, the database name is any valid format for the DATABASE or
 CONNECT statements.
+
 Examples include:
 
     dbase               # 'Local' database
@@ -557,10 +561,12 @@ Examples include:
     @server1            # Connection to (remote) server but no database
     /some/where/dbase   # Connect to local SE database
 
-The database name is not supplied implicitly by DBD::Informix, but the
-DBI driver will supply the value in $ENV{DBI_DBNAME} if the
-environment variable is set and no database name is supplied in the
-connect call.
+No database name is supplied implicitly by DBD::Informix (though the
+test code in DBD::InformixTest does supply the names of test databases
+implicitly).
+Read the DBI driver documentation to see what, if any, defaults will
+be supplied (eg check for the DBI_DRIVER and DBI_DSN environment
+variables).
 If DBD::Informix sees an empty string, then it makes no connection to
 any database with ESQL/C 5.0x, and it makes a default connection with
 ESQL/C 6.00 and later.
@@ -577,7 +583,9 @@ information about the database, etc.
      # Type is always 'db'
      print "    Type:                    $dbh->{Type}\n";
      # Name is the name of the database specified at connect
-     print "    Database Name:           $dbh->{Name}\n";
+     print "    Original Database Name:  $dbh->{Name}\n";
+     # ix_DatabaseName is the name of the current database
+     print "    Current Database Name:   $dbh->{ix_DatabaseName}\n";
      # AutoCommit is 1 (true) if the database commits each statement.
      print "    AutoCommit:              $dbh->{AutoCommit}\n";
 
@@ -620,15 +628,11 @@ forgotten the driver, you can discover it again using:
 This allows you to access the driver methods and attributes described
 previously.
 
-=over 4
-
-BUG: The name of the database should be tracked more carefully via the
-DATABASE, CLOSE DATABASE, CREATE DATABASE, ROLLFORWARD DATABASE and
-START DATABASE statements.
+Starting with version 0.60, the name of the database is now tracked
+accurately when the DATABASE, CLOSE DATABASE, CREATE DATABASE,
+ROLLFORWARD DATABASE and START DATABASE statements are used.
 Note that you cannot prepare CONNECT statements, so they do not have
 to be tracked.
-
-=back
 
 =head2 METADATA
 
@@ -917,10 +921,10 @@ string.
 There is provision to specify how you want blobs handled.
 You can set the attribute:
 
-    $sth->{BlobLocation} = 'InMemory';      # Default
-    $sth->{BlobLocation} = 'InFile';        # In a named file
-    $sth->{BlobLocation} = 'DummyValue';    # Return dummy values
-    $sth->{BlobLocation} = 'NullValue';     # Return undefined
+    $sth->{ix_BlobLocation} = 'InMemory';      # Default
+    $sth->{ix_BlobLocation} = 'InFile';        # In a named file
+    $sth->{ix_BlobLocation} = 'DummyValue';    # Return dummy values
+    $sth->{ix_BlobLocation} = 'NullValue';     # Return undefined
 
 The InFile mode returns the name of a file in the fetched array, and
 that file can be accessed by Perl using normal file access methods.
@@ -933,12 +937,12 @@ returning the data to the application, but the user does not get to
 see the data -- this depends on the internal implementation of the
 ESQL/C FETCH operation in conjunction with SQL descriptors.
 
-You can also set the BlobLocation attribute on the database,
+You can also set the ix_BlobLocation attribute on the database,
 overriding it at the statement level.
 
 =over 4
 
-BUG: BlobLocation is not honoured.
+BUG: ix_BlobLocation is not honoured properly.
 
 =back
 
@@ -954,6 +958,11 @@ That is done when you destroy (undef) the statement handle:
 You can also implicitly rebind a statement handle to a new statement
 by simply using the same variable again.
 This does not cause any memory leaks.
+
+You can retrieve use the ix_StatementText attribute to (re)discover
+the text of a statement:
+
+	$txt = $sth->{ix_StatementText};
 
 =head2 CURSORS FOR UPDATE
 
@@ -1181,6 +1190,7 @@ most purposes.
 =over 2
 
 =item *
+
 Blobs can only be located in memory (reliably).
 
 =item *
@@ -1191,12 +1201,11 @@ and DB_LOCALE set, then ESQL/C may set one or both of them during the
 connect operation.
 When it does so, it makes Perl emit a "Bad free()" error if you
 subsequently modify the %ENV hash in the Perl script.
-This is nasty, but not readily resolvable.
-If you need to establish what values you should set, modify the code
-in dbdimp.ec so that the function dbd_ix_printenv() is called in
-dbd_ix_db_login() and the function itself is compiled (it is protected
-by #ifdef DBD_IX_DEBUG_ENVIRONMENT, unlike the calls which are pure
-comments).
+This is nasty, but there is no easy solution.
+If you need to establish what values you should set, arrange for the
+compilation to define DBD_IX_DEBUG_ENVIRONMENT is defined; the code
+in dbdimp.ec will then call the function dbd_ix_printenv() in
+dbd_ix_db_login() which will help you identify what has been changed.
 
 =back
 
@@ -1220,6 +1229,9 @@ Jonathan Leffler (johnl@informix.com)
 
 =item *
 Jonathan Leffler (j.leffler@acm.org)
+
+=item *
+Jonathan Leffler (jleffler@informix.com)
 
 =back
 

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlc.h,v $
-@(#)Version:         $Revision: 1.14 $
-@(#)Last changed:    $Date: 1997/10/09 02:57:34 $
+@(#)Version:         $Revision: 2.3 $
+@(#)Last changed:    $Date: 1998/07/30 21:03:36 $
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
+@(#)Copyright:       (C) JLSS 1992-93,1995-98
+@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
 */
 
 #ifndef ESQLC_H
@@ -13,36 +13,11 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 1.14 1997/10/09 02:57:34 johnl Exp $";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 2.3 1998/07/30 21:03:36 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
-/* Backwards compatability -- will be removed after 1st January 1998.  */
-#ifndef ESQLC_VERSION
-#ifdef ESQLC_4_10
-#define ESQLC_VERSION 410
-#endif /* ESQLC_4_00 */
-#ifdef ESQLC_4_00
-#define ESQLC_VERSION 400
-#endif /* ESQLC_4_00 */
-#ifdef ESQLC_5_00
-#define ESQLC_VERSION 500
-#endif /* ESQLC_5_00 */
-#ifdef ESQLC_6_00
-#define ESQLC_VERSION 600
-#endif /* ESQLC_6_00 */
-#ifdef ESQLC_7_00
-#define ESQLC_VERSION 700
-#endif /* ESQLC_7_00 */
-#ifdef ESQLC_7_10
-#define ESQLC_VERSION 710
-#endif /* ESQLC_7_10 */
-#ifdef ESQLC_7_20
-#define ESQLC_VERSION 720
-#endif /* ESQLC_7_20 */
-#endif /* ESQLC_VERSION */
-
-/* If it still isn't defined, use version 0 */
+/* If ESQLC_VERSION isn't defined, use version 0 */
 #ifndef ESQLC_VERSION
 #define ESQLC_VERSION 0
 #endif /* ESQLC_VERSION */
@@ -103,7 +78,7 @@ extern "C" {
 #ifdef _WIN32
 #include <sqlproto.h>
 #else
-#if ESQLC_VERSION >= 720 && ESQLC_VERSION < 800
+#if ESQLC_VERSION >= 720 && ESQLC_VERSION < 730
 #include "esql7_20.h"
 #endif /* ESQLC_VERSION is 7.2x */
 
@@ -120,9 +95,24 @@ extern int      sqgetdbs(int *ret_fcnt,
 
 /* A table name may be: database@server:"owner".table */
 /* This contains 5 punctuation characters and a null */
+/*
+** Note that from 9.2 up (and maybe 7.3 up) and from 8.3 up,
+** identifier names can be much longer -- up to 128 bytes each.
+** Prior versions only allowed 18 characters for table, column,
+** database and server names, and only 8 characters for user
+** identifiers.
+*/
+#if (ESQLC_VERSION >= 730 && ESQLC_VERSION < 800) || \
+	(ESQLC_VERSION >= 830 && ESQLC_VERSION < 900) || \
+	(ESQLC_VERSION >= 920)
+#define SQL_NAMELEN	128
+#define SQL_USERLEN	32
+#else
 #define SQL_NAMELEN	18
 #define SQL_USERLEN	8
-#define SQL_TABNAMELEN	(3 * SQL_NAMELEN + SQL_USERLEN + 6)
+#endif
+#define SQL_TABNAMELEN	(3 * SQL_NAMELEN + SQL_USERLEN + sizeof("@:''."))
+#define SQL_COLNAMELEN	(SQL_NAMELEN + 1)
 
 #define loc_mode	lc_union.lc_file.lc_mode
 #define sqlva		sqlvar_struct

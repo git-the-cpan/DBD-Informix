@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
+ * @(#)$Id: dbdimp.h,v 60.1 1998/07/30 04:06:55 jleffler Exp $ 
  *
  * Copyright (c) 1994-95 Tim Bunce
  *           (c) 1996-98 Jonathan Leffler
@@ -58,7 +58,7 @@ struct imp_drh_st
 struct imp_dbh_st
 {
 	dbih_dbc_t      com;            /* MUST be first element in structure */
-	char           *database;       /* Name of database */
+	SV             *database;       /* Name of database */
 	Name            nm_connection;  /* Name of connection */
 	Boolean         is_connected;   /* Is connection open */
 	Boolean         is_onlinedb;    /* Is OnLine Engine */
@@ -81,6 +81,7 @@ struct imp_sth_st
 	Name            nm_ibind;	/* Name of input (bind) descriptor */
 	State           st_state;	/* State of statement */
 	int             st_type;	/* Type of statement */
+	SV             *st_text;	/* Text of statement */ 
 	BlobLocn        blob_bind;	/* Blob Binding */
 	int             n_blobs;	/* Number of blobs for statement */
 	int             n_columns;	/* Number of output fields */

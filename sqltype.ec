@@ -1,18 +1,18 @@
 /*
 @(#)File:            $RCSfile: sqltype.ec,v $
-@(#)Version:         $Revision: 1.12 $
-@(#)Last changed:    $Date: 1997/07/08 19:52:44 $
+@(#)Version:         $Revision: 1.13 $
+@(#)Last changed:    $Date: 1998/06/29 20:36:12 $
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1988-1993,1995-97
-@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
+@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
 */
 
 /*TABSTOP=4*/
 /*LINTLIBRARY*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltype.ec,v 1.12 1997/07/08 19:52:44 johnl Exp $";
+static const char rcs[] = "@(#)$Id: sqltype.ec,v 1.13 1998/06/29 20:36:12 jleffler Exp $";
 #endif
 
 #include <string.h>
@@ -197,7 +197,7 @@ char	*sqltypename(int coltype, int collen, char *buffer)
 					dt_fr_ext[dt_fr], dt_ld, dt_to_ext[dt_to]);
 		break;
 	default:
-		sprintf(buffer, "Unknown type %d, len %d", coltype, collen);
+		sprintf(buffer, "Unknown (type %d, len %d)", coltype, collen);
 		break;
 	}
 	return(buffer);

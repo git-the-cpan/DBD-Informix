@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.ec,v 59.3 1998/03/11 17:25:27 jleffler Exp $ 
+ * @(#)$Id: dbdimp.ec,v 60.5 1998/08/06 03:39:37 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 59.3 1998/03/11 17:25:27 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 60.5 1998/08/06 03:39:37 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -26,6 +26,7 @@ static const char rcs[] = "@(#)$Id: dbdimp.ec,v 59.3 1998/03/11 17:25:27 jleffle
 #define MAIN_PROGRAM	/* Embed version information for JLSS headers */
 #include "Informix.h"
 #include "decsci.h"
+#include "esqlutil.h"
 
 #define L_CURLY	'{'
 #define R_CURLY	'}'
@@ -209,6 +210,7 @@ void            dbd_ix_seterror(ErrNum rc)
 		sv_setiv(ix_errnum, (IV)rc);
 		sv_setpv(ix_errstr, msgbuf);
 		sv_setpv(ix_state, SQLSTATE);
+		dbd_ix_debug(1, "***ERROR***\n%s\n", msgbuf);
 	}
 }
 
@@ -267,7 +269,9 @@ dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 	if (name != 0 && strcmp(name, DEFAULT_DATABASE) == 0)
 		name = 0;
 
-	/*dbd_ix_printenv("pre-connect", function);*/
+#ifdef DBD_IX_DEBUG_ENVIRONMENT
+	dbd_ix_printenv("pre-connect", function);
+#endif /* DBD_IX_DEBUG_ENVIRONMENT */
 #if ESQLC_VERSION >= 600
 	if (user != 0 && *user == '\0')
 		user = 0;
@@ -280,7 +284,9 @@ dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 	/* Use DATABASE statement */
 	conn_ok = dbd_ix_opendatabase(name);
 #endif	/* ESQLC_VERSION >= 600 */
-	/*dbd_ix_printenv("post-connect", function);*/
+#ifdef DBD_IX_DEBUG_ENVIRONMENT
+	dbd_ix_printenv("post-connect", function);
+#endif /* DBD_IX_DEBUG_ENVIRONMENT */
 
 	if (sqlca.sqlcode < 0)
 	{
@@ -292,7 +298,8 @@ dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 
 	/* Examine sqlca to see what sort of database we are hooked up to */
 	dbd_ix_savesqlca(imp_dbh);
-	imp_dbh->database = name;
+	if (name != 0)
+		imp_dbh->database = newSVpv(name, 0);
 	dbd_ix_setdbtype(imp_dbh);
 	imp_dbh->is_connected = conn_ok;
 
@@ -552,6 +559,7 @@ dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
 	if (imp_dbh->is_connected == True)
 		dbd_ix_closedatabase(imp_dbh->database);
 #endif	/* ESQLC_VERSION >= 600 */
+	SvREFCNT_dec(imp_dbh->database);
 
 	dbd_ix_sqlcode(imp_dbh);
 	imp_dbh->is_connected = False;
@@ -598,6 +606,7 @@ static void     new_statement(imp_dbh_t *imp_dbh, imp_sth_t *imp_sth)
 	imp_sth->dbh = imp_dbh;
 	imp_sth->st_state = Unused;
 	imp_sth->st_type = 0;
+	imp_sth->st_text = 0;
 	imp_sth->n_blobs = 0;
 	imp_sth->n_bound = 0;
 	imp_sth->n_rows = 0;
@@ -715,6 +724,8 @@ static void del_statement(imp_sth_t *imp_sth)
 	case Unused:
 		break;
 	}
+	if (imp_sth->st_text != 0)
+		SvREFCNT_dec(imp_sth->st_text);
 	imp_sth->st_state = Unused;
 	delete_link(&imp_sth->chain, noop);
 	DBIc_off(imp_sth, DBIcf_IMPSET);
@@ -802,7 +813,29 @@ static int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 
 	EXEC SQL GET DESCRIPTOR :nm_ibind VALUE :index :type = TYPE;
 
-	if (!SvOK(val))
+	if (type == SQLBYTES || type == SQLTEXT)
+	{
+		blob_locate(&blob, BLOB_IN_MEMORY);
+		if (!SvOK(val))
+		{
+			dbd_ix_debug(2, "%s -- null blob\n", function);
+			blob.loc_indicator = -1;
+			blob.loc_buffer = 0;
+			blob.loc_bufsize = 0;
+			blob.loc_size = 0;
+		}
+		else
+		{
+			dbd_ix_debug(2, "%s -- blob\n", function);
+			/* One day, this will accept SQ_UPDATE and SQ_UPDALL */
+			/* There are no plans to support SQ_UPDCURR */
+			blob.loc_buffer = SvPV(val, len);
+			blob.loc_bufsize = len + 1;
+			blob.loc_size = len;
+		}
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index DATA = :blob;
+	}
+	else if (!SvOK(val))
 	{
 		/* It's a null! */
 		dbd_ix_debug(2, "%s -- null\n", function);
@@ -828,17 +861,6 @@ static int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 						TYPE = :type, DATA = :ival;
 		}
 #endif
-	}
-	else if (type == SQLBYTES || type == SQLTEXT)
-	{
-		dbd_ix_debug(2, "%s -- blob\n", function);
-		/* One day, this will accept SQ_UPDATE and SQ_UPDALL */
-		/* There are no plans to support SQ_UPDCURR */
-		blob_locate(&blob, BLOB_IN_MEMORY);
-		blob.loc_buffer = SvPV(val, len);
-		blob.loc_bufsize = len + 1;
-		blob.loc_size = len;
-		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index DATA = :blob;
 	}
 	else if (SvIOKp(val))
 	{
@@ -1124,6 +1146,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	nm_stmnt = imp_sth->nm_stmnt;
 	nm_obind = imp_sth->nm_obind;
 	nm_cursor = imp_sth->nm_cursor;
+	imp_sth->st_text = newSVpv(stmt, 0);
 
 	/* Record the number of input parameters in the statement */
 	DBIc_NUM_PARAMS(imp_sth) = dbd_ix_preparse(statement);
@@ -1131,6 +1154,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	/* Allocate space for that many parameters */
 	if (dbd_ix_setbindnum(imp_sth, DBIc_NUM_PARAMS(imp_sth)) == 0)
 	{
+		del_statement(imp_sth);
 		dbd_ix_exit(function);
 		return 0;
 	}
@@ -1141,6 +1165,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
 	{
+		del_statement(imp_sth);
 		dbd_ix_exit(function);
 		return 0;
 	}
@@ -1227,6 +1252,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	return rc;
 }
 
+/* CLOSE cursor */
 int
 dbd_ix_st_finish(SV *sth, imp_sth_t *imp_sth)
 {
@@ -1371,6 +1397,8 @@ dbd_ix_st_fetch(SV *sth, imp_sth_t *imp_sth)
 		else
 		{
 			imp_sth->st_state = Finished;
+			/* Implicitly CLOSE cursor on fetch failing */
+			dbd_ix_close(imp_sth);
 			dbd_ix_debug(1, "Exit %s -- SQLNOTFOUND\n", function);
 		}
 		dbd_ix_exit(function);
@@ -1404,6 +1432,9 @@ dbd_ix_st_fetch(SV *sth, imp_sth_t *imp_sth)
 			case SQLINT:
 			case SQLSERIAL:
 			case SQLSMINT:
+#ifdef SQLBOOL
+			case SQLBOOL:
+#endif /* SQLBOOL */
 			case SQLDATE:
 			case SQLDTIME:
 			case SQLINTERVAL:
@@ -1564,8 +1595,48 @@ static int dbd_ix_open(imp_sth_t *imp_sth)
 	return 1;
 }
 
-static void dbd_ix_getdbname(const char *kw1, const char *kw2, imp_sth_t *sth)
+/* Parse statement for name of database -- what a pain! */
+static void dbd_ix_setdbname(const char *kw1, const char *kw2, imp_sth_t *sth)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_setdbname";
+	/**
+	** Scan through statement string, skipping comments ('{}' and '--\n'
+	** style), seeking (case-insensitively) the text of kw1 as the first
+	** word in the statement, and kw2 (if not null) as the second word in
+	** the statement.  The required database name is the third word in the
+	** statement.  Pain!  Oh the pain!  Why can't I have the database name
+	** returned to me by Informix?  About the only mercy is that we know
+	** that there is a major problem if the keywords are not found.
+	** OK: we created sqltoken() to handle this!
+	*/
+	/* Where's the statement text? */
+	char *tok = SvPV(sth->st_text, na);
+	char *end = tok;
+
+	dbd_ix_enter(function);
+	tok = sqltoken(end, &end);
+	/* Should be same as kw1 -- give or take case */
+	if (DBIS->debug >= 6)
+		warn("%s: %s = <<%*.*s>>\n", function, kw1, end - tok, end - tok, tok);
+	/* What's the Perl case-insensitive string comparison routine called? */
+	if (kw2 != 0)
+	{
+		tok = sqltoken(end, &end);
+		if (DBIS->debug >= 6)
+			warn("%s: %s = <<%*.*s>>\n", function, kw2, end - tok, end - tok, tok);
+		/* Should be same as kw2 -- give or take case */
+	}
+	tok = sqltoken(end, &end);
+	if (DBIS->debug >= 6)
+		warn("%s: dbn = <<%*.*s>>\n", function, end - tok, end - tok, tok);
+	/* Should be the database name! */
+	/* Must handle this correctly! */
+	if (sth->dbh->database != 0)
+		SvREFCNT_dec(sth->dbh->database);
+	sth->dbh->database = newSVpv(tok, end - tok);
+	if (DBIS->debug >= 4)
+		warn("new database name <<%s>>\n", function, SvPV(sth->dbh->database, na));
+	dbd_ix_exit(function);
 }
 
 static int dbd_ix_exec(imp_sth_t *imp_sth)
@@ -1658,26 +1729,38 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 	case SQ_DATABASE:
 		dbh->is_txactive = False;
 		dbd_ix_setdbtype(dbh);
-		/* Analyse new database name and record it */
+		dbd_ix_setdbname("DATABASE", 0, imp_sth);
 		break;
 	case SQ_CREADB:
 		dbh->is_txactive = False;
 		dbd_ix_setdbtype(dbh);
-		/* Analyse new database name and record it */
+		dbd_ix_setdbname("CREATE", "DATABASE", imp_sth);
 		break;
 	case SQ_STARTDB:
 		dbh->is_txactive = False;
 		dbd_ix_setdbtype(dbh);
-		/* Analyse new database name and record it */
+		dbd_ix_setdbname("START", "DATABASE", imp_sth);
 		break;
 	case SQ_RFORWARD:
 		dbh->is_txactive = False;
 		dbd_ix_setdbtype(dbh);
-		/* Analyse new database name and record it */
+		dbd_ix_setdbname("ROLLFORWARD", "DATABASE", imp_sth);
 		break;
 	case SQ_CLSDB:
+		/*
+		** CLOSE DATABASE -- no transactions, no autocommit, etc.
+		** With 6.00 upwards, the connection to the server still exists
+		** With 5.00, if the database was remote, then the connection
+		** is broken by close database; otherwise, it remains.  Assume
+		** it still exists until further notice...
+		*/
 		dbh->is_txactive = False;
-		/* Record that no database is open */
+		dbh->is_modeansi = False;
+		dbh->is_onlinedb = False;
+		dbh->is_loggeddb = False;
+		DBIc_set(dbh, DBIcf_AutoCommit, False);
+		SvREFCNT_dec(dbh->database);
+		dbh->database = 0;
 		break;
 	default:
 		if (dbh->is_modeansi)

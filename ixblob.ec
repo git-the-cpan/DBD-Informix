@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: ixblob.ec,v $
-@(#)Version:        $Revision: 50.5 $
-@(#)Last changed:   $Date: 1997/10/09 02:51:49 $
+@(#)Version:        $Revision: 50.8 $
+@(#)Last changed:   $Date: 1998/05/15 22:26:15 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) Jonathan Leffler 1996-97
-@(#)Product:        $Product: DBD::Informix Version 0.58 (1998-01-15) $
+@(#)Copyright:      (C) Jonathan Leffler 1996-98
+@(#)Product:        $Product: DBD::Informix Version 0.60 (1998-08-12) $
 */
 
 /*TABSTOP=4*/
@@ -23,6 +23,10 @@
 #endif /* _WIN32 */
 #include "ixblob.h"
 
+#ifdef DEBUG
+#include "esqlutil.h"
+#endif /* DEBUG */
+
 #define FILENAMESIZE	128
 
 #ifndef DEFAULT_TMPDIR
@@ -32,7 +36,7 @@
 static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec,v 50.5 1997/10/09 02:51:49 johnl Exp $";
+static const char rcs[] = "@(#)$Id: ixblob.ec,v 50.8 1998/05/15 22:26:15 jleffler Exp $";
 #endif
 
 BlobLocn blob_getlocmode(void)
@@ -76,7 +80,7 @@ static int blob_locinnamefile(Blob *blob)
 	blob->loc_indicator = 0;
 	blob->loc_fd = -1;
 #ifdef DEBUG
-	dump_blob(blob);
+	dump_blob(stderr, "blob_locinnamefile()", blob);
 #endif	/* DEBUG */
 	return(0);
 }
@@ -103,7 +107,7 @@ static int blob_locinanonfile(Blob *blob)
 	}
 	unlink(tmp);
 #ifdef DEBUG
-	dump_blob(blob);
+	dump_blob(stderr, "blob_locinanonfile()", blob);
 #endif	/* DEBUG */
 	return(0);
 }
@@ -118,7 +122,7 @@ static int blob_locinmem(Blob *blob)
 	blob->loc_indicator = 0;
 	blob->loc_oflags = 0;
 #ifdef DEBUG
-	dump_blob(blob);
+	dump_blob(stderr, "blob_locinmem()", blob);
 #endif	/* DEBUG */
 	return(0);
 }
@@ -185,6 +189,8 @@ void blob_release(Blob *blob, int dflag)
 		blob->loc_buffer = (char *)0;
 		blob->loc_bufsize = -1;
 		blob->loc_mflags = 0;
+		blob->loc_size = 0;
+		blob->loc_indicator = 0;
 		break;
 
 	case LOCUSER:

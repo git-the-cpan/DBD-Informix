@@ -3,9 +3,61 @@ Change Log for DBD::Informix for DBI
 - Written by Alligator Descartes <descarte@arcana.co.uk>
 - Rewritten by Jonathan Leffler <j.leffler@acm.org>
 
+0.60 Release
+------------
+98-08-10: Release to Albert W Dorrington <awdorrin@ictest.delcoelect.com>
+          as 0.60b1 to give him HP-UX and GCC fixes.  Partially rework the
+          t00basic.t test to fix the problems accessing databases which
+          require a username and password.
+98-08-06: Fix problem with error -608 originally reported by Kenji Hino
+          <kenji@alcatraz.net>, related to handling a null blobs.  Maybe
+          this fix also fixed the -451 errors reported by both John Keston
+          <jkeston@wamnet.com> and Brian Renaud <renaud@ans.net>; the
+          change could plausibly resolve that error too, but none of us was
+          able to reproduce the -451 error on demand, so we don't know for
+          sure.
+98-08-05: Integrate changes by R Bernstein <rocky@panix3.panix.com> which
+          give support for IUS datatype BOOLEAN.  This has not been fully
+          tested on an IUS (IDS/UDO) engine, and may not handle nulls
+          correctly.  It is not complete IUS support by any stretch of the
+          imagination.  Add some new material to the hints directory, even
+          though they are not hints about compiling DBD::Informix.
+98-07-30: Revise the data_sources method to include the 'dbi:Informix:'
+          prefix mandated by the DBI specification.
+98-07-29: Finish renaming the tests.  Use MSD/NMD technology to create
+          directory from which distribution is made -- to ensure that
+          correct versions of all library files which are not mastered
+          under the DBD/Informix directory are fully up to date.  Drop
+          sqlcmd.sh as it is (a) unused and (b) superseded by DBI::Shell.
+          Add two new attributes, $sth->{ix_StatementText} and
+          $dbh->{ix_DatabaseName}.  Note that $dbh->{Name} returns the name
+          of the database when DBI->connect() is called, but the name of
+          the current database can be changed by things such as CLOSE
+          DATABASE and DATABASE or CREATE DATABASE statements;
+          $dbh->{ix_DatabaseName} reports the current database name.  When
+          last row is fetched, implicitly close (finish) the cursor, as
+          requested by Tim Bunce.  Explicit finish is only required if the
+          loop is terminated early.
+98-06-25: Include notes from Yang-Chao lin <ylin@sr.hp.com> about compiling
+          on HP-UX with ESQL/C 5.x or 6.x.  Also upgrade the comments about
+          IUS types for those who do not know anything other than IUS, such
+          as Stephen Pillinger <S.M.Pillinger@cs.bham.ac.uk> who first
+          alerted me to this problem.
+98-06-16: Include notes from Alex Shah <ashah@atg.eb.com> on __eprintf().
+98-06-15: Incorporate __eprintf() fix from Bernd Gill <bernd@dsi.co.nz>.
+          Include the HP-UX 10.20 build notes from Reed White
+          <REED_WHITE@HP-Corvallis-om1.om.hp.com>.  Improve esqltest.ec.
+          Add new environment variables DBD_INFORMIX_USE_EPRINTF_CODE and
+          DBD_INFORMIX_DISABLE_ASSERT to Makefile.PL.
+98-05-19: Change test to fail after trying to drop table dbd_ix_blobtest
+          in t/blob02.t when table exists but cannot be dropped by user.
+          Problem found by Nuno Carneiro de Moura <ncmoura@net.mailcom.pt>.
+98-03-11: Version numbering changes.
+
 0.59 Release
 ------------
 98-03-11: Make a release to try and resolve ongoing problems at AirTouch.
+          NB: this release not sent to CPAN.
 98-03-04: Chuck Collins <Chuck.Collins@AirTouch.COM> discovered that the
           dbd_ix_preparse() routine gets confused by DATETIME and INTERVAL
           literals -- it was treating '30:20:10' as '30??' because the
@@ -459,4 +511,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <johnl@informix.com>
-@(#)$Id: ChangeLog,v 59.5 1998/03/11 17:43:01 jleffler Exp $
+@(#)$Id: ChangeLog,v 60.8 1998/08/13 00:43:34 jleffler Exp $

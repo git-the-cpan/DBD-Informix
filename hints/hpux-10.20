@@ -1,0 +1,88 @@
+From: REED_WHITE@HP-Corvallis-om1.om.hp.com
+Date: Wed, 10 Jun 98 10:49:49 -0700
+Subject: Steps to load Informix DBD on HPUX 10.20
+To: Dbi-Users@fugue.com
+
+    *** From dbi-users -- To unsubscribe, see the end of this message. ***
+
+I successfully installed the Informix DBD on HPUX 10.20, thanks to
+Jonathan and all.  The following steps worked for me.
+
+Steps to install Informix DBD on HPUX 10.20:
+
+.Lines that begin with dot are comments. # indicate cmnds from root.
+
+.Following may not work unless Perl compiled with ANSI C compiler.
+.Install Informix esql/c.
+.The following works with the ANSI C compiler.
+$ su2 root
+.Do the download from CPAN, www.perl.org to /opt/perl5.004.
+# cd /opt
+# gzip -d -c /opt/perl5.004/DBD-Informix-0.58.tar.gz | tar xvf -
+# cd DBD-Informix-0.58
+.Read README
+# ln -s /opt/informix7.24.UC4 /usr/informix
+# export PATH=/usr/informix/bin:$PATH
+# export INFORMIXDIR=/usr/informix
+# export INFORMIXSERVER=ffdb_soc
+# export DBD_INFORMIX_USERNAME=fastfab1
+# export DBD_INFORMIX_PASSWORD=tym4ff
+# export DBD_INFORMIX_SERVER=ffdb_soc
+# export DBD_INFORMIX_DATABASE=stores7
+.Verify database access is properly setup (on remote machine).
+.The remote user/db must be setup for RSOURCE level priviliges.
+.Verify .rhosts includes entry for cpu/user, where test is being done.
+.Verify local /usr/informix/etc/sqlhosts has remote DB info in it.
+.From a CPU that has Informix running on it,
+.merge the Informix /etc/services entries into local /etc/services .
+# perl Makefile.PL
+# make
+# make test           .May see some errors.
+# make install        .Can use "make uninstall" to uninstall.
+
+______________________________________________________________
+
+As a test, try something like this.  The following program does a
+simple query.  (You will have to setup your own SQL, etc.)
+
+#!/opt/perl5/bin/perl
+
+# Do a simple query.
+
+$sql = "SELECT lot_number, wafer_id, die_x_loc, die_y_loc, die_defect_cd, ";
+$sql .= "die_severity_cd, operation, operator, insert_dttm ";
+$sql .= "FROM ict_wafermap_v WHERE wafer_id='ABF819100-14'";
+
+use DBI;
+
+$ENV{"INFORMIXDIR"}="/usr/informix"; # Required.
+$ENV{"INFORMIXSERVER"}="ffdb_soc";   # Required.
+
+# Connect to the db.
+$dbh = DBI->connect('dbi:Informix:fastfab@ffdb_soc',"fastfab1","pw")
+	or die "Unable to connect: $DBI::errstr";
+print "Connected!\n";
+
+# Do the SQL select, and execute.
+$sth = $dbh->prepare( "$fmt $sql" )
+	or die "Unable to prepare select: $DBI::errstr\n";
+$sth->execute;
+
+#Get selected data and print rows.
+$line = "";
+while (@row = $sth->fetchrow) {
+	$line = "";
+	foreach (@row) {  # Remove trailing spaces and insert pipe delimiter.
+	    s# +$##;
+	    $line .= "$_\|";
+	}
+	print "$line\n";
+}
+
+# Release resources.
+$sth->finish;
+$dbh->disconnect;
+
+--
+
+@(#)$Id: hpux-10.20,v 60.1 1998/06/16 16:08:44 jleffler Exp $

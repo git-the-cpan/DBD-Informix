@@ -1,4 +1,4 @@
-:	"@(#)$Id: test.one.sh,v 1.4 1998/01/14 02:23:55 johnl Exp $"
+:	"@(#)$Id: test.one.sh,v 1.5 1998/08/06 01:52:00 jleffler Exp $"
 #
 #	Run specified test(s)
 
@@ -7,7 +7,7 @@ export PERL_DL_NONLAZY
 
 for test in "$@"
 do
-	${PERL:-/usr/bin/perl} \
+	${PERL:-perl} \
 		-I./blib/arch \
 		-I./blib/lib \
 		"$test"

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: odbctype.c,v $
-@(#)Version:         $Revision: 56.1 $
-@(#)Last changed:    $Date: 1997/07/08 21:56:43 $
+@(#)Version:         $Revision: 56.2 $
+@(#)Last changed:    $Date: 1998/08/05 21:19:13 $
 @(#)Purpose:         Map Informix SQL Types to ODBC Types
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
-@(#)Product:         $Product: DBD::Informix Version 0.58 (1998-01-15) $
+@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
 */
 
 /*TABSTOP=4*/
@@ -36,6 +36,9 @@ typedef enum IxSQLType
 	ix_VARCHAR    = SQLVCHAR,
 	ix_NVARCHAR   = SQLNVCHAR,
 	ix_INTEGER    = SQLINT,
+#ifdef SQLBOOL
+	ix_BOOL       = SQLBOOL,
+#endif /* SQLBOOL */
 	ix_SMALLINT   = SQLSMINT,
 	ix_SERIAL     = SQLSERIAL,
 	ix_TEXT       = SQLTEXT,
@@ -50,7 +53,7 @@ typedef enum IxSQLType
 } IxSQLType;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: odbctype.c,v 56.1 1997/07/08 21:56:43 johnl Exp $";
+static const char rcs[] = "@(#)$Id: odbctype.c,v 56.2 1998/08/05 21:19:13 jleffler Exp $";
 #endif
 
 /* Map Informix DATETIME types to equivalent ODBC types */
@@ -142,6 +145,9 @@ int map_type_ifmx_to_odbc(int coltype, int collen)
 	case ix_INTEGER:
 		odbctype = SQL_INTEGER;
 		break;
+#ifdef SQLBOOL
+	case ix_BOOL:
+#endif /* SQLBOOL */
 	case ix_SMALLINT:
 		odbctype = SQL_SMALLINT;
 		break;
@@ -203,6 +209,9 @@ int map_prec_ifmx_to_odbc(int coltype, int collen)
 		odbcprec = 10;
 		break;
 	case ix_SMALLINT:
+#ifdef SQLBOOL
+	case ix_BOOL:
+#endif /* SQLBOOL */
 		odbcprec = 5;
 		break;
 	case ix_FLOAT:
@@ -254,6 +263,9 @@ int map_scale_ifmx_to_odbc(int coltype, int collen)
 		break;
 	case ix_INTEGER:
 	case ix_SMALLINT:
+#ifdef SQLBOOL
+	case ix_BOOL:
+#endif /* SQLBOOL */
 	case ix_SERIAL:
 		odbcscale = 0;
 		break;
