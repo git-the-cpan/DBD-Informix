@@ -1,10 +1,10 @@
 /*
 @(#)File:            esqlperl.h
-@(#)Version:         25.3
-@(#)Last changed:    96/11/26
+@(#)Version:         50.1
+@(#)Last changed:    97/01/12
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1996
+@(#)Copyright:       (C) Jonathan Leffler 1996,1997
 @(#)Product:         :PRODUCT:
 */
 
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)esqlperl.h	25.3 96/11/26";
+static const char esqlperl_h[] = "@(#)esqlperl.h	50.1 97/01/12";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

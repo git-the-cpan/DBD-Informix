@@ -130,8 +130,67 @@ Jeff Rowe - j.p.rowe@larc.nasa.gov
 Rodlyn Joseph - bluephi@sharpcomm.com
 Duc Nguyen - dhn@benvolio.nova.att.com
 Serge Davidov - serge@fcmc.com
-  
+
+96-12-10: Handle 5.00 and 5.01 by supplying actual array names to GET
+          DESCRIPTOR, thus bypassing the bug.  Note that it does affect 5.01
+          too; edited esql5_00.h to match.  Patch sent to Jeff Rowe who
+          confirms it works.  (Note to JL: 5.01 found on Godzilla; what is
+          installed as 5.00 is actually 4.10 ESQL/C).  Version 0.25p1 created
+          but not released officially or publicly.
+96-12-13: Update Makefile.PL to help the AIX people.  Version 0.25p2 created
+          but only the Makefile.PL changes sent to the dbi-users@fugue.com so
+          not released officially, though available publicly.
+
+0.26 Release
+------------
+96-12-18: Fix bug in patched Makefile.PL (need space before __H_LOCALEDEF).
+          Updated dbd_ix_setconnection() to take connection information, and
+          updated code in dbdimp.ec to ensure that the correct connection is
+          set before starting work.  Simple testing more or less works.  Some
+          more major revisions, such as not passing SV* to most of the code in
+          dbdimp.ec (let the Informix.c code convert as much as possible to
+          plain C).  Rework the 'do' function to completely override
+          DBI::_::db::do, avoiding problems with the rows() function.
+96-12-19: Add install instructions to README file after Wes Gamble
+          (wgamble@informix.com) pointed out this omission.  Add extensive
+          notes to Informix.PM on transaction management.  Implement most
+          of what those notes say (WITH HOLD cursors omitted at the
+          moment).
+96-12-20: Get transaction stuff to work, more or less, with AutoCommit On or
+          Off, in MODE ANSI or Logged databases.  Tests t/transact0[123].t
+          added, but these still need to be more formally verified.  They
+          pass with OnLine and any type of database.  Clean up various tests
+          so that they pass on MODE ANSI databases.  Add select_some_data
+          and select_zero_data functions to InformixTest.pm. Etc.  Version
+          0.26a1.  Use bug-fixed version of decsci.c (ouch!).
+97-01-09: Updated copyright messages.  Improved documentation.  Fixed tests.
+          Add $dbh->{InTransaction} query.  Clean up dbdimp.ec so that
+          AutoCommit works better. Etc.  Version 0.26a2.
+97-01-12: Use cursors WITH HOLD when a MODE ANSI database is working with
+          AutoCommit set On.  Make transaction tests more sensitive.
+          This release never made public.
+
+0.50 Release
+------------
+97-01-12: Version bumped to 0.50p1, for consistency with documented intentions
+          when 0.25 release was made.
+97-01-23: Fix InformixTest.pm so it works with perldoc.  It seems that perldoc
+          does not like lines which start with a single quote.  Thanks to
+          Jason Bodnar (jcbodnar@mail.utexas.edu) for pointing this problem
+          out. Add and use stmt_err to report errors or warnings, and document
+          it.
+97-02-13: Version 0.50 released.  Handle null database names on connect so
+          that CREATE DATABASE, etc, can be used.  ESQL/C 5.0x has to handle
+          this by doing nothing (successfully) in dbd_ix_database(), but the
+          disconnect code needs to know that there is no database so it
+          doesn't try to close the current database.  This requires interface
+          changes for dbd_ix_database() and dbd_ix_connect().  Add testing.
+          Thanks to Serge Davidov (serge@fcmc.com) for finding the problem.
+          You can also use DBI->connect('@server','','','Informix'), which
+          actually worked in v0.25.  DBD::Informix is still confused, in
+		  general, by statements such as CLOSE DATABASE.
+
 --------------
 
 Jonathan Leffler (johnl@informix.com)
-@(#)ChangeLog	25.7 96/12/09 20:30:20
+@(#)ChangeLog	50.3 97/02/13 12:52:17

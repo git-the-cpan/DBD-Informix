@@ -1,8 +1,10 @@
-#	@(#)blob02.t	25.2 96/12/09 20:49:26
+#!/usr/bin/perl -w
+#
+#	@(#)blob02.t	50.1 97/01/12 17:52:27
 #
 #	Test Basic Blobs (INSERT) for DBD::Informix
-
-BEGIN{unshift @INC, "../../lib", "./lib";}
+#
+#	Copyright (C) 1996,1997 Jonathan Leffler
 
 use DBD::InformixTest;
 
@@ -54,6 +56,8 @@ else
 	&stmt_note("Testing: \$insert->finish\n");
 	&stmt_fail() unless ($insert->finish);
 	&stmt_ok(0);
+
+	$dbh->commit if ($dbh->{ModeAnsiDatabase});
 }
 
 &stmt_note("# Testing: \$dbh->disconnect()\n");

@@ -1,7 +1,7 @@
 /*
 @(#)File:            esql4_10.h
-@(#)Version:         1.5
-@(#)Last changed:    96/11/26
+@(#)Version:         1.6
+@(#)Last changed:    96/12/20
 @(#)Purpose:         Function prototypes for ESQL/C Version 4.10
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992,1993,1995,1996
@@ -23,7 +23,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql4_10_h[] = "@(#)esql4_10.h	1.5 96/11/26";
+static const char esql4_10_h[] = "@(#)esql4_10.h	1.6 96/12/20";
 #endif	/*lint */
 #endif	/*MAIN_PROGRAM */
 
@@ -35,6 +35,9 @@ extern "C" {
 #include <sqlda.h>
 
 #ifdef __STDC__
+
+/* Pre-declare struct value to keep compilers quiet */
+struct value;
 
 extern int      _iqbeginwork(void);
 extern int      _iqclose(_SQCURSOR *cursor);

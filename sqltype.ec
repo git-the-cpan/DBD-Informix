@@ -1,7 +1,7 @@
 /*
 @(#)File:            sqltype.ec
-@(#)Version:         25.1
-@(#)Last changed:    96/11/25
+@(#)Version:         50.1
+@(#)Last changed:    97/01/12
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
 @(#)Product:         :PRODUCT:
@@ -11,7 +11,7 @@
 /*LINTLIBRARY*/
 
 #ifndef lint
-static const char sccs[] = "@(#)sqltype.ec	25.1 96/11/25";
+static const char sccs[] = "@(#)sqltype.ec	50.1 97/01/12";
 #endif
 
 #include <string.h>

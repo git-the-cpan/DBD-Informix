@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-# @(#)esqlcc	25.4 96/12/09 17:11:27
+# @(#)esqlcc	50.1 97/01/12 17:54:50
 #
 # DBD::Informix for Perl Version 5
 #
 # Surrogate C Compiler for Informix ESQL/C versions 4.10.UC1 upwards
 #
-# Copyright (c) 1996 Jonathan Leffler
+# Copyright (c) 1996,1997 Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.

@@ -1,8 +1,10 @@
-#	@(#)blob03.t	25.3 96/12/09 20:49:27
+#!/usr/bin/perl -w
+#
+#	@(#)blob03.t	50.1 97/01/12 17:52:28
 #
 #	Test Basic Blobs (SELECT) for DBD::Informix
-
-BEGIN{unshift @INC, "../../lib", "./lib";}
+#
+#	Copyright (C) 1996,1997 Jonathan Leffler
 
 use DBD::InformixTest;
 

@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 #
-# @(#)primitives.t	25.2 96/12/04 14:45:48
+# @(#)primitives.t	50.1 97/01/12 17:52:32
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#
+# Portions Copyright (C) 1996,1997 Jonathan Leffler
 #
 # Exercises the returning of error codes in ESQL/C intermediate step failure
 
@@ -41,3 +43,4 @@ undef $cursor;
 &stmt_fail unless ($dbh->disconnect);
 stmt_ok;
 print "# Disconnected\n" ;
+all_ok;

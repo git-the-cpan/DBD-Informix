@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 #
-# @(#)multicursor.t	25.3 96/12/04 14:38:27
+# @(#)multicursor.t	50.1 97/01/12 17:52:30
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#
+# Portions Copyright (C) 1996,1997 Jonathan Leffler
 #
 # Tests multiple simultaneous cursors being open
 
@@ -21,8 +23,10 @@ $dbh->do("DROP TABLE $tablename1");
 $dbh->do("DROP TABLE $tablename2");
 
 # These should be fine...
+# In Version 7.x and above, MODE ANSI databases interpret DECIMAL as
+# DECIMAL(16,0), which is a confounded nuisance.
 &stmt_test($dbh, "CREATE TEMP TABLE $tablename1 (id1 INTEGER, " .
-		 "id2 SMALLINT, id3 FLOAT, id4 DECIMAL, name CHAR(64))");
+		 "id2 SMALLINT, id3 FLOAT, id4 DECIMAL(26), name CHAR(64))");
 &stmt_test($dbh, "INSERT INTO $tablename1 VALUES(1122, " .
 		 "-234, -3.1415926, 3.7655, 'Hortense HorseRadish')");
 &stmt_test($dbh, "INSERT INTO $tablename1 VALUES(1001002002, " .

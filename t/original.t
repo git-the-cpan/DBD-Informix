@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 #
-# @(#)original.t	25.2 96/12/04 14:22:29
+# @(#)original.t	50.1 97/01/12 17:52:31
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#
+# Portions Copyright (C) 1996,1997 Jonathan Leffler
 #
 # Original basic test -- rewritten to use DBD::InformixTest
 
@@ -13,9 +15,9 @@ print("1..11\n");
 $dbh = connect_to_test_database();
 &stmt_ok;
 
-print "# Preparing SELECT * from systables ***\n";
+print "# Preparing SELECT * from 'informix'.SysTables ***\n";
 
-$cursor = $dbh->prepare("SELECT * FROM systables");
+$cursor = $dbh->prepare("SELECT * FROM 'informix'.SysTables");
 &stmt_fail() unless (defined $cursor);
 &stmt_ok;
 
@@ -39,9 +41,9 @@ while (@row = $cursor->fetchrow)
 &stmt_ok;
 undef $cursor;
 
-print "# Preparing SELECT * FROM systables WHERE tabname = 'systables' ***\n";
+print "# Preparing SELECT * FROM 'informix'.SysTables WHERE tabname = 'systables' ***\n";
 
-$cursor2 = $dbh->prepare("SELECT tabname, owner FROM systables" .
+$cursor2 = $dbh->prepare("SELECT tabname, owner FROM 'informix'.SysTables" .
 						 " WHERE tabname = 'systables'");
 &stmt_fail() unless (defined $cursor2);
 &stmt_ok;

@@ -1,10 +1,10 @@
 /*
 @(#)File:           ixblob.ec
-@(#)Version:        25.3
-@(#)Last changed:   96/12/09
+@(#)Version:        50.1
+@(#)Last changed:   97/01/12
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1992,1995,1996
+@(#)Copyright:      (C) Jonathan Leffler 1992,1995,1996,1997
 @(#)Product:        :PRODUCT:
 */
 
@@ -23,7 +23,7 @@
 #define DEFAULT_TMPDIR	"/tmp"
 
 #ifndef lint
-static const char sccs[] = "@(#)ixblob.ec	25.3 96/12/09";
+static const char sccs[] = "@(#)ixblob.ec	50.1 97/01/12";
 #endif
 
 const char *sql_dbtemp(void)

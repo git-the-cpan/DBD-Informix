@@ -1,11 +1,11 @@
 /*
- * @(#)esqlc_v5.ec	25.3 96/11/22 17:50:11
+ * @(#)esqlc_v5.ec	50.2 97/02/13 12:51:28
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
  * Code acceptable to ESQL/C Version 5.0x
  *
- * Copyright (c) 1996 Jonathan Leffler
+ * Copyright (c) 1996,1997 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -14,38 +14,49 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)esqlc_v5.ec	25.3 96/11/22";
+static const char sccs[] = "@(#)esqlc_v5.ec	50.2 97/02/13";
 #endif
 
 #include "Informix.h"
-#include "esqlc.h"
 
 /* ================================================================= */
 /* =================== Database Level Operations =================== */
 /* ================================================================= */
 
 /* Open database, possibly on a 'remote' host */
-void
+Boolean
 dbd_ix_opendatabase(char *dbase)
 {
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *dbname = dbase;
 	EXEC SQL END DECLARE SECTION;
+	Boolean         conn_ok = False;
 
-	dbd_ix_debug(2, "DATABASE %s\n", dbname);
-	EXEC SQL DATABASE :dbname;
+	if (dbase != (char *)0 && *dbase != '\0')
+	{
+		dbd_ix_debug(1, "DATABASE %s\n", dbname);
+		EXEC SQL DATABASE :dbname;
+		if (sqlca.sqlcode == 0)
+			conn_ok = True;
+	}
+	else
+	{
+		dbd_ix_debug(1, "ESQL/C 5.0x 'implicit' DATABASE - %s\n", "no-op");
+	}
+	return(conn_ok);
 }
 
 void
 dbd_ix_closedatabase(void)
 {
-	dbd_ix_debug(2, "CLOSE DATABASE%s\n", "");
+	dbd_ix_debug(1, "CLOSE DATABASE%s\n", "");
 	EXEC SQL CLOSE DATABASE;
 }
 
 /* Ensure that the correct connection is current -- a no-op in version 5.0x */
-int dbd_ix_setconnection(imp_sth_t *imp_sth)
+int dbd_ix_setconnection(imp_dbh_t *imp_dbh)
 {
 	int rc = 1;
+	dbd_ix_debug(1, "SET CONNECTION - %s\n", "no-op");
 	return(rc);
 }

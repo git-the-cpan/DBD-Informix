@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 #
-# @(#)numerics.t	25.2 96/12/04 14:06:56
+# @(#)numerics.t	50.1 97/01/12 17:52:31
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#
+# Portions Copyright (C) 1996,1997 Jonathan Leffler
 #
 # Basic Numeric type testing
 
@@ -14,13 +16,15 @@ print("1..10\n");
 $dbh = connect_to_test_database();
 &stmt_ok;
 
+# In Version 7.x and above, MODE ANSI databases interpret DECIMAL as
+# DECIMAL(16,0), which is a confounded nuisance.
 $stmt1 = qq{
 CREATE TEMP TABLE $tablename
 (
 	id1     INTEGER,
 	id2     SMALLINT,
 	id3     FLOAT,
-	id4     DECIMAL,
+	id4     DECIMAL(26),
 	name    CHAR(64)
 )
 };

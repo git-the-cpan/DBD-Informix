@@ -1,7 +1,7 @@
-#	@(#)Informix.PM	25.8 96/12/09 16:17:55
+#	@(#)Informix.PM	50.1 97/01/12 17:54:42
 #
 #   Portions Copyright (c) 1994,1995 Tim Bunce
-#   Portions Copyright (c) 1996      Jonathan Leffler
+#   Portions Copyright (c) 1996,1997 Jonathan Leffler
 #
 #   $Derived-From: Informix.pm,v 1.18 1995/08/15 05:31:30 timbo Archaic $
 #
@@ -20,7 +20,7 @@
 	my $PRODUCTVERSION      = "<<Product Version>>";
 	my $MultipleConnections = "<<Multiple Connections>>";
 	my $ATTRIBUTION         = 'By Alligator Descartes and Jonathan Leffler';
-	my $Revision            = substr(q@(#)Informix.PM 25.8 (96/12/09)@, 3);
+	my $Revision            = substr(q@(#)Informix.PM 50.1 (97/01/12)@, 3);
 
 	require_version DBI 0.69;
 
@@ -28,36 +28,36 @@
 
 	$err = 0;		# holds error code   for DBI::err
 	$errstr = "";	# holds error string for DBI::errstr
-	$drh = undef;	# holds driver handle once initialised
-
-	# Multiple connections not supported!
-	$MultipleConnections = 0;
+	my $drh = undef;	# holds driver handle once initialized
 
 	sub driver
 	{
-		#if ($MultipleConnections == 0)
-		#{
+		if ($MultipleConnections == 0)
+		{
 			# Reuse driver (no multiple connections)!
 			return $drh if $drh;
-		#}
+		}
 
 		my($class, $attr) = @_;
 
-		unless ($ENV{'INFORMIXDIR'})
+		unless ($ENV{INFORMIXDIR})
 		{
-			foreach(qw(/usr/informix /opt/informix /opt/Informix)){
+			foreach(qw(/usr/informix /opt/informix /opt/Informix))
+			{
 				if (-d "$_/lib")
 				{
-					$ENV{'INFORMIXDIR'}=$_;
+					$ENV{INFORMIXDIR} = $_;
+					warn "INFORMIXDIR set to $_\n";
 					last;
 				}
 			}
-			my $msg = ($ENV{INFORMIXDIR}) ? "set to $ENV{INFORMIXDIR}" : "not set!";
-			warn "INFORMIXDIR $msg\n";
+			warn "INFORMIXDIR not set!\n" unless $ENV{INFORMIXDIR};
 		}
 
 		$class .= "::dr";
-		$Attributes = {
+
+		# Create new driver handle.
+		$drh = DBI::_new_drh($class, {
 			'Name'                => 'Informix',
 			'Version'             => $VERSION,
 			'ProductName'         => $PRODUCTNAME,
@@ -66,24 +66,14 @@
 			'Err'                 => \$DBD::Informix::err,
 			'Errstr'              => \$DBD::Informix::errstr,
 			'Attribution'         => $ATTRIBUTION,
-		};
-
-		#if ($MultipleConnections)
-		#{
-		#	my $drh = DBI::_new_drh($class, $Attributes);
-		#}
-		#else
-		#{
-			# not a 'my' since we use it above to prevent multiple drivers
-			$drh = DBI::_new_drh($class, $Attributes);
-		#}
+			%{$attr}
+		});
 
 		# Initialize driver data
 		DBD::Informix::dr::driver_init($drh);
 
 		$drh;
 	}
-
 	1;
 }
 
@@ -98,22 +88,26 @@
 
 	sub connect
 	{
-		my($drh, $dbname, $user, $pass)= @_;
+		my ($drh, $dbname, $dbuser, $dbpass) = @_;
+
+		$dbname = "" unless(defined $dbname);
+		$dbuser = "" unless(defined $dbuser);
+		$dbpass = "" unless(defined $dbpass);
 
 		# Create new database connection handle for driver
 		my $dbh = DBI::_new_dbh($drh, {
 				'Name' => $dbname,
-				'User' => $user,
-				'Pass' => $pass
+				'User' => $dbuser,
+				'Pass' => $dbpass
 			});
 
 		# Initialize database connection
-		DBD::Informix::db::_login($dbh, $dbname, $user, $pass)
+		DBD::Informix::db::connect($dbh, $dbname, $dbuser, $dbpass)
 			or return undef;
 
 		$dbh;
 	}
-
+	1;
 }
 
 {
@@ -133,7 +127,7 @@
 			'Statement' => $statement,
 			});
 
-		DBD::Informix::st::_prepare($sth, $statement)
+		DBD::Informix::st::prepare($sth, $statement)
 			or return undef;
 
 		$sth;
@@ -141,7 +135,10 @@
 
 	# Override default implementation of do (which is DBD::_::db::do)
 	# NB: EXECUTE IMMEDIATE does not allow parameters, so if they are
-	# provided, use the default function which handles them correctly.
+	# provided, use the prepare, execute and finish functions which
+	# handle them correctly.  Note that the attributes are ignored
+	# unless the statement has parameters (and are actually ignored
+	# even then, but they are ignored at a lower level).
 	sub do
 	{
 		my($dbh, $statement, $attrib, @params) = @_;
@@ -152,11 +149,12 @@
 		}
 		else
 		{
-			DBD::_::db::do($dbh, $statement, $attrib, @params);
+			my ($sth) = DBD::Informix::st::prepare($dbh, $statement, $attrib);
+			$sth->execute(@params) if ($sth);
+			$sth->finish() if ($sth);
 		}
 	}
-
-
+	1;
 }
 
 {
@@ -167,6 +165,7 @@
 	{
 		DBD::Informix::errstr(@_);
 	}
+	1;
 }
 
 1;
@@ -210,8 +209,8 @@ because it uses SQL descriptors and these are not available prior to version
 To use the DBD::Informix software, you need to load the DBI software
 and then install the Informix driver:
 
-	use DBI;
-	$drh = DBI->install_driver('Informix');
+    use DBI;
+    $drh = DBI->install_driver('Informix');
 
 This gives you a reference to the driver, aka the driver handle.  If the
 load fails, your program stops immediately (unless, perhaps, you eval the
@@ -220,61 +219,57 @@ statement).
 Once you have the driver handle, you can interrogate the driver for some
 basic information:
 
-	print "Driver Information\n";
-	# Type is always 'dr'.
-	print "    Type:                  $drh->{Type}\n";
-	# Name is always 'Informix'.
-	print "    Name:                  $drh->{Name}\n";
-	# Version is the version of DBD::Informix (eg 0.25).
-	print "    Version:               $drh->{Version}\n";
-	# The ProductName is the version of ESQL/C; it corresponds to
-	# the first line of the output from "esql -V".
-	print "    Product:               $drh->{ProductName}\n";
-	# The ProductVersion is an integer version number such as 721
-	# for ESQL/C version 7.21.UC1.
-	print "    Product Version:       $drh->{ProductVersion}\n";
-	# The Attribution identifies the culprits who provided you
-	# with this software.
-	print "    Attribution:           $drh->{Attribution}\n";
-	# The MultipleConnections indicates whether the driver
-	# supports multiple connections (1) or not (0).
-	print "    Multiple Connections:  $drh->{MultipleConnections}\n";
+    print "Driver Information\n";
+    # Type is always 'dr'.
+    print "    Type:                  $drh->{Type}\n";
+    # Name is always 'Informix'.
+    print "    Name:                  $drh->{Name}\n";
+    # Version is the version of DBD::Informix (eg 0.25).
+    print "    Version:               $drh->{Version}\n";
+    # The ProductName is the version of ESQL/C; it corresponds to
+    # the first line of the output from "esql -V".
+    print "    Product:               $drh->{ProductName}\n";
+    # The ProductVersion is an integer version number such as 721
+    # for ESQL/C version 7.21.UC1.
+    print "    Product Version:       $drh->{ProductVersion}\n";
+    # The Attribution identifies the culprits who provided you
+    # with this software.
+    print "    Attribution:           $drh->{Attribution}\n";
+    # The MultipleConnections indicates whether the driver
+    # supports multiple connections (1) or not (0).
+    print "    Multiple Connections:  $drh->{MultipleConnections}\n";
 
-	# -- Not implemented in DBD::Informix 0.25 --
-	# ActiveConnections identifies the number of open connections.
-	print "    Active Connections:      $drh->{ActiveConnections}\n";
-	# CurrentConnection identifies the current connection.
-	print "    Current Connections:     $drh->{CurrentConnection}\n";
+    # -- Not implemented in DBD::Informix 0.25 --
+    # ActiveConnections identifies the number of open connections.
+    print "    Active Connections:      $drh->{ActiveConnections}\n";
+    # CurrentConnection identifies the current connection.
+    print "    Current Connections:     $drh->{CurrentConnection}\n";
 
 Once you have the driver loaded, you can connect to a database, or you
 can (in theory) sever all connections to databases with disconnect_all,
 but this has not been implemented in 0.25b2.
 
-	$drh->disconnect_all;
-
-=over 4
-
-BUG: DBD::Informix does not implement disconnect_all.
-
-= back
+    $drh->disconnect_all;
 
 There is also an unofficial function which can be called using:
 
-	@dbnames = $drh->func('_ListDBs');
+    @dbnames = $drh->func('_ListDBs');
 
 You can test whether this worked with:
 
-	if (defined @dbnames) { ...process array... }
-	else                  { ...process error... }
+    if (defined @dbnames) { ...process array... }
+    else                  { ...process error... }
 
 =head2 CONNECTING TO A DATABASE
 
-To connect to a database, you can specify:
+To connect to a database, you can use the connect function,
+which yields a valid reference or database handle if it is successful
+(and aborts the script if it is not successful).  FWIW: the abort is
+done by DBI, not by DBD::Informix.
 
-	$dbh = $drh->connect($database, $username, $password);
+    $dbh = $drh->connect($database, $username, $password);
 
-This yields a valid reference or database handle if it is successful.
-The username and password data is ignored by the 5.0x versions, and the
+The 5.0x versions ignore the username and password data, and the
 statement is equivalent to: EXEC SQL DATABASE :database;
 
 The 6.0x versions only use the username and password if both are supplied,
@@ -289,37 +284,40 @@ The connection is given a name by DBD::Informix.
 For Informix, the database name is any valid format for the DATABASE or
 CONNECT statements.  Examples include:
 
-	dbase				# 'Local' database
-	//machine1/dbase	# Database on remote machine
-	dbase@server1		# Database on (remote) server (as defined in sqlhosts)
-	@server1			# Connection to (remote) server but no database
-	/some/where/dbase	# Connect to local SE database
+    dbase               # 'Local' database
+    //machine1/dbase    # Database on remote machine
+    dbase@server1       # Database on (remote) server (as defined in sqlhosts)
+    @server1            # Connection to (remote) server but no database
+    /some/where/dbase   # Connect to local SE database
 
-The database name is not supplied implicitly.  Contrary to some other
-documentation, it does not default to the value in %ENV{PERL_DBI_DATABASE}.
+The database name is not supplied implicitly.
+Contrary to some other documentation, the DBD::Informix code does not
+default the database to the value in %ENV{PERL_DBI_DATABASE}.
 
 Once you have a database handle, you can interrogate it for some basic
 information about the database, etc.
 
-	 print "Database Information\n";
-	 # Type is always 'db'
-	 print "    Type:                    $dbh->{Type}\n";
-	 # Name is the name of the database specified at connect
-	 print "    Database Name:           $dbh->{Name}\n";
-	 # InformixOnLine is 1 (true) if the handle is connected to an
-	 # Informix-OnLine server.
-	 print "    Informix-OnLine:         $dbh->{InformixOnLine}\n";
-	 # LoggedDatabase is 1 (true) if the database has
-	 # transactions.
-	 print "    Logged Database:         $dbh->{LoggedDatabase}\n";
-	 # ModeAnsiDatabase is 1 (true) if the database is MODE ANSI.
-	 print "    Mode ANSI Database:      $dbh->{ModeAnsiDatabase}\n";
-	 # AutoCommit is 1 (true) if the database commits each
-	 # statement.
-	 print "    AutoCommit:              $dbh->{AutoCommit}\n";
-	 # AutoErrorReport is 1 (true) if errors are reported as they
-	 # are detected.
-	 print "    AutoErrorReport:         $dbh->{AutoErrorReport}\n";
+     print "Database Information\n";
+     # Type is always 'db'
+     print "    Type:                    $dbh->{Type}\n";
+     # Name is the name of the database specified at connect
+     print "    Database Name:           $dbh->{Name}\n";
+     # InformixOnLine is 1 (true) if the handle is connected to an
+     # Informix-OnLine server.
+     print "    Informix-OnLine:         $dbh->{InformixOnLine}\n";
+     # LoggedDatabase is 1 (true) if the database has
+     # transactions.
+     print "    Logged Database:         $dbh->{LoggedDatabase}\n";
+     # ModeAnsiDatabase is 1 (true) if the database is MODE ANSI.
+     print "    Mode ANSI Database:      $dbh->{ModeAnsiDatabase}\n";
+     # AutoCommit is 1 (true) if the database commits each
+     # statement.
+     print "    AutoCommit:              $dbh->{AutoCommit}\n";
+     # AutoErrorReport is 1 (true) if errors are reported as they
+     # are detected.
+     print "    AutoErrorReport:         $dbh->{AutoErrorReport}\n";
+     # InTransaction is 1 (true) if the database is in a transaction
+     print "    Transaction Active:      $dbh->{InTransaction}\n";
 
 If $dbh->{AutoErrorReport} is true, then DBD::Informix will report each
 error automatically on STDERR when it is detected.  The error is also
@@ -335,16 +333,15 @@ occurred and to report them.
 
 If you have forgotten the driver, you can discover it again using:
 
-	$drh = $dbh->{Driver};
+    $drh = $dbh->{Driver};
 
 =over 4
 
-BUG: the name of the database should be tracked more carefully via
-the DATABASE, CLOSE DATABASE, CREATE DATABASE and START DATABASE statements.
+BUG: The name of the database should be tracked more carefully via
+the DATABASE, CLOSE DATABASE, CREATE DATABASE, ROLLFORWARD DATABASE
+and START DATABASE statements.
 Note that you cannot prepare CONNECT statements, so they do not have to be
-tracked.  This is not fixed in 0.25.
-
-BUG: AutoCommit is not handled correctly in 0.25.
+tracked.
 
 = back
 
@@ -352,18 +349,14 @@ BUG: AutoCommit is not handled correctly in 0.25.
 
 You can also disconnect from the database:
 
-	$dbh->disconnect;
+    $dbh->disconnect;
 
 This will rollback any uncommitted work.
-
-=over 4
-
-BUG: no rollback occurs in 0.25.
-
-= back
-
-Note that this does not destroy the database handle.  You need to do an
-explicit 'undef $dbh' to destroy the handle.
+Note that this does not destroy the database handle.
+You need to do an explicit 'undef $dbh' to destroy the handle.
+Any statements prepared using this handle are finished (see below) and
+cannot be used again.
+All space associated with the statements is released.
 
 If you are using an Informix driver for which $drh->{ProductVersion} >= 600,
 then you can have multiple concurrent connections.  This means that multiple
@@ -374,28 +367,17 @@ If you are using an Informix driver for which $drh->{ProductVersion} < 600,
 then you cannot have multiple concurrent connections.  If you make multiple
 calls to $drh->connect, you will achieve the same effect as executing several
 database statements in a row.  This will generally switch databases
-successfully, but will invalidate any statements previously prepared.  It may
+successfully, but may invalidate any statements previously prepared.  It may
 fail if the current database is not local, or if there is an active
 transaction, etc.
-
-=over 4
-
-BUG: Multiple connections do not work in 0.25.
-
-BUG: You get memory leaks in version 0.25 if you do:
-
-	$dbh = $drh->connect('database1'):
-	$dbh = $drh->connect('database2'):
-
-= back
 
 =head2 SIMPLE STATEMENTS
 
 Given a database connection, you can execute a variety of simple statements
 using a variety of different calls:
 
-	$dbh->commit;
-	$dbh->rollback;
+    $dbh->commit;
+    $dbh->rollback;
 
 These two operations commit or rollback the current transaction. If the
 database is unlogged, they do nothing.  If the database is not MODE ANSI
@@ -403,9 +385,9 @@ and AutoCommit is set to 0 then a new transaction is automatically
 started.  If the database is not MODE ANSI and AutoCommit is set to 1 (the
 default), then no explicit transaction is started.
 
-You can execute an arbitrary parameterless statement using:
+You can execute most preparable parameterless statements using:
 
-	$dbh->do($stmt);
+    $dbh->do($stmt);
 
 The statement must not be either SELECT (other than SELECT...INTO TEMP) or
 EXECUTE PROCEDURE where the procedure returns data.  This will use the
@@ -413,38 +395,35 @@ ESQL/C EXECUTE IMMEDIATE statement.
 
 You can execute an arbitrary statement with parameters using:
 
-	$dbh->do($stmt, @parameters);
-	$dbh->do($stmt, $param1, $param2);
+    $dbh->do($stmt, @parameters);
+    $dbh->do($stmt, $param1, $param2);
 
 Again, the statement must not be a SELECT or EXECUTE PROCEDURE which
 returns data.  The values in @parameters (or the separate values) are bound
 to the question marks in the statement string.  However, this cannot use
 EXECUTE IMMEDIATE because it does not accept parameters.
 
-	$sth = $dbh->prepare($stmt);
-	$sth->execute(@parameters);
+    $sth = $dbh->prepare($stmt);
+    $sth->execute(@parameters);
 
-In DBD::Informix v0.25, this part of the functionality of $dbh->do() is
-provided by the DBI package implementation.  This is likely to be handled
-exclusively by DBD::Informix in the next release.
+Unlike previous releases, which used some code from the DBI package,
+DBD::Informix v0.26, now handles the 'do' operation exclusively with its
+own code.
 
 =over 4
-
-BUG: the code in DBI uses $dbh->rows to work out whether everything worked
-or not, and this is not implemented in DBD::Informix.  DBD::Informix should
-implement $dbh->do for both forms of call.
 
 BUG: If the statement you run is a SELECT, then it is prepared, and the
 cursor is declared, opened (potentially expensive, if the statement uses
 ORDER BY etc), and then closed and freed without fetching any data.  A more
-robust version would generate an error condition.
+robust version would generate an error condition without declaring the
+cursor, etc.
 
 = back
 
 You can embed an arbitrary string inside a statement with any quote marks
 correctly handled by invoking:
 
-	$dbh->quote($string);
+    $dbh->quote($string);
 
 This method is provided by the DBI package implementation and is inherited
 by the DBD::Informix package.  The string is enclosed in singel quotes, and
@@ -458,21 +437,31 @@ SELECT and EXECUTE PROCEDURE statements which return data (cursory
 statements) as well as non-cursory statements which return no data.  You
 create a statement handle (another reference) using:
 
-	$sth = $dbh->prepare($stmt);
+    $sth = $dbh->prepare($stmt);
 
 If the statement is a SELECT which returns data (not SELECT...INTO TEMP) or
 an EXECUTE PROCEDURE for a procedure which returns values, then a cursor is
 declared for the prepared statement.
 
+According to the DBI specification, the prepare call accepts an
+optional attributes parameter which is a reference to a hash.
+At the moment, no parameters are recognized.
+It would be reasonable to add, for example, {CursorWithHold => 1} to
+specify that the cursor should be declared WITH HOLD.
+Similarly, you could add {BlobLocation => 'InFile'} to support
+per-statement blob location, and {ScrollCursor => 1} to support
+scroll cursors.
+
 Note: in versions of DBD::Informix prior to 0.25, preparing a statement
 also executed non-cursory statements and opened the cursor for cursory
 statements.
+This no longer occurs.
 
 More typically, you need to do error checking, and this is achieved by
 using:
 
-	die "Failed to prepare '$stmt'\n"
-		unless ($sth = $dbh->prepare($stmt));
+    die "Failed to prepare '$stmt'\n"
+        unless ($sth = $dbh->prepare($stmt));
 
 =over 4
 
@@ -483,13 +472,13 @@ whether it is a cursory (fetchable) statement.  You are assumed to know.
 
 Once the statement is prepared, you can execute it:
 
-	$sth->execute;
+    $sth->execute;
 
 For a non-cursory statement, this simply executes the statement.  For a
 cursory statement, it opens the cursor.  You can also specify the
 parameters for a statement using:
 
-	$sth->execute(@parameters);
+    $sth->execute(@parameters);
 
 The first parameter will be supplied as the value for the first
 place-holder question mark in the statement, the second parameter for the
@@ -514,11 +503,11 @@ clearly documented semantics associated with the calls.
 For cursory statements, you can discover what the returned column names, types,
 nullability, etc are.  You do this with:
 
-	@name = @{$sth->{NAME}};		# Column names
-	@null = @{$sth->{NULLABLE}};	# True => accepts nulls
-	@type = @{$sth->{TYPE}};		# Data types with qualifiers
-	@prec = @{$sth->{PRECISION}};	# Numeric length from SysColumns.Collength
-	@scal = @{$sth->{SCALE}};		# Same as PRECISION
+    @name = @{$sth->{NAME}};        # Column names
+    @null = @{$sth->{NULLABLE}};    # True => accepts nulls
+    @type = @{$sth->{TYPE}};        # Data types with qualifiers
+    @prec = @{$sth->{PRECISION}};   # Numeric length from SysColumns.Collength
+    @scal = @{$sth->{SCALE}};       # Same as PRECISION
 
 =over 4
 
@@ -542,27 +531,27 @@ some internal machinations mean that it probably does not work in 0.25.
 If the statement is a cursory statement, you can retrieve the values in either
 of two ways:
 
-	$ref = $sth->fetch;
-	@row = @{$ref};
+    $ref = $sth->fetch;
+    @row = @{$ref};
 
-	@row = @{$sth->fetch};	# Shorthand for above...
+    @row = @{$sth->fetch};  # Shorthand for above...
 
-	@row = $sth->fetchrow;
+    @row = $sth->fetchrow;
 
 As usual, you have to worry about whether this worked or not.  You would
 normally, therefore, use:
 
-	while ($ref = $sth->fetch)
-	{
-		# We know we got some data here
-		...
-	}
-	# Investigate whether an error occurred or the SELECT had nothing more to
-	# return.
-	if ($sth->{sqlcode} < 0)
-	{
-		# Process error...
-	}
+    while ($ref = $sth->fetch)
+    {
+        # We know we got some data here
+        ...
+    }
+    # Investigate whether an error occurred or the SELECT
+	# simply had nothing more to return.
+    if ($sth->{sqlcode} < 0)
+    {
+        # Process error...
+    }
 
 The returned data includes blobs mapped into strings.  Note that byte blobs
 might contain ASCII NUL '\0' characters.  Perl knows how long the strings
@@ -572,10 +561,10 @@ need to be careful deciding how to handle this string.
 There is provision to specify how you want blobs handled.  You can set the
 attribute:
 
-	$sth->{BlobLocation} = 'InMemory';		# Default
-	$sth->{BlobLocation} = 'InFile';		# In a named file
-	$sth->{BlobLocation} = 'DummyValue';	# Return dummy values
-	$sth->{BlobLocation} = 'NullValue';		# Return undefined
+    $sth->{BlobLocation} = 'InMemory';      # Default
+    $sth->{BlobLocation} = 'InFile';        # In a named file
+    $sth->{BlobLocation} = 'DummyValue';    # Return dummy values
+    $sth->{BlobLocation} = 'NullValue';     # Return undefined
 
 The InFile mode returns the name of a file in the fetched array, and that
 file can be accessed by Perl using normal file access methods.  The
@@ -592,42 +581,193 @@ at the statement level.
 
 =over 4
 
-BUG: In version 0.25, BlobLocation is not honoured.  When questioning
-BlobLocation, you get a numeric answer rather than a string answer, and the
-numeric answer is not acceptable as input.  Both items need to be fixed.
+BUG: BlobLocation is not honoured.
 
 = back
 
 When you have fetched as many rows as required, you close the cursor using:
 
-	$sth->finish;
+    $sth->finish;
 
 This simply closes the cursor; it does not free the cursor or the statement.
 That is done when you destroy (undef) the statement handle:
 
-	undef $sth;
+    undef $sth;
 
 You can also implicitly rebind a statement handle to a new statement by
 simply using the same variable again.  This does not cause any memory leaks.
+
+=head1 TRANSACTION MANAGEMENT
+
+=head2 The Interactions of AutoCommit with Informix Databases
+
+There are 3 types of Informix database to consider: MODE ANSI, Logged,
+UnLogged.  Although MODE ANSI databases also have a transaction log, the
+category of Logged databases specifically excludes MODE ANSI databases.  In
+OnLine, this refers to databases created WITH LOG or WITH BUFFERED LOG; in
+SE, to databases created WITH LOG IN "/some/file/name".
+
+There are 2 AutoCommit modes to consider: On, Off.
+
+There are 2 possible transaction states: In-TX (In transaction), No-TX
+(Outside transaction).
+
+There are at least 13 types of statement (in 4 groups and 9 sub-groups) to
+consider:
+
+=over 2
+
+=item *
+    $drh->connect('xyz');                   # Group 1A
+
+=item *
+    $dbh->do('DATABASE xyz');               # Group 1B
+
+=item *
+    $dbh->do('CREATE DATABASE xyz');        # Group 1B
+
+=item *
+    $dbh->do('ROLLFORWARD DATABASE xyz');   # Group 1B
+
+=item *
+    $dbh->do('START DATABASE xyz');         # Group 1B
+
+=item *
+    $dbh->disconnect();                     # Group 2A
+
+=item *
+    $dbh->do('CLOSE DATABASE');             # Group 2B
+
+=item *
+    $dbh->commit();                         # Group 3A
+
+=item *
+    $dbh->rollback();                       # Group 3A
+
+=item *
+    $dbh->do('BEGIN WORK');                 # Group 3B
+
+=item *
+    $dbh->do('ROLLBACK WORK');              # Group 3C
+
+=item *
+    $dbh->do('COMMIT WORK');                # Group 3C
+
+=item *
+    $dbh->prepare('SELECT ...');            # Group 4A
+
+=item *
+    $dbh->prepare('UPDATE ...');            # Group 4B
+
+=back
+
+The Group 1 statements establish the default AutoCommit mode for a database
+handle.  Group 1A is the primary means of connecting to a database; the
+Group 1B statements can change the default AutoCommit mode by virtue of
+changing the current database.
+
+For a MODE ANSI database, the default AutoCommit mode is Off.
+For a Logged database, the default AutoCommit mode is On.
+For an UnLogged database, the default AutoCommit mode is On and it
+cannot be changed.
+Any attempt to change AutoCommit mode to Off with an UnLogged database
+generates a non-fatal warning.
+
+The Group 2 statements sever the connection to a database.  The Group 2A
+statement renders the database handle unusable; no further operations are
+possible except 'undef' or re-assigning with a new connection.  The Group 2B
+statement means that no operations other than those in Group 1B or 'DROP
+DATABASE' are permitted.  The value of AutoCommit is irrelevant after the
+database is closed.
+
+The Group 3 & 4 statements interact in many complicated ways.  Although
+UPDATE is cited in Group 4B, it represents any statement which is not a
+SELECT statement.  Note that 'SELECT ...  INTO TEMP' is a Group 4B
+statement because it returns no data to the program.  An 'EXECUTE
+PROCEDURE' statement is in Group 4A if it returns data, and in Group 4B if
+it does not, and you cannot tell which of the two groups applies until after
+the statement is prepared.
+
+=head2 MODE ANSI Databases
+
+By default, a MODE ANSI database operates with AutoCommit Off.  When the
+connection is established, a transaction is started implicitly, and the
+program will be inside a transaction (In-TX) at all times.  Whenever either
+of the group 3A functions is used, a new transaction is automatically (but
+implicitly) started.  The DBD::Informix code does not do an explicit
+BEGIN WORK because the user is entitled to write their own BEGIN WORK
+immediately after COMMIT WORK or ROLLBACK WORK (and hence $dbh->commit or
+$dbh->rollback), and if DBD::Informix did this, the user would get an
+unwarranted error.  Before disconnecting, the code does ROLLBACK
+WORK to ensure that the disconnect can occur cleanly.
+
+If the user elects to switch to AutoCommit On, things get trickier.  All
+cursors need to be declared WITH HOLD so that Group 4B statements being
+committed do not close the active cursors.  Whenever a Group 4B statement
+is executed, the statement needs to be committed.  With OnLine (and
+theoretically with SE, I think), if the statement fails there is no need to
+do a rollback -- the statement failing did the rollback anyway.  And the
+commit will automatically start a new transaction.  As before, the code can
+do ROLLBACK WORK before disconnecting, though it should not actually be
+necessary.
+
+=over 4
+
+BUG: DBD::Informix does not create WITH HOLD cursors for MODE ANSI databases
+when AutoCommit mode is On.
+
+= back
+
+=head2 Logged Databases
+
+Unlike MODE ANSI databases, Logged databases can be in either one of two
+transaction states -- In-TX and No-TX.
+
+AutoCommit is set to On when the connection is established, and the
+transaction state is No-TX.  No further action is required by DBD::Informix
+in this state.  Neither $dbh->commit nor $dbh->rollback should be used in
+this state -- there is no transaction for them to work on.  If they are
+called, the effect will be a no-op; all previous operations were already
+committed or rolled back, so they will succeed.  Note that cursors
+established in this state are not declared WITH HOLD.  If the user executes
+$dbh->do('BEGIN WORK') or equivalent, then the AutoCommit functionality is
+suspended and the transaction state is In-TX until the transaction is
+terminated.  If a Group 3A function is executed, a new transaction is not
+started explicitly and the transaction state is once more No-TX, and the
+user can execute BEGIN WORK as required.  If the state at $dbh->disconnect
+is In-TX, then DBD::Informix does a rollback before attempting to
+disconnect.  If the user attempts to close the database (or open a new one)
+while in the In-TX state, an error will be generated by Informix.
+
+If the user sets AutoCommit off explicitly, DBD::Informix does an explicit
+BEGIN WORK to start a transaction and the transaction state is In-TX (and
+will stay like that until AutoCommit is set to On).  Cursors declared while
+AutoCommit is off do not need to be declared WITH HOLD either, so cursors
+in Logged databases are not WITH HOLD regardless of AutoCommit.  However,
+it might be a good option to allow $dbh->{CursorsWithHold} to indicate that
+they are to be declared WITH HOLD.  When the user executes a Group 3A
+function, a new transaction is started explicitly (meaning that the user
+cannot successfully execute BEGIN WORK) and the transaction state is In-TX.
+
+=head2 UnLogged Databases
+
+The transaction state is No-TX and AutoCommit is On, and this cannot
+be changed.
+Any attempt to set AutoCommit to Off generates a non-fatal warning but
+the program will continue; setting it to On generates neither a
+warning nor an error.
+Both $dbh->commit and $dbh->rollback succeed but do nothing.
+Executing any Group 3B or 3C statement will generate an error.
 
 =head1 KNOWN RESTRICTIONS
 
 =over 2
 
 =item *
-Multiple connections are not supported.
-
-=item *
-AutoCommit is not properly supported.
-
-=item *
 Blobs can only be located in memory (reliably).
 
 =item *
-DisconnectAll is not properly supported.
-
-=item *
-Some driver attributes (notably CurrentConnection and 
+Some driver attributes (notably CurrentConnection and
 ActiveConnections) cannot be queried.
 
 =back

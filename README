@@ -1,7 +1,7 @@
 README for DBD::Informix -- an Informix interface for Perl 5 using DBI.
 
    Portions Copyright (c) 1994,1995,1996  Alligator Descartes
-   Portions Copyright (c) 1996            Jonathan Leffler
+   Portions Copyright (c) 1996,1997       Jonathan Leffler
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the Perl README file.
@@ -19,14 +19,20 @@ BUILDING DBD::Informix
     mandatory) is not installed, then build, test and install it.
 
     You must have a version of ESQL/C available to you.  At the moment,
-    version 4.0x or 4.1x are not supported.  Versions 5.00 and 5.01 have a
-    bug in them which makes them unsupported too.  If someone wants to code
-    up the fix necessary to get versions 4 or 5.0[01] to work, then contact
-    the DBD::Informix Maintenance Team.  ESQL/C Versions 5.02 upwards
+    version 4.0x or 4.1x are not supported.  If someone wants to code up
+    the fix necessary to get versions 4.0x or 4.1x to work, then contact
+    the DBD::Informix Maintenance Team.  ESQL/C Versions 5.00 upwards
     should be OK.  Please ensure that you have $INFORMIXDIR set, and that
     $INFORMIXDIR/bin is on your PATH.  The build may work without these
     environment variables being set, but it will be more reliable if they
-    are.
+    are.  Also, if you are using ESQL/C version 6.x or later, you will be
+    using ESQL/C shared libraries which are found in $INFORMIXDIR/lib and
+    $INFORMIXDIR/lib/esql.  You need to ensure that these will be found
+    when you run Perl with DBD::Informix.  On SVR4 machines, this means
+    adding these directories to LD_LIBRARY_PATH; on HP-UX, the variable is,
+    I believe, SHLIB_PATH; other systems may have other variable names.
+    You can test that this is correct by compiling and running a trivial
+    ESQL/C program which simply opens a database and exits.
 
     When Perl, DBI and ESQL/C are all installed do:
 
@@ -74,6 +80,40 @@ BUILDING DBD::Informix
     scripts detect that the engine is SE and do not try to test blob
     handling.
 
+    Additionally, for a really thorough scrutiny of DBD::Informix, you need
+    to test with at least 3 different databases: one created MODE ANSI, one
+    created with a transaction log but not MODE ANSI, and one created
+    without any transaction logs at all.
+
+        DBD_INFORMIX_DATABASE=mode_ansi make test
+        DBD_INFORMIX_DATABASE=logged    make test
+        DBD_INFORMIX_DATABASE=unlogged  make test
+
+    If you are concerned about both OnLine and SE, then you need these
+    databases for both environments.  Also note that the multiple
+    connection tests will use two different databases if you set the
+    environment variable DBD_INFORMIX_DATABASE2, but the tests assume that
+    you don't need to specify the user and password.  This could be fixed,
+    but hasn't happened yet.  You can use one SE and one OnLine database
+    for the multiple connection testing.
+
+    Once you are satisfied that DBD::Informix is working correctly, you
+    should install it:
+
+        make install
+
+    If you ever need to remove it, possibly as a preamble to installing a
+    new version, you should use the old version's makefile and run:
+
+        make uninstall
+
+    You can then install using the new version's makefile.  It is important
+    to use the correct (old or new) makefiles because the installed files
+    may be different, and if some file is made obsolete by the new version
+    (is not used by the new version), its makefile will not uninstall the
+    obsolete file; over time and multiple versions, this could, eventually,
+    lead to 'coronary thrombosis' on your disk drive -- or disk full.
+
 KNOWN PROBLEMS:
 
     * DBD::Informix uses SQL DESCRIPTORS which are not part of ESQL/C
@@ -81,12 +121,9 @@ KNOWN PROBLEMS:
       statements, which are likewise not supported in 4.0x or 4.1x (or
       earlier) versions.
 
-    * A bug in the 5.00 and 5.01 implementation of SQL DESCRIPTORS means
-      that these versions are not suitable either.
-
     * Some desirable features are not implemented.  A number of these are
       listed in the POD file.
-	  
+
     * Some Oracle-inspired functions which are listed as part of DBI are
       not implemented for lack of sufficient definition of what is actually
       required.
@@ -172,7 +209,7 @@ Please include:
 Regards,
 Tim & Al & Jonathan
 
-@(#)README	25.3 96/12/09 21:03:25
+@(#)README	50.2 97/01/24 09:17:03
 
 ---------------------------------------------------------------------------
 

@@ -1,7 +1,7 @@
 /*
 @(#)File:            decsci.c
-@(#)Version:         1.8
-@(#)Last changed:    96/12/09
+@(#)Version:         1.9
+@(#)Last changed:    96/12/20
 @(#)Purpose:         Fixed, Exponential and Engineering formatting of DECIMALs
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1991,1992,1993,1996
@@ -20,7 +20,7 @@
 static char     buffer[166];
 
 #ifndef lint
-static const char sccs[] = "@(#)decsci.c	1.8 96/12/09";
+static const char sccs[] = "@(#)decsci.c	1.9 96/12/20";
 #endif
 
 /*
@@ -121,7 +121,7 @@ char           *decsci(dec_t *d, int ndigit, int plus)
 	while (*src)				/* Digits after decimal point */
 		*dst++ = *src++;
 	deccvdbl(0.0, &z);
-	dst = decexp(dst, dp - (deccmp(d, &z) == 0));	/* Exponent */
+	dst = decexp(dst, dp - (deccmp(d, &z) != 0));	/* Exponent */
 	return(buffer);
 }
 

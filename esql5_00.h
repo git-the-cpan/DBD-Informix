@@ -1,7 +1,7 @@
 /*
 @(#)File:            esql5_00.h
-@(#)Version:         1.9
-@(#)Last changed:    96/11/27
+@(#)Version:         1.10
+@(#)Last changed:    96/12/10
 @(#)Purpose:         Function prototypes for ESQL/C Versions 5.00..5.07
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992,1993,1995,1996
@@ -14,9 +14,10 @@
 
 /*
 **  Beware:
-**  ESQL/C version 5.00 has a 4-argument version of _iqlocate_cursor(),
-**  but ESQL/C versions 5.01 and upwards (to 5.07 at least) have a
-**  3-argument version of _iqlocate_cursor().
+**  ESQL/C version 5.00 has a 4-argument version of _iqlocate_cursor(), but
+**  ESQL/C versions 5.02 and upwards (to 5.07 at least) have a 3-argument
+**  version of _iqlocate_cursor().  Opinion is divided on whether version
+**  5.01 used 3 or 4 arguments.  On SunOS 4.1.3, 5.01.UC1 used 4 arguments.
 **  You must set ESQLC_VERSION accurately.
 */
 
@@ -38,7 +39,7 @@ extern "C" {
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql5_00_h[] = "@(#)esql5_00.h	1.9 96/11/27";
+static const char esql5_00_h[] = "@(#)esql5_00.h	1.10 96/12/10";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -51,11 +52,11 @@ extern _SQCURSOR *_iqnprep(const char *name, char *stmt, short cs_sens);
 extern _SQCURSOR *_iqnprep();
 #endif /* ESQLC_STRICT_PROTOTYPES */
 
-#if ESQLC_VERSION == 500
+#if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
 extern _SQCURSOR *_iqlocate_cursor(const char *name, int type, int cs, int xx);
 #else
-extern _SQCURSOR *_iqlocate_cursor(const char *name, int type, int cs_sens);
-#endif /* ESQLC_VERSION */
+extern _SQCURSOR *_iqlocate_cursor(const char *name, int type, int cs);
+#endif /* ESQLC_VERSION in {500, 501} */
 
 extern int      _iqalloc(char *descname, int occurrence);
 extern int      _iqbeginwork(void);

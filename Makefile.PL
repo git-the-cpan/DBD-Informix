@@ -1,15 +1,11 @@
 #!/usr/bin/perl -sw
 #
-# @(#)Makefile.PL	25.20 96/12/09 20:20:08
+# @(#)Makefile.PL	50.2 97/02/13 12:51:57
 #
-# Amendments: Jonathan Leffler (johnl@informix.com)
-# Portions Copyright (c) 1996 Jonathan Leffler
-#
-# DEC OSF/1 fix based on Dave Thomas' (Dave@Thomases.com) solution.
-#
-# $Derived-From: Makefile.PL,v 1.1 1996/04/14 17:25:11 descarte Archaic $
-# (c) 1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+# Portions Copyright (c) 1996,1997 Jonathan Leffler (johnl@informix.com)
+# Portions Copyright (c) 1996 Alligator Descartes (descarte@hermetica.com)
 # From an original by Tim Bunce
+# DEC OSF/1 fix based on Dave Thomas' (Dave@Thomases.com) solution.
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
@@ -19,7 +15,7 @@ use Config;
 
 %opts = (
 	'NAME'    => 'DBD::Informix',
-	'VERSION' => '0.25',
+	'VERSION' => '0.50',
 );
 
 print "\nConfiguring DBD::Informix version $opts{VERSION}...\n";
@@ -154,6 +150,7 @@ else
 # -- Produce correctly configured Informix.pm file
 
 {
+	print "\nWriting Informix.pm\n";
 	my ($vn, $pn, $pv, $cc) = (0, 0, 0, 0);
 	my $input  = "Informix.PM";
 	my $output = "Informix.pm";
@@ -172,6 +169,7 @@ else
 		$cc == 0 and s/\$$kcc[ \t]*=.*;/\$$kcc = "$multiconn";/o and $cc++;
 		print PM_OUT;
 	}
+	print "\n";
 }
 
 # -- Configure the make process
@@ -205,6 +203,13 @@ $opts{DEFINE} .= ' -Xa'
 $opts{DEFINE} .= ' -std1'
 	if (($Config{cc} eq 'cc') && ($Config{osname} eq 'dec_osf'));
 
+# Workaround Informix bug B08223 (aka B14937, and other numbers too)
+# AIX localedef31.h defines a loc_t and is used by some system headers.
+# Informix locator.h also defines a loc_t.  The workaround is to prevent
+# the localedef31.h declaration from being included.
+$opts{DEFINE} .= " -D__H_LOCALEDEF"
+	if ($Config{osname} eq 'aix');
+
 # The Informix headers (like sqlhdr.h) only generate function prototypes if
 # __STD__ is defined.  Without function prototypes, we are often passing
 # pointers to _iq.. functions that the compiler thinks are ints.  This
@@ -225,11 +230,13 @@ else
 	print "Don't you need to upgrade your compiler?\n";
 }
 
+$objects = "Informix.o sqltype.o ixblob.o decsci.o dbdimp.o link.o $vercode";
+
 # Need to pick up the DBI headers.
 # NB: If using ESQL/C 4.xy, use -I$ID/incl, not -I$ID/incl/esql!
 # However, you've got other major work to do to handle 4.xy ESQL/C.
 $opts{INC} = "-I$ID/incl/esql -I$Config{archlib}/DBI -I$Config{sitearch}/DBI";
-$opts{OBJECT} = "Informix.o sqltype.o ixblob.o decsci.o dbdimp.o $vercode";
+$opts{OBJECT} = $objects;
 
 # The best way to get the library linked reliably is to use the script that
 # comes with ESQL/C.  It knows which libraries are needed, etc.  The lists
@@ -258,7 +265,8 @@ $opts{OBJECT} = "Informix.o sqltype.o ixblob.o decsci.o dbdimp.o $vercode";
 # the files list...
 
 # Default version of $opts{LD}
-$opts{LD} = "INFORMIXC='\$(FULLPERL) esqlld' ESQLLD='$Config{ld} \$(LDDLFLAGS)' \$(ESQL)";
+$opts{LD} = "INFORMIXC='\$(FULLPERL) esqlld' " .
+			"ESQLLD='$Config{ld} \$(LDDLFLAGS)' \$(ESQL)";
 
 if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 {
@@ -266,10 +274,8 @@ if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 	print "create shared libraries.\n";
 	if ($vernum >= 600)
 	{
-		print q{
-		Fortunately, you are using a sufficiently new version of ESQL/C
-		that we can use 'esql -libs' to tell us which libraries to use.
-		};
+		print "Fortunately, you are using a new version of ESQL/C and\n";
+		print "we can use 'esql -libs' to tell us which libraries to use.\n";
 		my $libs = `esql -libs` || die "Couldn't execute 'esql -libs'";
 		$libs =~ s/\n/ /gm;
 		$libs =~ s/-threads// if ($Config{osname} eq 'dec_osf');
@@ -280,12 +286,10 @@ if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 	}
 	else
 	{
-		print q{
-		Unfortunately, you are also using a version of ESQL/C which does not
-		have a mechanism to tell us which libraries will be needed.  We're
-		going to have to assume that esqlld can sort things out for you.
-		Contact the DBD::Informix maintenance team if it doesn't work.
-		};
+		print "Unfortunately, you are using a version of ESQL/C which does\n";
+		print "not have a mechanism to tell us which libraries it needs.\n";
+		print "We'll assume that esqlld can sort things out for you.\n";
+		print "Contact the DBD::Informix maintenance team if it doesn't.\n";
 		# Do not override default version of $opts{LD}
 	}
 }

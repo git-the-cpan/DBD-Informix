@@ -1,8 +1,10 @@
 #!/usr/bin/perl -w
 #
-# @(#)dblist.t	25.2 96/12/03 20:44:21
+# @(#)dblist.t	50.1 97/01/12 17:52:29
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#
+# Portions Copyright (C) 1996,1997 Jonathan Leffler
 #
 # List of available databases:
 #   @ary = $drh->func('_ListDBs');

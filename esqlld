@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 #
-# @(#)esqlld	25.1 96/12/01 15:15:43
+# @(#)esqlld	50.1 97/01/12 17:54:51
 #
 # DBD::Informix for Perl Version 5
 #
 # Surrogate Linker for Informix ESQL/C versions 4.10.UC1 upwards
 # -- Used to create shared libraries.
 #
-# Copyright (c) 1996 Jonathan Leffler
+# Copyright (c) 1996,1997 Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.

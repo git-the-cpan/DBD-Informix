@@ -1,8 +1,8 @@
-#	@(#)InformixTest.pm	25.3 96/12/05 16:58:44
+#	@(#)InformixTest.pm	50.2 97/01/23 16:25:45
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
-#   Copyright (c) 1996 Jonathan Leffler
+#   Copyright (c) 1996,1997 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -15,12 +15,15 @@
 	@EXPORT = qw(
 		all_ok
 		connect_to_test_database
+		print_sqlca
+		select_some_data
+		select_zero_data
+		stmt_err
 		stmt_fail
 		stmt_note
 		stmt_ok
 		stmt_retest
 		stmt_test
-		test_sqlca
 		);
 
 	use DBI;
@@ -41,18 +44,19 @@
 	$dbuser = "" unless ($dbuser);
 	my ($xxpass) = 'X' x length($dbpass); 
 
-	if (!$dbname) { $dbname = "stores"; }
+	$dbname = "stores" if (!$dbname);
 	# Unless we do an DBI->install_driver() and interrogate the driver,
 	# we cannot determine whether we should pay attention to INFORMIXSERVER.
-	if (!$dbhost) { $dbhost = $ENV{INFORMIXSERVER}; };
-	if ($dbhost && $dbname !~ m%[/@]%) { $dbname = $dbname . '@' . $dbhost; }
+	$dbhost = $ENV{INFORMIXSERVER} if (!$dbhost);
+	$dbname = $dbname . '@' . $dbhost if ($dbhost && $dbname !~ m%[/@]%);
+
 	&stmt_note("# DBI->connect('$dbname', '$dbuser', '$xxpass', 'Informix')\n");
 	my ($dbh) = DBI->connect($dbname, $dbuser, $dbpass, 'Informix');
 	&stmt_fail() unless (defined $dbh);
 	$dbh;
 	}
 
-	sub test_sqlca
+	sub print_sqlca
 	{
 		my ($sth) = @_;
 		print "# Testing SQLCA handling\n";
@@ -73,6 +77,14 @@
 	}
 
 	my $ok_counter = 0;
+	sub stmt_err
+	{
+			my ($str) = @_;
+			$str = "Error Message" unless ($str);
+			$str .= ":\n$DBI::errstr";
+			$str =~ s/^/# /gm;
+			&stmt_note($str);
+	}
 
 	sub stmt_ok
 	{
@@ -81,7 +93,7 @@
 		&stmt_note("ok $ok_counter\n");
 		if ($warn)
 		{
-			&stmt_note("# Warning Message: $DBI::errstr");
+			&stmt_err("Warning Message");
 		}
 	}
 
@@ -89,8 +101,7 @@
 	{
 		$ok_counter++;
 		&stmt_note("not ok $ok_counter\n");
-		#&stmt_note("!! FAIL !! $ok_counter\n");
-		&stmt_note("# Error Message: $DBI::errstr");
+		&stmt_err("Error Message");
 		die "!! Terminating Test !!\n";
 	}
 
@@ -122,6 +133,39 @@
 		&stmt_test($dbh, $stmt, $ok, "Retest");
 	}
 
+	sub select_some_data
+	{
+		my ($dbh, $num, $stmt) = @_;
+		my ($count, $st2) = (0);
+		my (@row);
+
+		&stmt_note("# $stmt\n");
+		# Check that there is some data
+		&stmt_fail() unless ($st2 = $dbh->prepare($stmt));
+		&stmt_fail() unless ($st2->execute);
+		while  (@row = $st2->fetchrow)
+		{
+			my($pad, $i) = ("# ", 0);
+			for ($i = 0; $i < @row; $i++)
+			{
+				&stmt_note("$pad$row[$i]");
+				$pad = " :: ";
+			}
+			&stmt_note("\n");
+			$count++;
+		}
+		&stmt_fail() unless ($count == $num);
+		&stmt_fail() unless ($st2->finish);
+		undef $st2;
+		&stmt_ok();
+	}
+
+	# Check that there is no data
+	sub select_zero_data
+	{
+		&select_some_data($_[0], 0, $_[1]);
+	}
+
 }
 
 1;
@@ -149,11 +193,11 @@ of reporting mechanisms.
 To use the DBD::InformixTest software, you need to load the DBI software
 and then install the Informix driver:
 
-	use DBD::InformixTest;
+    use DBD::InformixTest;
 
 =head2 Connecting to test database
 
-	$dbh = &connect_to_test_database;
+    $dbh = &connect_to_test_database;
 
 This gives you a reference to the database connection handle, aka the
 database handle.  If the load fails, your program stops immediately.  The
@@ -165,29 +209,31 @@ run.
 
 This code exploits 4 environment variables:
 
-	DBD_INFORMIX_DATABASE
-	DBD_INFORMIX_SERVER
-	DBD_INFORMIX_USERNAME
-	DBD_INFORMIX_PASSWORD
+    DBD_INFORMIX_DATABASE
+    DBD_INFORMIX_SERVER
+    DBD_INFORMIX_USERNAME
+    DBD_INFORMIX_PASSWORD
 
-The database variable can be simply the name of the database, or it can be
-'database@server', or it can be one of the SE notations such as
-'/opt/dbase' or '//hostname/dbase'.  If the database name does not contain
-either slashes or at-signs, then the value in the server variable, which
-defaults to $INFORMIXSERVER (which must be set for 6.00 and later Informix
-database systems) is appended to the database name after an at-sign.  If
-INFORMIXSERVER is not set, then you had better be on a 5.0x system as it
-the connection will fail.  With 6.00 and above, you can optionally specify
-a user name and password in the environment.  This is horribly insecure --
-do not use it for production work.  The test scripts do not print the
-password.
+The database variable can be simply the name of the database, or it
+can be 'database@server', or it can be one of the SE notations such
+as '/opt/dbase' or '//hostname/dbase'.
+If the database name does not contain either slashes or at-signs,
+then the value in the server variable, which defaults to
+$INFORMIXSERVER (which must be set for 6.00 and later Informix
+database systems) is appended to the database name after an at-sign.
+If INFORMIXSERVER is not set, then you had better be on a 5.0x
+system as otherwise the connection will fail.
+With 6.00 and above, you can optionally specify a user name and
+password in the environment.
+This is horribly insecure -- do not use it for production work.
+The test scripts do not print the password.
 
 =head2 Using stmt_test
 
 Once you have a database connection, you can execute simple statements (those
 which do not return any data) using &stmt_test():
 
-	&stmt_test($dbh, $stmt, $flag, $tag);
+    &stmt_test($dbh, $stmt, $flag, $tag);
 
 The first argument is the database handle.  The second is a string
 containing the statement to be executed.  The third is optional and is a
@@ -202,27 +248,27 @@ the statement when it is printed.  If omitted, it defaults to "Test".
 The &stmt_retest() function takes three arguments, which have the same meaning
 as the first three arguments of &stmt_test():
 
-	&stmt_retest($dbh, $stmt, $flag);
+    &stmt_retest($dbh, $stmt, $flag);
 
 It calls:
 
-	&stmt_test($dbh, $stmt, 0, "Retest");
+    &stmt_test($dbh, $stmt, 0, "Retest");
 
-=head2 Using test_sqlca
+=head2 Using print_sqlca
 
-The &test_sqlca() function takes a single argument which can be either a
+The &print_sqlca() function takes a single argument which can be either a
 statement handle or a database handle and prints out the current values of
 the SQLCA record.
 
-	&test_sqlca($dbh);
-	&test_sqlca($sth);
+    &print_sqlca($dbh);
+    &print_sqlca($sth);
 
 =head2 Using all_ok
 
 The &all_ok() function can be used at the end of a test script to report
 that everything was OK.  It exits with status 0.
 
-	&all_ok();
+    &all_ok();
 
 =head2 Using stmt_ok
 
@@ -232,16 +278,25 @@ with a non-false argument, it prints the contents of DBI::errstr as a
 warning message too.  This routine is used internally by stmt_test() but is
 also available for your use.
 
-	&stmt_ok(0);
+    &stmt_ok(0);
 
 =head2 Using stmt_fail
 
-This routine adds '!!  FAIL !!  N' to the end of a line, then reports the
+This routine adds 'not ok N' to the end of a line, then reports the
 error message in DBI::errstr, and then dies.  The N is incremented
 automatically, as with &stmt_ok().  This routine is used internally by
 stmt_test() but is also available for your use.
 
-	&stmt_fail();
+    &stmt_fail();
+
+=head2 Using stmt_err
+
+This routines prints a caption (defaulting to 'Error Message') and the
+contents of DBI::errstr, ensuring that each line is prefixed by "# ".
+This routine is used internally by the InformixTest module, but is
+also available for your use.
+
+	&stmt_err('Warning Message');
 
 =head2 Using stmt_note
 
@@ -249,8 +304,34 @@ This routine writes a string (without any newline unless you include it).
 This routine is used internally by stmt_test() but is also available for
 your use.
 
-	&stmt_note("Some string or other");
+    &stmt_note("Some string or other");
 
+=head2 Using select_some_data
+
+This routine takes three arguments:
+
+    &select_some_data($dbh, $nrows, $stmt);
+
+The first argument is the database handle.  The second is the number of
+rows that should be returned.  The third is a string containing the SELECT
+statement to be executed.  It prints all the data returned with a '#'
+preceding the first field and two colons separating the fields.  It reports
+OK if the select succeeds and the correct number of rows are returned; it
+fails otherwise.
+
+=head2 Using select_zero_data
+
+This routine takes a database handle and a SELECT statement and invokes
+&select_some_data with 0 rows expected.
+
+    &select_zero_data($dbh, $stmt);
+
+=head2 Note
+
+All these routines can also be used without parentheses or the &, so that
+the following is also valid:
+
+    select_zero_data $dbh, $stmt;
 
 =head1 AUTHOR
 

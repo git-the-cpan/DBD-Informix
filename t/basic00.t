@@ -1,12 +1,12 @@
-#	@(#)basic00.t	25.1 96/12/04 14:38:26
+#!/usr/bin/perl -w
+#
+#	@(#)basic00.t	50.1 97/01/12 17:52:26
 #
 #	Primary test script for DBD::Informix
 #
-#	Copyright (C) 1996 Jonathan Leffler
+#	Copyright (C) 1996,1997 Jonathan Leffler
 #
 #	Based on an original by Alligator Descartes (descarte@hermetica.com)
-
-BEGIN{unshift @INC, "../../lib", "./lib";}
 
 use DBD::InformixTest;
 
@@ -54,6 +54,7 @@ print "#     Logged Database:         $dbh->{LoggedDatabase}\n";
 print "#     Mode ANSI Database:      $dbh->{ModeAnsiDatabase}\n";
 print "#     AutoCommit:              $dbh->{AutoCommit}\n";
 print "#     AutoErrorReport:         $dbh->{AutoErrorReport}\n";
+print "#     Transaction Active:      $dbh->{InTransaction}\n";
 print "#\n";
 
 # Remove table if it already exists, warning (not failing) if it doesn't
@@ -85,6 +86,9 @@ $stmt5 = "SELECT * FROM $testtable WHERE id = 1";
 &stmt_fail() unless ($cursor = $dbh->prepare($stmt5));
 &stmt_ok();
 
+# Print statement...
+&stmt_note("# Statement: $cursor->{Statement}\n");
+
 &stmt_note("# Testing: \$cursor->execute\n");
 &stmt_fail() unless ($cursor->execute);
 &stmt_ok();
@@ -105,7 +109,7 @@ while ((@row = $cursor->fetch) and $#row > 0)
 &stmt_note("# OK (nothing found)\n");
 &stmt_ok(0);
 
-&test_sqlca($cursor);
+&print_sqlca($cursor);
 
 &stmt_note("# Testing: \$cursor->finish\n");
 &stmt_fail() unless ($cursor->finish);
@@ -293,7 +297,7 @@ $stmt13 = "INSERT INTO $testtable VALUES(?, ?)";
 &stmt_note("# Testing: \$sth->execute(@bind)\n");
 &stmt_fail() unless ($sth->execute(@bind));
 &stmt_ok(0);
-&test_sqlca($sth);
+&print_sqlca($sth);
 
 &stmt_note("# Testing: \$sth->execute([4.00, \"Ghenghis Khan\"])\n");
 &stmt_fail() unless ($sth->execute(4.00, "Ghenghis Khan"));
