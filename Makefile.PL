@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)Makefile.PL	54.7 97/05/14 17:25:18
+# @(#)Makefile.PL	55.1 97/05/20 11:50:49
 #
 # Portions Copyright (c) 1996,1997 Jonathan Leffler (johnl@informix.com)
 # Portions Copyright (c) 1996 Alligator Descartes (descarte@hermetica.com)
@@ -15,6 +15,8 @@ use Config;
 # A sufficiently recent version of DBI must be installed before we can
 # build any DBD module.  The code uses ChopBlanks introduced in DBI 0.81.
 use DBI 0.81;
+
+$| = 1;     # Ensure that Perl output is interleaved with test output.
 
 %opts = (
 	'NAME'         => 'DBD::Informix',
@@ -308,15 +310,20 @@ $opts{OBJECT} = $objects;
 # NB: test does not need any Perl headers (but don't pollute esqlperl.h)
 #     with anything that needs a Perl header.
 print "Testing whether your Informix test environment will work...\n";
+$sx = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? "set -x;" : "";
+$nr = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? "set -x; :" : "";
+$ESQL = "INFORMIXC='$Config{perlpath} esqlcc' ESQLCC='$Config{cc}' $esql";
 die "Failed to compile basic test program esqltest" unless
-	((system "$esql -c $Config{ccflags} $opts{DEFINE} esqltest.ec") == 0 &&
-	 (system "$esql -c $Config{ccflags} $opts{DEFINE} $vercode.ec") == 0 &&
-	 (system "$esql -o esqltest esqltest.o $vercode.o") == 0 &&
-	 (system "rm -f esqltest.o esqltest.c") == 0);
+	((system "$sx $ESQL -c $Config{ccflags} $opts{DEFINE} esqltest.ec") == 0 &&
+	 (system "$sx $ESQL -c $Config{ccflags} $opts{DEFINE} $vercode.ec") == 0 &&
+	 (system "$sx $ESQL -o esqltest esqltest.o $vercode.o") == 0 &&
+	 (system "$nr rm -f esqltest.o esqltest.c") == 0);
 if ((system "./esqltest") != 0)
 {
 	die "You do not have enough permissions in your Informix environment.\n";
 }
+die "Failed to remove esqltest program" unless
+	(system "$nr rm -f esqltest") == 0;
 ###########################################################################
 
 # The best way to get the library linked reliably is to use the script that

@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.ec	54.3 97/05/15 16:33:33
+ * @(#)dbdimp.ec	55.3 97/05/20 10:57:28
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)dbdimp.ec	54.3 97/05/15";
+static const char sccs[] = "@(#)dbdimp.ec	55.3 97/05/20";
 #endif
 
 #include <stdio.h>
@@ -27,17 +27,20 @@ static const char sccs[] = "@(#)dbdimp.ec	54.3 97/05/15";
 #include "Informix.h"
 #include "decsci.h"
 
-/*
-** Check whether key defined by key length (kl) and key value (kv)
-** matches keyword (kw), which should be a character literal ("KeyWord")!
-*/
-#define KEY_MATCH(kl, kv, kw) ((kl) == (sizeof(kw) - 1) && strEQ((kv), (kw)))
-
 DBISTATE_DECLARE;
 
 static SV *dbd_errnum = NULL;
 static SV *dbd_errstr = NULL;
 static SV *dbd_state = NULL;
+
+/*
+** SQLSTATE is only supported in version 6.00 and later.
+** The DBI 0.81 spec says that the value S1000 should be returned
+** when the implementation does not support SQLSTATE.
+*/
+#if ESQLC_VERSION < 600
+static const char SQLSTATE[] = "S1000";
+#endif /* ESQLC_VERSION */
 
 /* One day, this will go! */
 static void del_statement(imp_sth_t *imp_sth);
@@ -427,7 +430,7 @@ dbd_db_disconnect(imp_dbh_t *imp_dbh)
 #if ESQLC_VERSION >= 600
 	dbd_ix_disconnect(imp_dbh->nm_connection);
 #else
-	if (imp_dbh->is_connected == True)
+	if (imp_dbh->is_connected == True && imp_dbh->database != 0)
 		dbd_ix_closedatabase();
 #endif	/* ESQLC_VERSION >= 600 */
 
@@ -652,8 +655,27 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 		/* It's a null! */
 		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- null\n", dbd_ix_module());
 		type = SQLCHAR;
+#if ESQLC_VERSION >= 600
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
 						TYPE = :type, LENGTH = 0, INDICATOR = -1;
+#else
+		/*
+		** There appears to be a bug in ESQL/C 5.0x (for x in 0..6) such that
+		** the SET DESCRIPTOR code core dumps when asked to process a NULL.
+		** We use a cheat, pure and simple, to get around this bug.  We use
+		** the internal representation for a SMALLINT NULL (-32768) as the
+		** value to be inserted.  It shouldn't work (arguably another bug),
+		** but since it does, we'll exploit it.   Ugh!  JL 97-05-20
+		*/
+		{
+		EXEC SQL BEGIN DECLARE SECTION;
+		short ival = -32768;	/* Internal representation of SMALLINT NULL */
+		EXEC SQL END DECLARE SECTION;
+		type = SQLSMINT;
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, DATA = :ival;
+		}
+#endif
 	}
 	else if (type == SQLBYTES || type == SQLTEXT)
 	{

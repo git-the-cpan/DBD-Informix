@@ -1,5 +1,5 @@
 /*
- * @(#)esqltest.ec	53.3 97/03/12 12:41:09
+ * @(#)esqltest.ec	55.1 97/05/19 12:36:10
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -21,10 +21,18 @@
 error "Please read the README file, and Makefile.PL, and get __STDC__ defined"
 #endif /* __STDC__ */
 
+/* SunOS 4.1.3 <stdlib.h> does not provide EXIT_SUCCESS/EXIT_FAILURE */
+#ifndef EXIT_FAILURE
+#define EXIT_FAILURE 1
+#endif
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
+
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char sccs[] = "@(#)esqltest.ec	53.3 97/03/12";
+static const char sccs[] = "@(#)esqltest.ec	55.1 97/05/19";
 #endif
 
 /*
@@ -217,7 +225,7 @@ int main(int argc, char **argv)
 	else
 	{
 		printf("\n*** Your Informix environment is not usable");
-		printf("\n*** Fix it before testing DBD::Informix\n\n");
+		printf("\n*** You must fix it before building or testing DBD::Informix\n\n");
 	}
 	return(estat);
 }

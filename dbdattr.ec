@@ -1,5 +1,5 @@
 /*
- * @(#)dbdattr.ec	54.6 97/05/14 17:24:06
+ * @(#)dbdattr.ec	55.1 97/05/19 13:29:57
  *
  * DBD::Informix for Perl Version 5 -- attribute handling
  *
@@ -12,7 +12,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)dbdattr.ec	54.6 97/05/14";
+static const char sccs[] = "@(#)dbdattr.ec	55.1 97/05/19";
 #endif
 
 #include <stdio.h>
@@ -29,14 +29,10 @@ static const char sccs[] = "@(#)dbdattr.ec	54.6 97/05/14";
 static const char esql_prodname[] = ESQLC_VERSION_STRING;
 static const int  esql_prodvrsn   = ESQLC_VERSION;
 
-/* Deprecated constructs are flagged unconditionally in the 0.54 release */
-/* Old-style attributes won't work in the 0.55 release. */
-static Boolean deprecation = True;
-
 /* Print message deprecating old feature and indicating new */
 static void dbd_ix_deprecate(const char *old)
 {
-	warn("%s - deprecated attribute name %s <<DO NOT USE>>\n",
+	warn("%s - deprecated attribute name %s ignored\n",
 		 dbd_ix_module(), old);
 }
 
@@ -112,30 +108,22 @@ SV *dbd_dr_FETCH_attrib(imp_drh_t *imp_drh, SV *keysv)
 	else if (KEY_MATCH(kl, key, "MultipleConnections"))
 	{
 		dbd_ix_deprecate("{MultipleConnections}");
-		retsv = newSViv((IV)imp_drh->multipleconnections);
 	}
 	else if (KEY_MATCH(kl, key, "ActiveConnections"))
 	{
 		dbd_ix_deprecate("{ActiveConnections}");
-		retsv = newSViv((IV)imp_drh->n_connections);
 	}
 	else if (KEY_MATCH(kl, key, "CurrentConnection"))
 	{
-		char *conn = (char *)imp_drh->current_connection;	/* const_cast<char*> */
-		if (conn == 0)
-			conn = "<<no current connection>>";
 		dbd_ix_deprecate("{CurrentConnection}");
-		retsv = newSVpv(conn, 0);
 	}
 	else if (KEY_MATCH(kl, key, "ProductVersion"))
 	{
 		dbd_ix_deprecate("{ProductVersion}");
-		retsv = newSViv((IV)esql_prodvrsn);
 	}
 	else if (KEY_MATCH(kl, key, "ProductName"))
 	{
 		dbd_ix_deprecate("{ProductName}");
-		retsv = newSVpv((char *)esql_prodname, 0);	/* const_cast<char *> */
 	}
 
 	else
@@ -178,7 +166,6 @@ int dbd_db_STORE_attrib(imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 	else if (KEY_MATCH(kl, key, "BlobLocation"))
 	{
 		dbd_ix_deprecate("{BlobLocation}");
-		imp_dbh->blob_bind = blob_bindtype(valuesv);
 	}
 	else if (KEY_MATCH(kl, key, "ix_BlobLocation"))
 	{
@@ -187,7 +174,6 @@ int dbd_db_STORE_attrib(imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 	else if (KEY_MATCH(kl, key, "AutoErrorReport"))
 	{
 		dbd_ix_deprecate("{AutoErrorReport}");
-		imp_dbh->autoreport = on;
 	}
 	else if (KEY_MATCH(kl, key, "ix_AutoErrorReport"))
 	{
@@ -196,7 +182,6 @@ int dbd_db_STORE_attrib(imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 	else if (KEY_MATCH(kl, key, "ix_Deprecated"))
 	{
 		dbd_ix_deprecate("{ix_Deprecated}");
-		deprecation = on;
 	}
 	else
 	{
@@ -269,27 +254,22 @@ static SV *dbd_ix_getsqlca(imp_dbh_t *imp_dbh, STRLEN kl, char *key)
 	else if (KEY_MATCH(kl, key, "sqlcode"))
 	{
 		dbd_ix_deprecate("{sqlcode}");
-		retsv = newSViv((IV)imp_dbh->sqlca.sqlcode);
 	}
 	else if (KEY_MATCH(kl, key, "sqlerrm"))
 	{
 		dbd_ix_deprecate("{sqlerrm}");
-		retsv = newSVpv(imp_dbh->sqlca.sqlerrm, 0);
 	}
 	else if (KEY_MATCH(kl, key, "sqlerrp"))
 	{
 		dbd_ix_deprecate("{sqlerrp}");
-		retsv = newSVpv(imp_dbh->sqlca.sqlerrp, 0);
 	}
 	else if (KEY_MATCH(kl, key, "sqlerrd"))
 	{
 		dbd_ix_deprecate("{sqlerrd}");
-		retsv = newSqlerrd(&imp_dbh->sqlca);
 	}
 	else if (KEY_MATCH(kl, key, "sqlwarn"))
 	{
 		dbd_ix_deprecate("{sqlwarn}");
-		retsv = newSqlwarn(&imp_dbh->sqlca);
 	}
 
 	return(retsv);
@@ -314,7 +294,6 @@ SV *dbd_db_FETCH_attrib(imp_dbh_t *imp_dbh, SV *keysv)
 	else if (KEY_MATCH(kl, key, "ix_Deprecated"))
 	{
 		dbd_ix_deprecate("{ix_Deprecated}");
-		retsv = newSViv((IV)deprecation);
 	}
 	else if (KEY_MATCH(kl, key, "ix_InformixOnLine"))
 	{
@@ -353,42 +332,34 @@ SV *dbd_db_FETCH_attrib(imp_dbh_t *imp_dbh, SV *keysv)
 	else if (KEY_MATCH(kl, key, "Deprecated"))
 	{
 		dbd_ix_deprecate("{Deprecated}");
-		retsv = newSViv((IV)deprecation);
 	}
 	else if (KEY_MATCH(kl, key, "InformixOnLine"))
 	{
 		dbd_ix_deprecate("{InformixOnLine}");
-		retsv = newSViv((IV)imp_dbh->is_onlinedb);
 	}
 	else if (KEY_MATCH(kl, key, "LoggedDatabase"))
 	{
 		dbd_ix_deprecate("{LoggedDatabase}");
-		retsv = newSViv((IV)imp_dbh->is_loggeddb);
 	}
 	else if (KEY_MATCH(kl, key, "InTransaction"))
 	{
 		dbd_ix_deprecate("{InTransaction}");
-		retsv = newSViv((IV)imp_dbh->is_txactive);
 	}
 	else if (KEY_MATCH(kl, key, "ModeAnsiDatabase"))
 	{
 		dbd_ix_deprecate("{ModeAnsiDatabase}");
-		retsv = newSViv((IV)imp_dbh->is_modeansi);
 	}
 	else if (KEY_MATCH(kl, key, "BlobLocation"))
 	{
 		dbd_ix_deprecate("{BlobLocation}");
-		retsv = newSVpv(blob_bindname(imp_dbh->blob_bind), 0);
 	}
 	else if (KEY_MATCH(kl, key, "AutoErrorReport"))
 	{
 		dbd_ix_deprecate("{AutoErrorReport}");
-		retsv = newSViv((IV)imp_dbh->autoreport);
 	}
 	else if (KEY_MATCH(kl, key, "ConnectionName"))
 	{
 		dbd_ix_deprecate("{ConnectionName}");
-		retsv = newSVpv(imp_dbh->nm_connection, 0);
 	}
 
 	else
@@ -407,7 +378,6 @@ int dbd_st_STORE_attrib(imp_sth_t *sth, SV *keysv, SV *valuesv)
 	if (KEY_MATCH(kl, key, "BlobLocation"))
 	{
 		dbd_ix_deprecate("{BlobLocation}");
-		sth->blob_bind = blob_bindtype(valuesv);
 	}
 	else if (KEY_MATCH(kl, key, "ix_BlobLocation"))
 	{
@@ -531,18 +501,7 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	}
 	else if (KEY_MATCH(kl, key, "NativeTypeNames"))
 	{
-		AV             *av = newAV();
-		char buffer[SQLTYPENAME_BUFSIZ];
-		SV		*sv;
 		dbd_ix_deprecate("{NativeTypeNames}");
-		retsv = newRV((SV *)av);
-		for (i = 1; i <= sth->n_columns; i++)
-		{
-			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
-				:coltype = TYPE, :collength = LENGTH;
-			sv = newSVpv(sqltypename(coltype, collength, buffer), 0);
-			av_store(av, i - 1, sv);
-		}
 	}
 	else if (KEY_MATCH(kl, key, "ix_Fetchable"))
 	{
@@ -557,7 +516,6 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	else if (KEY_MATCH(kl, key, "BlobLocation"))
 	{
 		dbd_ix_deprecate("{BlobLocation}");
-		retsv = newSVpv(blob_bindname(sth->dbh->blob_bind), 0);
 	}
 	else if ((retsv = dbd_ix_getsqlca(sth->dbh, kl, key)) != NULL)
 	{

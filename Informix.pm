@@ -1,4 +1,4 @@
-#	@(#)Informix.pm	54.3 97/05/14 17:26:37
+#	@(#)Informix.pm	55.1 97/05/19 13:28:29
 #
 #   Portions Copyright (c) 1994,1995 Tim Bunce
 #   Portions Copyright (c) 1996,1997 Jonathan Leffler
@@ -15,9 +15,9 @@
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.54";
+	$VERSION     = "0.55";
 	$ATTRIBUTION = 'By Jonathan Leffler';
-	$Revision    = substr(q@(#)Informix.pm 54.3 (97/05/14)@, 3);
+	$Revision    = substr(q@(#)Informix.pm 55.1 (97/05/19)@, 3);
 
 	require_version DBI 0.81;	# Requires ChopBlanks, introduced in 0.81
 
@@ -871,15 +871,10 @@ could be set to 0 to suppress the warning reports in earlier
 (0.51..0.53) releases when a deprecated attribute was used.
 The deprecated form {Deprecated} is also supported.
 
-In this release (0.54), the deprecated warnings are enabled and there
-is no mechanism to switch them off, but both the deprecated and the
-non-deprecated forms of the attribute names will work.
-Setting "$sth->{ix_Deprecated} = 0;" does not fail, but generates a
-deprecated warning.
-In the next release (0.55), the deprecated warnings will alert you to
+In this release (0.55), the deprecated warnings will alert you to
 the fact that the old style attributes did not achieve anything, and
 there will be no mechanism to switch the warnings off.
-In the release after that (0.56), using the old-style attribute names
+In the next release (0.56), using the old-style attribute names
 will generate an error.
 In the release after that (0.57), using the old-style attribute names
 will do nothing silently.

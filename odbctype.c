@@ -1,7 +1,7 @@
 /*
 @(#)File:            odbctype.c
-@(#)Version:         54.2
-@(#)Last changed:    97/04/01
+@(#)Version:         55.1
+@(#)Last changed:    97/05/19
 @(#)Purpose:         Map Informix SQL Types to ODBC Types
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
@@ -20,6 +20,14 @@
 #else
 #include "odbctype.h"
 #endif /* USE_INSTALLED_ODBC */
+
+/* Cover pre-6.00 versions of ESQL/C */
+#ifndef SQLNCHAR
+#define SQLNCHAR	-1
+#endif
+#ifndef SQLNVCHAR
+#define SQLNVCHAR	-2
+#endif
 
 typedef enum IxSQLType
 {
@@ -42,7 +50,7 @@ typedef enum IxSQLType
 } IxSQLType;
 
 #ifndef lint
-static const char sccs[] = "@(#)odbctype.c	54.2 97/04/01";
+static const char sccs[] = "@(#)odbctype.c	55.1 97/05/19";
 #endif
 
 /* Map Informix DATETIME types to equivalent ODBC types */

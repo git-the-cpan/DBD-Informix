@@ -1,7 +1,7 @@
 /*
 @(#)File:            esql5_00.h
-@(#)Version:         1.12
-@(#)Last changed:    97/05/07
+@(#)Version:         1.13
+@(#)Last changed:    97/05/20
 @(#)Purpose:         Function prototypes for ESQL/C Versions 5.00..5.07
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-97
@@ -39,7 +39,7 @@ extern "C" {
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql5_00_h[] = "@(#)esql5_00.h	1.12 97/05/07";
+static const char esql5_00_h[] = "@(#)esql5_00.h	1.13 97/05/20";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -54,6 +54,17 @@ extern _SQCURSOR *_iqnprep(const char *name, char *stmt, short cs_sens);
 extern _SQCURSOR *_iqnprep();
 #endif /* ESQLC_STRICT_PROTOTYPES */
 
+#ifdef ESQLC_SLOPPY_CONST
+typedef char **CCPCCPC;
+#else
+/* The code generator emits a dubious declaration for the cmdtxt parameter. */
+/* The CCPCCPC (const char pointer to const char pointer to const) typedef */
+/* isn't entirely accurate (because the called code isn't prototyped, much */
+/* less declared with const attributes, but the code in the called routines */
+/* honours the restrictions (it doesn't modify anything), so it does OK. */
+typedef const char *const *const CCPCCPC;
+#endif /* ESQLC_SLOPPY_CONST */
+
 #if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
 extern _SQCURSOR *_iqlocate_cursor(const char *name, int type, int cs, int xx);
 #else
@@ -64,7 +75,7 @@ extern int      _iqalloc(char *descname, int occurrence);
 extern int      _iqbeginwork(void);
 extern int      _iqcdcl(_SQCURSOR *cursor,
                         char *curname,
-                        char **cmdtxt,
+                        CCPCCPC cmdtxt,
                         struct sqlda *idesc,
                         struct sqlda *odesc,
                         int flags);
@@ -106,7 +117,7 @@ extern int      _iqexecute(_SQCURSOR *cursor,
                            struct value *ivalues);
 extern int      _iqeximm(char *stmt);
 extern int      _iqexproc(_SQCURSOR *cursor,
-                          char **cmdtxt,
+                          CCPCCPC cmdtxt,
                           int icnt,
                           struct sqlvar_struct *ibind,
                           int ocnt,
@@ -125,14 +136,14 @@ extern int      _iqsetdesc(char *desc_name,
                            struct hostvar_struct *hosttab,
                            int xopen_flg);
 extern int      _iqslct(_SQCURSOR *cursor,
-                        char **cmdtxt,
+                        CCPCCPC cmdtxt,
                         int icnt,
                         struct sqlvar_struct *ibind,
                         int ocnt,
                         struct sqlvar_struct *obind,
                         int chkind);
 extern int      _iqstmnt(_SQSTMT *scb,
-                         char **cmdtxt,
+                         CCPCCPC cmdtxt,
                          int icnt,
                          struct sqlvar_struct *ibind,
                          struct value *ivalues);

@@ -3,6 +3,18 @@ Change Log for DBD::Informix for DBI
 - Written by Alligator Descartes <descarte@mcqueen.com>
 - Rewritten by Jonathan Leffler (johnl@informix.com)
 
+0.55 Bug-Fix Release
+--------------------
+97-05-20: ESQL/C Version 5.0x testing previously inadequate, and SQLSTATE
+          does not exist in 5.0x, sothe compilation fails.  Also fixed the
+          core dumps from t/nulls01.t and t/nulls02.t (nasty workaround)
+          and the failure message in t/dbase.t.  Tested with 5.06.UC1,
+          6.00.UE1, 7.22.UC2 and 9.10.UC2 on Sun Sparc 20 running Solaris
+          2.5.1, using 2 Perl configurations: Perl 5.003 with GCC 2.7.2.2
+          and Perl 5.004 with SUNWspro C Compiler SC3.0.1 -- all OK.
+          Version 0.55 released.
+97-05-19: Change the handling of deprecated attributes per Informix.pm.
+
 0.54 Release
 ------------
 97-05-16: Another major rework on Informix.Licence to make the requirements
@@ -274,4 +286,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler (johnl@informix.com)
-@(#)ChangeLog	54.6 97/05/16 10:06:16
+@(#)ChangeLog	55.2 97/05/20 11:58:23

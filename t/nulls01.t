@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)nulls01.t	51.1 97/02/25 19:43:11
+#	@(#)nulls01.t	55.1 97/05/20 11:05:15
 #
 #	Test Null Handling for DBD::Informix
 #
@@ -76,7 +76,9 @@ $select = "SELECT * FROM $trans01";
 select_null_data $dbh, 1, $select;
 
 # Insert a row of values.
-$sth = $dbh->prepare("INSERT INTO $trans01 VALUES(?, ?, ?, ?, ?)");
+$ins = "INSERT INTO $trans01 VALUES(?, ?, ?, ?, ?)";
+&stmt_note("# $ins\n");
+$sth = $dbh->prepare($ins);
 &stmt_fail() unless $sth;
 &stmt_ok;
 &stmt_fail() unless $sth->execute(undef, undef, undef, undef, undef);

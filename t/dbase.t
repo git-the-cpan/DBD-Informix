@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)dbase.t	53.1 97/03/06 20:37:28
+# @(#)dbase.t	55.1 97/05/20 11:06:27
 #
 # Copyright (C) 1997 Jonathan Leffler (johnl@informix.com)
 #
@@ -8,7 +8,7 @@
 # Note that database statements cannot be used with an explicit connection
 # with ESQL/C 6.0x and up.
 
-use DBD::InformixTest qw(stmt_ok stmt_fail stmt_note all_ok);
+use DBD::InformixTest qw(stmt_ok stmt_fail stmt_note all_ok stmt_test);
 
 $dbname = "dbd_ix_db";
 
@@ -22,12 +22,9 @@ $dbh->{ix_AutoErrorReport} = 0;
 $dbh->do("drop database $dbname");
 
 $dbh->{ix_AutoErrorReport} = 1;
-stmt_fail unless ($dbh->do("create database $dbname"));
-stmt_ok;
-stmt_fail unless ($dbh->do("close database"));
-stmt_ok;
-stmt_fail unless ($dbh->do("drop database $dbname"));
-stmt_ok;
+&stmt_test($dbh, "create database $dbname");
+&stmt_test($dbh, "close database");
+&stmt_test($dbh, "drop database $dbname");
 stmt_fail unless ($dbh->disconnect);
 stmt_ok;
 
