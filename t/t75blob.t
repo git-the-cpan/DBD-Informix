@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t75blob.t version /main/9 1999-12-04 23:45:10 $ 
+#	@(#)$Id: t/t75blob.t version /main/10 2000-01-27 16:21:44 $ 
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
 #	Copyright (C) 1996-97,1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # KLUDGE - of the worst type!
 print("1..0\n");

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t82number.t version /main/11 1999-09-19 21:18:32 $ 
+# @(#)$Id: t/t82number.t version /main/12 2000-01-27 16:21:54 $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -10,7 +10,7 @@
 
 $tablename = "dbd_ix_test3";
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 print("1..10\n");
 $dbh = connect_to_test_database();

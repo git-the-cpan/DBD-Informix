@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t43trans.t version /main/13 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t43trans.t version /main/14 2000-01-27 16:21:09 $ 
 #
 #	Test AutoCommit Off for DBD::Informix
 #
@@ -8,7 +8,7 @@
 
 # AutoCommit Off => Explicit transactions in force
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # Test install...
 $dbh = &connect_to_test_database();

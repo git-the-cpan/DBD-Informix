@@ -1,16 +1,19 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t05dbase.t version /main/11 1999-09-19 21:18:32 $ 
+# @(#)$Id: t/t05dbase.t version /main/13 2000-02-03 15:53:54 $ 
 #
-#	Copyright (C) 1997,1999 Jonathan Leffler
+# Portions Copyright 1997,1999 Jonathan Leffler
+# Portions Copyright 2000      Informix Software Inc
 #
 # Test database creation and default connections.
 # Note that database statements cannot be used with an explicit connection
 # with ESQL/C 6.0x and up.
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
-$dbname = "dbd_ix_db";
+my ($dbname) = "dbd_ix_db";
+my ($user) = $ENV{DBD_INFORMIX_USERNAME};
+my ($pass) = $ENV{DBD_INFORMIX_PASSWORD};
 
 stmt_note("1..19\n");
 
@@ -18,8 +21,8 @@ stmt_note("1..19\n");
 delete $ENV{DBI_DSN};
 delete $ENV{DBI_DBNAME};
 
-&stmt_note("# Test (implicit default) DBI->connect('',...)\n");
-stmt_fail unless ($dbh = DBI->connect('','','','Informix'));
+&stmt_note("# Test (implicit default, old-style) DBI->connect('',...)\n");
+stmt_fail unless ($dbh = DBI->connect('',$user,$pass,'Informix'));
 stmt_ok;
 
 # Don't care about non-existent database
@@ -39,7 +42,7 @@ stmt_ok;
 undef $dbh;
 
 &stmt_note("# Test (explicit default) DBI->connect('.DEFAULT.',...)\n");
-stmt_fail unless ($dbh = DBI->connect('.DEFAULT.','','','Informix'));
+stmt_fail unless ($dbh = DBI->connect('.DEFAULT.',$user,$pass,'Informix'));
 stmt_ok;
 
 $dbh->{PrintError} = 1;
@@ -52,7 +55,7 @@ stmt_ok;
 
 # Test disconnecting implicit connections (B42204)
 &stmt_note("# Test (explicit default) DBI->connect('.DEFAULT.',...)\n");
-stmt_fail unless ($dbh = DBI->connect('.DEFAULT.','','','Informix'));
+stmt_fail unless ($dbh = DBI->connect('.DEFAULT.',$user,$pass,'Informix'));
 stmt_ok;
 $dbh->{PrintError} = 1;
 &stmt_test($dbh, "create database $dbname");
@@ -63,7 +66,7 @@ stmt_ok;
 
 # Clean up test database
 &stmt_note("# Clean up test database\n");
-stmt_fail unless ($dbh = DBI->connect('.DEFAULT.','','','Informix'));
+stmt_fail unless ($dbh = DBI->connect('.DEFAULT.',$user,$pass,'Informix'));
 stmt_ok;
 &stmt_test($dbh, "drop database $dbname");
 stmt_fail unless ($dbh->disconnect);

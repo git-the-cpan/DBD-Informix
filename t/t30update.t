@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t30update.t version /main/5 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t30update.t version /main/6 2000-01-27 16:20:52 $ 
 #
 #	Test script for DBD::Informix
 #
 #	Copyright (C) 1998-99 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 use strict;
 
 my($testtable) = "dbd_ix_test1";

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t65updcur.t version /main/9 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t65updcur.t version /main/10 2000-01-27 16:21:32 $ 
 #
 #	Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
 #
 #	Copyright (C) 1997,1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # Test install...
 $dbh = &connect_to_test_database();

@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t99clean.t version /main/6 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t99clean.t version /main/7 2000-01-27 16:22:03 $ 
 #
 #	Clean up DBD::Informix testing debris from the test database
 #   NB: Running with AutoCommit on.
 #
 #	Copyright (C) 1998-99 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 my ($dbh) = &connect_to_test_database();
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t83oconn.t version /main/4 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t83oconn.t version /main/5 2000-01-27 16:21:57 $ 
 #
 #	Check old connection method for DBD::Informix
 #
@@ -10,7 +10,7 @@
 #
 #	Copyright (C) 1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 &stmt_note("1..3\n");
 

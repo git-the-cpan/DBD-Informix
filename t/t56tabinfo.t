@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t56tabinfo.t version /main/4 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t56tabinfo.t version /main/5 2000-01-27 16:21:23 $ 
 #
 #	Test table_info
 #
 #	Copyright (C) 1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 use strict;
 
 &stmt_note("1..6\n");

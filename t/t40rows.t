@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t40rows.t version /main/6 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t40rows.t version /main/7 2000-01-27 16:21:00 $ 
 #
 #	Test $sth->rows1 for DBD::Informix
 #
 #	Copyright (C) 1997,1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 sub select_row_data
 {

@@ -1,11 +1,12 @@
 /*
- * @(#)$Id: esqlc_v6.ec version /main/22 1998-01-06 02:53:23 $ 
+ * @(#)$Id: esqlc_v6.ec version /main/24 2000-02-03 15:49:07 $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
- * Code acceptable to ESQL/C Version 6.0x and later
+ * Connection Management for ESQL/C Version 6.0x and later
  *
- * Copyright (c) 1996-98 Jonathan Leffler
+ * Portions Copyright 1996-98 Jonathan Leffler
+ * Portions Copyright 2000    Informix Software Inc
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -14,15 +15,52 @@
 /*TABSTOP=4*/
 
 #include <string.h>
+#include <stdlib.h>
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v6.ec version /main/22 1998-01-06 02:53:23 $";
+static const char rcs[] = "@(#)$Id: esqlc_v6.ec version /main/24 2000-02-03 15:49:07 $";
 #endif
 
 /* ================================================================= */
 /* =================== Database Level Operations =================== */
 /* ================================================================= */
+
+static char *get_server_name(void)
+{
+	char *srvr = 0;
+	char *ix_srvr = getenv("INFORMIXSERVER");
+
+	if (ix_srvr == 0 || *ix_srvr == '\0' || (srvr = malloc(strlen(ix_srvr) + 2)) == 0)
+	{
+		sqlca.sqlcode = -952;
+	}
+	{
+		srvr[0] = '@';
+		strcpy(&srvr[1], ix_srvr);
+	}
+	return(srvr);
+}
+
+static void rel_server_name(char *srvr)
+{
+	free(srvr);
+}
+
+/* Execute a full CONNECT statement - no error checking */
+static void full_connect(char *connection, char *dbase, char *user, char *pass)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *dbconn = connection;
+	char           *dbname = dbase;
+	char           *dbpass = pass;
+	char           *dbuser = user;
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL CONNECT TO :dbname AS :dbconn
+		USER :dbuser USING :dbpass
+		WITH CONCURRENT TRANSACTION;
+}
 
 /*
 ** Use CONNECT to initiate database connection
@@ -44,33 +82,43 @@ Boolean dbd_ix_connect(char *connection, char *dbase, char *user, char *pass)
 	EXEC SQL END DECLARE SECTION;
 	Boolean         conn_ok = False;
 
-	if (dbase == (char *)0 || *dbase == '\0')
+	if (user != (char *)0 && pass != (char *)0)
+	{
+		/* User name and password provided */
+		if (dbase == (char *)0 || *dbase == '\0')
+		{
+			/* No database name; connect to '@server' */
+			dbname = get_server_name();
+			if (dbname != 0)
+			{
+				dbd_ix_debug(1, "CONNECT TO '%s' {DEFAULT with user info}\n", dbname);
+				full_connect(connection, dbname, user, pass);
+				rel_server_name(dbname);
+			}
+		}
+		else
+		{
+			dbd_ix_debug(1, "CONNECT TO '%s' with user info\n", dbase);
+			full_connect(connection, dbase, user, pass);
+		}
+	}
+	else if (dbase == (char *)0 || *dbase == '\0')
 	{
 		/* Not frequently used, but valid */
 		/* Reset connection name to empty string, and connect to default */
 		/* Typically used to create database on default server */
+		/* Only works when no username/password needed to connect */
 		/* Nasty interface, overwriting connection name! */
 		*connection = '\0';
-		dbd_ix_debug(1, "CONNECT TO DEFAULT%s\n", connection);
+		dbd_ix_debug(1, "CONNECT TO DEFAULT %s\n", "- no user info");
 		EXEC SQL CONNECT TO DEFAULT
-			WITH CONCURRENT TRANSACTION;
-	}
-	else if (user != (char *)0 && pass != (char *)0)
-	{
-		dbconn = connection;
-		dbname = dbase;
-		dbpass = pass;
-		dbuser = user;
-		dbd_ix_debug(1, "CONNECT with user info (%s)\n", connection);
-		EXEC SQL CONNECT TO :dbname AS :dbconn
-			USER :dbuser USING :dbpass
 			WITH CONCURRENT TRANSACTION;
 	}
 	else
 	{
 		dbconn = connection;
 		dbname = dbase;
-		dbd_ix_debug(1, "CONNECT - no user info (%s)\n", connection);
+		dbd_ix_debug(1, "CONNECT TO '%s' - no user info\n", dbname);
 		EXEC SQL CONNECT TO :dbname AS :dbconn
 			WITH CONCURRENT TRANSACTION;
 	}

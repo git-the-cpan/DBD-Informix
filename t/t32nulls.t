@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t32nulls.t version /main/6 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t32nulls.t version /main/7 2000-01-27 16:20:57 $ 
 #
 #	Test Null Handling for DBD::Informix
 #
 #	Copyright (C) 1997,1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # Test install...
 $dbh = &connect_to_test_database();

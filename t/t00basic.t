@@ -1,12 +1,13 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t00basic.t version /main/27 1999-11-19 02:28:14 $ 
+#	@(#)$Id: t/t00basic.t version /main/31 2000-01-27 16:20:17 $ 
 #
 #	Initial test script for DBD::Informix
 #
-#	Copyright (C) 1996-99 Jonathan Leffler
+#	Portions Copyright (C) 1996-99 Jonathan Leffler
+#	Portions Copyright (C) 2000    Informix Software
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 $testtable = "dbd_ix_test01";
 
@@ -16,17 +17,18 @@ $dbh = &connect_to_test_database();
 &stmt_ok(0);
 
 print "# DBI Information\n";
-print "#     Version:               $DBI::VERSION\n";
+print "#     Version:                $DBI::VERSION\n";
 print "# Generic Driver Handle Information\n";
-print "#     Type:                  $dbh->{Driver}->{Type}\n";
-print "#     Name:                  $dbh->{Driver}->{Name}\n";
-print "#     Version:               $dbh->{Driver}->{Version}\n";
-print "#     Attribution:           $dbh->{Driver}->{Attribution}\n";
+print "#     Type:                   $dbh->{Driver}->{Type}\n";
+print "#     Name:                   $dbh->{Driver}->{Name}\n";
+print "#     Version:                $dbh->{Driver}->{Version}\n";
+print "#     Attribution:            $dbh->{Driver}->{Attribution}\n";
 
 # NB: The code in dbd_ix_db_FETCH_attrib (in dbdattr.ec) relays these
 #     driver requests to dbd_ix_dr_FETCH_attrib, because there isn't
 #     an easy way to get the information otherwise.
 print  "# Informix Driver Handle Information\n";
+print  "#     DBD::Informix Licence: $dbh->{Driver}->{ix_InformixLicence}\n";
 print  "#     Product:               $dbh->{ix_ProductName}\n";
 print  "#     Product Version:       $dbh->{ix_ProductVersion}\n";
 print  "#     Server  Version:       $dbh->{ix_ServerVersion}\n";
@@ -35,7 +37,7 @@ printf "#     Stored Procedures:     %d\n", $dbh->{ix_StoredProcedures};
 printf "#     Multiple Connections:  %d\n", $dbh->{ix_MultipleConnections};
 printf "#     Active Connections:    %d\n", $dbh->{ix_ActiveConnections};
 print  "#     Current Connection:    $dbh->{ix_CurrentConnection}\n";
-print  "# \n";
+print  "#\n";
 
 &stmt_note("# Testing: \$dbh->disconnect()\n");
 &stmt_fail() unless ($dbh->disconnect);

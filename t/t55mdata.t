@@ -1,12 +1,13 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t55mdata.t version /main/7 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t55mdata.t version /main/9 2000-01-28 16:25:58 $ 
 #
-#	Test MetaData functions _tables, _columns for DBD::Informix
+#   Test MetaData functions _tables, _columns for DBD::Informix
 #
-#	Copyright (C) 1997,1999 Jonathan Leffler
+#   Portions Copyright (C) 1997,1999 Jonathan Leffler
+#   Portions Copyright     2000      Informix Software Inc
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 print "1..4\n";
 
@@ -50,8 +51,10 @@ $dbh->do("CREATE $public SYNONYM $public1 FOR 'informix'.SysColumns")
 	or die "DBI::errstr";
 $dbh->do("CREATE $private SYNONYM $private1 FOR 'informix'.SysTables")
 	or die "DBI::errstr";
-$dbh->do("CREATE $private SYNONYM $private2 FOR 'informix'.SysTables")
-	or die "DBI::errstr";
+# The next statement only works if you are a DBA.
+$dbh->{PrintError} = 0;
+$dbh->do("CREATE $private SYNONYM $private2 FOR 'informix'.SysTables");
+$dbh->{PrintError} = 1;
 stmt_ok();
 
 sub print_tables

@@ -6,9 +6,9 @@
 #
 # Reproduce 451 errors with Perl.
 #
-# @(#)$Id: t/t76blob.t version /main/7 1999-12-04 23:45:10 $
+# @(#)$Id: t/t76blob.t version /main/8 2000-01-27 16:21:46 $
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 $tablename = "dbd_ix_blobtest";
 

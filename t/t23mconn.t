@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t23mconn.t version /main/22 2000-01-20 11:44:03 $ 
+#	@(#)$Id: t/t23mconn.t version /main/23 2000-01-27 16:20:39 $ 
 #
 #	Test abuse of statements after DISCONNECT ALL for DBD::Informix
 #
 #	Portions Copyright (C) 1996-99 Jonathan Leffler
 #	Portions Copyright (C) 2000    Informix Software Inc
 
-BEGIN { require "perlsubs/InformixTest.pl"; require "perlsubs/shmconn.pl"; }
+use DBD::Informix::TestHarness;
 
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);

@@ -1,40 +1,157 @@
-#! /usr/bin/perl -w
+#!/usr/bin/perl -w
 #
-#	Surrogate branding tool for DBD::Informix
+#   @(#)$Id: InformixTechSupport version /main/5 2000-02-01 16:59:48 $
+#
+#   Tech Support Tool for Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+#
+#   Portions Copyright (c) 1999 Jonathan Leffler
+#   Portions Copyright (c) 2000 Informix Software Inc
+#
+#   You may distribute under the terms of either the GNU General Public
+#   License or the Artistic License, as specified in the Perl README file.
 
+use strict;
 use Config;
+use DBD::Informix::TechSupport;
 
-print STDERR "Usage: $0 licence-number\n" and exit 1
-	unless $ARGV[0];
+use vars qw($opt_l $opt_b $opt_w $opt_v $opt_V);
+use Getopt::Std;
 
-print STDERR "$0: invalid licence number $ARGV[0]\n" and exit 1
-	unless $ARGV[0] =~ m%^([A-Z][A-Z][A-Z])[@#]([A-Z]\d\d\d\d\d\d)$%;
+print STDERR "Usage: $0 [-b bugtype | -l licence | -w | -V | -v product]\n" and exit 1
+	if (getopts('b:l:v:wV') == 0);
 
-# Map @ to # for convenience of make, and vi.
-$ARGV[0] =~ s%%$1#$2%;
-
-my $PM_IFILE = qq[$Config{installsitearch}/DBD/Informix.pm];
-
-print STDERR "$0: file $PM_IFILE missing ($@)\n" and exit 1
-	unless (-f $PM_IFILE);
-
-my $PM_NFILE = "$PM_IFILE.tmp";
-
-open(PM_OLD, "<$PM_IFILE") or die "$0: $@\n";
-open(PM_NEW, ">$PM_NFILE") or die "$0: $@\n";
-
-while (<PM_OLD>)
+if ($opt_V)
 {
-	s/\$INFORMIX_LICENCE\s*=\s*".*";/\$INFORMIX_LICENCE = "$ARGV[0]";/;
-	print PM_NEW $_;
+	&print_versions('Perl DBI DBD::Informix ESQL/C Licence');
+}
+elsif ($opt_v)
+{
+	&print_versions($opt_v);
+}
+elsif ($opt_l)
+{
+	&set_licence_number($opt_l);
+}
+elsif ($opt_b)
+{
+	# Bug Report
+	&bug_report($opt_b, @ARGV);
+}
+elsif ($opt_w)
+{
+	# It Works
+	&it_works;
+}
+else
+{
+	print STDERR "$0: misunderstood your command/options @ARGV\n";
+	exit 1;
 }
 
-close PM_OLD;
-close PM_NEW;
+exit 0;
 
-my $PM_OFILE = "$PM_IFILE.old";
+__END__
 
-unlink $PM_OFILE or die "$0: $@\n"
-	if -f $PM_OFILE;
-rename $PM_IFILE, $PM_OFILE or die "$0: $@\n";
-rename $PM_NFILE, $PM_IFILE or die "$0: $@\n";
+=head1 NAME
+
+InformixTechSupport - Technical Support tool for Informix Database Driver for Perl
+
+=head1 SYNOPSIS
+
+C<InformixTechSupport -V>
+
+C<InformixTechSupport -v [ Perl | DBI | DBD::Informix | ESQL/C | Licence ]>
+
+C<InformixTechSupport -l new#licence>
+
+C<InformixTechSupport -b [ABCD] [test ...]>
+
+C<InformixTechSupport -w>
+
+=head1 DESCRIPTION
+
+The InformixTechSupport script is used for a variety of purposes
+related to technical support of Informix Database Driver for Perl Version 0.97003 (2000-02-07).
+
+=head2 CHECKING SOFTWARE VERSIONS
+
+Use C<InformixTechSupport -V> to discover the version number of each
+of the components listed in the next section.
+
+=head2 CHECKING VERSIONS OF SPECIFIC COMPONENTS
+
+Use C<InformixTechSupport -v component> to discover the version number
+of a component used by DBD::Informix.
+
+The valid component names are:
+
+=over 2
+
+=item *
+
+Perl
+
+=item *
+
+DBI
+
+=item *
+
+DBD::Informix
+
+=item *
+
+ESQL/C
+
+=item *
+
+Licence
+
+=back
+
+Other component names are silently ignored.
+If you do not have a supported licence number, it will not be reported.
+
+=head2 STORING A NEW LICENCE NUMBER
+
+Use C<InformixTechSupport -l new#licence> to stamp your software with
+the licence number you are given when you buy a support contract from
+Informix Software Inc.
+This number will then be reported when you make a bug report (see
+below) or list all the versions (see above).
+
+You must be able to write in the directory where the Informix.pm file
+was installed to stamp the software, which will often require root
+privileges.
+
+=head2 CREATING A BUG REPORT
+
+Use C<InformixTechSupport -b [class] [tests ...]> to create a basic
+bug report.
+The file Notes/bug.reports contains detailed information about the
+classes of bug reports (which are A, B, C, and D).
+If you have a class D bug, then you can list the specific test(s)
+which are failing on the command line.
+
+The output contains most of the information that will be needed to
+debug your problem.
+If your problem is not with the standard tests, then you should aim to
+create a standalone reproduction of your problem and include that test
+with your bug report.
+
+=head2 CREATING A REPORT THAT IT WORKS
+
+Use C<InformixTechSupport -w> to create a report that Informix Database Driver for Perl Version 0.97003 (2000-02-07) works.
+You may need to edit the output; you may certainly add comments in the
+'Optional comments' section.
+The output is written to standard output only.
+It is never sent anywhere unless you actually choose to send it.
+
+If you do send the report, please put "DBD::Informix - It Works" in
+the subject line and send the report to C<dbd-informix@informix.com>.
+
+=head1 AUTHOR
+
+Jonathan Leffler <jleffler@informix.com>
+
+=cut

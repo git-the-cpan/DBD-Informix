@@ -1,77 +1,15 @@
 #! /usr/bin/perl
 #
-#	@(#)$Id: ItWorks version /main/5 1999-12-31 00:12:52 $
+#   @(#)$Id: ItWorks version /main/8 2000-02-04 15:49:46 $
 #
-#	Generate a report that DBD::Informix works
+#   Generate a report that Informix Database Driver for Perl Version 0.97003 (2000-02-07) works
+#
+#   Portions Copyright 1999 Jonathan Leffler
+#   Portions Copyright 2000 Informix Software Inc
 
-### This trick was standard with Perl 4 ###
-#eval "exec /usr/bin/perl $0 $*"
-#		if $running_under_some_shell;
-# This is an odd variation on the trick
-eval "perl $0 | grep -v '^#' | tee It-Worked; exit 0"
+### This trick was more or less standard with Perl 4 ###
+eval "exec perl $0 $*"
 		if $running_under_some_shell;
 
-use strict;
-use DBI;
-use Config;
-
-my ($sec,$min,$hour,$mday,$mon,$year) = gmtime(time);
-my ($date) = sprintf "%04d-%02d-%02d", $year + 1900, $mon + 1, $mday;
-my ($uname,$passwd,$uid,$gid,$quota,$comment,$gcos,$dir,$shell) = getpwuid $>;
-my ($who) = "$uname\@$Config{myhostname}$Config{mydomain}";
-
-#perl -MConfig -e 'for $key (sort keys %Config) { print "$key = $Config{$key}\n"; }'
-
-if ($comment) 
-{
-	$who = "$comment <$who>";
-}
-elsif ($gcos)
-{
-	$who = "$gcos <$who>";
-}
-
-BEGIN { require "perlsubs/InformixTest.pl"; }
-
-my ($dbh) = &connect_to_test_database();
-
-my ($server) = sprintf "%.2f",
-my (%tags);
-
-# If you significantly change this list of tags, then change the version
-# number in the WORKING_VERSION open tag.
-
-$tags{DBD_INFORMIX} = "$dbh->{Driver}->{Version}";
-$tags{DBI} = "$DBI::VERSION";
-$tags{INFORMIX_ESQLC} = "$dbh->{ix_ProductName}";
-$tags{INFORMIX_SERVER} = sprintf "%.2f (%s)", ($dbh->{ix_ServerVersion}/100),
-								(($dbh->{ix_InformixOnLine}) ? "OnLine" : "SE");
-$tags{PERL} = "$] @Config{qw(archname dlsrc)}";
-$tags{SYSTEM} = "@Config{qw(myuname)}";
-$tags{SYS_COMPILER} = "@Config{qw(cc gccversion)}";
-$tags{SYS_LOADER} = "$Config{ld}";
-$tags{WHEN} = "$date";
-$tags{WHO} = "$who";
-$tags{Z_NOTES} = "Optional Notes";
-
-my ($keylen, $taglen) = (0, 0);
-my ($key, $tag);
-
-# Determine longest key and tag
-for $key (keys %tags)
-{
-	$tag = $tags{$key};
-	$keylen = length($key) if (length($key) > $keylen);
-	$taglen = length($tag) if (length($tag) > $taglen);
-}
-
-my ($fmt) = "    <%s>%s %-${taglen}s </%s>\n";
-
-print "<WORKING_VERSION VERSION=\"1.00\">\n";
-for $key (sort keys %tags)
-{
-	printf $fmt, $key, " " x ($keylen - length($key)), $tags{$key}, $key;
-}
-print "</WORKING_VERSION>\n";
-
-$dbh->disconnect;
+use DBD::Informix::TechSupport;
+it_works;

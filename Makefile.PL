@@ -1,10 +1,12 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL version /main/114 2000-01-24 15:19:14 $ 
+# @(#)$Id: Makefile.PL version /main/122 2000-02-04 17:04:25 $ 
 #
-# Portions Copyright (c) 1996-99 Jonathan Leffler
-# Portions Copyright (c) 1996    Alligator Descartes
-# Portions Copyright (c) 2000    Informix Software Inc
+# Configuration script for Informix Database Driver for Perl Version 0.97003 (2000-02-07) (aka DBD::Informix)
+#
+# Portions Copyright 1996-99 Jonathan Leffler
+# Portions Copyright 1996    Alligator Descartes
+# Portions Copyright 2000    Informix Software Inc
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
@@ -19,9 +21,8 @@ use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose);
 use Config;
 use strict;
 use DBI 1.02;
-use DBI::DBD;
-
-BEGIN { require "perlsubs/esqlc.pl"; }
+use DBI::DBD;	# dbd_postamble()
+use DBD::Informix::Configuration;
 
 $| = 1;     # Ensure that Perl output is interleaved with test output.
 
@@ -45,7 +46,8 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "0.97002";
+my $dbd_ix = "0.97003";
+# Hack for handling builds directly in Atria Clearcase view.
 $dbd_ix = "0.97002" unless $dbd_ix =~ /^\d+\.\d+/;
 
 my %opts = (
@@ -60,15 +62,17 @@ my %opts = (
 					  SUFFIX       => 'gz'
 					},
 	'PL_FILES'   =>	{ 'Informix.pm.PL' => 'Informix.pm' },
-	'PM'         =>	{ 'Informix.pm' => '$(INST_LIBDIR)/Informix.pm',
-					  'lib/Bundle/DBD/Informix.pm' => 'blib/lib/Bundle/DBD/Informix.pm',
+	'PM'         =>	{ 'Informix.pm'                   => '$(INST_LIBDIR)/Informix.pm',
+					  'DBD/Informix/Configuration.pm' => '$(INST_LIBDIR)/Informix/Configuration.pm',
+					  'DBD/Informix/TechSupport.pm'   => '$(INST_LIBDIR)/Informix/TechSupport.pm',
+					  'DBD/Informix/TestHarness.pm'   => '$(INST_LIBDIR)/Informix/TestHarness.pm',
+					  'lib/Bundle/DBD/Informix.pm'    => 'blib/lib/Bundle/DBD/Informix.pm'
 					}
 		   );
 
-#my $dbd_ix = &dbd_informix_version_info($opts{VERSION_FROM});
 print qq%
-Configuring $opts{NAME} version $dbd_ix...
-		You are using DBI version $DBI::VERSION and Perl version $]
+Configuring Informix Database Driver for Perl Version 0.97003 (2000-02-07) (aka $opts{NAME})
+        You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
 %;
@@ -80,13 +84,13 @@ print "Compiler: @Config{qw(cc optimize ccflags)}\n";
 print "Loader:   $Config{ld}\n"
 	if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc});
 
+&did_not_read("Perl is out of date") unless ($] >= 5.004);
+&did_not_read("DBI is out of date") unless ($DBI::VERSION >= 1.02);
+
 # Assorted hints - these should be move to a hints subdirectory.
 print "\nSee notes about SPARCompiler on Solaris in Notes/solaris\n"
 	if ($Config{osname} eq 'solaris' and &which($Config{cc}) =~ m%/SUNWspro/%);
 print "\n";
-
-&did_not_read("Perl is out of date") unless ($] >= 5.004);
-&did_not_read("DBI is out of date") unless ($DBI::VERSION >= 1.02);
 
 # Compare installed version of DBI with version which DBD::Informix was
 # last tested with.
@@ -608,6 +612,76 @@ elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 		$libs =~ s% -L *$ID/lib % %;
 		$libs =~ s% -L *$ID/lib/esql % %;
 		$libs =~ s/-threads// if ($Config{osname} eq 'dec_osf');
+		if ($Config{osname} eq "aix" and $libs =~ /-lnetstub/)
+		{
+			# JL 2000-01-28: ESQL/C 9.15.UC1 (CSDK 2.01.UC1) includes
+			# -lnetstub but $INFORMIXDIR/lib/libnetstub.so is rejected
+			# by the linker on AIX 4.2, so use libnetstubshr.a, instead.
+			if ($ENV{DBD_INFORMIX_AIX_USENETSTUB})
+			{
+				print "!!! Retaining reference to -lnetstub because of DBD_INFORMIX_AIX_USENETSTUB\n";
+			}
+			else
+			{
+				if (-f "$ID/lib/libnetstubshr.a")
+				{
+					print "... Replacing reference to -lnetstub with -lnetstubshr (override with DBD_INFORMIX_AIX_USENETSTUB)\n";
+					$libs =~ s%-lnetstub%-lnetstubshr%;
+				}
+				elsif (-f "$ID/lib/netstub.a")
+				{
+					print "... Replacing reference to -lnetstub with $ID/lib/netstub.a (override with DBD_INFORMIX_AIX_USENETSTUB)\n";
+					$libs =~ s%-lnetstub%$ID/lib/netstub.a%;
+				}
+				else
+				{
+					print "!!! Retaining reference to -lnetstub (no alternatives available?!)\n";
+				}
+			}
+		}
+		if ($Config{osname} eq "hpux" and $libs =~ /-l(V3|cl|:libcl.1)/)
+		{
+			# JL 2000-01-28: including -lcl and -l:libcl.1 on the link line
+			# causes HP-UX 11.0 to barf with thread-local storage in the shared library.
+			# As far as can be detected, libV3.{a,sl} is unneeded.
+			# Provide escape routes to override the behaviour which removes them.
+			if ($libs =~ /-lV3/)
+			{
+				if ($ENV{DBD_INFORMIX_HPUX_USELIBV3})
+				{
+					print "!!! Retaining reference to -lV3 because of DBD_INFORMIX_HPUX_USELIBV3\n";
+				}
+				else
+				{
+					print "... Removing reference to -lV3 (override with DBD_INFORMIX_HPUX_USELIBV3)\n";
+					$libs =~ s/-lV3//;
+				}
+			}
+			if ($libs =~ /-lcl/)
+			{
+				if ($ENV{DBD_INFORMIX_HPUX_USELIBCL})
+				{
+					print "!!! Retaining reference to -lcl because of DBD_INFORMIX_HPUX_USELIBCL\n";
+				}
+				else
+				{
+					print "... Removing reference to -lcl (override with DBD_INFORMIX_HPUX_USELIBCL)\n";
+					$libs =~ s/-lcl//;
+					$libs =~ s/-l:libcl.1//;
+				}
+			}
+		}
+		if ($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR})
+		{
+			# Specify that SHLIB_PATH is OK at runtime
+			$libs = "+s $libs" if ($Config{osname} eq "hpux");
+		}
+		else
+		{
+			my(@libs) = split ' ', $libs;
+			my(@names) = map_informix_lib_names(@libs);
+			$libs = join ' ', @names;
+		}
 		print "... We are going to use the library list:\n$libs\n";
 		# On 722 on the DEC, including checkAPI twice dies.
 		# Linking it once gives an undefined.  So we link once and
@@ -672,8 +746,7 @@ exit 0;
 # we think they didn't read it.
 sub did_not_read
 {
-	my ($reason) = @_;
-	die "\n*** You didn't read the README file!\n$reason\n\n";
+	die "\n*** You didn't read the README file!\n@_\n\n";
 }
 
 # which: report the name of an executable command.
@@ -730,7 +803,10 @@ INFORMIX_LICENCE = 'ACN@J334912'
 # Cribbed from the definition of CCCMD (MakeMaker const_cccmd) and the
 # rules for compiling object files (MakeMakerc_o) in the Makefile.
 # May need fixing if the corresponding rules change.
-ESQLFLAGS = $(INC) $(ESQL_NT) $(CCFLAGS) $(OPTIMIZE) \
+# NB: UFLAGS is for user-flags; it should not be set by the Makefile.
+#     The user can add a flag on the make line with "make UFLAGS=-Dxyz".
+UFLAGS =
+ESQLFLAGS = $(UFLAGS) $(INC) $(ESQL_NT) $(CCFLAGS) $(OPTIMIZE) \
 		$(PERLTYPE) $(LARGE) $(SPLIT) $(DEFINE_VERSION) \
 		$(XS_DEFINE_VERSION) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE)
 %;
@@ -791,9 +867,50 @@ sub MY::processPL
 	my $inherited = shift->SUPER::processPL(@_);
 	my $server = '';
 	$server = "-dINFORMIXSERVER=$ENV{INFORMIXSERVER}" if defined $ENV{INFORMIXSERVER};
-	my $licence = "-dINFORMIX_LICENCE=\${INFORMIX_LICENCE}";
+	my $licence = "-dINFORMIX_LICENCE=\$(INFORMIX_LICENCE)";
 	$inherited =~ s/(\$\(PERL\) .* Informix.pm.PL)/$1 -dINFORMIXDIR=$ID $server $licence/;
 	$inherited;
+}
+
+# Custom edit older versions of the ESQL/C compiler script to acknowledge
+# the INFORMIXC environment variable.
+sub customize_esql
+{
+	my ($src, $dst, $pkg) = @_;
+	open(ESQL, "<$src") ||
+		die "Unable to open $src for reading";
+	open(LOCAL, ">$dst") ||
+		die "Unable to open $dst for writing";
+	while (<ESQL>)
+	{
+		if (/^CC=/o && !/INFORMIXC/o)
+		{
+			print LOCAL "# INFORMIXC added by Makefile.PL for $pkg.\n";
+			chop;
+			s/^CC=//;
+			s/"(.*)"/$1/ if (/".*"/);
+			$_ = 'CC="${INFORMIXC:-' . $_ . "}\"\n";
+		}
+		elsif (/\s+CC="cc -g"/o)
+		{
+			print LOCAL "# CC adjustment changed by Makefile.PL\n";
+			print LOCAL "# Was: $_\n";
+			s/CC="cc -g"/CC="\${CC} -g"/o;
+		}
+		print LOCAL;
+	}
+	close(ESQL);
+	close(LOCAL);
+	chmod 0755, $dst;
+}
+
+sub set_esqlc_linkage
+{
+	my ($def_link) = @_;
+	my $env_link = $ENV{DBD_INFORMIX_ESQLC_LINKAGE};
+	print "** Using $env_link from DBD_INFORMIX_ESQLC_LINKAGE environment variable.\n\n"
+		if (defined $env_link);
+	return (defined $env_link) ? $env_link : $def_link;
 }
 
 __END__

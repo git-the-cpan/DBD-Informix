@@ -1,9 +1,10 @@
 /*
- * @(#)$Id: dbdattr.ec version /main/37 1999-12-30 19:09:50 $ 
+ * @(#)$Id: dbdattr.ec version /main/38 2000-02-01 13:46:06 $ 
  *
- * DBD::Informix for Perl Version 5 -- attribute handling
+ * @(#)$Product: Informix Database Driver for Perl Version 0.97003 (2000-02-07) $ -- attribute handling
  *
- * Copyright (c) 1997-99 Jonathan Leffler
+ * Portions Copyright 1997-99 Jonathan Leffler
+ * Portions Copyright 2000    Informix Software Inc
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -12,7 +13,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec version /main/37 1999-12-30 19:09:50 $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec version /main/38 2000-02-01 13:46:06 $";
 #endif
 
 #include <stdio.h>

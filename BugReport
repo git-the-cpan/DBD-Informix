@@ -1,128 +1,22 @@
 #! /usr/bin/perl -w
 #
-#	@(#)$Id: BugReport version /main/3 2000-01-13 14:31:46 $
+#	@(#)$Id: BugReport version /main/6 2000-02-01 13:45:37 $
 #
-#	Copyright (C) 1999 Jonathan Leffler
+#	Produce output for a Informix Database Driver for Perl Version 0.97003 (2000-02-07) Bug Report
 #
-#	Produce output for a DBD::Informix Bug Report
+#	Portions Copyright (C) 1999 Jonathan Leffler
+#	Portions Copyright (C) 2000 Informix Software Inc
 #
+# * See Notes/bug.reports for lots more details.
 # * By default (no arguments), produces just the most basic bug
 #   reporting info - versions and platform and environment.
 # * If given an argument A or B or C, produces the info for that
 #   type of bug report.
 # * If given an argument D and one or more specific test names,
 #   produces the info for a type D bug report.
-# * It is not unreasonable to build DBD::Informix using:
-#   perl BugReport 2>&1 | tee bugreport.out
+# * Assuming you use a Bourne/Korn/BornAgain shell, it is quite
+#   reasonable to build DBD::Informix using:
+#       perl BugReport C 2>&1 | tee bugreport.out
 
-use Config;
-
-$| = 1;
-
-$id = "id";
-if ($Config{osname} eq 'solaris')
-{
-	# On Solaris, /usr/bin/id only reports on auxilliary groups with
-	# the non-standard, non-POSIX -a option.  Usually, there's a
-	# /usr/xpg4/bin/id which does follow the standards.
-	$id = (-x "/usr/xpg4/bin/id") ? "/usr/xpg4/bin/id" : "/usr/bin/id -a";
-}
-
-system qq{
-	echo "Command:   $0 @ARGV"
-	echo "Date:      `date`"
-	echo "Machine:   `uname -n` (`uname -s -r`)"
-	echo "User:      `$id`"
-	echo "Directory: `pwd`"
-	echo "Umask:     `umask`"
-	echo "Terminal:  `tty 2>/dev/null`"
-	};
-
-print "\n#\n# Perl Version\n";
-system("$^X -V");
-
-require "perlsubs/esqlc.pl";
-
-print "\n#\n# Informix Version\n";
-my ($INFORMIXDIR, $ESQLC) = &find_informixdir_and_esql();
-my ($esqlversion, $esqlvernum) = &get_esqlc_version($ESQLC);
-print "INFORMIXDIR = $INFORMIXDIR\n";
-print "ESQLC = $ESQLC\n";
-print "Version = $esqlversion\n";
-
-$dbmsversion = `$INFORMIXDIR/bin/onstat   -V 2>/dev/null`;
-$dbmsversion = `$INFORMIXDIR/bin/tbstat   -V 2>/dev/null` unless $dbmsversion;
-$dbmsversion = `$INFORMIXDIR/bin/dbaccess -V 2>/dev/null` unless $dbmsversion;
-$dbmsversion = `$INFORMIXDIR/lib/sqlturbo -V 2>/dev/null` unless $dbmsversion;
-$dbmsversion = `$INFORMIXDIR/lib/sqlexec  -V 2>/dev/null` unless $dbmsversion;
-$dbmsversion = "*** indeterminate ***" unless $dbmsversion;
-
-chomp $dbmsversion;
-$dbmsversion =~ s/Software Serial Number.*//m;
-print "DBMS Version = $dbmsversion\n";
-
-print "Informix Server Entries in sqlhosts file\n";
-$db1 = $ENV{DBD_INFORMIX_DATABASE};
-$db2 = $ENV{DBD_INFORMIX_DATABASE2};
-if (defined $db1) { $server1 = ($db1 =~ s/.*@//); } else { $server1 = $ENV{INFORMIXSERVER}; }
-if (defined $db2) { $server2 = ($db2 =~ s/.*@//); } else { $server2 = $ENV{INFORMIXSERVER}; }
-system qq {
-egrep "^($server1|$server2)[ 	]" \${INFORMIXSQLHOSTS:-\$INFORMIXDIR/etc/sqlhosts}
-};
-
-# Print environment, not compromising passwords.
-print "\n#\n# Sorted Environment\n";
-for $var (sort keys %ENV)
-{
-	$val = $ENV{$var};
-	$val = "XXXXXXXX" if ($var =~ m/^DBD_INFORMIX_PASSWORD[12]?$/o);
-	print "$var=$val\n";
-}
-print "\n# End of Configuration Report\n";
-
-exit 0 if ($#ARGV < 0);
-
-# Handle bug reports for bug classes A through D.
-if ($ARGV[0] =~ m/^[abcdABCD]$/)
-{
-	print "\n#\n# Redoing configuration\n";
-	execute_command("[ ! -f Makefile ] || make realclean", "failed on preliminary cleanup");
-	execute_command("rm -f esql esqlvrsn.h esqlinfo.h",    "failed on preliminary cleanup");
-	execute_command("$^X Makefile.PL", "running on configuration");
-	if ($ARGV[0] =~ m/^[bcdBCD]$/)
-	{
-		print "\n#\n# Redoing build\n";
-		execute_command("make", "failed on build");
-		if ($ARGV[0] =~ m/^[cdCD]$/)
-		{
-			print "\n#\n# Redoing general testing\n";
-			execute_command("make test", "failed on general testing");
-			if ($ARGV[0] =~ m/^[dD]$/ && $#ARGV > 0)
-			{
-				shift;
-				print "\n#\n# Doing selective testing\n";
-				execute_command("sh test.one.sh @ARGV", "failed on selective tests");
-				if ($#ARGV == 0)
-				{
-					print "\n#\n# Rerunning test with debug fully enabled\n";
-					execute_command("sh -c 'PERL_DBI_DEBUG=9 sh test.one.sh @ARGV'", "failed on selective tests");
-				}
-			}
-		}
-	}
-	print "\n# End of Bug Report\n";
-}
-else
-{
-	print STDERR "Usage: $0 [A|B|C|D] [test cases...]\n";
-	exit 1;
-}
-
-# Execute a command, logging it if $sx is set, and dying with given message
-# if command fails.
-sub execute_command
-{
-	my ($cmd, $msg) = @_;
-	print "+ $cmd\n";
-	warn $msg unless system($cmd) == 0;
-}
+use DBD::Informix::TechSupport;
+bug_report(@ARGV);

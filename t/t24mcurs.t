@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t24mcurs.t version /main/13 1999-09-19 21:18:32 $ 
+# @(#)$Id: t/t24mcurs.t version /main/14 2000-01-27 16:20:42 $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -8,7 +8,7 @@
 #
 # Tests multiple simultaneous cursors being open
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 print "1..17\n";
 $dbh = connect_to_test_database();

@@ -1,56 +1,68 @@
-Change Log for DBD::Informix, the Informix driver for Perl DBI
+Change Log for Informix Database Driver for Perl Version 0.97003 (2000-02-07) (aka DBD::Informix)
 
-Note that none of the records for any of the 0.96 and 0.97 releases will
-appear in the official 1.00.PC1 ChangeLog.  These are purely
-experimental versions, but learning how to beat PAUSE and CPAN requires
-lots of (slow) testing with the results being semi-public.  Further,
-these versions will *all* be removed when the official 1.00 release is
-ready, or very shortly thereafter, if they are not removed beforehand.
-Do not rely on them.  Do not report problems with them.
-
-0.97002 Release
----------------
-2000-01-24: Another dummy release, doing more testing of whether we can
-            reinstate the code which records INFORMIXDIR and INFORMIXSERVER
-            during the build.  We are making progress.
-
-0.97001 Release
----------------
-2000-01-19: Another dummy release, doing more testing of whether we can
-            reinstate the code which records INFORMIXDIR and INFORMIXSERVER
-            during the build.  This was removed in the 0.95 build because
-            of problems with PAUSE and CPAN.
-
-0.97.PC1 Release
+1.00.PC1 Release
 ----------------
-2000-01-18: Another dummy release, testing whether we can reinstate the
-            code which records $INFORMIXDIR and $INFORMIXSERVER during
-            configuration (perl Makefile.PL).  This was removed in the 0.95
-            build because of problems with PAUSE and CPAN.
-
-0.96.PC2X2 Release
-------------------
-2000-01-17: Another dummy release testing PAUSE/CPAN and version numbers.
-
-0.96.PC2X1 Release
-------------------
-2000-01-17: Another dummy release testing PAUSE/CPAN and version numbers.
-
-0.96.PC2 Release
-----------------
-2000-01-17: Another dummy release testing PAUSE/CPAN and version numbers.
-
-0.96.PC1X1 Release
-------------------
-2000-01-17: Another dummy release testing PAUSE/CPAN and version numbers.
-
-0.96.PC1 Release
-----------------
-2000-01-17: Another dummy release testing PAUSE/CPAN and version numbers.
-
-0.95.PC1X2 Release
-------------------
-2000-01-14: Dummy release testing PAUSE/CPAN and version numbers.
+2000-02-04: Fix licence number handling in Makefile.PL for NT as nmake does
+            not like ${VAR}; found by Tom Kliethermes <tomk@informix.com>.
+            Revise README file.
+2000-02-03: If username and password are specified, connect to '@server'
+            rather than DEFAULT -- improves testing using remote database.
+            Fix Configuration.pm so that it has a sub did_not_read.  Map
+            shared library names from relative to absolute when using 'ld'
+            well as when using 'cc'.
+2000-02-01: Generate error -402, not core dump, on $dbh->prepare(undef).
+2000-02-01: Change official name to "Informix Database Driver for Perl" to
+            avoid trademark problems.  The acronym DBD is claimed by two
+            other companies in the USA, DBD Group (http://www.dbd.com) and
+            Digital By Design (http://www.digitalbydesign.net).  Upgrades
+            to documentation in Informix.pm, thanks to Informix Tech Pubs.
+2000-01-31: Add note in Notes/hpux about Sys::Syslog (email dated
+            1998-08-12 from Kurt D Starsinic <kstar@chapin.edu>).
+2000-01-28: Peeter Pirn <PPirn@lnc.com> reported link problems on AIX 4.2
+            with ESQL/C 9.15.UCx.  The $INFORMIXDIR/lib/libnetstub.so
+            library is rejected by the loader.  Modify the libraries from
+            the esql script to use $INFORMIXDIR/lib/libnetstubshr.a
+            instead, verifying that the file exists and with the override
+            environment variables DBD_INFORMIX_AIX_USENETSTUB to leave
+            things alone.
+2000-01-28: On HP-UX 11.00, ClientSDK 2.40.HC1 (ESQL/C 9.30.HC1) lists the
+            system libraries '-lV3 -lcl -l:libcl.1'.  The first appears to
+            be unused; the second causes the test phase to fail.  Remove
+            these options from the 'ld' link line, and the tests pass.  Two
+            new environment variables, DBD_INFORMIX_HPUX_USELIBV3 and
+            DBD_INFORMIX_HPUX_USELIBCL, can be set to force the link to use
+            those libraries, but this is not recommended.  Note that it is
+            possible to use dynamic loading of the DBD::Informix module on
+            HP-UX 11.00 (and, indeed, on HP-UX 10.20) -- see the notes on
+            HP-UX in the Notes sub-directory!
+2000-01-27: Reinstate the default values of INFORMIXDIR and INFORMIXSERVER
+            after extensive testing with versions such as 0.96.PC1 and
+            0.97002 on CPAN/PAUSE.  Thanks to Honza Pazdzoria for providing
+            an upgraded system to do this.  The technology also allows
+            Informix licence numbers to be inserted.  These are not
+            required for ordinary use of the product, but if you buy
+            Informix Technical Support, you will be given a licence number
+            which can be branded into the product.  Reinstate the test
+            harness as a full-blown module, DBD::Informix::TestHarness; add
+            DBD::Informix::TechSupport and DBD::Informix::Configuration.
+            Merge shared memory connection test into the TestHarness.
+            Remove perlsubs sub-directory, which also makes the test
+            scripts more flexible; after installation, they can be run
+            outside the build directory.  Revise the BugReport and ItWorks
+            scripts to use the new modules.  Add InformixTechSupport as an
+            installed Perl script to: report version numbers, set licence
+            number, do a bug report, and produce the ItWorks output.
+2000-01-14: Fix the BugReport script so that PERL_DBI_DEBUG=9 part works.
+2000-01-01: Control transferred to Informix Software.  The code will now be
+            maintained under Atria Clearcase.  Subject only to PAUSE/CPAN
+            accepting them, the version numbers will conform to Informix
+            standards.  The 1.00 is pretty much self-explanatory.  The P
+            stands for Perl.  The C1 indicates the first production release
+            (Ax and Bx are never used).  If an emergency patch port is
+            made, then the version number will change to 1.00.PC1X1.  You
+            may occasionally encounter 1.00.PC1[ABG]1 versions, which are
+            alpha, beta or gamma version numbers.  Version number stamping
+            is quite different under ClearCase.
 
 0.95 Release
 ------------
@@ -773,5 +785,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@informix.com>
-
-@(#)$Id: ChangeLog,v 97.2 2000/01/19 21:45:52 jleffler Exp $
+@(#)$Id: ChangeLog version /main/106 2000-02-04 16:11:29 $

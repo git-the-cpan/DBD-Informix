@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t21mconn.t version /main/20 2000-01-20 11:43:55 $ 
+#	@(#)$Id: t/t21mconn.t version /main/21 2000-01-27 16:20:33 $ 
 #
 #	Test Multiple Connections for DBD::Informix
 #
 #	Portions Copyright (C) 1996-99 Jonathan Leffler
 #	Portions Copyright (C) 2000    Informix Software Inc
 
-BEGIN { require "perlsubs/InformixTest.pl"; require "perlsubs/shmconn.pl"; }
+use DBD::Informix::TestHarness;
 
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);

@@ -1,21 +1,24 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t50update.t version /main/5 1999-09-19 21:18:32 $
+# @(#)$Id: t/t50update.t version /main/7 2000-02-03 15:54:00 $
 #
-#	Copyright (C) 1998-99 Jonathan Leffler
+# Portions Copyright 1998-99 Jonathan Leffler
+# Portions Copyright 2000    Informix Software Inc
 #
 # Test for UPDATE on zero rows in MODE ANSI database.
 # Note that database statements cannot be used with an explicit connection
 # with ESQL/C 6.0x and up.
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
-$dbname = "dbd_ix_db";
+my ($dbname) = "dbd_ix_db";
+my ($user) = $ENV{DBD_INFORMIX_USERNAME};
+my ($pass) = $ENV{DBD_INFORMIX_USERNAME};
 
 stmt_note("1..9\n");
 
 &stmt_note("# Use explicit default connection, new connect syntax\n");
-stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.','',''));
+stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.',$user,$pass));
 stmt_ok;
 
 # Don't care about non-existent database

@@ -1,5 +1,4 @@
-Key Environment Variables for DBD::Informix
-===========================================
+Key Environment Variables for Informix Database Driver for Perl Version 0.97003 (2000-02-07)
 
 There are many possible environment variables which affect Informix
 software and therefore which affect DBD::Informix.  All of the ones
@@ -123,6 +122,11 @@ DBD_INFORMIX_DEBUG_ESQLTEST
     Set to see the compilation for the esqltest program.  Seldom set by
     users.
 
+DBD_INFORMIX_DEBUG_LIBMAP
+    Set to see the mapping of relative shared library names (-lifgen) into
+    absolute names ($INFORMIXDIR/lib/esql/libifgen.so).  Seldom set by
+    users.
+
 DBD_INFORMIX_ENABLE_ASSERT
     Set to include assertions in the code.  Seldom set by users.
 
@@ -160,7 +164,37 @@ DBD_INFORMIX_USE_EPRINTF_CODE
     this to use the supplied alternative eprintf.c code.  It is much
     better to avoid setting this.
 
+DBD_INFORMIX_HPUX_USELIBV3
+DBD_INFORMIX_HPUX_USELIBCL
+    By default, ClientSDK 2.40.HC1 (ESQL/C 9.30) on HP-UX 11.0 includes
+    two libraries which are counter-productive.  The more serious
+    problems are caused by '-lcl' and '-l:libcl.1', which contains some
+    thread-local storage that causes the testing phase to fail.  The
+    less serious problem is '-lV3' which doesn't seem to provide any
+    symbols to the linking.  The code in Makefile.PL detects it is on
+    HP-UX (but does not distinguish the version number) and deletes the
+    references to those libraries, warning you that it has done so and
+    referencing these environment variables in the message.  The
+    variables must be set to any non-false value (so 'yes' is a good
+    value to use).  If you get a link failure or a runtime failure with
+    missing symbols, you could try setting these environment variables.
+	These libraries are also included on HP-UX 10.20, but don't seem to
+	spoil things there -- but they can equally well be removed.
+
+DBD_INFORMIX_AIX_USENETSTUB
+	By default, ClientSDK 2.01.UC1 (ESQL/C 9.15) on AIX 4.2 includes
+	-lnetstub on the link line.  The library $INFORMIXDIR/lib/libnetstub.so
+	is not acceptable to the loader (for reasons which are not clear; not
+	permissions, and the 'file' command doesn't suggest any differences),
+	so the linking fails.  The simplest workaround seems to be to use
+	libnetstubshr.a instead.  The code in Makefile.PL detects it is on AIX
+	(but does not distinguish the version number) and edits the reference
+	to this library, warning you that it has done so and referencing these
+	environment variables in the message.  The variables must be set to any
+	non-false value (so 'yes' is a good value to use).  Using environment
+	variables to fix the infelicities of the ESQL/C script is in vogue.
+
 ---------------------------------------------------------------------------
 
 Author: Jonathan Leffler (j.leffler@acm.org)
-@(#)$Id: Notes/environment.variables version /main/1 1999-11-17 19:49:22 $
+@(#)$Id: Notes/environment.variables version /main/4 2000-02-03 16:04:45 $

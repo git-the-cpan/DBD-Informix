@@ -1,19 +1,22 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t60unlog.t version /main/8 1999-09-19 21:18:32 $ 
+# @(#)$Id: t/t60unlog.t version /main/10 2000-02-03 15:54:03 $ 
 #
-#	Copyright (C) 1997,1999 Jonathan Leffler
+# Portions Copyright 1997,1999 Jonathan Leffler
+# Portions Copyright 2000      Informix Software Inc
 #
 # Test that unlogged databases refuse to connect with AutoCommit => 0
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
-$dbname = "dbd_ix_db";
+my ($dbname) = "dbd_ix_db";
+my ($user) = $ENV{DBD_INFORMIX_USERNAME};
+my ($pass) = $ENV{DBD_INFORMIX_PASSWORD};
 
 stmt_note("1..8\n");
 
 &stmt_note("# Test DBI->connect('dbi:Informix:.DEFAULT.')\n");
-stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.', '', ''));
+stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.', $user, $pass));
 stmt_ok;
 
 # Don't care about non-existent database
@@ -34,7 +37,7 @@ undef $dbh;
 my $msg;
 $SIG{__WARN__} = sub { $msg = $_[0]; };
 &stmt_note("# Test DBI->connect('dbi:Informix:$dbname',...,{AutoCommit=>0})\n");
-$dbh = DBI->connect("dbi:Informix:$dbname",'','',
+$dbh = DBI->connect("dbi:Informix:$dbname", $user, $pass,
 					{ AutoCommit => 0, PrintError => 1 });
 $SIG{__WARN__} = 'DEFAULT';
 # Under DBI 0.85, this connection worked.  Ideally it should have failed.
@@ -45,7 +48,7 @@ $msg =~ s/\n/ /mg;
 &stmt_note("# $msg\n");
 
 # Remove test database
-stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.', '', ''));
+stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.', $user, $pass));
 $dbh->{PrintError} = 1;
 &stmt_test($dbh, "drop database $dbname");
 stmt_fail unless ($dbh->disconnect);

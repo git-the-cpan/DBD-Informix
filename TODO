@@ -1,5 +1,4 @@
-DBD::Informix -- List of Things That Need To Be Done
-====================================================
+A List of Things That Need to be Done to Informix Database Driver for Perl Version 0.97003 (2000-02-07)
 
 At the moment, everything has an added date of 1999-12-29, even though
 many of the items have been valid issues since version 0.25 back in 1996.
@@ -68,4 +67,4 @@ T.014: Added 1999-12-29
 
 Jonathan Leffler <j.leffler@acm.org>
 
-@(#)$Id: TODO version /main/1 1999-12-30 00:57:18 $
+@(#)$Id: TODO version /main/2 2000-02-01 13:46:03 $

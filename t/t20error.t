@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t20error.t version /main/8 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t20error.t version /main/9 2000-01-27 16:20:31 $ 
 #
 #	Test error on EXECUTE for DBD::Informix
 #
 #	Copyright (C) 1997,1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # Test install...
 $dbh = &connect_to_test_database();

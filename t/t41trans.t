@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t41trans.t version /main/15 1999-12-04 23:50:27 $ 
+#	@(#)$Id: t/t41trans.t version /main/16 2000-01-27 16:21:03 $ 
 #
 #	Test Transactions with AutoCommit Off for DBD::Informix
 #
@@ -9,7 +9,7 @@
 #
 #	Copyright (C) 1996-97,1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # Test connection
 $dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });

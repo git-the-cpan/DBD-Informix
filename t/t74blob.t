@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t74blob.t version /main/16 1999-12-04 23:45:10 $ 
+#	@(#)$Id: t/t74blob.t version /main/17 2000-01-27 16:21:41 $ 
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
 #	Copyright (C) 1996-97,1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # Test install...
 $dbh = connect_to_test_database();

@@ -1,8 +1,8 @@
-# @(#)$Id: lib/Bundle/DBD/Informix.pm version /main/3 1999-11-18 22:10:59 $
+# @(#)$Id: lib/Bundle/DBD/Informix.pm version /main/4 2000-01-25 12:20:09 $
 
 package Bundle::DBD::Informix;
 
-$VERSION = '0.95';
+$VERSION = '0.97003';
 
 1;
 
@@ -28,7 +28,7 @@ DBD::Informix  - DBD::Informix by JOHNL (Jonathan Leffler)
 
 This bundle includes all the modules used by the Perl Database
 Interface (DBI) driver for Informix (DBD::Informix), assuming the
-use of DBI version 1.02, created by Tim Bunce.
+use of DBI version 1.02 or later, created by Tim Bunce.
 
 If you've not previously used the CPAN module to install any
 bundles, you will be interrogated during its setup phase.
@@ -36,10 +36,11 @@ But when you've done it once, it remembers what you told it.
 You could start by running:
 
     C<perl -MCPAN -e 'install Bundle::CPAN'>
+    C<perl -MCPAN -e 'install Bundle::libnet'>
+    C<perl -MCPAN -e 'install Bundle::LWP'>
 
-Note that DBD::Informix does not directly use Digest::MD5.  However, if
-Informix R&D or Tech Support takes over DBD::Informix (which, as of
-1999-11-17, they have not agreed to do), then you will be required to
+Note that DBD::Informix does not directly use Digest::MD5.  However, when
+Informix takes over support for DBD::Informix, then you may be required to
 demonstrate that the MD5 checksums of the code you've got match the
 original, or you'll be required to provide the diffs between the original
 and what you are using.  The shell script md5.verify and Perl script

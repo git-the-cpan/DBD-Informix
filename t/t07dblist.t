@@ -1,23 +1,32 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t07dblist.t version /main/10 1999-09-19 21:18:32 $ 
+# @(#)$Id: t/t07dblist.t version /main/12 2000-02-03 15:53:57 $ 
 #
-# (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
-#
-# Portions Copyright (C) 1996-99 Jonathan Leffler
+# Portions Copyright 1996    Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+# Portions Copyright 1996-99 Jonathan Leffler
+# Portions Copyright 2000    Informix Software Inc
 #
 # List of available databases:
 #   @ary = $DBI->data_sources('Informix');
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 @ary = DBI->data_sources('Informix');
 
 if (!defined @ary)
 {
-	print "1..1\n";
-	&stmt_note("# Test: DBI->data_sources('Informix'):\n");
-	&stmt_fail();
+	if ($ENV{DBD_INFORMIX_USERNAME} && $ENV{DBD_INFORMIX_PASSWORD} && $DBI::err == -951)
+	{
+		# Problem is with default connection and sqgetdbs().
+		print "1..0\n";
+		&stmt_note("# Test: DBI->data_sources('Informix'): skipped\n");
+	}
+	else
+	{
+		print "1..1\n";
+		&stmt_note("# Test: DBI->data_sources('Informix'): failed\n");
+		&stmt_fail();
+	}
 }
 else
 {

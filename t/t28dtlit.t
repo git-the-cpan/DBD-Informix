@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t28dtlit.t version /main/6 1999-09-19 21:18:32 $
+# @(#)$Id: t/t28dtlit.t version /main/7 2000-01-27 16:20:47 $
 #
 # Copyright (C) 1998-99 Jonathan Leffler
 #
@@ -9,7 +9,7 @@
 # because dbd_ix_preparse() would treat the :30 as a positional parameter
 # (in a misguided attempt to accommodate Oracle scripts).
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 print("1..10\n");
 

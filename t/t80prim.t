@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t80prim.t version /main/12 1999-09-19 21:18:32 $ 
+# @(#)$Id: t/t80prim.t version /main/13 2000-01-27 16:21:49 $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -9,7 +9,7 @@
 # Exercises the returning of error codes in ESQL/C intermediate step failure
 
 use strict;
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 my ($dbh, $cursor, @row);
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t44trans.t version /main/12 1999-12-04 23:50:27 $ 
+#	@(#)$Id: t/t44trans.t version /main/13 2000-01-27 16:21:12 $ 
 #
 #	Test AutoCommit On for DBD::Informix
 #
@@ -9,7 +9,7 @@
 # AutoCommit On => Each statement is a self-contained transaction
 # Ensure MODE ANSI databases use cursors WITH HOLD
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # Test install...
 $dbh = &connect_to_test_database();

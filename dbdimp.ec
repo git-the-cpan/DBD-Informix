@@ -1,18 +1,14 @@
-/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil -*-
+/*
+ * @(#)$Id: dbdimp.ec version /main/131 2000-02-01 14:51:17 $
  *
- * @(#)$Id: dbdimp.ec version /main/129 2000-01-21 15:05:01 $
+ * @(#)$Product: Informix Database Driver for Perl Version 0.97003 (2000-02-07) $ -- implementation details
  *
- * DBD::Informix for Perl Version 5 -- implementation details
- *
- * @(#)$Product: DBD::Informix Version 0.97002 (2000-01-24) $
- *
- * Portions Copyright
- *           (c) 1994-95 Tim Bunce
- *           (c) 1995-96 Alligator Descartes
- *           (c) 1994    Bill Hailes
- *           (c) 1996    Terry Nightingale
- *           (c) 1996-99 Jonathan Leffler
- *           (c) 2000    Informix Software Inc
+ * Portions Copyright 1994-95 Tim Bunce
+ * Portions Copyright 1995-96 Alligator Descartes
+ * Portions Copyright 1994    Bill Hailes
+ * Portions Copyright 1996    Terry Nightingale
+ * Portions Copyright 1996-99 Jonathan Leffler
+ * Portions Copyright 2000    Informix Software Inc
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -21,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec version /main/129 2000-01-21 15:05:01 $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec version /main/131 2000-02-01 14:51:17 $";
 #endif
 
 #include <stdio.h>
@@ -203,9 +199,9 @@ dbd_db_destroyer(void *data)
 int
 dbd_ix_dr_discon_all(SV *drh, imp_drh_t *imp_drh)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_dr_discon_all";
 	dTHR;
 
-	static const char function[] = DBD_IX_MODULE "::dbd_ix_dr_discon_all";
 	dbd_ix_enter(function);
 	dbd_ix_link_delchain(&imp_drh->head, dbd_db_destroyer);
 	dbd_ix_exit(function);
@@ -363,11 +359,10 @@ dbd_ix_setdbtype(imp_dbh_t *imp_dbh)
 int
 dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_login";
 	dTHR;
-
 	D_imp_drh_from_dbh;
 	Boolean conn_ok;
-	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_login";
 
 	dbd_ix_enter(function);
 	new_connection(imp_dbh);
@@ -652,9 +647,8 @@ dbd_ix_db_preset(imp_dbh_t *imp_dbh, SV *dbattr)
 int
 dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
 {
-	dTHR;
-
 	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_disconnect";
+	dTHR;
 	D_imp_drh_from_dbh;
 	int junk;
 
@@ -919,8 +913,8 @@ dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 static int
 dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 {
-	int rc = 1;
 	static const char function[] = DBD_IX_MODULE "::dbd_ix_bindsv";
+	int rc = 1;
 	STRLEN len;
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_ibind = imp_sth->nm_ibind;
@@ -1385,6 +1379,16 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 
 	dbd_ix_enter(function);
 
+	if (stmt == 0 || *stmt == '\0')
+	{
+		/* No valid statement text */
+		/* -402: Address of a host variable is NULL. */
+		dbd_ix_seterror(-402);
+		dbd_ix_savesqlca(imp_dbh);
+		dbd_ix_exit(function);
+		return(0);
+	}
+
 	if ((rc = dbd_db_setconnection(imp_dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_dbh);
@@ -1554,9 +1558,8 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 int
 dbd_ix_st_finish(SV *sth, imp_sth_t *imp_sth)
 {
-        dTHR;
-      
 	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_finish";
+	dTHR;
 	int rc;
 
 	dbd_ix_enter(function);
@@ -2251,9 +2254,8 @@ dbd_ix_exec(imp_sth_t *imp_sth)
 int
 dbd_ix_st_execute(SV *sth, imp_sth_t *imp_sth)
 {
-        dTHR;
-
 	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_execute";
+	dTHR;
 	int rv;
 	int rc;
 

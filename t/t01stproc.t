@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t01stproc.t version /main/5 1999-12-04 23:46:08 $ 
+#	@(#)$Id: t/t01stproc.t version /main/6 2000-01-27 16:20:20 $ 
 #
 #	Test stored procedure handling for DBD::Informix
 #
 #	Copyright (C) 1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 $dbh = &connect_to_test_database();
 

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t29update.t version /main/5 1999-09-19 21:18:32 $ 
+#	@(#)$Id: t/t29update.t version /main/6 2000-01-27 16:20:49 $ 
 #
 #	Simple test for UPDATE with attributes listed in execute call
 #
 #	Copyright (C) 1998-99 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 &stmt_note("1..3\n");
 

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t72blob.t version /main/20 1999-12-04 23:45:10 $ 
+#	@(#)$Id: t/t72blob.t version /main/21 2000-01-27 16:21:35 $ 
 #
 #	Test Basic Blobs (INSERT & SELECT) for DBD::Informix
 #
 #	Copyright (C) 1996-97,1999 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+use DBD::Informix::TestHarness;
 
 # Test install...
 $dbh = connect_to_test_database();
