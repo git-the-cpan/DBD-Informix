@@ -1,10 +1,10 @@
 /*
 @(#)File:           ixblob.ec
-@(#)Version:        50.1
-@(#)Last changed:   97/01/12
+@(#)Version:        50.3
+@(#)Last changed:   97/05/05
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) Jonathan Leffler 1992,1995,1996,1997
+@(#)Copyright:      (C) Jonathan Leffler 1996,1997
 @(#)Product:        :PRODUCT:
 */
 
@@ -16,15 +16,29 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "esqlc.h"
-#include "esqlperl.h"
+#include "ixblob.h"
 
 #define FILENAMESIZE	128
+
+#ifndef DEFAULT_TMPDIR
 #define DEFAULT_TMPDIR	"/tmp"
+#endif
+
+static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
 
 #ifndef lint
-static const char sccs[] = "@(#)ixblob.ec	50.1 97/01/12";
+static const char sccs[] = "@(#)ixblob.ec	50.3 97/05/05";
 #endif
+
+BlobLocn blob_getlocmode(void)
+{
+	return(def_blob_locn);
+}
+
+void blob_setlocmode(BlobLocn locn)
+{
+	def_blob_locn = locn;
+}
 
 const char *sql_dbtemp(void)
 {
@@ -32,8 +46,8 @@ const char *sql_dbtemp(void)
 
 	if (db_temp == (char *)0)
 	{
-		db_temp = getenv("DBTEMP");
-		if (db_temp == (char *)0)
+		if (((db_temp = getenv("DBTEMP")) == (char *)0) &&
+			((db_temp = getenv("TMPDIR")) == (char *)0))
 			db_temp = DEFAULT_TMPDIR;
 	}
 	return(db_temp);
@@ -50,6 +64,7 @@ static int blob_locinnamefile(Blob *blob)
 		return(-1);
 	blob->loc_loctype = LOCFNAME;
 	blob->loc_fname = malloc(strlen(tmp) + 1);
+	strcpy(blob->loc_fname, tmp);
 	blob->loc_mode = 0666;
 	blob->loc_oflags = LOC_WONLY | LOC_RONLY;
 	blob->loc_size = -1;
@@ -114,6 +129,8 @@ int blob_locate(Blob * blob, BlobLocn locn)
 	blob->loc_status = 0;
 	blob->loc_type = SQLTEXT;
 	blob->loc_xfercount = 0;
+	if (locn == BLOB_DEFAULT)
+		locn = blob_getlocmode();
 	switch(locn)
 	{
 	case BLOB_IN_NAMEFILE:
@@ -122,10 +139,10 @@ int blob_locate(Blob * blob, BlobLocn locn)
 	case BLOB_IN_ANONFILE:
 		rc = blob_locinanonfile(blob);
 		break;
-	case BLOB_DEFAULT:
 	case BLOB_IN_MEMORY:
 		rc = blob_locinmem(blob);
 		break;
+	case BLOB_DEFAULT:
 	default:
 		assert(0);
 		rc = -1;

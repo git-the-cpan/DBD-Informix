@@ -1,10 +1,10 @@
 /*
 @(#)File:            esql5_00.h
-@(#)Version:         1.10
-@(#)Last changed:    96/12/10
+@(#)Version:         1.12
+@(#)Last changed:    97/05/07
 @(#)Purpose:         Function prototypes for ESQL/C Versions 5.00..5.07
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992,1993,1995,1996
+@(#)Copyright:       (C) JLSS 1992-93,1995-97
 @(#)Product:         :PRODUCT:
 */
 
@@ -28,7 +28,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/* There is a unprototyped declaration of _iqlocate_cursor() in <sqlhdr.h> */
+/* There is an unprototyped declaration of _iqlocate_cursor() in <sqlhdr.h> */
 #undef _iqlocate_cursor
 #define _iqlocate_cursor _iq_non_existent
 #include <sqlhdr.h>
@@ -39,11 +39,13 @@ extern "C" {
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql5_00_h[] = "@(#)esql5_00.h	1.10 96/12/10";
+static const char esql5_00_h[] = "@(#)esql5_00.h	1.12 97/05/07";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
-#ifdef __STDC__
+#ifdef __cplusplus
+#define ESQLC_STRICT_PROTOTYPES
+#endif /* __cplusplus */
 
 #ifdef ESQLC_STRICT_PROTOTYPES
 /* A non-prototyped declaration for _iqnprep() is emitted by the compiler */
@@ -144,45 +146,6 @@ extern int      sqlbreak(void);
 extern void     sqldetach(void);
 extern void     sqlexit(void);
 extern int      sqlstart(void);
-
-#else
-
-extern _SQCURSOR *_iqnprep();
-extern _SQCURSOR *_iqlocate_cursor();
-extern int      _iqalloc();
-extern int      _iqbeginwork();
-extern int      _iqcdcl();
-extern int      _iqcddcl();
-extern int      _iqcftch();
-extern int      _iqclose();
-extern int      _iqcommit();
-extern int      _iqcopen();
-extern int      _iqcput();
-extern int      _iqcrproc();
-extern int      _iqdbase();
-extern int      _iqdbclose();
-extern int      _iqdcopen();
-extern int      _iqdealloc();
-extern int      _iqdescribe();
-extern int      _iqexecute();
-extern int      _iqeximm();
-extern int      _iqexproc();
-extern int      _iqflush();
-extern int      _iqfree();
-extern int      _iqgetdesc();
-extern int      _iqprepare();
-extern int      _iqrollback();
-extern int      _iqsetdesc();
-extern int      _iqslct();
-extern int      _iqstmnt();
-extern void     iec_stop();
-extern int      sqgetdbs();
-extern int      sqlbreak();
-extern void     sqldetach();
-extern void     sqlexit();
-extern int      sqlstart();
-
-#endif	/* __STDC__ */
 
 #ifdef __cplusplus
 }

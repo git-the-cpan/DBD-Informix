@@ -1,10 +1,10 @@
 /*
 @(#)File:            esqllib.h
-@(#)Version:         1.8
-@(#)Last changed:    96/11/26
+@(#)Version:         1.9
+@(#)Last changed:    97/01/28
 @(#)Purpose:         ESQL/C Library Function Prototypes
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992,1993,1995,1996
+@(#)Copyright:       (C) JLSS 1992-93,1995-97
 @(#)Product:         :PRODUCT:
 */
 
@@ -15,15 +15,13 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqllib_h[] = "@(#)esqllib.h	1.8 96/11/26";
+static const char esqllib_h[] = "@(#)esqllib.h	1.9 97/01/28";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-#ifdef __STDC__
 
 /* DATE */
 extern int      rdayofweek(long jdate);
@@ -94,80 +92,6 @@ extern void     rdownshift(char *s);
 extern void     rupshift(char *s);
 extern void     stcat(char *s, char *dest);
 extern void     stchar(char *fr, char *to, int cnt);
-
-#else
-
-/* DATE */
-extern int      rdayofweek();
-extern int      rdefmtdate();
-extern int      rfmtdate();
-extern int      rjulmdy();
-extern int      rleapyear();
-extern int      rmdyjul();
-extern int      rstrdate();
-extern int      rdatestr();
-extern void     rtoday();
-
-/* DECIMAL */
-extern int      decadd();
-extern int      deccmp();
-extern int      deccpy();
-extern int      deccvasc();
-extern int      deccvdbl();
-extern int      deccvint();
-extern int      deccvlong();
-extern int      decdiv();
-extern char    *dececvt();
-extern char    *decfcvt();
-extern int      decmul();
-extern int      decround();
-extern int      decsub();
-extern int      dectoasc();
-extern int      dectodbl();
-extern int      dectoint();
-extern int      dectolong();
-extern int      dectrunc();
-
-/* FORMAT USING */
-extern int      rfmtdec();
-extern int      rfmtdouble();
-extern int      rfmtlong();
-
-/* DATETIME/INTERVAL */
-extern int      dtcvasc();
-extern int      dtcvfmtasc();
-extern int      dtextend();
-extern int      dttoasc();
-extern int      incvasc();
-extern int      incvfmtasc();
-extern int      intoasc();
-extern void     dtcurrent();
-
-/* LIBRARY */
-extern char    *rtypname();
-extern int      bycmpr();
-extern int      byleng();
-extern int      rgetmsg();
-extern int      risnull();
-extern int      rsetnull();
-extern int      rstod();
-extern int      rstoi();
-extern int      rstol();
-extern int      rtypalign();
-extern int      rtypmsize();
-extern int      rtypwidth();
-extern int      stcmpr();
-extern int      stcopy();
-extern int      stleng();
-extern void     bycopy();
-extern void     byfill();
-extern void     ldchar();
-extern void     rdownshift();
-extern void     rupshift();
-extern void     stcat();
-extern void     stchar();
-
-#endif	/* __STDC__ */
 
 #ifdef __cplusplus
 }

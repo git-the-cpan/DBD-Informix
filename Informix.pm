@@ -1,4 +1,4 @@
-#	@(#)Informix.PM	53.2 97/03/10 19:52:48
+#	@(#)Informix.pm	54.3 97/05/14 17:26:37
 #
 #   Portions Copyright (c) 1994,1995 Tim Bunce
 #   Portions Copyright (c) 1996,1997 Jonathan Leffler
@@ -15,34 +15,33 @@
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	my $VERSION             = "<<DBD::Informix Version>>";
-	my $PRODUCTNAME         = "<<Product Name>>";
-	my $PRODUCTVERSION      = "<<Product Version>>";
-	my $MultipleConnections = "<<Multiple Connections>>";
-	my $ATTRIBUTION         = 'By Alligator Descartes and Jonathan Leffler';
-	my $Revision            = substr(q@(#)Informix.PM 53.2 (97/03/10)@, 3);
+	$VERSION     = "0.54";
+	$ATTRIBUTION = 'By Jonathan Leffler';
+	$Revision    = substr(q@(#)Informix.pm 54.3 (97/05/14)@, 3);
 
-	require_version DBI 0.69;
+	require_version DBI 0.81;	# Requires ChopBlanks, introduced in 0.81
 
 	bootstrap DBD::Informix $VERSION;
 
 	$err = 0;		# holds error code   for DBI::err
 	$errstr = "";	# holds error string for DBI::errstr
+	$state = "";    # holds error string for DBI::state
+
 	my $drh = undef;	# holds driver handle once initialized
 
 	sub driver
 	{
-		if ($MultipleConnections == 0)
+		if (defined $drh && !defined $drh->{ix_MultipleConnections})
 		{
 			# Reuse driver (no multiple connections)!
-			return $drh if $drh;
+			return $drh;
 		}
 
 		my($class, $attr) = @_;
 
 		unless ($ENV{INFORMIXDIR})
 		{
-			foreach(qw(/usr/informix /opt/informix /opt/Informix))
+			foreach(qw(/usr/informix))
 			{
 				if (-d "$_/lib")
 				{
@@ -57,19 +56,15 @@
 		$class .= "::dr";
 
 		# Create new driver handle.
+		# The ix_ProductName, ix_ProductVersion, ix_MultipleConnections
+		# ix_CurrentConnection and ix_ActiveConnections attributes are
+		# handled by the driver's FETCH_attrib function.
 		$drh = DBI::_new_drh($class, {
 			'Name'                   => 'Informix',
 			'Version'                => $VERSION,
-			'ProductName'            => $PRODUCTNAME,
-			'ProductVersion'         => $PRODUCTVERSION,
-			'MultipleConnections'    => $MultipleConnections,
-			'ix_ProductName'         => $PRODUCTNAME,
-			'ix_ProductVersion'      => $PRODUCTVERSION,
-			'ix_MultipleConnections' => $MultipleConnections,
-			'ix_ActiveConnections'   => 0,
-			'ix_CurrentConnection'   => undef,
 			'Err'                    => \$DBD::Informix::err,
 			'Errstr'                 => \$DBD::Informix::errstr,
+			'State'                  => \$DBD::Informix::state,
 			'Attribution'            => $ATTRIBUTION,
 			%{$attr}
 		});
@@ -139,6 +134,7 @@
 	}
 
 	# Override default implementation of do (which is DBD::_::db::do)
+	# EXECUTE IMMEDIATE was introduced in version 5.00 ESQL/C.
 	# NB: EXECUTE IMMEDIATE does not allow parameters, so if they are
 	# provided, use the prepare, execute and finish functions which
 	# handle them correctly.  Note that the attributes are ignored
@@ -147,8 +143,9 @@
 	sub do
 	{
 		my($dbh, $statement, $attrib, @params) = @_;
+		my($pv) = DBD::Informix::dr::FETCH($dbh->{Driver},'ix_ProductVersion');
 
-		if ($dbh->{Driver}->{ProductVersion} >= 500 && @params == 0)
+		if ($pv >= 500 && @params == 0)
 		{
 			DBD::Informix::db::immediate($dbh, $statement);
 		}
@@ -685,38 +682,21 @@ or 'UPDATE...WHERE CURRENT OF' statement.
     $row = $st1->fetch;
     $st3->execute();
 
-=over 4
-
-BUG: Attribute caching is not working correctly in DBD::Informix.
-Once you've retrieved the cursor name once, you cannot retrieve it a
-second time.
-Hence the assignment to $wc is necessary in the example code above.
-This applies to all attributes.
-
-=back
-
 =head2 ACCESSING THE SQLCA RECORD
 
 You can access the SQLCA record via either a database handle or a statement
 handle.
 
-    $sqlcode = $sth->{sqlcode};
-    $sqlerrm = $sth->{sqlerrm};
-    $sqlerrp = $sth->{sqlerrp};
-    @sqlerrd = $sth->{sqlerrd};
-    @sqlwarn = $sth->{sqlwarn};
+    $sqlcode = $sth->{ix_sqlcode};
+    $sqlerrm = $sth->{ix_sqlerrm};
+    $sqlerrp = $sth->{ix_sqlerrp};
+    @sqlerrd = $sth->{ix_sqlerrd};
+    @sqlwarn = $sth->{ix_sqlwarn};
 
 Note that the warning information is treated as an array (as in Informix-4GL)
 rather than as a bunch of separate fields (as in Informix-ESQL/C).  Inspect
 the code in the print_sqlca() function in InformixTest.pm for more ideas on
 the use of these.  You cannot set the sqlca record.
-
-=over 4
-
-BUG: DBD::Informix is over-zealous at handling the sqlca record and is apt
-to lose valuable information.
-
-=back
 
 =head1 TRANSACTION MANAGEMENT
 
@@ -882,29 +862,23 @@ Executing any Group 3B or 3C statement will generate an error.
 
 =head1 ATTRIBUTE NAME CHANGES
 
-Note that with this version of DBD::Informix, most (theoretically all)
-of the Informix-specific attributes have been renamed so that they
-start ix_ (eg: $dbh->{ix_AutoErrorReport}), and the old names which do
-not have this systematic prefix are now officially deprecated.
-And additional attribute, $dbh->{ix_Deprecated} has been invented
-which can be set to 0 to suppress the warning reports when
-a deprecated attribute
-is used.
+Note that most (theoretically all) of the Informix-specific attributes
+have been renamed so that they start "ix_" (eg:
+$dbh->{ix_AutoErrorReport}), and the old names which do not have this
+systematic prefix are now officially deprecated.
+An additional attribute, $dbh->{ix_Deprecated} was invented which
+could be set to 0 to suppress the warning reports in earlier
+(0.51..0.53) releases when a deprecated attribute was used.
 The deprecated form {Deprecated} is also supported.
 
-For this release (0.53), the default value of {ix_Deprecated} is 1
-(True), so the deprecated warnings appear unless you ask for
-them to be suppressed.
-You can suppress the warning by setting:
-
-    $sth->{ix_Deprecated} = 0;
-
-In the next release (0.54), the warnings will be enabled without a
-mechanism to switch them off, but both the deprecated and the
+In this release (0.54), the deprecated warnings are enabled and there
+is no mechanism to switch them off, but both the deprecated and the
 non-deprecated forms of the attribute names will work.
-In the release after that (0.55), the warnings will be enabled without
-a mechanism to switch them off, and the old style attribute names
-won't work.
+Setting "$sth->{ix_Deprecated} = 0;" does not fail, but generates a
+deprecated warning.
+In the next release (0.55), the deprecated warnings will alert you to
+the fact that the old style attributes did not achieve anything, and
+there will be no mechanism to switch the warnings off.
 In the release after that (0.56), using the old-style attribute names
 will generate an error.
 In the release after that (0.57), using the old-style attribute names

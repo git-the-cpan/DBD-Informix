@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.h	53.3 97/03/06 20:40:00
+ * @(#)dbdimp.h	54.3 97/05/14 17:26:03
  *
  * $Derived-From: dbdimp.h,v 1.5 1995/06/22 00:37:04 timbo Archaic $
  *
@@ -15,6 +15,17 @@
 
 #define NAMESIZE 19				/* 18 character name plus '\0' */
 #define DEFAULT_DATABASE	".DEFAULT."
+
+/* The DBIc_ChopBlanks* macros should be in DBIXS.h but aren't in DBI 0.81 */
+#ifndef DBIc_ChopBlanks
+#define DBIc_ChopBlanks(imp)	DBIc_is(imp, DBIcf_ChopBlanks)
+#endif
+#ifndef DBIc_ChopBlanks_on
+#define DBIc_ChopBlanks_on(imp)	DBIc_on(imp, DBIcf_ChopBlanks)
+#endif
+#ifndef DBIc_ChopBlanks_off
+#define DBIc_ChopBlanks_off(imp)	DBIc_off(imp, DBIcf_ChopBlanks)
+#endif
 
 /* Different states for a statement */
 enum State
@@ -83,35 +94,37 @@ struct imp_sth_st
 	Link            chain;      /* Link in list of statements */
 };
 
-extern void dbd_ix_seterror _((ErrNum rc));
+extern void dbd_ix_seterror(ErrNum rc);
 
-extern void dbd_dr_init _((dbistate_t *dbistate));
-extern int dbd_dr_driver _((SV *drh));
-extern int dbd_dr_disconnectall _((imp_drh_t *));
+extern SV *dbd_dr_FETCH_attrib(imp_drh_t *drh, SV *keysv);
+extern int dbd_dr_disconnectall(imp_drh_t *);
+extern int dbd_dr_driver(SV *drh);
+extern void dbd_dr_init(dbistate_t *dbistate);
 
-extern SV *dbd_db_FETCH_attrib _((imp_dbh_t *dbh, SV *keysv));
-extern int dbd_db_STORE_attrib _((imp_dbh_t *dbh, SV *keysv, SV *valuesv));
-extern int dbd_db_begin _((imp_dbh_t *sth));
-extern int dbd_db_commit _((imp_dbh_t *sth));
-extern int dbd_db_connect _((imp_dbh_t *dbh, char *dbs, char *uid, char *pwd));
-extern int dbd_db_disconnect _((imp_dbh_t *dbh));
-extern int dbd_db_immediate _((imp_dbh_t *dbh, char *stmt));
-extern int dbd_db_rollback _((imp_dbh_t *sth));
-extern void dbd_db_destroy _((imp_dbh_t *dbh));
+extern SV *dbd_db_FETCH_attrib(imp_dbh_t *dbh, SV *keysv);
+extern int dbd_db_STORE_attrib(imp_dbh_t *dbh, SV *keysv, SV *valuesv);
+extern int dbd_db_begin(imp_dbh_t *sth);
+extern int dbd_db_commit(imp_dbh_t *sth);
+extern int dbd_db_connect(imp_dbh_t *dbh, char *dbs, char *uid, char *pwd);
+extern int dbd_db_createprocfrom(imp_dbh_t *imp_dbh, char *file);
+extern int dbd_db_disconnect(imp_dbh_t *dbh);
+extern int dbd_db_immediate(imp_dbh_t *dbh, char *stmt);
+extern int dbd_db_rollback(imp_dbh_t *sth);
+extern void dbd_db_destroy(imp_dbh_t *dbh);
 
-extern AV *dbd_st_fetch _((imp_sth_t *sth));
-extern SV *dbd_st_FETCH_attrib _((imp_sth_t *sth, SV *keysv));
-extern int dbd_st_STORE_attrib _((imp_sth_t *sth, SV *keysv, SV *valuesv));
-extern int dbd_st_bind_ph _((SV *sth, SV *param, SV *value, SV *attribs, int boolean, int len));
-extern int dbd_st_blob_read _((SV *sth, int field, long offset, long len, SV *destsv, int destoffset));
-extern int dbd_st_execute _((imp_sth_t *sth));
-extern int dbd_st_finish _((imp_sth_t *sth));
-extern int dbd_st_prepare _((imp_sth_t *sth, char *statement, SV *attribs));
-extern int dbd_st_rows _((SV *sth));
-extern void dbd_st_destroy _((imp_sth_t *sth));
+extern AV *dbd_st_fetch(imp_sth_t *sth);
+extern SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv);
+extern int dbd_st_STORE_attrib(imp_sth_t *sth, SV *keysv, SV *valuesv);
+extern int dbd_st_bind_ph(SV *sth, SV *param, SV *value, SV *attribs, int boolean, int len);
+extern int dbd_st_blob_read(SV *sth, int field, long offset, long len, SV *destsv, int destoffset);
+extern int dbd_st_execute(imp_sth_t *sth);
+extern int dbd_st_finish(imp_sth_t *sth);
+extern int dbd_st_prepare(imp_sth_t *sth, char *statement, SV *attribs);
+extern int dbd_st_rows(SV *sth);
+extern void dbd_st_destroy(imp_sth_t *sth);
 
-extern int dbd_ix_setbindnum _((imp_sth_t *sth, int items));
-extern int dbd_ix_bindsv _((imp_sth_t *sth, int idx, SV *val));
+extern int dbd_ix_setbindnum(imp_sth_t *sth, int items);
+extern int dbd_ix_bindsv(imp_sth_t *sth, int idx, SV *val);
 extern const char *dbd_ix_module(void);
 
 extern void add_link(Link *link_1, Link *link_n);

@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.ec	53.4 97/03/17 18:46:28
+ * @(#)dbdimp.ec	54.3 97/05/15 16:33:33
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)dbdimp.ec	53.4 97/03/17";
+static const char sccs[] = "@(#)dbdimp.ec	54.3 97/05/15";
 #endif
 
 #include <stdio.h>
@@ -37,6 +37,7 @@ DBISTATE_DECLARE;
 
 static SV *dbd_errnum = NULL;
 static SV *dbd_errstr = NULL;
+static SV *dbd_state = NULL;
 
 /* One day, this will go! */
 static void del_statement(imp_sth_t *imp_sth);
@@ -59,6 +60,7 @@ dbistate_t     *dbistate;
 	DBIS = dbistate;
 	dbd_errnum = GvSV(gv_fetchpv("DBD::Informix::err", 1, SVt_IV));
 	dbd_errstr = GvSV(gv_fetchpv("DBD::Informix::errstr", 1, SVt_PV));
+	dbd_state  = GvSV(gv_fetchpv("DBD::Informix::state", 1, SVt_PV));
 }
 
 /* Formally initialize the DBD::Informix driver structure */
@@ -69,12 +71,13 @@ dbd_dr_driver(SV *drh)
 
 	imp_drh->n_connections = 0;			/* No active connections */
 	imp_drh->current_connection = 0;	/* No name */
-#if ESQLC_VERSION < 600
+#if ESQLC_VERSION >= 600
 	imp_drh->multipleconnections = 1;		/* Multiple connections allowed */
 #else
 	imp_drh->multipleconnections = 0;		/* Multiple connections forbidden */
 #endif /* ESQLC_VERSION */
 	new_headlink(&imp_drh->head);		/* Linked list of connections */
+
 	return 1;
 }
 
@@ -152,9 +155,10 @@ void            dbd_ix_seterror(ErrNum rc)
 		strcpy(msgbuf, sql_buf);
 		strcat(msgbuf, isambuf);
 
-		/* Record error number and error message */
+		/* Record error number, error message, and error state */
 		sv_setiv(dbd_errnum, (IV)rc);
 		sv_setpv(dbd_errstr, msgbuf);
+		sv_setpv(dbd_state, SQLSTATE);
 	}
 }
 
@@ -643,7 +647,6 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 
 	EXEC SQL GET DESCRIPTOR :nm_ibind VALUE :index :type = TYPE;
 
-
 	if (!SvOK(val))
 	{
 		/* It's a null! */
@@ -985,6 +988,41 @@ static char *decgen(dec_t *val, int plus)
 	return str;
 }
 
+/*
+** Fetch a single row of data.
+**
+** Note the use of 'varchar' variables.  Given the sample code:
+**
+** #include <stdio.h>
+** int main(int argc, char **argv)
+** {
+**     EXEC SQL BEGIN DECLARE SECTION;
+**     char    cc[30];
+**     varchar vc[30];
+**     EXEC SQL END DECLARE SECTION;
+**     EXEC SQL WHENEVER ERROR STOP;
+**     EXEC SQL DATABASE Apt;
+**     EXEC SQL CREATE TEMP TABLE Test(Col01 CHAR(20), Col02 VARCHAR(20));
+**     EXEC SQL INSERT INTO Test VALUES("ABCDEFGHIJ     ", "ABCDEFGHIJ     ");
+**     EXEC SQL SELECT Col01, Col01 INTO :cc, :vc FROM Test;
+**     printf("Col01: cc = <<%s>>\n", cc);
+**     printf("Col01: vc = <<%s>>\n", vc);
+**     EXEC SQL SELECT Col02, Col02 INTO :cc, :vc FROM TestTable;
+**     printf("Col02: cc = <<%s>>\n", cc);
+**     printf("Col02: vc = <<%s>>\n", vc);
+**     return(0);
+** }
+**
+** The output looks like:
+**		Col01: cc = <<ABCDEFGHIJ                   >>
+**		Col01: vc = <<ABCDEFGHIJ          >>
+**		Col02: cc = <<ABCDEFGHIJ                   >>
+**		Col02: vc = <<ABCDEFGHIJ     >>
+** Note that the data returned into 'cc' is blank padded to the length of
+** the host variable, not the length of the database column, whereas 'vc'
+** is blank-padded to the length of the database column for a CHAR column,
+** and to the length of the inserted data in a VARCHAR column.
+*/
 AV *
 dbd_st_fetch(imp_sth_t *imp_sth)
 {
@@ -992,7 +1030,7 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_cursor = imp_sth->nm_cursor;
 	char           *nm_obind = imp_sth->nm_obind;
-	char            coldata[256];
+	varchar         coldata[256];
 	long			coltype;
 	long			collength;
 	long			colind;
@@ -1010,7 +1048,7 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 	** maximum size character columns.  This isn't a major problem.
 	** Note that the independent DECLARE SECTIONs are necessary.
 	*/
-	char            longchar[32767];
+	varchar         longchar[32767];
 	EXEC SQL END DECLARE SECTION;
 #endif /* ESQLC_VERSION in {500, 501} */
 
@@ -1068,12 +1106,7 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 			case SQLDATE:
 			case SQLDTIME:
 			case SQLINTERVAL:
-			case SQLVCHAR:
-#ifdef SQLNVCHAR
-			case SQLNVCHAR:
-#endif /* SQLNVCHAR */
 				/* These types will always fit into a 256 character string */
-				/* NB: VARCHAR strings retain trailing blanks */
 				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
 						:coldata = DATA;
 				result = coldata;
@@ -1086,12 +1119,26 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 			case SQLSMFLOAT:
 			case SQLDECIMAL:
 			case SQLMONEY:
+				/* Default formatting assumes 2 decimal places -- wrong! */
 				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
 						:decval = DATA;
 				strcpy(coldata, decgen(&decval, 0));
 				result = coldata;
 				length = strlen(result);
 				/*warn("Decimal Data: %d <<%s>>\n", length, result);*/
+				break;
+
+			case SQLVCHAR:
+#ifdef SQLNVCHAR
+			case SQLNVCHAR:
+#endif /* SQLNVCHAR */
+				/* These types will always fit into a 256 character string */
+				/* NB: VARCHAR strings always retain trailing blanks */
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+						:coldata = DATA;
+				result = coldata;
+				length = strlen(result);
+				/*warn("VARCHAR Data: %d <<%s>>\n", length, result);*/
 				break;
 
 			case SQLCHAR:
@@ -1136,7 +1183,10 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
 						:result = DATA;
 #endif /* ESQLC_VERSION in {500, 501} */
-				length = byleng(result, strlen(result));
+				/* Conditionally chop trailing blanks */
+				length = strlen(result);
+				if (DBIc_ChopBlanks(imp_sth))
+					length = byleng(result, length);
 				result[length] = '\0';
 				/*warn("Character Data: %d <<%s>>\n", length, result);*/
 				break;
@@ -1333,7 +1383,7 @@ int dbd_db_immediate(imp_dbh_t *imp_dbh, char *stmt)
 	char           *statement = stmt;
 	EXEC SQL END DECLARE SECTION;
 
-	dbd_ix_debug(1, "%s::dbd_ix_immediate() called\n", dbd_ix_module());
+	dbd_ix_debug(1, "%s::dbd_db_immediate() called\n", dbd_ix_module());
 	if (dbd_db_setconnection(imp_dbh) == 0)
 	{
 		dbd_ix_savesqlca(imp_dbh);
@@ -1346,8 +1396,32 @@ int dbd_db_immediate(imp_dbh_t *imp_dbh, char *stmt)
 		return(0);
 	if (imp_dbh->autocommit == True && imp_dbh->is_modeansi == True)
 		dbd_ix_commit(imp_dbh);
-	dbd_ix_debug(1, "%s::dbd_ix_immediate() exiting\n", dbd_ix_module());
+	dbd_ix_debug(1, "%s::dbd_db_immediate() exiting\n", dbd_ix_module());
 	return(sqlca.sqlcode == 0);
 }
+
+int dbd_db_createprocfrom(imp_dbh_t *imp_dbh, char *file)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *filename = file;
+	EXEC SQL END DECLARE SECTION;
+
+	dbd_ix_debug(1, "%s::dbd_createprocfrom() called\n", dbd_ix_module());
+	if (dbd_db_setconnection(imp_dbh) == 0)
+	{
+		dbd_ix_savesqlca(imp_dbh);
+		return(0);
+	}
+	EXEC SQL CREATE PROCEDURE FROM :filename;
+	dbd_ix_seterror(sqlca.sqlcode);
+	dbd_ix_savesqlca(imp_dbh);
+	if (sqlca.sqlcode < 0)
+		return(0);
+	if (imp_dbh->autocommit == True && imp_dbh->is_modeansi == True)
+		dbd_ix_commit(imp_dbh);
+	dbd_ix_debug(1, "%s::dbd_createprocfrom() exiting\n", dbd_ix_module());
+	return(sqlca.sqlcode == 0);
+}
+
 
 /* -------------- End of dbdimp.ec -------------- */

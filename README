@@ -15,14 +15,18 @@ PREREQUISITES
 
     If you do not have Perl version 5.003 or later, then build, test and
     install it before doing anything else!  And please ensure that you
-	compile it with whatever options are necessary to get __STDC__ defined.
+    compile it with whatever options are necessary to get __STDC__ defined.
 
-    If the DBI module (version 0.73 or later preferred; 0.69 or later is
-    mandatory) is not installed, then build, test and install it.
+    If you do not have DBI version 0.81 or later installed, then build,
+    test and install it.  Note that previous versions of DBD::Informix
+    allowed you to use older versions of DBI than the version it was built
+    with.  This policy changed with DBD::Informix v0.54.  In addition,
+    the code uses ChopBlanks introduced in DBI 0.81.
 
     To build DBD::Informix, the C compiler must accept function prototypes.
     This is not a problem on any machine to which Informix is currently
-    ported.
+    ported (though the HP-UX compiler does not accept prototypes unless
+    told to do so).
 
     You must have a version of Informix-ESQL/C available to you.  You
     should read the Informix.Licence file for information about what you
@@ -30,18 +34,41 @@ PREREQUISITES
     nor are any earlier versions.  ESQL/C Versions 5.00 upwards should be
     OK.
 
+    *** BEWARE ***
+
+    DBD::Informix version 0.54 has been tested on Informix-Universal Server
+    version 9.10.UC2 (on a Sparc 20 running Solaris 2.5.1).  Where the IUS
+    database uses the same types as were available in earlier versions of
+    Informix products, there doesn't seem to be any problem.  However, it is
+    known to fail badly (usually with an assert firing and a core dump) if it
+    encounters one of the IUS-specific data types.
+
+    The IUS SysProcedures table in the system catalog has a ParamTypes column
+    which is of the type RtnParamTypes, and therefore DBD::Informix will not
+    work if you try to select all the columns from this table.  There are
+    probably other columns in the system catalog for which this is true.  And
+    there may be other tables which won't work for the same reason.
+
+    *** YOU WERE WARNED ***
+
+    DBD::Informix has never been tested with a version 8.x (OnLine XPS)
+    version of ESQL/C and database.
+
+    *** YOU WERE WARNED ABOUT THIS TOO ***
+
     You need to have a fully working Informix environment before you try to
     build and test DBD::Informix.  This means that you will need to have
     access to at least one database where you have at least RESOURCE level
     privileges.  You should consider creating the 'stores' database using
-    the dbaccessdemoN program which comes with your server if you don't
-    have DBA privileges on any databases.  The multiple connection tests
-    use two databases for preference (though the tests will use the same
-    database twice if you do not specify two separate databases) and the
-    test will fail if you try using olipcshm (shared memory) connections to
-    both databases.  If your databases are not on the machine where you are
-    building DBD::Informix, you need to ensure that you have the necessary
-    privileges to connect to the machine where the databases are.
+    the dbaccessdemoN program (where N is a version number, such a 7) which
+    comes with your server if you don't have DBA privileges on any
+    databases.  The multiple connection tests use two databases for
+    preference (though the tests will use the same database twice if you do
+    not specify two separate databases) and the test will fail if you try
+    using olipcshm (shared memory) connections to both databases.  If your
+    databases are not on the machine where you are building DBD::Informix,
+    you need to ensure that you have the necessary privileges to connect to
+    the machine where the databases are.
 
     Please ensure that you have $INFORMIXDIR set, and that $INFORMIXDIR/bin
     is on your PATH.  The build no longer works unless these environment
@@ -51,9 +78,9 @@ PREREQUISITES
     these will be found when you run Perl with DBD::Informix.  On SVR4
     machines, this means adding these directories to LD_LIBRARY_PATH; on
     HP-UX, the variable is SHLIB_PATH; other systems may have other
-    variable names.  You need to set INFORMIXSERVER correctly if you are using
-    version 6.0x or later.  You may need to set other environment variables
-    too -- consult the Informix manuals for more information.
+    variable names.  You need to set INFORMIXSERVER correctly if you are
+    using version 6.0x or later.  You may need to set other environment
+    variables too -- consult the Informix manuals for more information.
 
     You should take a look at the documentation in InformixTest.pm, and set
     the DBD_INFORMIX_DATABASE, DBD_INFORMIX_USERNAME, DBD_INFORMIX_PASSWORD
@@ -62,6 +89,9 @@ PREREQUISITES
     not a good idea to use your prize database for this.  The stores
     database is a good bet (unless you are using an old version of Fourgen
     software and it is using the stores database for its data dictionary).
+    Note that these variables only have significance when running the
+    DBD::Informix tests.  They are not used by DBD::Informix itself, only
+    by DBD::InformixTest.
 
     One step in the setup process tests that you have permissions on the
     databases which will be used by the testing.  It does this by compiling
@@ -145,10 +175,10 @@ BUILDING DBD::Informix
     obsolete file; over time and multiple versions, this could, eventually,
     lead to 'coronary thrombosis' on your disk drive -- or disk full.
 
-    If you run into problems which suggest that the ESQL/C you have won't work
-    as dynamically loaded libraries (eg on HP-UX or SCO), then you should
-    create a statically linked version of Perl with DBD::Informix linked to
-    it.  Use:
+    If you run into problems which suggest that the ESQL/C you have won't
+    work as dynamically loaded libraries (eg on HP-UX or SCO), then you
+    should create a statically linked version of Perl with DBD::Informix
+    linked to it.  Use:
 
         make perl
         make test_static
@@ -259,7 +289,7 @@ Please include:
 Regards,
 Jonathan Leffler (johnl@informix.com)
 
-@(#)README	53.2 97/03/12 12:41:25
+@(#)README	54.3 97/05/14 17:19:54
 
 ---------------------------------------------------------------------------
 

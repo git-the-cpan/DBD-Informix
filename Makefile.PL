@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)Makefile.PL	53.3 97/03/17 18:49:48
+# @(#)Makefile.PL	54.7 97/05/14 17:25:18
 #
 # Portions Copyright (c) 1996,1997 Jonathan Leffler (johnl@informix.com)
 # Portions Copyright (c) 1996 Alligator Descartes (descarte@hermetica.com)
@@ -13,21 +13,27 @@
 use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose);
 use Config;
 # A sufficiently recent version of DBI must be installed before we can
-# build any DBD module
-use DBI;
+# build any DBD module.  The code uses ChopBlanks introduced in DBI 0.81.
+use DBI 0.81;
 
 %opts = (
-	'NAME'    => 'DBD::Informix',
-	'VERSION' => '0.53',
+	'NAME'         => 'DBD::Informix',
+	'VERSION_FROM' => 'Informix.pm',
 );
 
-print "\nConfiguring DBD::Informix version $opts{VERSION}...\n";
+print "\nConfiguring DBD::Informix...\n";
 print "Remember to actually read the README file!\n\n";
 
 $ID = $ENV{INFORMIXDIR};
 
 die "\n*** You didn't read the README file!\n\n"
-	unless ($] >= 5.003 && $DBI::VERSION >= 0.69 && $ID);
+	unless ($] >= 5.003 && $DBI::VERSION >= 0.81 && $ID);
+
+# Compare installed version of DBI with version which DBD::Informix was
+# last tested with.
+$dbi_ref_version = "0.81";
+die "\n*** You must upgrade to DBI version $dbi_ref_version or later.\n\n"
+	unless ($DBI::VERSION >= $dbi_ref_version);
 
 $IDB = "$ID/bin";
 
@@ -40,7 +46,7 @@ die "\n*** You didn't read the README file!\n\n"
 # --- Find out which version of Informix ESQL/C by running 'esql -V'
 open(ESQL, "$IDB/esql -V|") || die;
 die "Failed to read anything from 'esql -V'\n"
-	unless ($infversion = <ESQL>);
+	unless defined ($infversion = <ESQL>);
 while(<ESQL>) { }		# Rest of input (1 line) to avoid Broken Pipe messages
 close ESQL;
 
@@ -57,10 +63,19 @@ print "Using $infversion from $ID\n";
 sub chk_libs
 {
 	my (@libs) = @_;
-	my ($ixlib, $ok) = ("$ID/lib/", 1);
+	my ($ixlib1, $ixlib2, $ok) = ("$ID/lib/", "$ID/lib/esql/", 1);
 	for $lib (@libs)
 	{
-		$ok = 0 if ! -f $ixlib . $lib;
+		my ($lib1) = $ixlib1 . $lib;
+		if (! -f $lib1)
+		{
+			my ($lib2) = $ixlib2 . $lib;
+			if (! -f $lib2)
+			{
+				$ok = 0;
+				warn "Cannot locate $lib under $ixlib1\n";
+			}
+		}
 	}
 	warn "*** Warning: ESQL/C does not appear to be installed correctly!\n\n"
 		if ! $ok;
@@ -71,7 +86,7 @@ $vercode = "esqlc_v6";
 $multiconn = 1;
 if ($vernum >= 500 && $vernum < 510)
 {
-	&chk_libs(qw{esql/libgen.a esql/libos.a esql/libsql.a});
+	&chk_libs(qw{libgen.a libos.a libsql.a});
 	$vercode = "esqlc_v5";
 	$multiconn = 0;
 	print "You need to use a customized ESQL/C compiler script\n";
@@ -106,13 +121,12 @@ if ($vernum >= 500 && $vernum < 510)
 }
 elsif (($vernum >= 600 && $vernum < 610) or ($vernum >= 710 && $vernum < 720))
 {
-	&chk_libs(qw{esql/libgen.a esql/libos.a esql/libsql.a libasf.a});
+	&chk_libs(qw{libgen.a libos.a libsql.a libasf.a});
 }
 elsif ($vernum >= 720 && $vernum < 740)
 {
 	# 7.2x is already released; 7.3x is in the pipeline
-	&chk_libs(qw{esql/libixgen.a esql/libixos.a esql/libixsql.a
-				 esql/libixgls.a libixasf.a});
+	&chk_libs(qw{libixgen.a libixos.a libixsql.a libixgls.a libixasf.a});
 }
 elsif ($version =~ /[1-4]\.[01][0-9]/)
 {
@@ -121,6 +135,12 @@ elsif ($version =~ /[1-4]\.[01][0-9]/)
 	This version of DBD::Informix requires this facility.
 	Please report your requirement to the DBD::Informix maintenance team.
 	}
+}
+elsif ($vernum >= 900 && $vernum < 930)
+{
+	# 9.10 is released; 9.20 is in the pipeline
+	&chk_libs(qw{libixgen.a libixos.a libixsql.a libixcss.a libixglx.a
+				 libixgls.a libixasf.a});
 }
 else
 {
@@ -139,44 +159,77 @@ else
 	}
 }
 
-# -- Produce correctly configured Informix.pm file
-
-{
-	print "\nWriting Informix.pm\n";
-	my ($vn, $pn, $pv, $cc) = (0, 0, 0, 0);
-	my $input  = "Informix.PM";
-	my $output = "Informix.pm";
-	my $kvn = "VERSION";
-	my $kpn = "PRODUCTNAME";
-	my $kpv = "PRODUCTVERSION";
-	my $kcc = "MultipleConnections";
-
-	open(PM_IN, "<$input") or die "Failed to open file $input";
-	open(PM_OUT, ">$output") or die "Failed to open file $output";
-	while (<PM_IN>)
-	{
-		$vn == 0 and s/\$$kvn[ \t]*=.*;/\$$kvn = "$opts{VERSION}";/o and $vn++;
-		$pn == 0 and s/\$$kpn[ \t]*=.*;/\$$kpn = "$infversion";/o and $pn++;
-		$pv == 0 and s/\$$kpv[ \t]*=.*;/\$$kpv = "$vernum";/o and $pv++;
-		$cc == 0 and s/\$$kcc[ \t]*=.*;/\$$kcc = "$multiconn";/o and $cc++;
-		print PM_OUT;
-	}
-	print "\n";
-}
-
 # -- Configure the make process
 
 # Define the version of ESQL/C for the object code.
 $opts{DEFINE}  = " -DESQLC_VERSION=$vernum";
 
+# Can we locate the CLI headers qeodbc.h, sqlext.h and sql.h?
+# If so, we'll use them.  If not, we use inc/odbctype.h instead.
+# The code in odbctype.c expects to be given SQLEXT_H_FILENAME
+print "\nChecking to see whether you have Informix-CLI (ODBC) installed.\n";
+@hdrs = ("qeodbc.h", "sqlext.h", "sql.h");
+@dirs = ("cli/include", "incl", "incl/esql", "odbc/include");
+$fcnt = 0;
+foreach $hdr (@hdrs)
+{
+	foreach $dir (@dirs)
+	{
+		$name = "$ID/$dir/$hdr";
+		if (-r $name)
+		{
+			$fcnt++;
+			$subd{$hdr} = $dir;
+			print "\tFound $name\n";
+			last;
+		}
+	}
+}
+if ($fcnt == @hdrs)
+{
+	print "You've got Informix-CLI or equivalent ODBC software installed.\n";
+	print "$opts{NAME} will use the headers @hdrs.\n";
+	$opts{INC} = "-I$ID/$subd{$hdrs[0]}";
+	$incd{$subd{$hdrs[0]}} = 1;
+	for ($i = 1; $i < @hdrs; $i++)
+	{
+		if ($subd{$hdrs[0]} ne $subd{$hdrs[$i]})
+		{
+			print "...That's odd; $hdrs[0] is in a different";
+			print " directory from $hdrs[$i]\n";
+			unless ($incd{$subd{$hdrs[$i]}})
+			{
+				$opts{INC} .= " -I$ID/$subd{$hdrs[$i]}";
+				$incd{$subd{$hdrs[$i]}} = 1;
+			}
+		}
+	}
+	$inst_odbc = 1;
+}
+else
+{
+	print "You don't seem to have the Informix-CLI software installed.\n";
+	print "Never mind; I'll use the home-brew header odbctype.h instead.\n";
+	$inst_odbc = 0;
+	$opts{INC} = " ";
+}
+print "\n";
+
 # The ESQL/C script does not handle options with spaces and quotes, dammit!
 # Hence, create $versionfile to contain ESQLC_VERSION_STRING.
+# Also use it to decide whether ODBC is available or not.
 {
 $versionfile = "esqlvrsn.h";
 unlink $versionfile;
 die "Unable to open $versionfile for writing\n"
 	unless open(VERSION, ">$versionfile");
 print VERSION "#define ESQLC_VERSION_STRING \"$infversion\"\n";
+if (defined $inst_odbc)
+{
+	print VERSION "#ifndef USE_INSTALLED_ODBC\n";
+	print VERSION "#define USE_INSTALLED_ODBC $inst_odbc\n";
+	print VERSION "#endif /* USE_INSTALLED_ODBC */\n";
+}
 close VERSION;
 }
 
@@ -191,7 +244,9 @@ $opts{DEFINE} .= ' -Wall -pedantic -Wno-comment'
 $opts{DEFINE} .= ' -Xa'
 	if $Config{cc} eq 'clcc';
 
-# You might want to add -Aa on HP-UX.
+# We need to add -Ae on HP-UX to ensure that prototypes are accepted.
+$opts{DEFINE} .= " -Ae"
+	if $Config{osname} eq "hpux" and $Config{ccflags} !~ /-A[ea]/;
 
 # Extra definitions under Alpha cc to get __STDC__ defined
 $opts{DEFINE} .= ' -std1'
@@ -233,7 +288,8 @@ else
 	print "Don't you need to upgrade your compiler?\n";
 }
 
-$objects = "Informix.o sqltype.o ixblob.o decsci.o dbdimp.o dbdattr.o link.o $vercode.o";
+$objects = "Informix.o dbdimp.o dbdattr.o";
+$objects .= " sqltype.o ixblob.o decsci.o odbctype.o link.o $vercode.o";
 
 # Need to pick up the DBI headers.
 # NB: If using ESQL/C 4.xy, use -I$ID/incl, not -I$ID/incl/esql!
@@ -241,11 +297,10 @@ $objects = "Informix.o sqltype.o ixblob.o decsci.o dbdimp.o dbdattr.o link.o $ve
 # With DBI-0.77 and up, DBIXS.h is in an auto sub-directory.
 
 $INC1 = "-I$ID/incl/esql";
-$INC2 = "-I$Config{archlib}/DBI";
 $inc_pad = "/auto" if ($DBI::VERSION >= 0.77);
-$INC3 = "-I$Config{sitearch}$inc_pad/DBI";
+$INC2 = "-I\$(INSTALLSITEARCH)$inc_pad/DBI";
 
-$opts{INC} = "$INC1 $INC2 $INC3";
+$opts{INC} .= " $INC1 $INC2";
 $opts{OBJECT} = $objects;
 
 ###########################################################################
@@ -254,9 +309,10 @@ $opts{OBJECT} = $objects;
 #     with anything that needs a Perl header.
 print "Testing whether your Informix test environment will work...\n";
 die "Failed to compile basic test program esqltest" unless
-	((system "$esql -c $opts{DEFINE} esqltest.ec") == 0 &&
-	 (system "$esql -c $opts{DEFINE} $vercode.ec") == 0 &&
-	 (system "$esql -o esqltest esqltest.o $vercode.o") == 0);
+	((system "$esql -c $Config{ccflags} $opts{DEFINE} esqltest.ec") == 0 &&
+	 (system "$esql -c $Config{ccflags} $opts{DEFINE} $vercode.ec") == 0 &&
+	 (system "$esql -o esqltest esqltest.o $vercode.o") == 0 &&
+	 (system "rm -f esqltest.o esqltest.c") == 0);
 if ((system "./esqltest") != 0)
 {
 	die "You do not have enough permissions in your Informix environment.\n";
@@ -304,10 +360,18 @@ if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 		my $libs = `esql -libs` || die "Couldn't execute 'esql -libs'";
 		$libs =~ s/\n/ /gm;
 		$libs =~ s/-threads// if ($Config{osname} eq 'dec_osf');
-		$libs .= " $ID/lib/esql/checkapi.o" if (-f "$ID/lib/esql/checkapi.o");
+		# On 722 on the DEC, including checkAPI twice dies.
+		# Linking it once gives an undefined.  So we link once and
+		# export. -- AWH et al. 4/18/97
+		# Andrew Hunt (andy@toolshed.com)
+		$libs .= " $ID/lib/esql/checkapi.o"
+			if (-f "$ID/lib/esql/checkapi.o") &&
+				!($vernum >= 722 && $Config{osname} eq 'dec_osf');
 		# Override default version of $opts{LD}
 		$opts{dynamic_lib} = { OTHERLDFLAGS => "-L$ID/lib -L$ID/lib/esql $libs"};
 		$opts{LD} = "$Config{ld} \$(LDDLFLAGS)";
+		$opts{LD} .= " -exported_symbol ifx_checkAPI"
+			if ($vernum >= 722 && $Config{osname} eq 'dec_osf');
 	}
 	else
 	{
@@ -354,6 +418,10 @@ print "\nSee README notes about SPARCompiler on Solaris\n"
 	if ($Config{osname} eq 'solaris' and &which($Config{cc}) =~ m%/SUNWspro/%);
 print "\n";
 
+# Probably cause for being thrown out of The Perl Institute, but TMTOWTDI!
+system "perl t/dtgen.pl > t/dtgen.sql";
+system "perl t/decgen.pl > t/decgen.sql";
+
 WriteMakefile(%opts, dist => { COMPRESS => 'gzip', SUFFIX => 'gz' });
 
 # Define a postamble for the makefile which briefs MAKE on how to compile
@@ -386,24 +454,6 @@ MAP_LINKCMD = $(ESQL_CC)
 .ec.o:
 	$(ESQL_CC) -c $(ESQLFLAGS) $*.ec
 	$(RM_F) $*.c
-
-# Dependency and rebuild rule for Informix.pm.
-# It is entirely negotiable whether this approach to handling version
-# information is a good idea -- I am not convinced, but I am not sure
-# how else to get the information I want into the the system.
-#
-# This rule is cribbed from the MakeMaker makefile section.
-#
-# We take a very conservative approach here, but it is worth it.
-# We move Makefile to Makefile.old here to avoid gnu make looping.
-Informix.pm : Informix.PM Makefile.PL $(CONFIGDEP)
-	@echo "$@ is out-of-date with respect to $?"
-	@echo "Cleaning current config before rebuilding $@..."
-	-@mv Makefile Makefile.old
-	-$(MAKE) -f Makefile.old clean >/dev/null 2>&1 || true
-	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL 
-	@echo ">>> Your Makefile and Informix.pm have been rebuilt. <<<"
-	@echo ">>>          Please rerun the make command.          <<<"; false
 '
 }
 

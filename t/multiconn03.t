@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)multiconn03.t	53.1 97/03/06 20:37:34
+#	@(#)multiconn03.t	54.4 97/05/13 15:38:08
 #
 #	Test abuse of statements after DISCONNECT ALL for DBD::Informix
 #
@@ -11,7 +11,7 @@ use DBD::InformixTest;
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);
 $dbase2 = $ENV{DBD_INFORMIX_DATABASE2};
-$dbase2 = "stores" unless ($dbase2);
+$dbase2 = $dbase1 unless ($dbase2);
 
 # Test install...
 &stmt_note("# Testing: DBI->install_driver('Informix')\n");
@@ -20,12 +20,12 @@ $drh = DBI->install_driver('Informix');
 print "# Driver Information\n";
 print "#     Name:                  $drh->{Name}\n";
 print "#     Version:               $drh->{Version}\n";
-print "#     Product:               $drh->{ProductName}\n";
-print "#     Product Version:       $drh->{ProductVersion}\n";
-print "#     Multiple Connections:  $drh->{MultipleConnections}\n";
+print "#     Product:               $drh->{ix_ProductName}\n";
+print "#     Product Version:       $drh->{ix_ProductVersion}\n";
+print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
 print "# \n";
 
-if ($drh->{MultipleConnections} == 0)
+if ($drh->{ix_MultipleConnections} == 0)
 {
 	&stmt_note("1..1\n");
 	&stmt_note("# Multiple connections are not supported\n");
@@ -36,6 +36,7 @@ if ($drh->{MultipleConnections} == 0)
 &stmt_note("1..13\n");
 &stmt_ok();
 
+&stmt_note("# Connect to: $dbase1\n");
 &stmt_fail() unless ($dbh1 = $drh->connect($dbase1));
 &stmt_ok();
 
@@ -47,8 +48,12 @@ print "#     Logged Database:         $dbh1->{ix_LoggedDatabase}\n";
 print "#     Mode ANSI Database:      $dbh1->{ix_ModeAnsiDatabase}\n";
 print "#     AutoErrorReport:         $dbh1->{ix_AutoErrorReport}\n";
 print "#     Transaction Active:      $dbh1->{ix_InTransaction}\n";
+print "# Connection Information\n";
+print "#     Active Connections:      $drh->{ix_ActiveConnections}\n";
+print "#     Current Connection:      $drh->{ix_CurrentConnection}\n";
 print "#\n";
 
+&stmt_note("# Connect to: $dbase2\n");
 &stmt_fail() unless ($dbh2 = $drh->connect($dbase2));
 &stmt_ok();
 
@@ -60,6 +65,9 @@ print "#     Logged Database:         $dbh2->{ix_LoggedDatabase}\n";
 print "#     Mode ANSI Database:      $dbh2->{ix_ModeAnsiDatabase}\n";
 print "#     AutoErrorReport:         $dbh2->{ix_AutoErrorReport}\n";
 print "#     Transaction Active:      $dbh2->{ix_InTransaction}\n";
+print "# Connection Information\n";
+print "#     Active Connections:      $drh->{ix_ActiveConnections}\n";
+print "#     Current Connection:      $drh->{ix_CurrentConnection}\n";
 print "#\n";
 
 $stmt1 =
@@ -95,6 +103,10 @@ LOOP: while (1)
 &stmt_note("# Test DISCONNECT ALL.\n");
 &stmt_fail() unless ($drh->disconnect_all);
 &stmt_ok();
+
+print "# Connection Information\n";
+print "#     Active Connections:      $drh->{ix_ActiveConnections}\n";
+print "#     Current Connection:      $drh->{ix_CurrentConnection}\n";
 
 # Turn off automatic error reporting...
 $dbh1->{ix_AutoErrorReport} = 0;

@@ -1,0 +1,2304 @@
+::::::::::::::
+:: Announce ::
+::::::::::::::
+
+54.1 97/05/16 10:26:45 johnl 00050/00006/00018
+Update for version 0.54 release
+
+1.2 97/04/18 13:02:42 johnl 00001/00001/00023
+Add Alligator to the addressee list
+
+1.1 97/03/19 10:07:26 johnl 00024/00000/00000
+date and time created 97/03/19 10:07:26 by johnl
+
+:::::::::::::::
+:: ChangeLog ::
+:::::::::::::::
+
+54.6 97/05/16 10:06:16 johnl 00015/00003/00262
+Final changes for 0.54 release (bar any problems when testing)
+
+54.5 97/05/14 17:27:59 johnl 00006/00000/00259
+More changes recorded
+
+54.4 97/04/24 20:24:06 johnl 00207/00199/00052
+Reverse the order of changes so that newest are at top.
+Rewrite dates in 97-04-24 format throughout.
+
+54.3 97/04/24 20:06:09 johnl 00002/00000/00249
+Add a change
+
+54.2 97/04/18 13:01:53 johnl 00010/00009/00239
+Upgrades
+
+54.1 97/04/08 18:59:36 johnl 00048/00041/00200
+Upgrades, misc
+
+53.2 97/03/17 18:50:19 johnl 00012/00001/00229
+Release 0.53
+
+53.1 97/03/06 20:42:04 johnl 00010/00000/00220
+Today's changes
+
+52.3 97/03/05 15:47:01 johnl 00004/00001/00216
+Remove stray tabs.  Add a new note
+
+52.2 97/03/02 12:59:37 johnl 00007/00005/00210
+Add notes about splitting dbdimp.ec into dbdattr.ec etc
+
+52.1 97/02/28 18:58:03 johnl 00009/00000/00206
+Today's changes logged
+
+51.2 97/02/26 12:08:36 johnl 00001/00000/00205
+And another change
+
+51.1 97/02/26 10:18:33 johnl 00010/00001/00195
+More changes noted
+
+50.3 97/02/13 12:52:17 johnl 00010/00000/00186
+Upgrade to version 0.50, etc.
+
+50.2 97/01/23 16:24:46 johnl 00005/00000/00181
+Add notes about updated InformixTest.pm.
+
+50.1 97/01/12 17:54:42 johnl 00006/00000/00175
+Bump version to 50
+
+26.4 97/01/12 17:06:54 johnl 00002/00000/00173
+More notes
+
+26.3 97/01/09 10:01:19 johnl 00001/00001/00172
+Add note about bug-fix in decsci.c
+
+26.2 97/01/09 09:37:33 johnl 00003/00000/00170
+Add notes about recent changes
+
+26.1 96/12/20 14:56:27 johnl 00012/00001/00158
+More notes about what changed
+
+25.8 96/12/18 19:14:55 johnl 00023/00001/00136
+Note that release 0.26 started
+
+25.7 96/12/09 20:30:20 johnl 00010/00000/00127
+Add the names of the 0.25 testing team
+
+25.6 96/12/09 20:18:01 johnl 00005/00002/00122
+Note DECIMAL handling changes
+
+25.5 96/12/09 16:19:02 johnl 00015/00000/00109
+More comments on more fixes
+
+25.4 96/12/04 15:23:31 johnl 00013/00000/00096
+A couple of days worth of changes
+
+25.3 96/12/02 10:20:10 johnl 00034/00015/00062
+Add notes about changes
+
+25.2 96/11/26 12:58:51 johnl 00039/00035/00038
+Detab.  Add some (paltry) notes about the 0.25 changes.
+
+25.1 96/11/19 18:01:40 johnl 00015/00000/00058
+Initial changes -- more to do
+
+1.1 96/11/05 14:07:20 johnl 00058/00000/00000
+date and time created 96/11/05 14:07:20 by johnl
+
+::::::::::::::::::::::
+:: Informix.Licence ::
+::::::::::::::::::::::
+
+54.2 97/05/16 09:08:18 johnl 00128/00058/00088
+Another major clarification.
+Thanks to Honza Pazdziora (adelton@fi.muni.cz) for the input leading
+to the recent changes.
+
+54.1 97/05/15 10:08:22 johnl 00063/00023/00083
+Clarify even more explicitly what is needed to use DBD::Informix
+
+53.4 97/03/17 17:20:36 johnl 00023/00008/00083
+Upgrade LiveWire Pro restrictions, thanks to John Quist (jquist@informix.com)
+
+53.3 97/03/17 11:10:18 johnl 00002/00002/00089
+Correct the syntax
+
+53.2 97/03/17 11:07:22 johnl 00012/00004/00079
+Update info on LiveWire Pro
+
+53.1 97/03/06 19:29:40 johnl 00003/00001/00080
+Move the offer to co-develop 4.1x ESQL/C code into this file
+
+52.1 97/02/28 16:54:22 johnl 00081/00000/00000
+Create initial version of information
+
+1.1 97/02/28 15:19:02 johnl 00000/00000/00000
+date and time created 97/02/28 15:19:02 by johnl
+
+::::::::::::::::
+:: Informix.h ::
+::::::::::::::::
+
+50.1 97/01/12 17:54:43 johnl 00000/00000/00023
+Bump version to 50
+
+26.1 97/01/06 13:12:54 johnl 00001/00001/00022
+Update copyright dates
+
+25.3 96/11/26 12:49:36 johnl 00002/00001/00021
+Use esqlvrsn.h to relay ESQLC_VERSION_STRING
+
+25.2 96/11/23 19:45:47 johnl 00002/00000/00020
+Include esqlc.h and esqlperl.h
+
+25.1 96/11/13 20:21:57 johnl 00016/00009/00004
+Clean up
+
+1.1 96/11/05 14:07:23 johnl 00013/00000/00000
+date and time created 96/11/05 14:07:23 by johnl
+
+:::::::::::::::::
+:: Informix.pm ::
+:::::::::::::::::
+
+54.3 97/05/14 17:26:37 johnl 00002/00002/00957
+Update to version 0.54; insist on DBI 0.81 for ChopBlanks support
+
+54.2 97/05/13 12:53:59 johnl 00015/00018/00944
+Sort out driver attributes
+
+54.1 97/03/31 17:36:12 johnl 00019/00042/00943
+Update the deprecation comments (and the notes which use
+deprecated features).
+
+53.2 97/03/10 19:52:48 johnl 00070/00036/00915
+Upgrade comments to encourage the use of DBI->connect
+
+53.1 97/03/06 19:30:36 johnl 00053/00038/00898
+Update commentary
+
+52.1 97/03/05 15:51:42 johnl 00102/00032/00834
+Add to and amend the POD
+
+51.1 97/02/26 12:06:10 johnl 00090/00020/00776
+Update documentation on a variety of issues
+
+50.1 97/01/12 17:54:42 johnl 00000/00000/00796
+Bump version to 50
+
+26.3 97/01/09 09:20:58 johnl 00163/00156/00633
+Detab documentation and fix it up
+
+26.2 97/01/06 13:12:53 johnl 00001/00001/00788
+Update copyright dates
+
+26.1 96/12/19 15:11:55 johnl 00148/00005/00641
+Add notes on Transaction Management
+
+25.10 96/12/18 19:10:53 johnl 00028/00023/00618
+Revise the do() code, rename some functions, etc
+
+25.9 96/12/18 12:40:41 johnl 00010/00025/00631
+Make the MultipleConnection code work (at this level)
+
+25.8 96/12/09 16:17:55 johnl 00121/00086/00535
+Clarify various aspects of the 0.25 implementation
+
+25.7 96/11/30 15:14:25 johnl 00017/00017/00604
+Revise to use MultipleConnections instead of ConcurrentConnections
+
+25.6 96/11/26 17:33:59 johnl 00412/00003/00209
+Add a lot of documentation; more to go in
+
+25.5 96/11/25 19:32:10 johnl 00037/00033/00175
+Ready for v0.25b1
+
+25.4 96/11/19 17:56:33 johnl 00003/00001/00205
+Fix multiple connections for the time being
+
+25.3 96/11/19 11:33:39 johnl 00041/00013/00165
+Add better identification.
+Re-enable build of Informix.pm from (renamed) Informix.PM once more.
+Put in hooks for multiple concurrent connections, but they don't work
+for a variety of reasons.
+
+25.2 96/11/17 16:55:05 johnl 00035/00029/00143
+Minor upgrades
+
+25.1 96/11/14 18:23:47 johnl 00070/00065/00102
+Renamed to Informix.PM.  Edited by Makefile.PL to give Informix.pm
+
+1.2 96/11/05 18:09:22 johnl 00049/00005/00118
+Add elementary (hopelessly incomplete) documentation
+
+1.1 96/11/05 14:07:25 johnl 00123/00000/00000
+date and time created 96/11/05 14:07:25 by johnl
+
+:::::::::::::::::
+:: Informix.xs ::
+:::::::::::::::::
+
+54.2 97/05/14 17:21:54 johnl 00010/00015/00417
+dbd_??_FETCH_attrib and dbd_??_STORE_attrib made uniform
+with each other and with DBD-Oracle-0.44.  Some comments removed.
+
+54.1 97/05/13 11:39:00 johnl 00021/00016/00411
+Add DBD::Informix::dr::FETCH
+
+53.1 97/03/06 19:28:48 johnl 00002/00002/00425
+Rename two functions
+
+52.2 97/03/02 12:57:42 johnl 00002/00002/00425
+Revise interface to dbd_st_{FETCH|STORE}_atrib
+
+52.1 97/02/28 18:52:46 johnl 00007/00015/00420
+Rename dbd_xx_{FETCH|STORE}.  Fix attribute caching.
+
+50.1 97/01/12 17:54:44 johnl 00000/00000/00435
+Bump version to 50
+
+26.1 97/01/06 13:12:55 johnl 00001/00001/00434
+Update copyright dates
+
+25.9 96/12/18 19:06:34 johnl 00119/00085/00316
+Revise interfaces into dbdimp.ec, using fewer SV pointers
+
+25.8 96/11/25 20:12:20 johnl 00006/00000/00395
+Embed version information in executable
+
+25.7 96/11/25 19:34:40 johnl 00014/00001/00381
+Add driver_init and immediate functions
+
+25.6 96/11/23 17:25:36 johnl 00001/00001/00381
+Fix basic EXECUTE problems
+
+25.5 96/11/22 17:50:05 johnl 00022/00018/00360
+Nearly got execute with bind working
+
+25.4 96/11/19 18:02:25 johnl 00010/00007/00368
+Minor reformatting
+
+25.3 96/11/19 11:55:00 johnl 00258/00229/00117
+Reindent etc.  Disable bind_param routines
+
+25.2 96/11/13 20:36:40 johnl 00005/00005/00341
+Rename dbd_bind_ph() to dbd_st_bind_ph() and dbd_describe()
+to dbd_st_describe()
+
+25.1 96/11/13 20:23:58 johnl 00115/00115/00231
+Mimic DBD::Oracle v0.43 except for _ListDBs
+
+1.4 96/11/13 19:19:24 johnl 00002/00007/00344
+Removed some more code
+
+1.3 96/11/07 19:21:35 johnl 00003/00013/00348
+Some changes and cleanup; working
+
+1.2 96/11/05 18:10:17 johnl 00033/00025/00328
+Revise mildly -- mainly administrative
+
+1.1 96/11/05 14:07:27 johnl 00353/00000/00000
+date and time created 96/11/05 14:07:27 by johnl
+
+:::::::::::::::::::::
+:: InformixTest.pm ::
+:::::::::::::::::::::
+
+54.4 97/05/14 17:24:46 johnl 00003/00000/00351
+Set ChopBlanks for old test cases
+
+54.3 97/05/14 10:05:41 johnl 00003/00001/00348
+Demonstrate DBI::state at work
+
+54.2 97/04/01 16:30:26 johnl 00000/00001/00349
+De-deprecate the code
+
+54.1 97/03/31 17:27:04 johnl 00005/00005/00345
+Evade deprecated warnings in this code
+
+52.1 97/02/28 18:54:20 johnl 00001/00000/00349
+Set ix_Deprecated to off
+
+50.2 97/01/23 16:25:45 johnl 00038/00020/00311
+Fix documentation section so that no single quotes
+start the comment lines.  Add section on stmt_err in documentation,
+and use it in the other test routines.
+
+50.1 97/01/12 17:54:45 johnl 00000/00000/00331
+Bump version to 50
+
+26.4 97/01/09 09:23:18 johnl 00003/00001/00328
+Improve handling of warnings
+
+26.3 97/01/06 18:02:34 johnl 00001/00001/00328
+Make correct function call
+
+26.2 97/01/06 13:12:56 johnl 00001/00001/00328
+Update copyright dates
+
+26.1 96/12/20 14:37:11 johnl 00077/00016/00252
+Add select_some_data and select_zero_data (not yet used)
+
+25.4 96/12/18 17:16:09 johnl 00006/00006/00262
+Change test_sqlca to print_sqlca
+
+25.3 96/12/05 16:58:44 johnl 00018/00005/00250
+Recognize slashes in dbname.  Annotate DBD_INFORMIX_*.
+
+25.2 96/12/04 14:48:26 johnl 00010/00008/00245
+Make output of test_sqlca() into comments
+
+25.1 96/12/03 20:55:44 johnl 00035/00051/00218
+Upgrade; export everything, notwithstanding the exhortations to the contrary
+
+1.1 96/12/03 19:46:27 johnl 00269/00000/00000
+date and time created 96/12/03 19:46:27 by johnl
+
+::::::::::::::
+:: MANIFEST ::
+::::::::::::::
+
+54.3 97/05/16 10:14:09 johnl 00005/00003/00057
+Final revisions for 0.54 release, barring any unexpected problems
+
+54.2 97/05/15 17:56:19 johnl 00025/00020/00035
+Updated (with one predictive version for sqlcmd.pm)
+
+54.1 97/04/18 13:03:43 johnl 00019/00014/00036
+Know to work; prior to reorganization and renaming Informix.pm
+
+53.2 97/03/17 19:09:29 johnl 00001/00001/00049
+After bug fix in testing (thank goodness for the tests!)
+
+53.1 97/03/17 18:52:23 johnl 00031/00029/00019
+Update for 0.53 release
+
+52.2 97/03/05 15:54:35 johnl 00009/00007/00039
+Release for 0.52 (pre-testing)
+
+52.1 97/02/28 18:58:49 johnl 00010/00009/00036
+Add Informix.Licence document and update changes so far
+
+51.1 97/02/26 12:15:29 johnl 00026/00024/00019
+Updated for 0.51 release
+
+50.2 97/02/13 16:03:58 johnl 00014/00013/00029
+First automatically generated MANIFEST
+
+50.1 97/01/12 17:54:45 johnl 00034/00033/00008
+Bump version to 50
+
+26.3 96/12/20 15:20:27 johnl 00001/00001/00040
+Fix README
+
+26.2 96/12/20 15:15:49 johnl 00006/00000/00035
+Add the transaction and multi-connection tests
+
+26.1 96/12/20 15:06:12 johnl 00019/00018/00016
+Updated for 0.26a1
+
+25.8 96/12/09 21:04:04 johnl 00005/00005/00029
+Final update for 0.25
+
+25.7 96/12/09 20:20:45 johnl 00006/00004/00028
+Upgrade to 0.25
+
+25.6 96/12/09 16:27:21 johnl 00011/00010/00021
+Changes for 0.25b5
+
+25.5 96/12/04 15:32:21 johnl 00014/00011/00017
+Update for 0.25b4
+
+25.4 96/12/02 10:25:35 johnl 00028/00025/00000
+Add SCCS version numbers to all files
+
+25.3 96/11/25 20:10:02 johnl 00000/00001/00025
+Remove esqlutil.h
+
+25.2 96/11/23 19:45:15 johnl 00003/00001/00023
+Update
+
+25.1 96/11/19 11:11:31 johnl 00010/00002/00014
+After various additions
+
+1.2 96/11/05 18:13:02 johnl 00000/00001/00016
+Drop Informix.bs -- its an empty file
+
+1.1 96/11/05 14:07:28 johnl 00017/00000/00000
+date and time created 96/11/05 14:07:28 by johnl
+
+:::::::::::::::::
+:: Makefile.PL ::
+:::::::::::::::::
+
+54.7 97/05/14 17:25:18 johnl 00005/00005/00459
+Need DBI 0.81 because of ChopBlanks
+
+54.6 97/05/13 15:49:08 johnl 00025/00053/00439
+Simplify to use VERSION_FROM, etc
+
+54.5 97/04/28 10:35:07 johnl 00017/00002/00475
+Incorporating changes from Andy Hunt (and@toolshed.com)
+for DEC OSF/1 and 7.22 ESQL/C
+
+54.4 97/04/18 12:59:03 johnl 00004/00004/00473
+Minor revision prior to reorganizing Informix.PM into Informix.pm, etc.
+
+54.3 97/04/08 18:59:38 johnl 00005/00003/00472
+Upgrades, misc
+
+54.2 97/04/01 16:24:37 johnl 00032/00017/00443
+Test for CLI/ODBC installation properly
+
+54.1 97/03/31 17:26:15 johnl 00052/00006/00408
+Add support for CLI headers (sqlext.h and sql.h).
+Generate t/decgen.sql and t/dtgen.sql.  Upgrade DBIXS.h handling.
+
+53.3 97/03/17 18:49:48 johnl 00001/00001/00413
+Set version to release
+
+53.2 97/03/12 12:40:44 johnl 00019/00007/00395
+Upgrade notes and information for __STDC__
+
+53.1 97/03/06 19:34:32 johnl 00034/00028/00368
+Update version (to 0.53a1).
+Insist that $INFORMIXDIR is set and $INFORMIXDIR/bin is on $PATH.
+Test whether testing might work before writing Makefile.
+
+52.3 97/03/05 15:45:05 johnl 00008/00001/00388
+Handle DBI-0.77 and the relocated DBIXS.h file.
+
+52.2 97/03/02 12:56:18 johnl 00001/00001/00388
+Add dbdattr.o to the files list
+
+52.1 97/02/28 18:53:44 johnl 00002/00002/00387
+Bump version.  Search /home/informix too.
+
+51.2 97/02/26 12:14:47 johnl 00001/00001/00388
+Configure distribution to use gzip
+
+51.1 97/02/26 10:17:57 johnl 00001/00001/00388
+Upgrade version number
+
+50.2 97/02/13 12:51:57 johnl 00001/00001/00388
+Upgrade to version 0.50
+
+50.1 97/01/12 17:54:46 johnl 00001/00001/00388
+Bump version to 50
+
+26.3 97/01/06 18:11:57 johnl 00001/00001/00388
+Upgrade to version 0.26a2
+
+26.2 97/01/06 13:12:57 johnl 00001/00001/00388
+Update copyright dates
+
+26.1 96/12/20 14:23:13 johnl 00004/00008/00385
+Bump version number to 0.26a1
+
+25.23 96/12/18 19:13:46 johnl 00005/00001/00388
+Note when Informix.pm is written.  Add link.o
+
+25.22 96/12/18 12:41:15 johnl 00002/00002/00387
+Fix bug in __H_LOCALEDEF and bump version to 0.25p3
+
+25.21 96/12/13 09:34:10 johnl 00016/00012/00373
+Add the AIX patch (0.25p2)
+
+25.20 96/12/09 20:20:08 johnl 00001/00001/00384
+Upgrade to 0.25!  Hooray
+
+25.19 96/12/09 20:19:03 johnl 00001/00001/00384
+Add decsci.o
+
+25.18 96/12/09 15:33:57 johnl 00001/00001/00384
+C comments do not work well in Perl scripts!
+
+25.17 96/12/09 15:18:21 johnl 00038/00023/00347
+Finally get DEC OSF laid to rest.
+Bump version to 0.25b5.  Revise version number testing.
+Enforce pre-requisite version numbers.
+Make sarcastic comments when compiler does not support prototypes!
+
+25.16 96/12/04 15:24:29 johnl 00003/00002/00367
+Use USE_PROTOTYPES in preference to the global __STDC__
+
+25.15 96/12/04 15:02:25 johnl 00008/00019/00361
+Simplify the detection of prototypes (Perl did it for us)
+
+25.14 96/12/04 13:18:21 johnl 00027/00003/00353
+Patched from changes supplied by Dave Thomas (Dave@Thomases.com)
+
+25.13 96/12/04 08:50:13 johnl 00050/00006/00306
+Integrate Dave Thomas's fixes for DEC OSF more directly
+
+25.12 96/12/02 10:12:05 johnl 00005/00001/00307
+Fix "make perl" too.
+
+25.11 96/12/01 15:39:43 johnl 00030/00013/00278
+Upgrade to fix most complaints from beta testers, I think
+
+25.10 96/11/30 18:05:10 johnl 00002/00002/00289
+Bump version to Beta3 (0.25b3).
+Set INFORMIXC on compile line as well as link line
+
+25.9 96/11/26 12:56:00 johnl 00001/00001/00290
+Update to 0.25b2
+
+25.8 96/11/26 12:50:48 johnl 00015/00004/00276
+Place ESQLC_VERSION_STRING in esqlvrsn.h.
+Refine GCC warning parameters.
+Refine object file list (avoid ${O_FILES})
+
+25.7 96/11/25 20:36:06 johnl 00008/00001/00272
+Fix the lines that set CC="cc -g" to read CC="${CC} -g"
+
+25.6 96/11/25 19:32:56 johnl 00019/00011/00254
+Upgrade version to 0.25b1.  Improve handling of Informix.PM
+
+25.5 96/11/23 19:43:41 johnl 00005/00003/00260
+Reinstate -I$ID/incl/esql.  Bump version (0.25a2)
+
+25.4 96/11/19 18:05:33 johnl 00020/00002/00243
+Add the Informix.pm: Informix.PM dependency stuff
+
+25.3 96/11/19 11:11:44 johnl 00125/00076/00120
+After major reworking
+
+25.2 96/11/17 16:56:02 johnl 00002/00001/00194
+Add .xs back into suffix list
+
+25.1 96/11/14 18:24:19 johnl 00060/00028/00135
+Create Informix.pm from Informix.PM
+
+1.3 96/11/05 19:50:19 johnl 00025/00001/00138
+Add a whole bunch of stuff to help with ESQL/C version 5.0x
+
+1.2 96/11/05 14:37:40 johnl 00062/00062/00077
+Major upgrade to ESQL/C version detection and tail-end
+of Makefile generation
+
+1.1 96/11/05 14:07:32 johnl 00139/00000/00000
+date and time created 96/11/05 14:07:32 by johnl
+
+::::::::::::
+:: README ::
+::::::::::::
+
+54.3 97/05/14 17:19:54 johnl 00025/00002/00276
+Minor upgrades
+
+54.2 97/04/17 09:45:41 johnl 00030/00026/00248
+New changes
+
+54.1 97/04/08 18:59:39 johnl 00018/00015/00256
+Upgrades, misc
+
+53.2 97/03/12 12:41:25 johnl 00002/00001/00269
+Mention __STDC__ in this file too.
+
+53.1 97/03/06 19:32:21 johnl 00044/00020/00226
+Make the pre-requesites clearer, and document the test
+
+52.1 97/02/28 18:55:09 johnl 00049/00024/00197
+Minor upgrades...
+
+50.2 97/01/24 09:17:03 johnl 00010/00003/00211
+Add note on LD_LIBRARY_PATH per a suggestion from Tim Bunce (tim@ig.co.uk).
+Thanks, Tim, for pointing out what should have been there anyway.
+
+50.1 97/01/12 17:54:48 johnl 00000/00000/00214
+Bump version to 50
+
+26.4 97/01/06 13:12:58 johnl 00001/00001/00213
+Update copyright dates
+
+26.3 96/12/20 15:19:41 johnl 00003/00007/00211
+Remove the comments about 5.0[01] ESQL/C
+
+26.2 96/12/20 14:01:43 johnl 00018/00001/00200
+Add comments about multiple databases to be used for testing
+
+26.1 96/12/19 11:05:14 johnl 00017/00000/00184
+Add instructions to install the software!
+Thanks to Wes Gamble (wgamble@informix.com) for pointing out this
+omission
+
+25.3 96/12/09 21:03:25 johnl 00056/00032/00128
+Add notes
+
+25.2 96/12/05 16:49:03 johnl 00092/00055/00068
+Rework it fairly extensively
+
+25.1 96/11/19 18:02:44 johnl 00024/00000/00099
+Initial changes
+
+1.2 96/11/13 19:25:13 johnl 00017/00018/00082
+Amended somewhat
+
+1.1 96/11/05 14:07:33 johnl 00100/00000/00000
+date and time created 96/11/05 14:07:33 by johnl
+
+::::::::::::::::::::::
+:: README.M88K.SVR4 ::
+::::::::::::::::::::::
+
+54.1 97/05/16 09:54:33 johnl 00065/00000/00000
+Incorporate information from Anibal Jodorcovsky (anibal@nortel.ca)
+
+1.1 97/05/16 09:50:41 johnl 00000/00000/00000
+date and time created 97/05/16 09:50:41 by johnl
+
+::::::::::::::::
+:: dbdattr.ec ::
+::::::::::::::::
+
+54.6 97/05/14 17:24:06 johnl 00011/00000/00586
+Add ChopBlanks attribute (at $dbh level)
+
+54.5 97/05/13 15:59:39 johnl 00004/00004/00582
+Insert necessary const_cast<char*> operations
+
+54.4 97/05/13 12:51:22 johnl 00098/00037/00488
+Got driver attributes working OK
+
+54.3 97/04/08 18:59:40 johnl 00007/00000/00518
+Upgrades, misc
+
+54.2 97/03/31 17:24:14 johnl 00014/00010/00504
+Update the deprecation handling.
+Use the ODBC type mapping functions.
+
+54.1 97/03/26 19:20:44 johnl 00004/00008/00510
+Update the deprecated feature handling
+
+53.1 97/03/06 16:35:31 johnl 00025/00003/00493
+Update the deprecated warning behaviour per the release notes.
+Add ix_ColType and ixColLength attributes.
+
+52.3 97/03/05 15:51:00 johnl 00015/00001/00481
+Rename ix_TypeName to ix_NativeTypeNames and add deprecated version of name.
+
+52.2 97/03/05 15:42:43 johnl 00003/00001/00479
+Do not deprecate by default in this release.
+
+52.1 97/03/02 12:54:46 johnl 00480/00000/00000
+Transfer attribute handling code from dbdimp.ec to dbdattr.ec
+Improve the attribute handling by using functions.
+
+1.1 97/03/02 12:02:54 johnl 00000/00000/00000
+date and time created 97/03/02 12:02:54 by johnl
+
+:::::::::::::::
+:: dbdimp.ec ::
+:::::::::::::::
+
+54.3 97/05/15 16:33:33 johnl 00054/00017/01373
+Fix VARCHAR (and CHAR) handling
+
+54.2 97/05/13 12:51:20 johnl 00020/00007/01370
+Got driver attributes working OK
+
+54.1 97/03/31 17:20:01 johnl 00026/00002/01351
+Add (unused) dbd_db_createprocfrom() function.
+Fix two old typos in strings.
+
+53.4 97/03/17 18:46:28 johnl 00027/00009/01326
+Fix the null problem found by Oyvind Gjerstad (ogj@tglobe1.tollpost.no)
+and now tested by t/nulls02.t
+
+53.3 97/03/06 20:41:18 johnl 00006/00006/01329
+Remove unused variable.  Use type-clean cleanup function
+dbd_db_destroyer.  Fix core dump on strcmp() with null pointer.
+Use explicit comparisons instead of implicit ones in dbd_db_connect.
+
+53.2 97/03/06 17:17:52 johnl 00004/00002/01331
+Handle DEFAULT_DATABASE centrally in dbdimp.ec
+
+53.1 97/03/06 16:30:50 johnl 00033/00012/01300
+Revise dbd_ix_setconnection() so that it can be used in esqltest.ec easily.
+Bulk of code renamed to dbd_db_setconnection() in dbdimp.ec.
+
+52.2 97/03/02 12:54:42 johnl 00038/00482/01274
+Transfer attribute handling code from dbdimp.ec to dbdattr.ec
+Improve the attribute handling by using functions.
+
+52.1 97/02/28 18:50:18 johnl 00200/00049/01556
+Add dbd_ix_deprecate and code using it, etc.
+Improve sqlca record handling.
+Fix cached value handling.
+
+51.1 97/02/26 10:11:12 johnl 00028/00012/01577
+Fix NULL handling.
+Add ConnectionName and CursorName attribute enquiries.
+
+50.2 97/02/13 12:51:30 johnl 00017/00016/01572
+Upgrade to handle null connections properly
+
+50.1 97/01/12 17:54:24 johnl 00041/00004/01547
+Bump version to 50.
+Start handling COMMIT WORK which is handled vi dbd_ix_exec.
+Note that it still needs to be handled for dbd_ix_immediate too.
+Also the other special statements
+
+26.7 97/01/12 16:19:57 johnl 00008/00001/01543
+Use cursors WITH HOLD when declaring cursors with
+MODE ANSI databases and AutoCommit = On
+
+26.6 97/01/12 15:51:28 johnl 00004/00000/01540
+Handle AutoCommit for MODE ANSI with EXECUTE IMMEDIATE too
+
+26.5 97/01/09 09:20:02 johnl 00009/00007/01531
+Add InTransaction query.  Only set ix_txactive = False
+in non-MODE ANSI databases
+
+26.4 97/01/06 18:06:23 johnl 00014/00003/01524
+Do rollback for MODE ANSI databases before disconnect.
+Warn that autocommit cannot be set on unlogged databases.
+
+26.3 97/01/06 13:12:59 johnl 00001/00001/01526
+Update copyright dates
+
+26.2 96/12/20 14:17:19 johnl 00043/00005/01484
+Mostly OK
+
+26.1 96/12/18 20:48:00 johnl 00041/00009/01448
+Multiple connections seems to be OK -- more analysis needed
+
+25.32 96/12/18 19:06:36 johnl 00113/00074/01344
+Revise interfaces into dbdimp.ec, using fewer SV pointers
+
+25.31 96/12/18 12:37:52 johnl 00041/00003/01377
+Basic connection management in place
+
+25.30 96/12/12 13:03:23 johnl 00000/00008/01380
+Fix obvious problems found by Langs Gerhard (glangs@mail.Austria.eu.net)
+
+25.29 96/12/10 13:41:55 johnl 00071/00003/01317
+After testing on SunOS 4.1.3 and ESQL/C 5.01.UC2, we have
+a workaround for the SQL DESCRIPTOR bug.
+
+25.28 96/12/09 20:55:35 johnl 00001/00001/01319
+Comment out decimal data warning
+
+25.27 96/12/09 20:15:29 johnl 00049/00007/01271
+Move FLOAT, SMALLFLOAT, DECIMAL and MONEY handling
+
+25.26 96/12/09 15:13:40 johnl 00027/00006/01251
+Use coltype in place of typecode consistently.
+Fix memory leak on DEALLOCATE DESCRIPTOR (blob handling, probably
+a ESQL/C bug).
+
+25.25 96/12/09 14:48:08 johnl 00014/00044/01243
+This seems to work (bar a memory leak on blobs)
+
+25.24 96/12/09 13:38:02 johnl 00006/00010/01281
+Previous version did not set loc_size and therefore inserted
+non-null, zero-length blobs.
+The saved blob array is unnecessary for INSERT operations,
+and is presumably unnecessary for SELECT too.
+
+25.23 96/12/09 13:31:15 johnl 00002/00001/01289
+This appears to work OK under multiple blobs handled
+by a single INSERT statement.  SELECT multiple blobs is broken.
+
+25.22 96/12/05 18:02:15 johnl 00085/00071/01205
+Rename nm_* in imp_sth.  Mostly fixed blobs, maybe.
+
+25.21 96/12/04 14:53:55 johnl 00001/00000/01275
+Oops.  How embarrassing.  I omitted SQLDATE from the
+switch in dbd_st_fetch().  Still, at least it told me it didn't
+know about it!
+
+25.20 96/12/02 10:16:41 johnl 00044/00005/01231
+Mark buggy code for handling INSERT and blobs
+
+25.19 96/11/30 18:00:47 johnl 00090/00057/01146
+Move sqlca from statement to connection (imp_sth --> imp_dbh)
+
+25.18 96/11/30 17:28:58 johnl 00086/00000/01117
+Revise blob handling -- seems to work on SELECT
+
+25.17 96/11/26 12:51:47 johnl 00012/00023/01105
+Remove some unused variables.
+Fix a printf-style call.  Set length on blobs in fetch code.
+
+25.16 96/11/25 20:09:37 johnl 00025/00023/01103
+Revise debug levels to 1.  Use dbd_ix_debug in dbd_ix_immediate().
+
+25.15 96/11/25 19:35:35 johnl 00044/00007/01082
+Add dbd_ix_immediate() and dbd_ix_driver() functions.
+Minor cleanup.
+
+25.14 96/11/25 14:05:23 johnl 00112/00029/00977
+Add statement-level access to sqlca record.
+Add autoreport flag and support via imp_dbh.
+
+25.13 96/11/23 19:41:55 johnl 00108/00029/00898
+Add various attributes (InformixOnLine, LoggedDatabase, ModeAnsiDatabase,
+AutoCommit, BlobLocation -> {InMemory, InFile, DummyValue, NullValue}).
+Add untested BlobLocation = InMemory support.
+
+25.12 96/11/23 17:25:35 johnl 00010/00009/00917
+Fix basic EXECUTE problems
+
+25.11 96/11/22 17:50:07 johnl 00100/00007/00826
+Nearly got execute with bind working
+
+25.10 96/11/19 18:07:05 johnl 00031/00014/00802
+Report ISAM errors too.  Note that error messages already
+end in new line.  Use more of dbd_ix_debug (and make it non-static)
+
+25.9 96/11/19 11:44:07 johnl 00010/00000/00806
+Initialize connection name
+
+25.8 96/11/19 10:47:26 johnl 00016/00078/00790
+Move the version-specific ESQL/C code into sub-files
+
+25.7 96/11/18 17:24:30 johnl 00014/00009/00854
+Minor tidying up
+
+25.6 96/11/17 16:51:12 johnl 00089/00368/00774
+Remove the Oracle-based choss.  Get dbd_st_fetch() working correctly,
+almost.  Memory leaks not verified.
+
+25.5 96/11/17 13:13:24 johnl 00096/00026/01046
+Yahoo!  One row returned OK by dbd_st_fetch.
+It returns a reference to an array, so use something like:
+
+$ref = $cursor->fetch;
+@row = @{$ref};
+
+Or, I guess, @row = @{$cursor->fetch};
+
+25.4 96/11/17 12:25:28 johnl 00172/00110/00900
+Now start work on upgrading the fetch code
+
+25.3 96/11/17 11:09:08 johnl 00009/00012/01001
+Making progress; always print error messages (at least for the time being).
+
+25.2 96/11/16 18:27:14 johnl 00104/00034/00909
+dbd_st_fetch() -- close, but no dice.
+The manual (7.20 ESQL/C) implies (p10-57) that the variable in a
+:variable = DATA clause of a GET DESCRIPTOR should match the type
+of the data being fetched.  Pity -- with SQLDA structures, you
+can get automatic type conversion.  Next checkin will revise this
+to use sqlda structures after all (with the automatic conversion).
+
+25.1 96/11/14 18:26:29 johnl 00050/00069/00893
+Add skeletal code for the new functions.
+Remove the database name creating code.
+
+1.15 96/11/07 21:03:37 johnl 00562/00487/00400
+Reformat, thank you.
+
+1.14 96/11/07 20:39:22 johnl 00033/00083/00854
+Another bout of code reduction -- tests pass
+
+1.13 96/11/07 20:07:41 johnl 00142/00648/00795
+Using variably named statements, descriptors and cursors.
+Test passes!
+
+1.12 96/11/07 19:21:36 johnl 00005/00026/01438
+Some changes and cleanup; working
+
+1.11 96/11/07 18:43:19 johnl 00003/00002/01461
+Get rid of type mismatch warnings
+
+1.10 96/11/07 18:35:18 johnl 00062/00065/01401
+Let the engine parse the statement -- not yet remotely efficient, but it works
+
+1.9 96/11/07 17:43:49 johnl 00025/00017/01441
+More minor changes -- next ones will be major
+
+1.8 96/11/07 17:02:19 johnl 00148/00163/01310
+Convert $ notation to EXEC SQL, and minor other changes
+
+1.7 96/11/06 13:24:35 johnl 00156/00027/01317
+Tests in test.pl@@1.3 pass with dbdimp.ec@@1.7
+
+1.6 96/11/06 13:17:47 johnl 00020/00015/01324
+Upgraded dbd_is_seterror() and tested OK
+
+1.5 96/11/06 13:12:27 johnl 00305/00603/01034
+Test in test.pl@@1.2 passes when compiled with dbdimp.ec@@1.5.
+The code in dbdimp.ec has unconditional diagnostics.
+The test is not as thorough as all that, but it does drop table testaa
+before trying to create it.
+Note that the array result has dimension 65536, but this value does
+not get stored accurately in the ESQL/C stuctures, so in effect, the
+value is zero.  This allows the tests to work, for a not clearly
+defined reason, but it is probably related to ESQL/C allocating space
+because the user did not.
+
+1.4 96/11/05 18:27:52 johnl 00151/00148/01486
+Convert $ notation to EXEC SQL
+
+1.3 96/11/05 18:14:54 johnl 00449/00272/01185
+Major upgrades.  Not working because of fetching on closed cursors
+
+1.2 96/11/05 14:36:51 johnl 00005/00001/01452
+Quick fixes to clean up most of compilation
+
+1.1 96/11/05 14:07:35 johnl 01453/00000/00000
+date and time created 96/11/05 14:07:35 by johnl
+
+::::::::::::::
+:: dbdimp.h ::
+::::::::::::::
+
+54.3 97/05/14 17:26:03 johnl 00011/00000/00124
+Add DBIc_ChopBlanks* macros
+
+54.2 97/05/13 11:31:59 johnl 00003/00002/00121
+Add driver FETCH_attrib function
+
+54.1 97/03/31 17:18:50 johnl 00026/00025/00097
+Remove support for compilers without prototypes
+
+53.3 97/03/06 20:40:00 johnl 00005/00001/00117
+Remove dbd_ix_debug().  Add the link.c function declarations.
+
+53.2 97/03/06 17:18:37 johnl 00002/00018/00116
+Move what is needed by esqltest.ec into esqlperl.h
+
+53.1 97/03/06 16:30:49 johnl 00001/00001/00133
+Revise dbd_ix_setconnection() so that it can be used in esqltest.ec easily.
+Bulk of code renamed to dbd_db_setconnection() in dbdimp.ec.
+
+52.2 97/03/02 12:57:04 johnl 00004/00002/00130
+Add dbd_ix_module() and revise interface to dbd_st_{FETCH|STORE}_atrib
+
+52.1 97/02/28 18:51:59 johnl 00005/00006/00127
+Remove dbd_ix_sqlcode().  Rename dbd_xx_{FETCH|STORE}.
+
+51.1 97/02/26 12:08:08 johnl 00001/00000/00132
+Define name for explicit default connection
+
+50.2 97/02/13 12:51:33 johnl 00002/00002/00130
+Upgrade to handle null connections properly
+
+50.1 97/01/12 17:54:49 johnl 00000/00000/00132
+Bump version to 50
+
+26.2 97/01/06 13:13:02 johnl 00002/00002/00130
+Update copyright dates
+
+26.1 96/12/20 14:18:02 johnl 00006/00005/00126
+Add is_txactive element to database handle
+
+25.16 96/12/18 19:06:35 johnl 00035/00018/00096
+Revise interfaces into dbdimp.ec, using fewer SV pointers
+
+25.15 96/12/18 11:22:24 johnl 00001/00001/00113
+Change interface on dbd_ix_setconnection() to take
+dbh instead of sth
+
+25.14 96/12/09 14:48:25 johnl 00000/00001/00114
+No need for the wretched array of blobs!
+
+25.13 96/12/05 17:56:15 johnl 00007/00007/00108
+Change type of "blobs" array.  Tidy names.
+
+25.12 96/11/30 18:00:46 johnl 00003/00002/00112
+Move sqlca from statement to connection (imp_sth --> imp_dbh)
+
+25.11 96/11/30 17:36:28 johnl 00002/00000/00112
+Blobs in SELECT OK
+
+25.10 96/11/26 12:52:16 johnl 00000/00003/00112
+Do not declare dbd_errnum and dbd_errstr
+
+25.9 96/11/26 11:56:03 johnl 00005/00005/00110
+Move typedef of enum after definition of enum
+
+25.8 96/11/25 19:35:55 johnl 00002/00000/00113
+Add dbd_ix_immediate() and dbd_ix_driver() functions.
+
+25.7 96/11/25 14:05:24 johnl 00004/00001/00109
+Add statement-level access to sqlca record.
+Add autoreport flag and support via imp_dbh.
+
+25.6 96/11/23 19:42:45 johnl 00012/00003/00098
+Redefine Boolean.  Add blob binding and autocommit info.
+
+25.5 96/11/22 17:50:08 johnl 00016/00011/00085
+Nearly got execute with bind working
+
+25.4 96/11/19 18:14:31 johnl 00044/00071/00052
+Reformat and remove final Oracleisms
+
+25.3 96/11/19 10:47:27 johnl 00008/00000/00115
+Move the version-specific ESQL/C code into sub-files
+
+25.2 96/11/17 16:51:14 johnl 00012/00063/00103
+Remove the Oracle-based choss.  Get dbd_st_fetch() working correctly,
+almost.  Memory leaks not verified.
+
+25.1 96/11/13 20:33:18 johnl 00017/00008/00149
+Upgrade to match DBD::Oracle v0.43
+
+1.7 96/11/07 21:03:39 johnl 00000/00000/00157
+Reformat, thank you.
+
+1.6 96/11/07 20:39:21 johnl 00004/00015/00153
+Another bout of code reduction -- tests pass
+
+1.5 96/11/07 20:07:40 johnl 00016/00025/00152
+Using variably named statements, descriptors and cursors.
+Test passes!
+
+1.4 96/11/07 19:21:38 johnl 00012/00033/00165
+Some changes and cleanup; working
+
+1.3 96/11/07 18:43:21 johnl 00001/00002/00197
+Get rid of type mismatch warnings
+
+1.2 96/11/05 18:13:30 johnl 00031/00018/00168
+Partial upgrade
+
+1.1 96/11/05 14:07:37 johnl 00186/00000/00000
+date and time created 96/11/05 14:07:37 by johnl
+
+::::::::::::::
+:: decsci.c ::
+::::::::::::::
+
+1.9 96/12/20 11:51:11 johnl 00001/00001/00296
+Fix an embarrassing off-by-one bug in the exponent
+calculation (amounting to an off-by-10 error in the values produced).
+Been in the code since version 1.4 (1993!), but the test code
+showed that there was a problem -- results never got rechecked
+properly.
+
+1.8 96/12/09 18:33:49 johnl 00007/00018/00290
+Use decsci.h.  Convert to ANSI C
+
+1.7 93/05/16 20:30:47 jl 00001/00003/00307
+Use #include "esqlc.h" in place of two spare includes
+and #include <esqlc.h> -- it works better with cmkmake
+
+1.6 93/05/16 19:43:11 jl 00003/00004/00307
+Use esqlc.h to declare functions.  Fix bug in call
+to deccmp.  Compiles clean under gcc -Wall.
+
+1.5 92/05/28 23:02:34 jl 00048/00027/00263
+Handle nulls.  Improve engineering and scientific notation
+
+1.4 92/05/27 23:23:20 jl 00041/00025/00249
+Make exponent a fixed size.  Reformat.
+
+1.3 91/05/09 14:44:17 johnl 00001/00001/00273
+Revise comment in heading
+
+1.2 91/03/20 11:52:03 johnl 00076/00003/00198
+Add decfix
+
+1.1 91/03/20 10:33:03 johnl 00201/00000/00000
+date and time created 91/03/20 10:33:03 by johnl
+
+::::::::::::::
+:: decsci.h ::
+::::::::::::::
+
+1.2 97/05/05 17:05:01 johnl 00007/00002/00027
+Upgrade to ANSI C and use decsci.h
+
+1.1 96/12/09 18:35:52 johnl 00029/00000/00000
+date and time created 96/12/09 18:35:52 by johnl
+
+::::::::::::::::
+:: esql4_00.h ::
+::::::::::::::::
+
+1.6 97/01/28 19:28:26 johnl 00001/00009/00044
+Update to full ANSI C
+
+1.5 96/11/26 11:52:31 johnl 00002/00002/00051
+Upgrade to static const char file_h[].
+Refix the sqgetdbs() prototype for 6.0x and later
+
+1.4 95/12/12 17:52:21 johnl 00008/00140/00045
+Fix copyright notices
+
+1.3 95/12/12 17:33:02 johnl 00008/00000/00177
+Upgraded after tests with esql++
+
+1.2 93/05/16 08:51:05 jl 00023/00023/00154
+Under advice from GCC -Wall, revised prototypes
+
+1.1 92/05/09 16:41:34 jl 00177/00000/00000
+date and time created 92/05/09 16:41:34 by jl
+
+::::::::::::::::
+:: esql4_10.h ::
+::::::::::::::::
+
+1.7 97/01/28 19:28:26 johnl 00001/00038/00145
+Update to full ANSI C
+
+1.6 96/12/20 11:48:17 johnl 00003/00000/00180
+Compilers complain about introducing struct value
+in prototypes, so pre-declare it
+
+1.5 96/11/26 11:52:32 johnl 00002/00002/00178
+Upgrade to static const char file_h[].
+Refix the sqgetdbs() prototype for 6.0x and later
+
+1.4 95/12/12 17:52:22 johnl 00007/00007/00173
+Fix copyright notices
+
+1.3 95/12/12 17:33:03 johnl 00008/00000/00172
+Upgraded after tests with esql++
+
+1.2 93/05/16 08:51:06 jl 00023/00023/00149
+Under advice from GCC -Wall, revised prototypes
+
+1.1 92/05/09 16:41:35 jl 00172/00000/00000
+date and time created 92/05/09 16:41:35 by jl
+
+::::::::::::::::
+:: esql5_00.h ::
+::::::::::::::::
+
+1.12 97/05/07 17:44:57 johnl 00005/00001/00149
+C++ requires strict prototypes for _iqnprep()
+
+1.11 97/01/28 19:28:27 johnl 00001/00042/00149
+Update to full ANSI C
+
+1.10 96/12/10 13:34:22 johnl 00007/00006/00184
+Updated after direct experience on 5.01.UC[12] on SunOS 4.1.3
+
+1.9 96/11/27 09:23:15 johnl 00012/00009/00178
+Nail down 3.vs.4 argument _iqlocate_cursor
+
+1.8 96/11/26 11:52:33 johnl 00002/00002/00185
+Upgrade to static const char file_h[].
+Refix the sqgetdbs() prototype for 6.0x and later
+
+1.7 96/11/23 18:27:45 johnl 00006/00000/00181
+Add ESQLC_STRICT_PROTOTYPES protection for _iqnprep()
+
+1.6 95/12/12 17:52:23 johnl 00001/00001/00180
+Fix copyright notices
+
+1.5 95/12/12 17:33:04 johnl 00028/00004/00153
+Upgraded after tests with esql++
+
+1.4 93/05/16 19:50:22 jl 00006/00000/00151
+Upgrade to compile cleanly under gcc -Wall
+
+1.3 93/05/16 10:34:29 jl 00008/00000/00143
+Include sqlbreak, sqlexit and sqlstart per comment
+on change for version 1.2 of esqllib.h.  Add sqldetach
+
+1.2 93/05/16 08:51:07 jl 00012/00015/00131
+Under advice from GCC -Wall, revised prototypes
+
+1.1 92/05/09 16:41:37 jl 00146/00000/00000
+date and time created 92/05/09 16:41:37 by jl
+
+::::::::::::::::
+:: esql7_20.h ::
+::::::::::::::::
+
+1.1 97/04/24 18:08:08 johnl 00038/00000/00000
+date and time created 97/04/24 18:08:08 by johnl
+
+:::::::::::::
+:: esqlc.h ::
+:::::::::::::
+
+1.11 97/04/24 18:09:18 johnl 00004/00000/00128
+Add fix for 7.2x ESQL/C
+
+1.10 97/01/28 19:28:28 johnl 00010/00025/00118
+Update to full ANSI C
+
+1.9 96/12/04 15:19:48 johnl 00024/00000/00119
+Handle DEC Alpha and OSF/1
+
+1.8 96/11/26 11:52:34 johnl 00012/00002/00107
+Upgrade to static const char file_h[].
+Refix the sqgetdbs() prototype for 6.0x and later
+
+1.7 95/12/12 17:52:24 johnl 00001/00001/00108
+Fix copyright notices
+
+1.6 95/12/12 17:33:05 johnl 00051/00009/00058
+Upgraded after tests with esql++
+
+1.5 95/05/25 17:15:53 johnl 00004/00003/00063
+Selectively use esqllib.h; fix Sqlca
+
+1.4 93/05/16 19:50:24 jl 00002/00004/00064
+Upgrade to compile cleanly under gcc -Wall
+
+1.3 92/05/18 21:11:38 jl 00006/00007/00062
+Use esqllib.h for library functions.  Revise typedefs
+
+1.2 92/05/17 22:12:45 jl 00001/00000/00068
+Add varchar.h
+
+1.1 92/05/09 16:41:38 jl 00068/00000/00000
+date and time created 92/05/09 16:41:38 by jl
+
+:::::::::::::::::
+:: esqlc_v5.ec ::
+:::::::::::::::::
+
+53.2 97/03/06 17:17:54 johnl 00002/00003/00060
+Handle DEFAULT_DATABASE centrally in dbdimp.ec
+
+53.1 97/03/06 16:32:02 johnl 00002/00004/00061
+Revise dbd_ix_setconnection() so that it can be used in esqltest.ec easily.
+Bulk of code renamed to dbd_db_setconnection() in dbdimp.ec.
+
+51.1 97/02/26 12:03:40 johnl 00010/00007/00055
+Handle explicit .DEFAULT. database name for default connection
+
+50.2 97/02/13 12:51:28 johnl 00014/00003/00048
+Upgrade to handle null connections properly
+
+50.1 97/01/12 17:54:49 johnl 00000/00000/00051
+Bump version to 50
+
+26.2 97/01/06 13:13:03 johnl 00001/00001/00050
+Update copyright dates
+
+26.1 96/12/20 14:21:14 johnl 00003/00002/00048
+Mainly bump version; trace info a debug 1
+
+25.5 96/12/18 11:22:25 johnl 00001/00001/00049
+Change interface on dbd_ix_setconnection() to take
+dbh instead of sth
+
+25.4 96/12/12 13:15:49 johnl 00000/00001/00050
+Remove redundant include
+
+25.3 96/11/22 17:50:11 johnl 00007/00000/00044
+Nearly got execute with bind working
+
+25.2 96/11/19 18:15:12 johnl 00002/00000/00042
+Add debug code to help trace
+
+25.1 96/11/19 11:43:26 johnl 00000/00000/00042
+Bump revision
+
+1.1 96/11/19 10:11:44 johnl 00042/00000/00000
+date and time created 96/11/19 10:11:44 by johnl
+
+:::::::::::::::::
+:: esqlc_v6.ec ::
+:::::::::::::::::
+
+53.2 97/03/06 17:17:55 johnl 00002/00003/00107
+Handle DEFAULT_DATABASE centrally in dbdimp.ec
+
+53.1 97/03/06 16:32:02 johnl 00005/00020/00105
+Revise dbd_ix_setconnection() so that it can be used in esqltest.ec easily.
+Bulk of code renamed to dbd_db_setconnection() in dbdimp.ec.
+
+52.1 97/02/28 18:51:06 johnl 00000/00001/00125
+Remove call to dbd_ix_sqlcode()
+
+51.1 97/02/26 12:03:41 johnl 00005/00003/00121
+Handle explicit .DEFAULT. database name for default connection
+
+50.3 97/02/13 12:51:29 johnl 00006/00006/00118
+Upgrade to handle null connections properly
+
+50.2 97/02/13 09:27:56 johnl 00016/00005/00108
+Allow default connections (for create database, etc)
+
+50.1 97/01/12 17:54:50 johnl 00000/00000/00113
+Bump version to 50
+
+26.2 97/01/06 13:13:03 johnl 00001/00001/00112
+Update copyright dates
+
+26.1 96/12/20 14:21:15 johnl 00004/00003/00109
+Mainly bump version; trace info a debug 1
+
+25.7 96/12/18 19:11:36 johnl 00005/00000/00107
+Handle non-connected connections better
+
+25.6 96/12/18 11:22:26 johnl 00001/00002/00106
+Change interface on dbd_ix_setconnection() to take
+dbh instead of sth
+
+25.5 96/12/12 13:15:50 johnl 00000/00001/00108
+Remove redundant include
+
+25.4 96/12/02 10:19:05 johnl 00001/00004/00108
+Tidy up
+
+25.3 96/11/22 17:50:12 johnl 00024/00000/00088
+Nearly got execute with bind working
+
+25.2 96/11/19 18:15:13 johnl 00012/00006/00076
+Add debug code to help trace
+
+25.1 96/11/19 10:48:14 johnl 00004/00004/00078
+Fix syntax.  Note that DEFAULT connection is a nuisance.
+
+1.1 96/11/19 10:11:45 johnl 00082/00000/00000
+date and time created 96/11/19 10:11:45 by johnl
+
+::::::::::::
+:: esqlcc ::
+::::::::::::
+
+50.1 97/01/12 17:54:50 johnl 00000/00000/00072
+Bump version to 50
+
+26.1 97/01/06 13:13:04 johnl 00001/00001/00071
+Update copyright dates
+
+25.4 96/12/09 17:11:27 johnl 00001/00000/00071
+chomp the first line to remove the new line
+
+25.3 96/12/04 08:52:57 johnl 00001/00001/00070
+Use "perl esqlsed ..." in preference to "esqlsed"
+
+25.2 96/12/01 18:11:01 johnl 00002/00002/00069
+In -c mode, drop .a and .o files
+
+25.1 96/12/01 15:15:42 johnl 00024/00008/00047
+Bump version.  Fix to work correctly.
+
+1.1 96/12/01 14:27:33 johnl 00055/00000/00000
+date and time created 96/12/01 14:27:33 by johnl
+
+::::::::::::
+:: esqlld ::
+::::::::::::
+
+54.1 97/04/08 18:59:41 johnl 00003/00001/00027
+Upgrades, misc
+
+50.1 97/01/12 17:54:51 johnl 00000/00000/00028
+Bump version to 50
+
+26.1 97/01/06 13:13:05 johnl 00001/00001/00027
+Update copyright dates
+
+25.1 96/12/01 15:15:43 johnl 00006/00002/00022
+Bump version.  Fix to work correctly.
+
+1.1 96/12/01 14:27:35 johnl 00024/00000/00000
+date and time created 96/12/01 14:27:35 by johnl
+
+:::::::::::::::
+:: esqllib.h ::
+:::::::::::::::
+
+1.9 97/01/28 19:28:29 johnl 00001/00077/00099
+Update to full ANSI C
+
+1.8 96/11/26 11:52:35 johnl 00002/00014/00174
+Upgrade to static const char file_h[].
+Refix the sqgetdbs() prototype for 6.0x and later
+
+1.7 96/11/26 10:12:29 johnl 00012/00000/00176
+Declare sqgetdbs() for ESQL/C 6.0x and later
+
+1.6 95/12/12 17:52:25 johnl 00001/00001/00175
+Fix copyright notices
+
+1.5 95/12/12 17:33:06 johnl 00008/00000/00168
+Upgraded after tests with esql++
+
+1.4 95/05/25 17:16:41 johnl 00006/00006/00162
+Fix some glitches
+
+1.3 93/05/16 19:50:26 jl 00008/00004/00160
+Upgrade to compile cleanly under gcc -Wall
+
+1.2 92/05/26 23:58:25 jl 00000/00006/00164
+sqlbreak, sqlexit, sqlstart are in esql?_??.h
+
+1.1 92/05/18 20:58:28 jl 00170/00000/00000
+date and time created 92/05/18 20:58:28 by jl
+
+::::::::::::::::
+:: esqlperl.h ::
+::::::::::::::::
+
+54.2 97/05/05 19:14:39 johnl 00001/00020/00055
+Remove that which is now in ixblob.h
+
+54.1 97/03/31 17:16:39 johnl 00005/00000/00070
+Add ODBC type mapping functions
+
+53.2 97/03/06 20:39:05 johnl 00002/00000/00068
+Include the declaration of dbd_ix_debug to allow esqlc_v[56].ec to compile
+with not fuss from GCC.
+
+53.1 97/03/06 17:18:38 johnl 00015/00000/00053
+Move what is needed by esqltest.ec into esqlperl.h
+
+50.1 97/01/12 17:54:52 johnl 00000/00000/00053
+Bump version to 50
+
+26.1 97/01/06 13:13:05 johnl 00001/00001/00052
+Update copyright dates
+
+25.3 96/11/26 12:52:46 johnl 00001/00001/00052
+Change blob_release() to void
+
+25.2 96/11/26 11:55:24 johnl 00001/00001/00052
+Move typedef of enum after definition of enum
+
+25.1 96/11/25 19:54:00 johnl 00000/00010/00053
+Drop sqltypemode()
+
+1.1 96/11/25 19:48:24 johnl 00063/00000/00000
+date and time created 96/11/25 19:48:24 by johnl
+
+:::::::::::::
+:: esqlsed ::
+:::::::::::::
+
+50.1 97/01/12 17:54:52 johnl 00000/00000/00020
+Bump version to 50
+
+26.1 97/01/06 13:13:06 johnl 00001/00001/00019
+Update copyright dates
+
+25.2 96/12/01 15:33:52 johnl 00001/00001/00019
+Do not include .bak option
+
+25.1 96/12/01 15:15:44 johnl 00004/00004/00016
+Bump version.  Fix to work correctly.
+
+1.1 96/12/01 14:27:36 johnl 00020/00000/00000
+date and time created 96/12/01 14:27:36 by johnl
+
+:::::::::::::::::
+:: esqltest.ec ::
+:::::::::::::::::
+
+53.3 97/03/12 12:41:09 johnl 00031/00005/00192
+Extend test to cover __STDC__.  Also improve reporting
+
+53.2 97/03/06 18:56:39 johnl 00009/00008/00188
+Refine
+
+53.1 97/03/06 17:17:18 johnl 00196/00000/00000
+Somewhat verbose testing of Informix environment
+
+1.1 97/03/06 15:07:05 johnl 00000/00000/00000
+date and time created 97/03/06 15:07:05 by johnl
+
+:::::::::::::::
+:: ixblob.ec ::
+:::::::::::::::
+
+50.3 97/05/05 16:52:05 johnl 00015/00001/00175
+Add blob_setlocmode() and blob_getlocmode().
+Use blob_getlocmode() when processing BLOB_DEFAULT.
+
+50.2 97/05/05 16:36:32 johnl 00008/00005/00168
+Extract blob locating code into separate file
+
+50.1 97/01/12 17:54:53 johnl 00000/00000/00173
+Bump version to 50
+
+26.1 97/01/06 13:13:07 johnl 00001/00001/00172
+Update copyright dates
+
+25.3 96/12/09 14:35:19 johnl 00005/00000/00168
+Set a few more fields in blob
+
+25.2 96/11/26 12:53:22 johnl 00002/00001/00166
+Change blob_release() to void.  Include unistd.h
+
+25.1 96/11/23 19:44:23 johnl 00001/00000/00166
+Include <assert.h> and bump revision
+
+1.1 96/11/23 18:03:07 johnl 00166/00000/00000
+date and time created 96/11/23 18:03:07 by johnl
+
+::::::::::::::
+:: ixblob.h ::
+::::::::::::::
+
+50.2 97/05/05 16:52:06 johnl 00002/00000/00044
+Add blob_setlocmode() and blob_getlocmode().
+Use blob_getlocmode() when processing BLOB_DEFAULT.
+
+50.1 97/05/05 16:36:33 johnl 00044/00000/00000
+Extract blob locating code into separate file
+
+1.1 97/05/05 16:33:09 johnl 00000/00000/00000
+date and time created 97/05/05 16:33:09 by johnl
+
+::::::::::::
+:: link.c ::
+::::::::::::
+
+53.1 97/03/06 20:38:22 johnl 00001/00002/00060
+Flatten definition of new_headlink
+
+50.1 97/01/12 17:54:54 johnl 00000/00000/00062
+Bump version to 50
+
+26.2 97/01/06 13:13:08 johnl 00001/00001/00061
+Update copyright dates
+
+26.1 96/12/20 15:03:09 johnl 00001/00000/00061
+Add debug note
+
+25.1 96/12/18 18:36:59 johnl 00014/00105/00047
+Remove demonstration code
+
+1.1 96/12/03 16:18:13 johnl 00152/00000/00000
+date and time created 96/12/03 16:18:13 by johnl
+
+::::::::::::::::
+:: odbctype.c ::
+::::::::::::::::
+
+54.2 97/04/01 16:22:52 johnl 00007/00006/00266
+Rework the use of installed ODBC headers
+
+54.1 97/03/31 17:15:55 johnl 00272/00000/00000
+Write the code
+
+1.1 97/03/26 18:11:40 johnl 00000/00000/00000
+date and time created 97/03/26 18:11:40 by johnl
+
+::::::::::::::::
+:: odbctype.h ::
+::::::::::::::::
+
+54.3 97/04/01 16:22:30 johnl 00003/00000/00073
+Add SQL_NO_TOTAL
+
+54.2 97/03/26 18:27:00 johnl 00041/00041/00032
+Remove tabs
+
+54.1 97/03/26 18:26:12 johnl 00055/00010/00018
+Incorporate key extracts from sql.h and sqlext.h from ODBC Version 2.1
+as released with Informix-CLI Version 2.50.UC1
+
+1.1 97/03/26 18:20:03 johnl 00028/00000/00000
+date and time created 97/03/26 18:20:03 by johnl
+
+:::::::::::::::
+:: sqlcmd.sh ::
+:::::::::::::::
+
+54.2 97/04/08 18:59:42 johnl 00016/00018/00078
+Upgrades, misc
+
+54.1 97/03/31 18:00:32 johnl 00096/00000/00000
+Initial version.
+The -V, -x, and -d options work (more or less) and a single -e does too.
+
+1.1 97/03/31 17:59:11 johnl 00000/00000/00000
+date and time created 97/03/31 17:59:11 by johnl
+
+::::::::::::::::
+:: sqltype.ec ::
+::::::::::::::::
+
+50.1 97/01/12 17:54:55 johnl 00000/00000/00252
+Bump version to 50
+
+25.1 96/11/25 19:53:21 johnl 00008/00048/00244
+Streamline for DBD::Informix
+
+1.11 96/11/17 16:20:59 johnl 00130/00037/00162
+Fix bugs handling DATETIME/INTERVAL FRACTION TO FRACTION(4), etc.
+Add sqltypename() which is thread safe and sqltypemode() to indicate whether
+to use Informix long names or shortened names.
+
+1.10 95/03/15 17:21:09 johnl 00015/00007/00184
+Upgrade
+
+1.9 93/05/16 20:55:53 jl 00001/00000/00190
+Compile cleanly under GCC -Wall
+
+1.8 92/05/28 22:59:30 jl 00001/00001/00189
+Alter declaration of typestr
+
+1.7 91/12/22 14:17:23 jl 00002/00000/00188
+Revise headers. Add :PRODUCT: throughout. Add test programs where missing. Some bugs fixed in some programs. Etc.
+
+1.6 91/03/22 13:36:39 johnl 00077/00003/00111
+Correct interval handling; add test rig
+
+1.5 91/03/13 13:32:43 johnl 00000/00003/00114
+Without checking, of course
+
+1.4 91/03/13 13:31:39 johnl 00009/00016/00108
+Convert to real C interface
+
+1.3 90/04/05 12:04:53 john 00057/00003/00067
+Upgrade to include Version 4.00 data types
+
+1.2 89/11/28 10:07:39 john 00006/00003/00064
+Fix glitch in format of DECIMAL(n) fields
+
+1.1 88/07/12 12:30:46 john 00067/00000/00000
+date and time created 88/07/12 12:30:46 by john
+
+:::::::::::::::
+:: basic00.t ::
+:::::::::::::::
+
+54.2 97/05/15 16:27:48 johnl 00005/00001/00325
+Explicitly set ChopBlanks.  Document deprecated use of DBI->install_driver.
+
+54.1 97/05/13 12:55:20 johnl 00010/00006/00316
+Fix deprecated warnings
+
+53.1 97/03/06 20:37:22 johnl 00011/00011/00311
+Update the attribute names to avoid deprecated warnings
+
+52.1 97/03/05 15:53:07 johnl 00002/00000/00320
+Add printing of DBI version
+
+51.1 97/02/25 19:42:59 johnl 00001/00001/00319
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:26 johnl 00002/00000/00318
+Bump version to 50
+
+26.4 97/01/09 10:40:06 johnl 00001/00001/00317
+Change TxActive to InTransaction
+
+26.3 97/01/08 18:51:43 johnl 00001/00000/00317
+Report on TxActive too
+
+26.2 97/01/06 18:00:59 johnl 00000/00002/00317
+Drop the BEGIN{...} clause
+
+26.1 97/01/06 13:09:57 johnl 00001/00001/00318
+Update copyright dates
+
+25.3 96/12/18 17:15:58 johnl 00002/00002/00317
+Change test_sqlca to print_sqlca
+
+25.2 96/12/18 17:15:02 johnl 00003/00000/00316
+Print Statement
+
+25.1 96/12/04 14:38:26 johnl 00001/00000/00315
+Upgrade for connect_to_test_database() not saying it succeeded
+
+1.1 96/12/04 12:46:05 johnl 00315/00000/00000
+date and time created 96/12/04 12:46:05 by johnl
+
+::::::::::::::
+:: blob02.t ::
+::::::::::::::
+
+53.1 97/03/06 20:37:24 johnl 00003/00003/00064
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:00 johnl 00004/00004/00063
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:27 johnl 00002/00000/00065
+Bump version to 50
+
+26.3 97/01/06 18:01:00 johnl 00000/00002/00065
+Drop the BEGIN{...} clause
+
+26.2 97/01/06 13:09:58 johnl 00002/00000/00065
+Update copyright dates
+
+26.1 96/12/20 13:28:03 johnl 00002/00000/00063
+Fix for MODE ANSI databases too
+
+25.2 96/12/09 20:49:26 johnl 00001/00001/00062
+Fix counts for SE testing
+
+25.1 96/12/09 14:34:43 johnl 00000/00047/00063
+Upgraded -- fully operational
+
+1.1 96/12/09 14:32:37 johnl 00110/00000/00000
+date and time created 96/12/09 14:32:37 by johnl
+
+::::::::::::::
+:: blob03.t ::
+::::::::::::::
+
+53.1 97/03/06 20:37:25 johnl 00001/00001/00077
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:01 johnl 00002/00002/00076
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:28 johnl 00002/00000/00076
+Bump version to 50
+
+26.2 97/01/06 18:01:00 johnl 00000/00002/00076
+Drop the BEGIN{...} clause
+
+26.1 97/01/06 13:09:59 johnl 00002/00000/00076
+Update copyright dates
+
+25.3 96/12/09 20:49:27 johnl 00001/00001/00075
+Fix counts for SE testing
+
+25.2 96/12/09 14:34:44 johnl 00003/00009/00073
+Upgraded -- fully operational
+
+25.1 96/12/04 13:53:13 johnl 00004/00000/00078
+Some chance they work OK if blobs on insert are OK
+
+1.1 96/12/04 12:50:56 johnl 00078/00000/00000
+date and time created 96/12/04 12:50:56 by johnl
+
+::::::::::::::
+:: blob04.t ::
+::::::::::::::
+
+53.1 97/03/06 20:37:27 johnl 00002/00002/00107
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:02 johnl 00003/00003/00106
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:29 johnl 00002/00000/00107
+Bump version to 50
+
+26.2 97/01/06 18:01:01 johnl 00000/00002/00107
+Drop the BEGIN{...} clause
+
+26.1 97/01/06 13:09:59 johnl 00002/00000/00107
+Update copyright dates
+
+25.3 96/12/09 20:49:28 johnl 00001/00001/00106
+Fix counts for SE testing
+
+25.2 96/12/09 14:34:45 johnl 00027/00014/00080
+Upgraded -- fully operational
+
+25.1 96/12/04 13:53:25 johnl 00039/00092/00055
+Some chance they work OK if blobs on insert are OK
+
+1.1 96/12/04 12:50:57 johnl 00147/00000/00000
+date and time created 96/12/04 12:50:57 by johnl
+
+::::::::::::::::::
+:: chopblanks.t ::
+::::::::::::::::::
+
+54.2 97/05/15 16:20:37 johnl 00001/00001/00077
+Insert all the rows in @expect_vc
+
+54.1 97/05/14 17:23:09 johnl 00078/00000/00000
+First plausibly working version
+
+1.1 97/05/14 17:22:35 johnl 00000/00000/00000
+date and time created 97/05/14 17:22:35 by johnl
+
+:::::::::::::
+:: dbase.t ::
+:::::::::::::
+
+53.1 97/03/06 20:37:28 johnl 00003/00003/00046
+Update the attribute names to avoid deprecated warnings
+
+51.2 97/02/26 11:59:55 johnl 00016/00001/00033
+Test the explicit .DEFAULT. connection
+
+51.1 97/02/25 19:43:10 johnl 00000/00000/00034
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/02/13 12:12:24 johnl 00034/00000/00000
+Test null connection and create/close/drop database
+
+1.1 97/02/13 12:10:31 johnl 00000/00000/00000
+date and time created 97/02/13 12:10:31 by johnl
+
+::::::::::::::
+:: dblist.t ::
+::::::::::::::
+
+51.1 97/02/25 19:43:02 johnl 00000/00000/00037
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:29 johnl 00000/00000/00037
+Bump version to 50
+
+26.1 97/01/06 13:10:00 johnl 00002/00000/00035
+Update copyright dates
+
+25.2 96/12/03 20:44:21 johnl 00012/00003/00023
+Upgraded to pass automatic test
+
+25.1 96/12/01 18:07:46 johnl 00018/00013/00008
+Basic upgrades -- much work to do
+
+1.1 96/11/05 14:07:41 johnl 00021/00000/00000
+date and time created 96/11/05 14:07:41 by johnl
+
+:::::::::::::::
+:: decgen.pl ::
+:::::::::::::::
+
+54.1 97/03/27 17:28:59 johnl 00025/00000/00000
+Implement type generator scripts for DBD::Informix
+
+1.1 97/03/27 17:25:57 johnl 00000/00000/00000
+date and time created 97/03/27 17:25:57 by johnl
+
+:::::::::::::::
+:: dratt01.t ::
+:::::::::::::::
+
+54.1 97/05/13 15:38:37 johnl 00049/00000/00000
+Preliminary version
+
+1.1 97/05/13 12:55:46 johnl 00000/00000/00000
+date and time created 97/05/13 12:55:46 by johnl
+
+::::::::::::::
+:: dtgen.pl ::
+::::::::::::::
+
+54.1 97/03/27 17:28:59 johnl 00233/00000/00000
+Implement type generator scripts for DBD::Informix
+
+1.1 97/03/27 17:25:57 johnl 00000/00000/00000
+date and time created 97/03/27 17:25:57 by johnl
+
+:::::::::::::::::::
+:: multiconn01.t ::
+:::::::::::::::::::
+
+54.3 97/05/13 12:55:21 johnl 00004/00004/00149
+Fix deprecated warnings
+
+54.2 97/04/01 16:28:07 johnl 00002/00002/00151
+Test the fixes, and fix the fixes, and test again
+
+54.1 97/03/28 10:02:21 johnl 00003/00001/00150
+Correct the handling of $dbase2 when DBD_INFORMIX_DATABASE2 is not set.
+Fix required after John C. Hossfeld (john@netpub.com) had problems.
+Also log which database is being connected to!
+
+53.1 97/03/06 20:37:31 johnl 00010/00010/00141
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:06 johnl 00000/00000/00151
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:32 johnl 00002/00000/00149
+Bump version to 50
+
+26.5 97/01/09 10:40:07 johnl 00002/00002/00147
+Change TxActive to InTransaction
+
+26.4 97/01/08 18:51:45 johnl 00002/00000/00147
+Report on TxActive too
+
+26.3 97/01/06 18:01:02 johnl 00000/00002/00147
+Drop the BEGIN{...} clause
+
+26.2 97/01/06 13:10:01 johnl 00001/00001/00148
+Update copyright dates
+
+26.1 96/12/20 13:28:04 johnl 00006/00003/00143
+Fix for MODE ANSI databases too
+
+25.1 96/12/18 14:57:10 johnl 00146/00000/00000
+Write test code for multiple concurrent connections
+
+1.1 96/12/18 14:55:54 johnl 00000/00000/00000
+date and time created 96/12/18 14:55:54 by johnl
+
+:::::::::::::::::::
+:: multiconn02.t ::
+:::::::::::::::::::
+
+54.3 97/05/13 12:55:21 johnl 00004/00004/00096
+Fix deprecated warnings
+
+54.2 97/04/01 16:28:08 johnl 00002/00002/00098
+Test the fixes, and fix the fixes, and test again
+
+54.1 97/03/28 10:02:21 johnl 00003/00001/00097
+Correct the handling of $dbase2 when DBD_INFORMIX_DATABASE2 is not set.
+Fix required after John C. Hossfeld (john@netpub.com) had problems.
+Also log which database is being connected to!
+
+53.1 97/03/06 20:37:32 johnl 00010/00010/00088
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:06 johnl 00000/00000/00098
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:33 johnl 00002/00000/00096
+Bump version to 50
+
+26.5 97/01/09 10:40:07 johnl 00002/00002/00094
+Change TxActive to InTransaction
+
+26.4 97/01/08 18:51:45 johnl 00002/00000/00094
+Report on TxActive too
+
+26.3 97/01/06 18:01:03 johnl 00000/00002/00094
+Drop the BEGIN{...} clause
+
+26.2 97/01/06 13:10:01 johnl 00001/00001/00095
+Update copyright dates
+
+26.1 96/12/20 13:28:05 johnl 00004/00002/00092
+Fix for MODE ANSI databases too
+
+25.1 96/12/18 15:04:23 johnl 00094/00000/00000
+Add basic DISCONNECT ALL test
+
+1.1 96/12/18 15:03:59 johnl 00000/00000/00000
+date and time created 96/12/18 15:03:59 by johnl
+
+:::::::::::::::::::
+:: multiconn03.t ::
+:::::::::::::::::::
+
+54.4 97/05/13 15:38:08 johnl 00010/00000/00138
+Record active connection and number of connections
+
+54.3 97/05/13 12:55:22 johnl 00004/00004/00134
+Fix deprecated warnings
+
+54.2 97/04/01 16:28:09 johnl 00002/00002/00136
+Test the fixes, and fix the fixes, and test again
+
+54.1 97/03/28 10:02:22 johnl 00003/00001/00135
+Correct the handling of $dbase2 when DBD_INFORMIX_DATABASE2 is not set.
+Fix required after John C. Hossfeld (john@netpub.com) had problems.
+Also log which database is being connected to!
+
+53.1 97/03/06 20:37:34 johnl 00014/00014/00122
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:07 johnl 00000/00000/00136
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:34 johnl 00002/00000/00134
+Bump version to 50
+
+26.5 97/01/09 10:40:08 johnl 00002/00002/00132
+Change TxActive to InTransaction
+
+26.4 97/01/08 18:51:46 johnl 00002/00000/00132
+Report on TxActive too
+
+26.3 97/01/06 18:01:03 johnl 00000/00002/00132
+Drop the BEGIN{...} clause
+
+26.2 97/01/06 13:10:02 johnl 00001/00001/00133
+Update copyright dates
+
+26.1 96/12/20 13:28:06 johnl 00004/00002/00130
+Fix for MODE ANSI databases too
+
+25.1 96/12/19 15:16:02 johnl 00132/00000/00000
+OK now
+
+1.1 96/12/18 15:05:11 johnl 00000/00000/00000
+date and time created 96/12/18 15:05:11 by johnl
+
+:::::::::::::::::::
+:: multicursor.t ::
+:::::::::::::::::::
+
+53.1 97/03/06 20:37:36 johnl 00001/00001/00084
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:03 johnl 00002/00004/00083
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:30 johnl 00000/00000/00087
+Bump version to 50
+
+26.2 97/01/06 13:10:03 johnl 00002/00000/00085
+Update copyright dates
+
+26.1 96/12/20 13:28:06 johnl 00003/00001/00082
+Fix for MODE ANSI databases too
+
+25.3 96/12/04 14:38:27 johnl 00001/00000/00082
+Upgrade for connect_to_test_database() not saying it succeeded
+
+25.2 96/12/03 20:44:22 johnl 00046/00020/00036
+Upgraded to pass automatic test
+
+25.1 96/12/01 18:07:47 johnl 00030/00027/00026
+Basic upgrades -- much work to do
+
+1.1 96/11/05 14:07:42 johnl 00053/00000/00000
+date and time created 96/11/05 14:07:42 by johnl
+
+:::::::::::::::
+:: nulls01.t ::
+:::::::::::::::
+
+51.1 97/02/25 19:43:11 johnl 00088/00000/00000
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+1.1 97/02/25 09:06:41 johnl 00000/00000/00000
+date and time created 97/02/25 09:06:41 by johnl
+
+:::::::::::::::
+:: nulls02.t ::
+:::::::::::::::
+
+53.2 97/03/17 19:08:48 johnl 00020/00013/00036
+Fix test to pass
+
+53.1 97/03/17 18:50:43 johnl 00049/00000/00000
+Write passable test based on bug found by Oyvind Gjerstad - ogj@tglobe1.tollpost.no
+
+1.1 97/03/17 17:57:06 johnl 00000/00000/00000
+date and time created 97/03/17 17:57:06 by johnl
+
+::::::::::::::::
+:: numerics.t ::
+::::::::::::::::
+
+53.1 97/03/06 20:37:38 johnl 00000/00000/00060
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:04 johnl 00001/00001/00059
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:31 johnl 00000/00000/00060
+Bump version to 50
+
+26.2 97/01/06 13:10:04 johnl 00002/00000/00058
+Update copyright dates
+
+26.1 96/12/20 13:28:07 johnl 00003/00001/00055
+Fix for MODE ANSI databases too
+
+25.2 96/12/04 14:06:56 johnl 00035/00026/00021
+Now passes
+
+25.1 96/12/01 18:07:48 johnl 00012/00013/00035
+Basic upgrades -- much work to do
+
+1.1 96/11/05 14:07:44 johnl 00048/00000/00000
+date and time created 96/11/05 14:07:44 by johnl
+
+::::::::::::::::
+:: original.t ::
+::::::::::::::::
+
+51.1 97/02/25 19:43:04 johnl 00009/00002/00073
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:31 johnl 00000/00000/00075
+Bump version to 50
+
+26.2 97/01/06 13:10:04 johnl 00002/00000/00073
+Update copyright dates
+
+26.1 96/12/20 13:28:08 johnl 00004/00004/00069
+Fix for MODE ANSI databases too
+
+25.2 96/12/04 14:22:29 johnl 00039/00022/00034
+Upgraded to use DBD::InformixTest and working.
+This test exposed the oversight of SQLDATE in the fetch code in
+dbdimp.ec -- it is a useful test, therefore!
+
+25.1 96/12/01 18:07:49 johnl 00016/00014/00040
+Basic upgrades -- much work to do
+
+1.1 96/11/05 14:07:45 johnl 00054/00000/00000
+date and time created 96/11/05 14:07:45 by johnl
+
+::::::::::::::::::
+:: primitives.t ::
+::::::::::::::::::
+
+53.1 97/03/06 20:37:40 johnl 00000/00000/00046
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:05 johnl 00003/00003/00043
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:32 johnl 00000/00000/00046
+Bump version to 50
+
+26.2 97/01/06 13:10:05 johnl 00002/00000/00044
+Update copyright dates
+
+26.1 97/01/06 10:48:10 johnl 00001/00000/00043
+Add all_ok to end of test
+
+25.2 96/12/04 14:45:48 johnl 00023/00024/00020
+Upgrade to use DBD::InformixTest
+
+25.1 96/12/01 18:07:50 johnl 00012/00008/00032
+Basic upgrades -- much work to do
+
+1.1 96/11/05 14:07:47 johnl 00040/00000/00000
+date and time created 96/11/05 14:07:47 by johnl
+
+:::::::::::::
+:: sqlca.t ::
+:::::::::::::
+
+52.1 97/03/05 15:52:40 johnl 00056/00000/00000
+Add test for durability of SQLCA record
+
+1.1 97/02/27 12:11:45 johnl 00000/00000/00000
+date and time created 97/02/27 12:11:45 by johnl
+
+::::::::::::::::::
+:: transact01.t ::
+::::::::::::::::::
+
+53.1 97/03/06 20:37:43 johnl 00005/00005/00123
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:08 johnl 00001/00001/00127
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:35 johnl 00003/00001/00125
+Bump version to 50
+
+26.4 97/01/06 18:01:26 johnl 00009/00037/00117
+Use select_some_data/select_zero_data
+
+26.3 97/01/06 13:10:06 johnl 00001/00001/00153
+Update copyright dates
+
+26.2 96/12/19 15:48:20 johnl 00047/00112/00107
+Major overhaul using stmt_test and inline functions
+to test for some data and no data
+
+26.1 96/12/19 15:20:44 johnl 00219/00000/00000
+Not properly using InformixTest.pm but working
+
+1.1 96/12/19 15:20:03 johnl 00000/00000/00000
+date and time created 96/12/19 15:20:03 by johnl
+
+::::::::::::::::::
+:: transact02.t ::
+::::::::::::::::::
+
+53.1 97/03/06 20:37:45 johnl 00003/00003/00093
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:09 johnl 00001/00001/00095
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:36 johnl 00003/00001/00093
+Bump version to 50
+
+26.6 97/01/12 16:45:16 johnl 00004/00009/00090
+Improve test sensitivity again
+
+26.5 97/01/12 15:50:16 johnl 00011/00004/00088
+Make tests more sensitive
+
+26.4 97/01/06 18:01:26 johnl 00006/00034/00086
+Use select_some_data/select_zero_data
+
+26.3 97/01/06 13:10:06 johnl 00001/00001/00119
+Update copyright dates
+
+26.2 96/12/20 15:13:08 johnl 00000/00003/00120
+Make it pass on all databases
+
+26.1 96/12/20 13:27:30 johnl 00123/00000/00000
+Fix to work on Logged and MODE ANSI databases
+
+1.1 96/12/20 13:26:52 johnl 00000/00000/00000
+date and time created 96/12/20 13:26:52 by johnl
+
+::::::::::::::::::
+:: transact03.t ::
+::::::::::::::::::
+
+53.1 97/03/06 20:37:46 johnl 00002/00002/00124
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:07 johnl 00001/00001/00125
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:34 johnl 00004/00001/00122
+Bump version to 50
+
+26.5 97/01/12 15:50:17 johnl 00005/00013/00118
+Make tests more sensitive
+
+26.4 97/01/09 10:39:03 johnl 00007/00000/00124
+Attempt to set AutoCommit off with Unlogged databases
+
+26.3 97/01/06 18:01:27 johnl 00009/00047/00115
+Use select_some_data/select_zero_data
+
+26.2 97/01/06 13:10:07 johnl 00001/00001/00161
+Update copyright dates
+
+26.1 96/12/20 15:12:59 johnl 00162/00000/00000
+Make it pass on all databases
+
+1.1 96/12/20 13:26:55 johnl 00000/00000/00000
+date and time created 96/12/20 13:26:55 by johnl
+
+::::::::::::::::::
+:: transact04.t ::
+::::::::::::::::::
+
+54.1 97/04/01 16:30:00 johnl 00001/00001/00121
+De-deprecate the code
+
+53.1 97/03/06 20:37:48 johnl 00001/00001/00121
+Update the attribute names to avoid deprecated warnings
+
+51.1 97/02/25 19:43:10 johnl 00001/00001/00121
+Update table names more or less systematically.
+Some places still need multiple references defined once.
+
+50.1 97/01/12 17:52:37 johnl 00004/00002/00118
+Bump version to 50
+
+26.1 97/01/12 16:47:04 johnl 00120/00000/00000
+Test that cursors can coexist with statements in
+MODE ANSI database with AutoCommit = On
+
+1.1 97/01/12 16:46:22 johnl 00000/00000/00000
+date and time created 97/01/12 16:46:22 by johnl
+
+:::::::::::::::::
+:: updcursor.t ::
+:::::::::::::::::
+
+53.1 97/03/17 17:47:43 johnl 00015/00004/00099
+Fix the behaviour on logged databases
+
+51.2 97/02/26 12:40:16 johnl 00001/00001/00102
+There are only 13 tests in this file
+
+51.1 97/02/26 10:05:41 johnl 00103/00000/00000
+Write test
+
+1.1 97/02/26 10:05:10 johnl 00000/00000/00000
+date and time created 97/02/26 10:05:10 by johnl
+

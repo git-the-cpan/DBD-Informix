@@ -1,0 +1,68 @@
+To: dbi-announce@fugue.com, dbi-dev@fugue.com, dbi-users@fugue.com,
+        informix-list@rmy.emory.edu, descarte@hermetica.com
+Subject: ANNOUNCE: DBD::Informix Version 0.54 released
+
+The next release of DBD::Informix, version 0.54, has been uploaded to CPAN.
+It will be available worldwide in a day or three.
+
+DBD::Informix is the driver code that enables Perl 5.003 to access Informix
+databases via the DBI module (you'll need the code for both DBI version 0.81
+and DBD::Informix).  The code is available for download via:
+
+http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
+http://www.hermetica.com/technologia/perl/DBI
+
+New in this release:
+* With luck, you should be able to download DBD::Informix from the DBD home
+  pages at Hermetica (http://www.hermetica.com/technologia/DBI).
+* Changes in Informix-specific attribute names as forecast.
+* Add support for ChopBlanks attribute.
+* DBD::Informix has now been tested on 9.10.UC2 Informix-Universal Server.
+  See the README file for details.
+* New program sqlcmd.sh which, more or less, interprets SQL statements out
+  of a file.  The naming of this script is problematic; it should really be
+  installed in the bin directory where Perl is found.  It is a secondary
+  work-in-progress item.  There are lot's of things which the Perl SQLCMD
+  does not handle but the real, ESQL/C SQLCMD program does do.  Note that
+  it is not installed by the build process.  For all that it is stored in
+  sqlcmd.sh, it is actually a Perl script.
+* The statement attribute $sth->{TYPE} now returns the ODBC type numbers.
+  Similarly, $sth->{PRECISION} now returns the ODBC precision numbers, and
+  $sth->{SCALE} now returns ODBC scale numbers.  The Informix type names
+  are available via $sth->{ix_NativeTypeNames}, and the attributes
+  $sth->{ix_ColType} and $sth->{ix_ColLength} return the raw data from the
+  SysColumns table in the catalogue.
+* The statement attribute $sth->{ix_Fetchable} is set when you need to
+  fetch data.  It is very difficult to determine whether a statement needs
+  that treatment otherwise, because some SELECT statements (with an INTO
+  TEMP) clause do not need to be fetched, and some EXECUTE PROCEDURE
+  statements do need data fetching and others don't with no syntactic way
+  to tell the difference.
+* DBI::state now contains the value of SQLSTATE after an error occurs.
+  Note that the most common value is 'IX000', an Informix reserved error
+  message.  However, if one of the standardized (or documented) error
+  conditions occurs, DBI::state should also reflect that.
+* I've included the file SCCS.Log which contains the history of all the
+  changes made to all the files in DBD::Informix.  It is quite big, and I'm
+  not sure of it's value.  Please send me (private) feedback about whether
+  or not including it is a good idea for future versions.  Don't send me
+  suggestions about using RCS -- I shall ignore you if I'm feeling
+  tolerant, or abuse you if I'm not.
+
+Still to do:
+* Investigate whether using sqlda structures in place of SQL descriptors
+  makes a significant difference to the performance of DBD::Informix.
+* Integrate sqlcmd.sh into the build more thoroughly.  Document it.  Make
+  it bomb-proof (for example, it fails horribly if you don't have a '-d'
+  option on the command line because there isn't a way to connect to a
+  database.
+
+Let me know of problems, as usual, and solutions too when you have them.
+
+Enjoy!
+
+Jonathan Leffler (johnl@informix.com) #include <disclaimer.h>
+
+PS: Read the README file.  Also read the Informix.Licence file.
+
+@(#)Announce	54.1 97/05/16

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)transact04.t	53.1 97/03/06 20:37:48
+#	@(#)transact04.t	54.1 97/04/01 16:30:00
 #
 #	Test AutoCommit On for DBD::Informix
 #
@@ -107,7 +107,7 @@ while ($row2 = $sth->fetch)
 {
 	print_row $row2;
 }
-&stmt_fail if ($sth->{sqlcode} < 0);
+&stmt_fail if ($sth->{ix_sqlcode} < 0);
 &stmt_ok;
 
 # Check that there is some data

@@ -1,10 +1,10 @@
 /*
 @(#)File:            esql4_10.h
-@(#)Version:         1.6
-@(#)Last changed:    96/12/20
+@(#)Version:         1.7
+@(#)Last changed:    97/01/28
 @(#)Purpose:         Function prototypes for ESQL/C Version 4.10
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992,1993,1995,1996
+@(#)Copyright:       (C) JLSS 1992-93,1995-97
 @(#)Product:         :PRODUCT:
 */
 
@@ -23,7 +23,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql4_10_h[] = "@(#)esql4_10.h	1.6 96/12/20";
+static const char esql4_10_h[] = "@(#)esql4_10.h	1.7 97/01/28";
 #endif	/*lint */
 #endif	/*MAIN_PROGRAM */
 
@@ -33,8 +33,6 @@ extern "C" {
 
 #include <sqlhdr.h>
 #include <sqlda.h>
-
-#ifdef __STDC__
 
 /* Pre-declare struct value to keep compilers quiet */
 struct value;
@@ -140,41 +138,6 @@ extern int      iec_stop(void);
 extern int      sqlbreak(void);
 extern int      sqlexit(void);
 extern int      sqlstart(void);
-
-#else
-
-extern int      _iqbeginwork();
-extern int      _iqclose();
-extern int      _iqcommit();
-extern int      _iqcopen();
-extern int      _iqdatabase();
-extern int      _iqdbclose();
-extern int      _iqdclcur();
-extern int      _iqddclcur();
-extern int      _iqdscribe();
-extern int      _iqeximm();
-extern int      _iqflush();
-extern int      _iqfree();
-extern int      _iqftch();
-extern int      _iqinsput();
-extern int      _iqnftch();
-extern int      _iqpclose();
-extern int      _iqpdclcur();
-extern int      _iqpdelete();
-extern int      _iqpopen();
-extern int      _iqpput();
-extern int      _iqprepare();
-extern int      _iqpupdate();
-extern int      _iqrollback();
-extern int      _iqslct();
-extern int      _iqstmnt();
-extern int      _iqxecute();
-extern int      iec_stop();
-extern int      sqlbreak();
-extern int      sqlexit();
-extern int      sqlstart();
-
-#endif	/* __STDC__ */
 
 #ifdef __cplusplus
 }

@@ -1,7 +1,7 @@
 /*
 @(#)File:            esqlperl.h
-@(#)Version:         53.2
-@(#)Last changed:    97/03/06
+@(#)Version:         54.2
+@(#)Last changed:    97/05/05
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1996,1997
@@ -15,12 +15,13 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)esqlperl.h	53.2 97/03/06";
+static const char esqlperl_h[] = "@(#)esqlperl.h	54.2 97/05/05";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
 #include <stdio.h>
 #include "esqlc.h"
+#include "ixblob.h"
 
 enum Boolean
 {
@@ -36,26 +37,6 @@ typedef enum Boolean Boolean;
 #define SQLTYPENAME_BUFSIZ sizeof("INTERVAL MINUTE(2) TO FRACTION(5)")
 extern char *sqltypename(int coltype, int collen, char *buffer);
 
-/* Return the name specified by $DBTEMP, defaulting to /tmp */
-extern const char *sql_dbtemp(void);
-
-enum BlobLocn
-{
-	BLOB_DEFAULT, BLOB_IN_MEMORY, BLOB_IN_ANONFILE, BLOB_IN_NAMEFILE,
-	BLOB_DUMMY_VALUE, BLOB_NULL_VALUE
-};
-typedef enum BlobLocn BlobLocn;
-
-/*
-** If you are using blobs in memory, the space allocated for the
-** blob needs to be released by blob_locate().  Blob files may or
-** may not need to be deleted; if dflag is non-zero, then the file
-** is deleted.  Note that blob_locate() does not handle BLOB_DUMMY_VALUE
-** or BLOB_NULL_VALUE.
-*/
-extern int blob_locate(Blob *blob, BlobLocn locn);
-extern void blob_release(Blob *blob, int dflag);
-
 extern void dbd_ix_debug(int n, char *fmt, const char *arg);
 extern void dbd_ix_setconnection(char *conn);
 
@@ -66,5 +47,10 @@ extern Boolean dbd_ix_connect(char *conn, char *dbase, char *user, char *pass);
 extern void dbd_ix_closedatabase(void);
 extern Boolean dbd_ix_opendatabase(char *dbase);
 #endif	/* ESQLC_VERSION >= 600 */
+
+/* Informix to ODBC mapping for type, precision and scale */
+extern int map_type_ifmx_to_odbc(int coltype, int collen);
+extern int map_prec_ifmx_to_odbc(int coltype, int collen);
+extern int map_scale_ifmx_to_odbc(int coltype, int collen);
 
 #endif	/* ESQLPERL_H */

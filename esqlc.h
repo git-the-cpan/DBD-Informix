@@ -1,10 +1,10 @@
 /*
 @(#)File:            esqlc.h
-@(#)Version:         1.9
-@(#)Last changed:    96/12/04
+@(#)Version:         1.11
+@(#)Last changed:    97/04/24
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992,1993,1995,1996
+@(#)Copyright:       (C) JLSS 1992-93,1995-97
 @(#)Product:         :PRODUCT:
 */
 
@@ -13,10 +13,11 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)esqlc.h	1.9 96/12/04";
+static const char esqlc_h[] = "@(#)esqlc.h	1.11 97/04/24";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
+/* Backwards compatability -- will be removed after 1st January 1998.  */
 #ifndef ESQLC_VERSION
 #ifdef ESQLC_4_10
 #define ESQLC_VERSION 410
@@ -52,18 +53,8 @@ static const char esqlc_h[] = "@(#)esqlc.h	1.9 96/12/04";
 ** pointers are treated correctly (sizeof(void *) != sizeof(int)).
 ** The <sqlhdr.h> prototypes for version 6.00 and above are only active if
 ** __STDC__ is defined (whether 1 or 0 or something else does not matter).
-** If USE_PROTOTYPES is defined, then the code with ESQLC_UNDEF_STDC
-** ensures that the ESQL/C prototypes are visible, even if __STDC__ is not
-** otherwise defined, and it also ensures the __STDC__ is not defined
-** outside the scope of this header and those it includes.
+** Ensure that the compilation options set __STDC__.
 */
-#undef ESQLC_UNDEF_STDC
-#ifdef USE_PROTOTYPES
-#ifndef __STDC__
-#define ESQLC_UNDEF_STDC
-#define __STDC__
-#endif /* __STDC__ */
-#endif /* USE_PROTOTYPES */
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,7 +75,7 @@ extern "C" {
 #endif /* ESQLC_VERSION >= 400 */
 
 #if ESQLC_VERSION < 400
-/* No prototypes available */
+/* No prototypes available -- for earlier versions, you are on your own! */
 #elif ESQLC_VERSION < 410
 #include "esql4_00.h"
 #include "esqllib.h"
@@ -95,20 +86,23 @@ extern "C" {
 #include "esql5_00.h"
 #include "esqllib.h"
 #else
-/* For later versions, sqlhdr.h contains the requisite declarations */
-/* For earlier versions, you are on your own! */
+/* For later versions, sqlhdr.h contains the requisite declarations. */
+/* However, these declarations are protected by __STDC__ so you need */
+/* to ensure that your compiler has it defined.  Note that compilers */
+/* on some machines do complain if you try to define __STDC__.       */
 #include <sqlhdr.h>
 
-#ifdef __STDC__
+#if ESQLC_VERSION >= 720 && ESQLC_VERSION < 800
+#include "esql7_20.h"
+#endif /* ESQLC_VERSION is 7.2x */
+
 extern int      sqgetdbs(int *ret_fcnt,
                          char **fnames,
                          int fnsize,
                          char *farea,
                          int fasize);
-#else
-extern int      sqgetdbs();
-#endif /* __STDC__ */
-#endif
+
+#endif /* ESQLC_VERSION */
 
 /* -- Constant Definitions */
 
@@ -134,10 +128,5 @@ typedef struct sqlva	Sqlva;
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#ifdef ESQLC_UNDEF_STDC
-#undef __STDC__
-#endif /* ESQLC_UNDEF_STDC */
-#undef ESQLC_UNDEF_STDC
 
 #endif	/* ESQLC_H */

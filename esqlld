@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)esqlld	50.1 97/01/12 17:54:51
+# @(#)esqlld	54.1 97/04/08 18:59:41
 #
 # DBD::Informix for Perl Version 5
 #
@@ -25,4 +25,6 @@ for $arg (@ARGV)
 $cmd = $ENV{ESQLLD};
 $cmd = 'cc' unless ($cmd);
 @cmd = split /\s+/, $cmd;
-exec @cmd, @ARGS;
+
+print STDERR "@cmd -v @ARGS -lc\n";
+exec @cmd, @ARGS, "-lc";

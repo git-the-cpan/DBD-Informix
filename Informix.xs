@@ -1,5 +1,5 @@
 /*
- * @(#)Informix.xs	53.1 97/03/06 19:28:48
+ * @(#)Informix.xs	54.2 97/05/14 17:21:54
  *
  * Portions Copyright (c) 1994,1995 Tim Bunce
  * Portions Copyright (c) 1995,1996 Alligator Descartes
@@ -9,6 +9,8 @@
  * License or the Artistic License, as specified in the Perl README file.
  */
 
+/*TABSTOP=4*/
+
 #include "Informix.h"
 
 /* --- Variables --- */
@@ -17,7 +19,7 @@ DBISTATE_DECLARE;
 
 /* Assume string concatenation is available */
 #ifndef lint
-static const char sccs[] = "@(#)Informix.xs	53.1 97/03/06";
+static const char sccs[] = "@(#)Informix.xs	54.2 97/05/14";
 static const char esqlc_ver[] = "@(#)" ESQLC_VERSION_STRING;
 #endif
 
@@ -73,6 +75,18 @@ disconnect_all(drh)
 		XST_mIV(0, 1);
 	}
 
+# Fetch a driver attribute.  The keys are always strings.
+void
+FETCH(drh, keysv)
+	SV *        drh
+	SV *        keysv
+	CODE:
+	D_imp_drh(drh);
+	SV *valuesv = dbd_dr_FETCH_attrib(imp_drh, keysv);
+	if (!valuesv)
+		valuesv = DBIS->get_attr(drh, keysv);
+	ST(0) = valuesv;    /* dbd_dr_FETCH_attrib did sv_2mortal  */
+
 # Utility function to list available databases
 void
 _ListDBs( drh )
@@ -118,6 +132,7 @@ connect(dbh, dbname, uid, pwd)
 
 # Begin work (analogue of commit and rollback, below)
 # Cannot be called using "$dbh->begin", unlike commit and rollback
+# Would have to use: DBD::Informix::db::begin();
 void
 begin(dbh)
 	SV *        dbh
@@ -141,10 +156,7 @@ rollback(dbh)
 	D_imp_dbh(dbh);
 	ST(0) = dbd_db_rollback(imp_dbh) ? &sv_yes : &sv_no;
 
-# Store a connection attribute.
-# Are the keys always strings?  I think so...  So we could use
-# 'char *keysv'.  The caching and DBIS->set_attr() calls should be
-# handled in the main DBI code.
+# Store a connection attribute.  The keys are always strings.
 void
 STORE(dbh, keysv, valuesv)
 	SV *        dbh
@@ -153,21 +165,13 @@ STORE(dbh, keysv, valuesv)
 	CODE:
 	D_imp_dbh(dbh);
 	ST(0) = &sv_yes;
-	if (dbd_db_STORE_attrib(imp_dbh, keysv, valuesv))
+	if (!dbd_db_STORE_attrib(imp_dbh, keysv, valuesv))
 	{
-		/* This caching should be handled by the DBI switch, somehow */
-		/* Cache for next time (via DBI quick_FETCH) */
-		STRLEN          kl;
-		char           *key = SvPV(keysv, kl);
-		hv_store((HV *)SvRV(dbh), key, kl, &sv_yes, 0);
+		if (!DBIS->set_attr(dbh, keysv, valuesv))
+			ST(0) = &sv_no;
 	}
-	else if (!DBIS->set_attr(dbh, keysv, valuesv))
-		ST(0) = &sv_no;
 
-# Fetch a connection attribute.
-# Are the keys always strings?  I think so...  So we could use
-# 'char *keysv'.  The caching and DBIS->set_attr() calls should be
-# handled in the main DBI code.
+# Fetch a connection attribute.  The keys are always strings.
 void
 FETCH(dbh, keysv)
 	SV *        dbh
@@ -353,26 +357,22 @@ blob_read(sth, field, offset, len, destrv=Nullsv, destoffset=0)
 	CODE:
 	croak("DBD::Informix::blob_read is not implemented\n");
 
-# Store a statement attribute
-# Are the keys always strings?  I think so...  So we could use
-# 'char *keysv'.  The caching and DBIS->set_attr() calls should be
-# handled in the main DBI code.
+# Store a statement attribute.  The keys are always strings.
 void
 STORE(sth, keysv, valuesv)
 	SV *	sth
-	SV *        keysv
-	SV *        valuesv
+	SV *    keysv
+	SV *    valuesv
 	CODE:
 	D_imp_sth(sth);
 	ST(0) = &sv_yes;
 	if (!dbd_st_STORE_attrib(imp_sth, keysv, valuesv))
+	{
 		if (!DBIS->set_attr(sth, keysv, valuesv))
 			ST(0) = &sv_no;
+	}
 
-# Fetch a statement attribute
-# Are the keys always strings?  I think so...  So we could use
-# 'char *keysv'.  The caching and DBIS->set_attr() calls should be
-# handled in the main DBI code.
+# Fetch a statement attribute.  The keys are always strings.
 void
 FETCH(sth, keysv)
 	SV *        sth

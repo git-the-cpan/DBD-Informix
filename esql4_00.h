@@ -1,10 +1,10 @@
 /*
 @(#)File:            esql4_00.h
-@(#)Version:         1.5
-@(#)Last changed:    96/11/26
+@(#)Version:         1.6
+@(#)Last changed:    97/01/28
 @(#)Purpose:         Function prototypes for ESQL/C Version 4.00
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992,1993,1995,1996
+@(#)Copyright:       (C) JLSS 1992-93,1995-97
 @(#)Product:         :PRODUCT:
 */
 
@@ -22,7 +22,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql4_00_h[] = "@(#)esql4_00.h	1.5 96/11/26";
+static const char esql4_00_h[] = "@(#)esql4_00.h	1.6 97/01/28";
 #endif	/*lint */
 #endif	/*MAIN_PROGRAM */
 
@@ -32,19 +32,11 @@ extern "C" {
 
 #include "esql4_10.h"
 
-#ifdef __STDC__
-
 extern int      sqgetdbs(int *ret_fcnt,
                          char **fnames,
                          int fnsize,
                          char *farea,
                          int fasize);
-
-#else
-
-extern int      sqgetdbs();
-
-#endif	/* __STDC__ */
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)basic00.t	53.1 97/03/06 20:37:22
+#	@(#)basic00.t	54.2 97/05/15 16:27:48
 #
 #	Primary test script for DBD::Informix
 #
@@ -14,21 +14,26 @@ $testtable = "dbd_ix_test01";
 
 &stmt_note("1..51\n");
 
-# Test install...
+# Test installation of driver
+# NB: Do not use install_driver in your own code.
+#     Use DBI->connect as shown below.
 &stmt_note("# Testing: DBI->install_driver('Informix')\n");
 $drh = DBI->install_driver('Informix');
 &stmt_ok(0);
 
 print "# DBI Information\n";
 print "#     Version:               $DBI::VERSION\n";
-print "# Driver Information\n";
+print "# Generic Driver Information\n";
 print "#     Type:                  $drh->{Type}\n";
 print "#     Name:                  $drh->{Name}\n";
 print "#     Version:               $drh->{Version}\n";
-print "#     Product:               $drh->{ProductName}\n";
-print "#     Product Version:       $drh->{ProductVersion}\n";
 print "#     Attribution:           $drh->{Attribution}\n";
-print "#     Multiple Connections:  $drh->{MultipleConnections}\n";
+print "# Informix Driver Information\n";
+print "#     Product:               $drh->{ix_ProductName}\n";
+print "#     Product Version:       $drh->{ix_ProductVersion}\n";
+print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
+print "#     Active Connections:    $drh->{ix_ActiveConnections}\n";
+print "#     Current Connection:    $drh->{ix_CurrentConnection}\n";
 print "# \n";
 
 $dbh = &connect_to_test_database();
@@ -48,10 +53,13 @@ $dbname = $dbh->{Name};
 &stmt_fail() unless ($dbh = DBI->connect($dbname, "", "", 'Informix'));
 &stmt_ok();
 
-print "# Database Information\n";
+$dbh->{ChopBlanks} = 1;		# Force chopping of trailing blanks 
+
+print "# Generic Database Information\n";
 print "#     Type:                    $dbh->{Type}\n";
 print "#     Database Name:           $dbh->{Name}\n";
 print "#     AutoCommit:              $dbh->{AutoCommit}\n";
+print "# Informix Database Information\n";
 print "#     Informix-OnLine:         $dbh->{ix_InformixOnLine}\n";
 print "#     Logged Database:         $dbh->{ix_LoggedDatabase}\n";
 print "#     Mode ANSI Database:      $dbh->{ix_ModeAnsiDatabase}\n";
@@ -236,7 +244,7 @@ sub select_all
 &stmt_retest($dbh, $stmt1, 0);
 
 # Test stored procedures...
-if ($drh->{ProductVersion} >= 500)
+if ($drh->{ix_ProductVersion} >= 500)
 {
 	$stmt10 = "DROP PROCEDURE dbd_ix_01";
 	&stmt_test($dbh, $stmt10, 1);

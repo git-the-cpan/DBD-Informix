@@ -1,108 +1,166 @@
-DBD::Informix for DBI
+Change Log for DBD::Informix for DBI
 
 - Written by Alligator Descartes <descarte@mcqueen.com>
 - Rewritten by Jonathan Leffler (johnl@informix.com)
 
-18/08/95:       Started.
-                Version 0.0.0 (Totally pre-alpha!)
-
-17/10/95:15:39  After a good break of about a month and a half, back in the
-                saddle.
-
-                We have data from SELECTs coming back from the database!
-
-                Released 0.20pl0 Disney on ftp.mcqueen.com. Limited hacker
-                release.
-
-14/04/96:18:04  Added support for CREATE, DROP, INSERT, UPDATE and DELETE.
-                Fixed $DBI::errnum and $DBI::errstr problems
-                Fixed Informix.pm to stop reporting MSQL_HOME errors
-                Fixed Makefile.PL
-                Removed hacky 'build' file and uses Makefile.PL exclusively
-                now.
-
-0.21 Release
+0.54 Release
 ------------
-01/09/95:       Fixed truncated INTEGER bug. Other numerical types still
-                screwed. Patch on the way.
+97-05-16: Another major rework on Informix.Licence to make the requirements
+          clearer to people with minimal exposure to Informix, after Honza
+          Pazdziora (adelton@fi.muni.cz) had some problems with it.  Add
+          notes from Anibal Jodorcovsky (anibal@nortel.ca) about
+          compilation on Motorola M88K SVR4 machines in README.M88K.SVR4.
+          Version 0.54 released.
+97-05-15: ChopBlanks code added and tested.  VARCHAR was bad!  Statement
+          level ChopBlanks attribute not tested (probably not operational;
+          attribute probably remains as it was when the statement was
+          prepared).
+97-05-13: Finish adding driver fetch function, and consequential changes.
+          SQLSTATE now available via DBI::state!
+97-05-05: Revise ixblob.ec to use ixblob.h and transfer to general library.
+          Eliminate BLOB_DUMMY_VALUE and BLOB_NULL_VALUE (can't think what
+          they were to be used for!).  Consequential changes.
+97-04-24: Add fix in Makefile.PL for DEC OSF/1 and ESQL/C 7.22 from Andrew
+          Hunt (andy@toolshed.com).  Reverse order of updates in ChangeLog.
+          DEC OSF/1 changes also reported later by Debbie Ingram
+          (djingram@mindspring.com).
+97-04-08: Add attribute $sth->{ix_Fetchable} to determine whether the
+          statement needs data fetching or not.  Add this to sqlcmd.sh, which
+          enables basic simulation of the full SQLCMD program.  Still need
+          better Getopt module which allows for multiple occurrences of a
+          single option on the command line (eg: multiple -e or -f options).
+          Also need better handling of filenames versus commands in the rest
+          of the arguments.  Note that the build process does not (yet) do
+          anything with the source code of sqlcmd.sh.
+97-04-01: Add '-Ae' for HP-UX unless $Config{ccflags} includes -Aa or -Ae,
+          per information from Oyvind Gjerstad (ogj@tglobe1.tollpost.no).
+          Include $Config{ccflags} in the command line when building the
+          ESQL/C test program.
+97-03-28: Correct the handling of $dbase2 in multiple connections tests when
+          DBD_INFORMIX_DATABASE2 is not set.  Fix required after John C
+          Hossfeld (john@netpub.com) had problems.  Also report which database
+          is being connected to!  Problem (and solution) also subsequently
+          reported by James F Miner (jfm@winternet.com).
+97-03-26: Add ODBC type handling.
+97-03-20: Update Makefile.PL to handle relocated DBIXS.h header, again.
+97-03-18: Change the handling of deprecated attributes per Informix.PM.
 
-0.22 Release
+0.53 Release
 ------------
-09/09/96:       Added @ary = $drh->func('_ListDBs'); method for getting
-                a list of extant databases on the local Informix server.
-                (From original code and suggestion by
-                  George.Vicherek@Sciatl.COM)
+97-03-06: Change the handling of deprecated attributes per Informix.PM.
+          Update the README file to spell out the pre-requisites better.
+          Update Makefile.PL with 0.53a1 version number, and so that it
+          insists that $INFORMIXDIR is set, and that $INFORMIXDIR/bin is in
+          $PATH.  Update tests to use the non-deprecated attributes.  Add the
+          test program esqltest.ec to check that the ESQL/C environment is OK
+          before creating the Makefile.
+97-03-10: No changes over the weekend - the skiing at Squaw was fabulous!
+          Update the POD to encourage the use of DBI->connect() in preference
+          to $drh = DBI->install_driver().  Add two new, but fore-shadowed,
+          driver attributes, ix_CurrentConnection and ix_ActiveConnections,
+          though they're currently only set when the driver is loaded.
+97-03-17: Update Informix.Licence to contain more comprehensive information
+          on licencing and Netscape's LiveWire Pro.  Update t/updcursor.t so
+          it passes on a logged (non-MODE ANSI) database.  Fix the problem
+          with nulls found by Oyvind Gjerstad (ogj@tglobe1.tollpost.no) and
+          now immortalized in the test case t/nulls02.t.  Change version to
+          0.53 and release.
 
-10/09/96:       Fixed all numeric types to return correctly. CHAR fields don't
-                quite behave as planned, or perhaps they do. Added 'multicursor'
-                test which proves that simultanous multiple cursors fails
-                miserably.
-
-0.23 Release
+0.52 Release
 ------------
-17/09/96:       Added patch for bad column names as show in George Vicherek's
-                splendid test case. (extratests/primitives.pl exercises this)
+97-03-05: Add ESQL/C => DBD::Informix statement mapping to POD in Informix.PM,
+          after suggestion by Bill Mitlyng (Bill.Mitlyng@abnamro.com).
+97-03-03: Use $DBI::VERSION to determine where DBIXS.h should be found.
+97-03-02: Split attribute handling code from dbdimp.ec into dbdattr.ec.
+          Add dbd_ix_module() function.  Revise the interface to the functions
+          dbd_st_{FETCH|STORE} to match dbd_db_{FETCH|STORE} (they now take a
+          pointer to imp_sth_t argument instead of a pointer to SV).
+97-02-28: Add the Informix.Licence file to explain the licencing issues for
+          Informix-ESQL/C.  Update the README file.  Fix the caching of
+          attributes.  Add 'deprecated' warning to the system, and a way of
+          turning the deprecated warnings off.  Use this method in
+          InformixTest.pm.  Add the attribute handling of ix_XyZ as well as
+          deprecating the corresponding XyZ attribute.  Fix the handling of
+          SQLCA so that the inserted serial number is available, etc.  Version
+          bumped to 0.52.
 
-18/09/96:       Wrapped in a patch to Makefile.PL from Christophe Martin.
-                Added some other Makefile.PL patches of my own. It should now
-                support cleaner builds on HP-UX (spit!) and correctly detect
-                when dbdimp.ec has changed.
-
-18/09/96:       Wrapped in patches by Terry Nightingale based on Bill Hailes'
-                isqlperl for supporting multi-cursors. Cleaned the type
-                handling code again.
-
-0.24 Release
+0.51 Release
 ------------
-26/09/96:       Patches from Terry arrived. This'll be the 0.25 release. Seems
-                to work.
+97-02-26: Add $sth->{CursorName} and $dbh->{ConnectionName}.  Add test
+          updcursor.t to check that you can do 'UPDATE ... WHERE CURRENT OF'.
+          Add ".DEFAULT." as an explicit way of making the default connection.
+          Release version 0.51, and a patch, version 0.51p1.
+97-02-25: Version bumped to 0.51.  Nulls on SELECT handled correctly.  Test
+          nulls01.t added.  Notes on access to the SQLCA record added to the
+          POD in Informix.PM, after this omission was noted by Torsten Stein
+          (stein@cls.de).
+97-01-23: Fix InformixTest.pm so it works with perldoc.  It seems that perldoc
+          does not like lines which start with a single quote.  Thanks to
+          Jason Bodnar (jcbodnar@mail.utexas.edu) for pointing this problem
+          out. Add and use stmt_err to report errors or warnings, and document
+          it.
+
+0.50 Release
+------------
+97-02-13: Version 0.50 released.  Handle null database names on connect so
+          that CREATE DATABASE, etc, can be used.  ESQL/C 5.0x has to handle
+          this by doing nothing (successfully) in dbd_ix_database(), but the
+          disconnect code needs to know that there is no database so it
+          doesn't try to close the current database.  This requires interface
+          changes for dbd_ix_database() and dbd_ix_connect().  Add testing.
+          Thanks to Serge Davidov (serge@fcmc.com) for finding the problem.
+          You can also use DBI->connect('@server','','','Informix'), which
+          actually worked in v0.25.  DBD::Informix is still confused, in
+          general, by statements such as CLOSE DATABASE.
+97-01-12: Version bumped to 0.50p1, for consistency with documented intentions
+          when 0.25 release was made.
+
+0.26 Release
+------------
+97-01-12: Use cursors WITH HOLD when a MODE ANSI database is working with
+          AutoCommit set On.  Make transaction tests more sensitive.
+          This release never made public.
+97-01-09: Updated copyright messages.  Improved documentation.  Fixed tests.
+          Add $dbh->{InTransaction} query.  Clean up dbdimp.ec so that
+          AutoCommit works better. Etc.  Version 0.26a2.
+96-12-20: Get transaction stuff to work, more or less, with AutoCommit On or
+          Off, in MODE ANSI or Logged databases.  Tests t/transact0[123].t
+          added, but these still need to be more formally verified.  They
+          pass with OnLine and any type of database.  Clean up various tests
+          so that they pass on MODE ANSI databases.  Add select_some_data
+          and select_zero_data functions to InformixTest.pm. Etc.  Version
+          0.26a1.  Use bug-fixed version of decsci.c (ouch!).
+96-12-19: Add install instructions to README file after Wes Gamble
+          (wgamble@informix.com) pointed out this omission.  Add extensive
+          notes to Informix.PM on transaction management.  Implement most
+          of what those notes say (WITH HOLD cursors omitted at the
+          moment).
+96-12-18: Fix bug in patched Makefile.PL (need space before __H_LOCALEDEF).
+          Updated dbd_ix_setconnection() to take connection information, and
+          updated code in dbdimp.ec to ensure that the correct connection is
+          set before starting work.  Simple testing more or less works.  Some
+          more major revisions, such as not passing SV* to most of the code in
+          dbdimp.ec (let the Informix.c code convert as much as possible to
+          plain C).  Rework the 'do' function to completely override
+          DBI::_::db::do, avoiding problems with the rows() function.
+
+0.25 Patch 2
+------------
+96-12-13: Update Makefile.PL to help the AIX people.  Version 0.25p2 created
+          but only the Makefile.PL changes sent to the dbi-users@fugue.com so
+          not released officially, though available publicly.
+
+0.25 Patch 1
+------------
+96-12-10: Handle 5.00 and 5.01 by supplying actual array names to GET
+          DESCRIPTOR, thus bypassing the bug.  Note that it does affect 5.01
+          too; edited esql5_00.h to match.  Patch sent to Jeff Rowe who
+          confirms it works.  (Note to JL: 5.01 found on Godzilla; what is
+          installed as 5.00 is actually 4.10 ESQL/C).  Version 0.25p1 created
+          but not released officially or publicly.
 
 0.25 Release
 ------------
-96-11-01: Control transferred to Jonathan Leffler (johnl@informix.com).
-96-11-19: Rewrite of dbdimp.ec more or less complete.  The ESQL/C code
-          has been almost totally rewritten; the Perl interface code is
-          still similar to what was there previously.  Nearly ready to go
-          into release.  5.0x ESQL/C not linking OK on Solaris; not sure
-          why.  7.21 is doing fine.
-96-11-25: Changes leading up to 0.25b1 release.  Add sqlca record handling
-          for statements.  Add use of EXEC IMMEDIATE when feasible.
-96-11-26: Feedback from beta testers incorporated into build process.
-          Not all problems will be resolved yet.  Version 0.25b2.
-96-11-30: Move sqlca handling to connection (not statement).
-          Fix blob handling to the extent that SELECT works.  (INSERT and
-          UPDATE still need fixing.  INSERT will probably be able to adapt
-          the SELECT code to handle blobs.  UPDATE will be very tricky.
-          Memory leaks may (probably) occur.
-          Upgrade Makefile.PL to always set INFORMIXC when compiling ESQL/C.
-96-12-01: Upgrade Makefile.PL to use new Perl scripts esqlcc, esqlsed and
-          esqlld to protect platforms such as DEC OSF/1 where the C
-          compiler is not used to link shared libraries.  Also, only use
-          GCC warnings when DBD_GCC_DEBUG is set in the environment.  Also
-          use $(RM_F) to remove the generated C files instead of $(RM) so
-          that it works for platforms like SCO where $(RM) is not defined
-          by MAKE automatically.
-96-12-02: Release 0.25b3 with some work incomplete.  Update Makefile.PL so
-          that "make perl" works.  Note that INSERT and blobs does not work!
-96-12-03: Update Makefile.PL (and esqlcc) to use '$(FULLPERL) esqlcc' etc.
-          Rename the extratests directory to t for automatic testing as
-          documented in the Test::Harness module.  Create (and document)
-          InformixTest.pm to help with the test programs.  Note that
-          test.pl does not exploit it all that much because it has to test
-          some more basic stuff.  However, the other tests do use it.
-          NB: ESQL/C 5.00 and 5.01 have a bug in the SQL descriptor code
-          which means that using 'char *' as a type restricts you to precisely
-          3 characters of data.  This is fixed in 5.02 and above.  Dammit!
-96-12-04: Update Makefile.PL to overcome Dave Thomas problems on DEC OSF
-          (version 25.13 sent to him for approval, and comments incorporated
-          into version 25.14 .. 25.16).  Also finish converting the tests in
-          the t directory.
-96-12-05: More revisions to Makefile.PL, some putting teeth into the
-          prerequisites, some more dealing with DEC OSF (there's a compiler
-          flag to say set __STDC__, as there usually is).  Rename nm_* inside
-          the imp_sth structure.  Redefine the type of imp_sth->blobs and
-          upgrade code to match.  Test t/blob03.t passes; some work to do to
-          get t/blob04.t to pass.  Improved README.  Etc.
 96-12-09: Finally worked out how SQL descriptors handle blobs.  Code now works
           safely with blobs located in memory.  However, with ESQL/C 7.21.UC1
           on Solaris 2.4, there is a memory leak corresponding to the space
@@ -126,116 +184,94 @@ Rodlyn Joseph - bluephi@sharpcomm.com
 Duc Nguyen - dhn@benvolio.nova.att.com
 Serge Davidov - serge@fcmc.com
 
-96-12-10: Handle 5.00 and 5.01 by supplying actual array names to GET
-          DESCRIPTOR, thus bypassing the bug.  Note that it does affect 5.01
-          too; edited esql5_00.h to match.  Patch sent to Jeff Rowe who
-          confirms it works.  (Note to JL: 5.01 found on Godzilla; what is
-          installed as 5.00 is actually 4.10 ESQL/C).  Version 0.25p1 created
-          but not released officially or publicly.
-96-12-13: Update Makefile.PL to help the AIX people.  Version 0.25p2 created
-          but only the Makefile.PL changes sent to the dbi-users@fugue.com so
-          not released officially, though available publicly.
+96-12-05: More revisions to Makefile.PL, some putting teeth into the
+          prerequisites, some more dealing with DEC OSF (there's a compiler
+          flag to say set __STDC__, as there usually is).  Rename nm_* inside
+          the imp_sth structure.  Redefine the type of imp_sth->blobs and
+          upgrade code to match.  Test t/blob03.t passes; some work to do to
+          get t/blob04.t to pass.  Improved README.  Etc.
+96-12-04: Update Makefile.PL to overcome Dave Thomas problems on DEC OSF
+          (version 25.13 sent to him for approval, and comments incorporated
+          into version 25.14 .. 25.16).  Also finish converting the tests in
+          the t directory.
+96-12-03: Update Makefile.PL (and esqlcc) to use '$(FULLPERL) esqlcc' etc.
+          Rename the extratests directory to t for automatic testing as
+          documented in the Test::Harness module.  Create (and document)
+          InformixTest.pm to help with the test programs.  Note that
+          test.pl does not exploit it all that much because it has to test
+          some more basic stuff.  However, the other tests do use it.
+          NB: ESQL/C 5.00 and 5.01 have a bug in the SQL descriptor code
+          which means that using 'char *' as a type restricts you to precisely
+          3 characters of data.  This is fixed in 5.02 and above.  Dammit!
+96-12-02: Release 0.25b3 with some work incomplete.  Update Makefile.PL so
+          that "make perl" works.  Note that INSERT and blobs does not work!
+96-12-01: Upgrade Makefile.PL to use new Perl scripts esqlcc, esqlsed and
+          esqlld to protect platforms such as DEC OSF/1 where the C
+          compiler is not used to link shared libraries.  Also, only use
+          GCC warnings when DBD_GCC_DEBUG is set in the environment.  Also
+          use $(RM_F) to remove the generated C files instead of $(RM) so
+          that it works for platforms like SCO where $(RM) is not defined
+          by MAKE automatically.
+96-11-30: Move sqlca handling to connection (not statement).
+          Fix blob handling to the extent that SELECT works.  (INSERT and
+          UPDATE still need fixing.  INSERT will probably be able to adapt
+          the SELECT code to handle blobs.  UPDATE will be very tricky.
+          Memory leaks may (probably) occur.
+          Upgrade Makefile.PL to always set INFORMIXC when compiling ESQL/C.
+96-11-26: Feedback from beta testers incorporated into build process.
+          Not all problems will be resolved yet.  Version 0.25b2.
+96-11-25: Changes leading up to 0.25b1 release.  Add sqlca record handling
+          for statements.  Add use of EXEC IMMEDIATE when feasible.
+96-11-19: Rewrite of dbdimp.ec more or less complete.  The ESQL/C code
+          has been almost totally rewritten; the Perl interface code is
+          still similar to what was there previously.  Nearly ready to go
+          into release.  5.0x ESQL/C not linking OK on Solaris; not sure
+          why.  7.21 is doing fine.
+96-11-01: Control transferred to Jonathan Leffler (johnl@informix.com).
 
-0.26 Release
+0.24 Release
 ------------
-96-12-18: Fix bug in patched Makefile.PL (need space before __H_LOCALEDEF).
-          Updated dbd_ix_setconnection() to take connection information, and
-          updated code in dbdimp.ec to ensure that the correct connection is
-          set before starting work.  Simple testing more or less works.  Some
-          more major revisions, such as not passing SV* to most of the code in
-          dbdimp.ec (let the Informix.c code convert as much as possible to
-          plain C).  Rework the 'do' function to completely override
-          DBI::_::db::do, avoiding problems with the rows() function.
-96-12-19: Add install instructions to README file after Wes Gamble
-          (wgamble@informix.com) pointed out this omission.  Add extensive
-          notes to Informix.PM on transaction management.  Implement most
-          of what those notes say (WITH HOLD cursors omitted at the
-          moment).
-96-12-20: Get transaction stuff to work, more or less, with AutoCommit On or
-          Off, in MODE ANSI or Logged databases.  Tests t/transact0[123].t
-          added, but these still need to be more formally verified.  They
-          pass with OnLine and any type of database.  Clean up various tests
-          so that they pass on MODE ANSI databases.  Add select_some_data
-          and select_zero_data functions to InformixTest.pm. Etc.  Version
-          0.26a1.  Use bug-fixed version of decsci.c (ouch!).
-97-01-09: Updated copyright messages.  Improved documentation.  Fixed tests.
-          Add $dbh->{InTransaction} query.  Clean up dbdimp.ec so that
-          AutoCommit works better. Etc.  Version 0.26a2.
-97-01-12: Use cursors WITH HOLD when a MODE ANSI database is working with
-          AutoCommit set On.  Make transaction tests more sensitive.
-          This release never made public.
+96-09-26: Patches from Terry arrived.  This'll be the 0.25 release.  Seems to
+          work.
 
-0.50 Release
+0.23 Release
 ------------
-97-01-12: Version bumped to 0.50p1, for consistency with documented intentions
-          when 0.25 release was made.
-97-01-23: Fix InformixTest.pm so it works with perldoc.  It seems that perldoc
-          does not like lines which start with a single quote.  Thanks to
-          Jason Bodnar (jcbodnar@mail.utexas.edu) for pointing this problem
-          out. Add and use stmt_err to report errors or warnings, and document
-          it.
-97-02-13: Version 0.50 released.  Handle null database names on connect so
-          that CREATE DATABASE, etc, can be used.  ESQL/C 5.0x has to handle
-          this by doing nothing (successfully) in dbd_ix_database(), but the
-          disconnect code needs to know that there is no database so it
-          doesn't try to close the current database.  This requires interface
-          changes for dbd_ix_database() and dbd_ix_connect().  Add testing.
-          Thanks to Serge Davidov (serge@fcmc.com) for finding the problem.
-          You can also use DBI->connect('@server','','','Informix'), which
-          actually worked in v0.25.  DBD::Informix is still confused, in
-          general, by statements such as CLOSE DATABASE.
+96-09-18: Wrapped in a patch to Makefile.PL from Christophe Martin.  Added
+          some other Makefile.PL patches of my own.  It should now support
+          cleaner builds on HP-UX (spit!) and correctly detect when dbdimp.ec
+          has changed.
+96-09-18: Wrapped in patches by Terry Nightingale based on Bill Hailes'
+          isqlperl for supporting multi-cursors.  Cleaned the type handling
+          code again.
+96-09-17: Added patch for bad column names as show in George Vicherek's
+          splendid test case. (extratests/primitives.pl exercises this)
 
-0.51 Release
+0.22 Release
 ------------
-97-02-25: Version bumped to 0.51.  Nulls on SELECT handled correctly.  Test
-          nulls01.t added.  Notes on access to the SQLCA record added to the
-          POD in Informix.PM, after this omission was noted by Torsten Stein
-          (stein@cls.de).
-97-02-26: Add $sth->{CursorName} and $dbh->{ConnectionName}.  Add test
-          updcursor.t to check that you can do 'UPDATE ... WHERE CURRENT OF'.
-          Add ".DEFAULT." as an explicit way of making the default connection.
-          Release version 0.51, and a patch, version 0.51p1.
+96-09-10: Fixed all numeric types to return correctly.  CHAR fields don't
+          quite behave as planned, or perhaps they do.  Added 'multicursor'
+          test which proves that simultaneous multiple cursors fail miserably.
+96-09-09: Added @ary = $drh->func('_ListDBs'); method for getting a list of
+          extant databases on the local Informix server.  (From original code
+          and suggestion by George.Vicherek@Sciatl.COM)
 
-0.52 Release
+0.21 Release
 ------------
-97-02-28: Add the Informix.Licence file to explain the licencing issues for
-          Informix-ESQL/C.  Update the README file.  Fix the caching of
-          attributes.  Add 'deprecated' warning to the system, and a way of
-          turning the deprecated warnings off.  Use this method in
-          InformixTest.pm.  Add the attribute handling of ix_XyZ as well as
-          deprecating the corresponding XyZ attribute.  Fix the handling of
-          SQLCA so that the inserted serial number is available, etc.  Version
-          bumped to 0.52.
-97-03-02: Split attribute handling code from dbdimp.ec into dbdattr.ec.
-          Add dbd_ix_module() function.  Revise the interface to the functions
-          dbd_st_{FETCH|STORE} to match dbd_db_{FETCH|STORE} (they now take a
-          pointer to imp_sth_t argument instead of a pointer to SV).
-97-03-03: Use $DBI::VERSION to determine where DBIXS.h should be found.
-97-03-05: Add ESQL/C => DBD::Informix statement mapping to POD in Informix.PM,
-          after suggestion by Bill Mitlyng (Bill.Mitlyng@abnamro.com).
+95-09-01: Fixed truncated INTEGER bug.  Other numerical types still screwed.
+          Patch on the way.
 
-0.53 Release
-------------
-97-03-06: Change the handling of deprecated attributes per Informix.PM.
-          Update the README file to spell out the pre-requisites better.
-          Update Makefile.PL with 0.53a1 version number, and so that it
-          insists that $INFORMIXDIR is set, and that $INFORMIXDIR/bin is in
-          $PATH.  Update tests to use the non-deprecated attributes.  Add the
-          test program esqltest.ec to check that the ESQL/C environment is OK
-          before creating the Makefile.
-97-03-10: No changes over the weekend - the skiing at Squaw was fabulous!
-          Update the POD to encourage the use of DBI->connect() in preference
-          to $drh = DBI->install_driver().  Add two new, but fore-shadowed,
-          driver attributes, ix_CurrentConnection and ix_ActiveConnections,
-          though they're currently only set when the driver is loaded.
-97-03-17: Update Informix.Licence to contain more comprehensive information
-          on licencing and Netscape's LiveWire Pro.  Update t/updcursor.t so
-          it passes on a logged (non-MODE ANSI) database.  Fix the problem
-          with nulls found by Oyvind Gjerstad (ogj@tglobe1.tollpost.no) and
-          now immortalized in the test case t/nulls02.t.  Change version to
-          0.53 and release.
+Pre-Release
+-----------
+96-04-14: Added support for CREATE, DROP, INSERT, UPDATE and DELETE.  Fixed
+          $DBI::errnum and $DBI::errstr problems.  Fixed Informix.pm to stop
+          reporting MSQL_HOME errors.  Fixed Makefile.PL.  Removed hacky
+          'build' file and uses Makefile.PL exclusively now.
+95-10-17: After a good break of about a month and a half, back in the saddle.
+          We have data from SELECTs coming back from the database!  Released
+          0.20pl0 Disney on ftp.mcqueen.com.  Limited hacker release.
+95-08-18: Started.  Version 0.0.0 (Totally pre-alpha!)
 
 --------------
 
 Jonathan Leffler (johnl@informix.com)
-@(#)ChangeLog	53.2 97/03/17 18:50:19
+@(#)ChangeLog	54.6 97/05/16 10:06:16

@@ -1,4 +1,4 @@
-#	@(#)InformixTest.pm	52.1 97/02/28 18:54:20
+#	@(#)InformixTest.pm	54.4 97/05/14 17:24:46
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
@@ -53,7 +53,9 @@
 	&stmt_note("# DBI->connect('$dbname', '$dbuser', '$xxpass', 'Informix')\n");
 	my ($dbh) = DBI->connect($dbname, $dbuser, $dbpass, 'Informix');
 	&stmt_fail() unless (defined $dbh);
-	$dbh->{ix_Deprecated} = 0;
+	# Unconditionally chop trailing blanks.
+	# Override in test cases as necessary.
+	$dbh->{ChopBlanks} = 1;
 	$dbh;
 	}
 
@@ -61,28 +63,30 @@
 	{
 		my ($sth) = @_;
 		print "# Testing SQLCA handling\n";
-		print "#     SQLCA.SQLCODE    = $sth->{sqlcode}\n";
-		print "#     SQLCA.SQLERRM    = '$sth->{sqlerrm}'\n";
-		print "#     SQLCA.SQLERRP    = '$sth->{sqlerrp}'\n";
+		print "#     SQLCA.SQLCODE    = $sth->{ix_sqlcode}\n";
+		print "#     SQLCA.SQLERRM    = '$sth->{ix_sqlerrm}'\n";
+		print "#     SQLCA.SQLERRP    = '$sth->{ix_sqlerrp}'\n";
 		my ($i) = 0;
-		my @errd = @{$sth->{sqlerrd}};
+		my @errd = @{$sth->{ix_sqlerrd}};
 		for ($i = 0; $i < @errd; $i++)
 		{
 			print "#     SQLCA.SQLERRD[$i] = $errd[$i]\n";
 		}
-		my @warn = @{$sth->{sqlwarn}};
+		my @warn = @{$sth->{ix_sqlwarn}};
 		for ($i = 0; $i < @warn; $i++)
 		{
 			print "#     SQLCA.SQLWARN[$i] = '$warn[$i]'\n";
 		}
+			print "# SQLSTATE             = '$DBI::state'\n";
 	}
 
 	my $ok_counter = 0;
 	sub stmt_err
 	{
+			# NB: error messages ${DBI::errstr} end with a newline.
 			my ($str) = @_;
 			$str = "Error Message" unless ($str);
-			$str .= ":\n$DBI::errstr";
+			$str .= ":\n${DBI::errstr}SQLSTATE = $DBI::state\n";
 			$str =~ s/^/# /gm;
 			&stmt_note($str);
 	}

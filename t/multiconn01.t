@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)multiconn01.t	53.1 97/03/06 20:37:31
+#	@(#)multiconn01.t	54.3 97/05/13 12:55:21
 #
 #	Test Multiple Connections for DBD::Informix
 #
@@ -11,7 +11,7 @@ use DBD::InformixTest;
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);
 $dbase2 = $ENV{DBD_INFORMIX_DATABASE2};
-$dbase2 = "stores" unless ($dbase2);
+$dbase2 = $dbase1 unless ($dbase2);
 
 sub info_usertables
 {
@@ -45,12 +45,12 @@ $drh = DBI->install_driver('Informix');
 print "# Driver Information\n";
 print "#     Name:                  $drh->{Name}\n";
 print "#     Version:               $drh->{Version}\n";
-print "#     Product:               $drh->{ProductName}\n";
-print "#     Product Version:       $drh->{ProductVersion}\n";
-print "#     Multiple Connections:  $drh->{MultipleConnections}\n";
+print "#     Product:               $drh->{ix_ProductName}\n";
+print "#     Product Version:       $drh->{ix_ProductVersion}\n";
+print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
 print "# \n";
 
-if ($drh->{MultipleConnections} == 0)
+if ($drh->{ix_MultipleConnections} == 0)
 {
 	&stmt_note("1..1\n");
 	&stmt_note("# Multiple connections are not supported\n");
@@ -61,6 +61,7 @@ if ($drh->{MultipleConnections} == 0)
 &stmt_note("1..23\n");
 &stmt_ok();
 
+&stmt_note("# Connect to: $dbase1\n");
 &stmt_fail() unless ($dbh1 = $drh->connect($dbase1));
 &stmt_ok();
 
@@ -76,6 +77,7 @@ print "#\n";
 
 &info_usertables($dbh1);
 
+&stmt_note("# Connect to: $dbase2\n");
 &stmt_fail() unless ($dbh2 = $drh->connect($dbase2));
 &stmt_ok();
 
