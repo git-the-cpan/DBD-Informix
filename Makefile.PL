@@ -19,7 +19,7 @@ use DBI;	# The DBI must be installed before we can build a DBD
 
 %opts = (
     'NAME'    => 'DBD::Informix',
-    'VERSION' => '0.22',
+    'VERSION' => '0.23',
 );
 
 print "\nConfiguring DBD::Informix version $opts{VERSION}...\n";

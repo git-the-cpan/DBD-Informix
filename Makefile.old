@@ -97,10 +97,8 @@ LINKTYPE = dynamic
 
 # Handy lists of source code files:
 XS_FILES= Informix.xs
-C_FILES = Informix.c \
-	dbdimp.c
-O_FILES = Informix.o \
-	dbdimp.o
+C_FILES = Informix.c
+O_FILES = Informix.o
 H_FILES = Informix.h \
 	dbdimp.h
 MAN1PODS = 

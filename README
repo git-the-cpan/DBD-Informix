@@ -51,6 +51,16 @@ Makefile.PL command line and/or editing the Makefile.PL.
 You should never need to make any changes. If you do *please* let me
 know so that I can try to make it automatic in a later release.
 
+KNOWN PROBLEMS:
+
+	o Make'ing generally fails first time around with a message like:
+
+		In file included from dbdimp.ec:21:
+                Informix.h:5: DBIXS.h: No such file or directory
+                *** Error code 1
+
+	  Just type 'make' immediately. It should complete without further
+	  problems.
 
 IF YOU HAVE PROBLEMS:
 

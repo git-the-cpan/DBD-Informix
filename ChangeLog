@@ -32,3 +32,8 @@ DBD::Informix for DBI - Written by Alligator Descartes <descarte@mcqueen.com>
 		a list of extant databases on the local Informix server.
 		( From original code and suggestion by 
                   George.Vicherek@Sciatl.COM )
+
+10/09/96:	Fixed all numeric types to return correctly. CHAR fields don't
+		quite behave as planned, or perhaps they do. Added 'multicursor'
+		test which proves that simultanous multiple cursors fails
+		miserably.

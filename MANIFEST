@@ -5,11 +5,13 @@ Informix.xs
 MANIFEST
 Makefile
 Makefile.PL
+Makefile.old
 README
 ToDo
 dbdimp.ec
 dbdimp.h
 extratests/dblist.pl
-extratests/integerbug.pl
+extratests/multicursor.pl
+extratests/numerics.pl
 extratests/original_0.20pl0_test.pl
 test.pl
