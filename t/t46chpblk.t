@@ -1,27 +1,28 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t46chpblk.t,v 100.3 2002/02/08 22:50:56 jleffler Exp $ 
+#   @(#)$Id: t46chpblk.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	ChopBlanks attribute test script for DBD::Informix
+#   ChopBlanks attribute test script for DBD::Informix
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
-$tabname = "dbd_ix_chbl_01";
+my $tabname = "dbd_ix_chbl_01";
 
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 print "# OnLine - will test VARCHAR data types\n"
 	if ($dbh->{ix_InformixOnLine});
 print "# SE - no testing for VARCHAR data types\n"
 	unless ($dbh->{ix_InformixOnLine});
-$subtests = 5;
-$comtests = 2;
-$multiplier = 2;
+my $subtests = 5;
+my $comtests = 2;
+my $multiplier = 2;
 $multiplier = 4 if ($dbh->{ix_InformixOnLine});
-$ntests = $subtests * $multiplier + $comtests;
+my $ntests = $subtests * $multiplier + $comtests;
 &stmt_note("1..$ntests\n");
 &stmt_ok(0);
 
@@ -29,9 +30,9 @@ $ntests = $subtests * $multiplier + $comtests;
 # @expect_vc -- VARCHAR (either way)
 # @expect_ct -- CHAR with trailing blanks
 # @expect_cn -- CHAR without trailing blanks
-@expect_vc = ( "ABC", "ABC   ", "ABCDEFGHIJ" );
-@expect_ct = ( "ABC       ", "ABC       ", "ABCDEFGHIJ" );
-@expect_cn = ( "ABC", "ABC", "ABCDEFGHIJ" );	
+my @expect_vc = ( "ABC", "ABC   ", "ABCDEFGHIJ" );
+my @expect_ct = ( "ABC       ", "ABC       ", "ABCDEFGHIJ" );
+my @expect_cn = ( "ABC", "ABC", "ABCDEFGHIJ" );	
 
 sub test_trailing_blanks
 {
@@ -47,6 +48,7 @@ sub test_trailing_blanks
 			Col02 $type(10) NOT NULL
 		)
 		%);
+	my $ins;
 	&stmt_fail() unless $ins = $dbh->prepare(qq%
 		INSERT INTO $tabname VALUES(?, ?)
 		%);

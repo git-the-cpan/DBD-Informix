@@ -1,14 +1,15 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t40rows.t,v 100.3 2002/02/08 22:50:51 jleffler Exp $ 
+#   @(#)$Id: t40rows.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test $sth->rows1 for DBD::Informix
+#   Test $sth->rows1 for DBD::Informix
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 sub select_row_data
 {
@@ -41,11 +42,11 @@ sub select_row_data
 }
 
 # Test install...
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 
 &stmt_note("1..9\n");
 &stmt_ok();
-$table = "dbd_ix_rows";
+my $table = "dbd_ix_rows";
 
 # Create table for testing
 stmt_test $dbh, qq{
@@ -63,19 +64,19 @@ stmt_test $dbh, qq{
 INSERT INTO $table VALUES(0, 'Some Value', TODAY, CURRENT, 3.14159)
 };
 
-$select = "SELECT * FROM $table";
+my $select = "SELECT * FROM $table";
 
 # Check that there is now one row of data
 select_row_data $dbh, 1, $select;
 
 # Insert a row of values.
-$sth = $dbh->prepare("INSERT INTO $table VALUES(0, ?, ?, ?, ?)");
+my $sth = $dbh->prepare("INSERT INTO $table VALUES(0, ?, ?, ?, ?)");
 &stmt_fail() unless $sth;
 &stmt_ok;
 &stmt_fail() unless $sth->execute('Another value', 'today', '1997-02-28 00:11:22.55555', 2.8128);
 &stmt_ok;
 print_sqlca $sth;
-$rows = $sth->rows;
+my $rows = $sth->rows;
 print "# ROWS = $rows\n";
 
 # Check that there are now two rows of data

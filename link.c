@@ -2,8 +2,8 @@
 @(#)Purpose:         Specialized doubly-linked list management routines
 @(#)Author:          J Leffler
 @(#)Copyright:       1996-98 Jonathan Leffler
-@(#)Copyright:       2002    IBM
-@(#)Product:         Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+@(#)Copyright:       2002-03 IBM
+@(#)Product:         IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 */
 
 /*TABSTOP=4*/
@@ -22,7 +22,7 @@
 #endif /* DBD_IX_DEBUG_LINK */
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: link.c,v 100.1 2002/02/08 22:49:30 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: link.c,v 2003.2 2003/02/28 21:13:14 jleffler Exp $";
 #endif
 
 #ifdef DBD_IX_DEBUG_LINK
@@ -76,12 +76,12 @@ void dbd_ix_link_delete(Link *link_d, void (*function)(void *))
 void dbd_ix_link_delchain(Link *head, void (*function)(void *))
 {
 	/* Delete all links */
-	dbd_ix_debug(1, "-->> %s::dbd_ix_link_delchain()\n", "DBD::Informix");
+	dbd_ix_debug(1, "-->> %s::dbd_ix_link_delchain()\n", dbd_ix_module());
 	PRINT_LIST("dbd_ix_link_delchain:before", head);
 	while (head->next->data != 0)
 		dbd_ix_link_delete(head->next, function);
 	PRINT_LIST("dbd_ix_link_delchain:after", head);
-	dbd_ix_debug(1, "<<-- %s::dbd_ix_link_delchain()\n", "DBD::Informix");
+	dbd_ix_debug(1, "<<-- %s::dbd_ix_link_delchain()\n", dbd_ix_module());
 }
 
 /* Add the link (link_n) after a pre-existing link in a list (link_1) */

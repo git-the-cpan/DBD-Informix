@@ -1,14 +1,15 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t31nulls.t,v 100.3 2002/02/08 22:50:49 jleffler Exp $ 
+#   @(#)$Id: t31nulls.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test Null Handling for DBD::Informix
+#   Test Null Handling for DBD::Informix
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 sub select_null_data
 {
@@ -49,11 +50,11 @@ sub select_null_data
 
 
 # Test install...
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 
 &stmt_note("1..7\n");
 &stmt_ok();
-$trans01 = "dbd_ix_nulls01";
+my $trans01 = "dbd_ix_nulls01";
 
 # Create table which accepts nulls in all columns
 stmt_test $dbh, qq{
@@ -72,15 +73,15 @@ stmt_test $dbh, qq{
 INSERT INTO $trans01 VALUES(NULL, NULL, NULL, NULL, NULL)
 };
 
-$select = "SELECT * FROM $trans01";
+my $select = "SELECT * FROM $trans01";
 
 # Check that there is now one row of null data
 select_null_data $dbh, 1, $select;
 
 # Insert a row of values.
-$ins = "INSERT INTO $trans01 VALUES(?, ?, ?, ?, ?)";
+my $ins = "INSERT INTO $trans01 VALUES(?, ?, ?, ?, ?)";
 &stmt_note("# $ins\n");
-$sth = $dbh->prepare($ins);
+my $sth = $dbh->prepare($ins);
 &stmt_fail() unless $sth;
 &stmt_ok;
 &stmt_fail() unless $sth->execute(undef, undef, undef, undef, undef);

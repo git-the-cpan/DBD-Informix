@@ -1,10 +1,10 @@
-#   @(#)$Id: TestHarness.pm,v 100.12 2002/11/05 18:40:47 jleffler Exp $ 
+#   @(#)$Id: TestHarness.pm,v 2003.5 2003/03/04 00:01:39 jleffler Exp $
 #
-#   Pure Perl Test Harness for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+#   Pure Perl Test Harness for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 #
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
-#   Copyright 2002    IBM
+#   Copyright 2002-03 IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -17,9 +17,11 @@
 	@EXPORT = qw(
 		all_ok
 		cleanup_database
-		connect_noisily
-		connect_quietly
+		connect_controllably
 		connect_to_test_database
+		connect_to_primary
+		connect_to_secondary
+		connect_to_tertiary
 		date_as_string
 		is_shared_memory_connection
 		memory_leak_test
@@ -27,30 +29,39 @@
 		print_dbinfo
 		print_sqlca
 		secondary_connection
-		select_some_data
 		select_zero_data
+		set_verbosity
 		stmt_comment
 		stmt_err
 		stmt_fail
 		stmt_note
 		stmt_ok
+		stmt_nok
+		stmt_counter
 		stmt_retest
 		stmt_test
 		test_for_ius
+		tertiary_connection
+		validate_unordered_unique_data
 		);
 
 	use DBI;
+	use Carp;
 	use Config;
+	use strict;
+
 	require_version DBI 1.02;
 
-	$VERSION = "1.04.PC1";
+	# our $VERSION = "2003.03.0303"; # But 'our' not acceptable to Perl 5.005_03!
+	my
+	$VERSION = "2003.03.0303";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
 	sub print_connection
 	{
 		my ($dbase, $user, $pass, $attr) = @_;
-		my ($xxpass) = (defined $dbpass) ? 'X' x length($dbpass) : "";
+		my ($xxpass) = (defined $pass) ? 'X' x length($pass) : "";
 
 		&stmt_note("# DBI->connect('dbi:Informix:$dbase', '$user', '$xxpass');\n");
 		if (defined $attr)
@@ -95,7 +106,7 @@
 
 		if (!defined $dbname || !defined $dbuser || !defined $dbpass)
 		{
-			($dbname1, $dbuser1, $dbpass1) = &primary_connection();
+			my ($dbname1, $dbuser1, $dbpass1) = &primary_connection();
 			$dbname = $dbname1 unless defined $dbname;
 			$dbuser = $dbuser1 unless defined $dbuser;
 			$dbpass = $dbpass1 unless defined $dbpass;
@@ -111,30 +122,61 @@
 		return ($dbname, $dbuser, $dbpass);
 	}
 
-	sub connect_quietly
+	sub tertiary_connection
 	{
-		my ($attr) = @_;
-		connect_controllably(0, $attr);
-	}
+		my ($dbname) = $ENV{DBD_INFORMIX_DATABASE3};
+		my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME3};
+		my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD3};
 
-	# Exactly the same as connect_to_test_database
-	sub connect_noisily
-	{
-		my ($attr) = @_;
-		connect_controllably(1, $attr);
+		if (!defined $dbname || !defined $dbuser || !defined $dbpass)
+		{
+			my ($dbname1, $dbuser1, $dbpass1) = &primary_connection();
+			$dbname = $dbname1 unless defined $dbname;
+			$dbuser = $dbuser1 unless defined $dbuser;
+			$dbpass = $dbpass1 unless defined $dbpass;
+		}
+
+		# Clear undefs
+		$dbpass = "" unless ($dbpass);
+		$dbuser = "" unless ($dbuser);
+		# Either both username and password are set or neither are set
+		$dbpass = "" unless ($dbuser && $dbpass);
+		$dbuser = "" unless ($dbuser && $dbpass);
+
+		return ($dbname, $dbuser, $dbpass);
 	}
 
 	sub connect_to_test_database
 	{
 		my ($attr) = @_;
-		connect_controllably(1, $attr);
+		connect_to_primary(1, $attr);
+	}
+
+	sub connect_to_primary
+	{
+		my ($verbose, $attr) = @_;
+		connect_controllably($verbose, $attr, \&primary_connection);
+	}
+
+	sub connect_to_secondary
+	{
+		my ($verbose, $attr) = @_;
+		connect_controllably($verbose, $attr, \&secondary_connection);
+	}
+
+	sub connect_to_tertiary
+	{
+		my ($verbose, $attr) = @_;
+		connect_controllably($verbose, $attr, \&tertiary_connection);
 	}
 
 	sub connect_controllably
 	{
-		my ($verbose, $attr) = @_;
-		my ($dbname, $dbuser, $dbpass) = &primary_connection();
+		my ($verbose, $attr, $func) = @_;
+		my ($dbname, $dbuser, $dbpass) = &$func();
 
+		# Chop trailing blanks by default, unless user explicitly chooses otherwise.
+		${$attr}{ChopBlanks} = 1 unless defined ${$attr}{ChopBlanks};
 		&print_connection($dbname, $dbuser, $dbpass, $attr)
 			if ($verbose);
 
@@ -143,9 +185,6 @@
 		# Unconditionally fail if connection does not work!
 		&stmt_fail() unless (defined $dbh);
 
-		# Unconditionally chop trailing blanks.
-		# Override in test cases as necessary.
-		$dbh->{ChopBlanks} = 1;
 		$dbh;
 	}
 
@@ -160,17 +199,19 @@
 		# How to insert date values even when you cannot be bothered to sort out
 		# what DBDATE will do...  You cannot insert an MDY() expression directly.
 		# JL 2002-11-05: String concatenation is available in all supported
-		# servers.  Date value has to be returned as string - otherwise, you run
-		# into problems when server has DBDATE set to non-default value (such as
-		# "Y4MD-") and client side does not set DBDATE at all.  Problem reported
-		# previously by others, but this fix introduced in response to questions
-		# from Arlene Gelbolingo <Gelbolingo.Arlene@menlolog.com>.  Note that if
-		# none of the date components are specified, the returned string will be
-		# unambiguous.
+		# servers.  The date value has to be returned as string; otherwise,
+		# you run into problems when the server has DBDATE set to a
+		# non-default value (such as "Y4MD-") and the client side does not
+		# set DBDATE at all.  This problem reported previously by others,
+		# but this fix introduced in response to questions from Arlene
+		# Gelbolingo <Gelbolingo.Arlene@menlolog.com>.  Note that the
+		# string returned by default is unambiguous.
 		$sel1 = qq% SELECT MDY($mm,$dd,$yyyy) || '' FROM "informix".SysTables WHERE Tabid = 1%;
-		&stmt_fail() unless ($sth = $dbh->prepare($sel1));
-		&stmt_fail() unless ($sth->execute);
-		&stmt_fail() unless (@row = $sth->fetchrow_array);
+		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth = $dbh->prepare($sel1);
+		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth->execute;
+		(&stmt_nok(), return "$yyyy-$mm-$dd") unless @row = $sth->fetchrow_array;
+		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth->finish;
+		&stmt_ok(0);
 		return $row[0];
 	}
 
@@ -178,7 +219,8 @@
 	{
 		my ($dbh) = @_;
 		print  "# Database Information\n";
-		print  "#     Database Name:           $dbh->{Name}\n";
+		printf "#     Database Name:           %s\n", $dbh->{Name};
+		printf "#     DBMS Version:            %d\n", $dbh->{ix_ServerVersion};
 		printf "#     AutoCommit:              %d\n", $dbh->{AutoCommit};
 		printf "#     PrintError:              %d\n", $dbh->{PrintError};
 		printf "#     RaiseError:              %d\n", $dbh->{RaiseError};
@@ -212,7 +254,8 @@
 		print "# ROWS                 = $rows\n";
 	}
 
-	my $ok_counter = 0;
+	my $test_counter = 0;
+	my $fail_counter = 0;
 	sub stmt_err
 	{
 		# NB: error messages $DBI::errstr no longer end with a newline.
@@ -229,26 +272,46 @@
 	sub stmt_ok
 	{
 		my ($warn) = @_;
-		$ok_counter++;
-		&stmt_note("ok $ok_counter\n");
+		$test_counter++;
+		&stmt_note("ok $test_counter\n");
 		&stmt_err("Warning Message") if ($warn);
+	}
+
+	sub stmt_nok
+	{
+		my ($warn) = @_;
+		&stmt_note($warn) if ($warn);
+		$test_counter++;
+		$fail_counter++;
+		&stmt_note("not ok $test_counter\n");
 	}
 
 	sub stmt_fail
 	{
 		my ($warn) = @_;
-		&stmt_note($warn) if ($warn);
-		$ok_counter++;
-		&stmt_note("not ok $ok_counter\n");
+		&stmt_nok($warn);
 		&stmt_err("Error Message");
-		die "!! Terminating Test !!\n";
+		confess "!! Terminating Test !!\n";
+	}
+
+	sub stmt_counter
+	{
+		return $test_counter;
 	}
 
 	sub all_ok
 	{
 		&stmt_note("# *** Testing of DBD::Informix complete ***\n");
-		&stmt_note("# ***     You appear to be normal!      ***\n");
-		exit(0);
+		if ($fail_counter == 0)
+		{
+			&stmt_note("# ***     You appear to be normal!      ***\n");
+			exit(0);
+		}
+		else
+		{
+			&stmt_note("# *** There appear to be some problems! ***\n");
+			exit(1);
+		}
 	}
 
 	sub stmt_comment
@@ -272,7 +335,7 @@
 		&stmt_comment("$test: do('$stmt'):\n");
 		if ($dbh->do($stmt)) { &stmt_ok(0); }
 		elsif ($ok)          { &stmt_ok(1); }
-		else                 { &stmt_fail(); }
+		else                 { &stmt_nok(); }
 	}
 
 	sub stmt_retest
@@ -281,52 +344,28 @@
 		&stmt_test($dbh, $stmt, $ok, "Retest");
 	}
 
-	sub select_some_data
-	{
-		my ($dbh, $num, $stmt, $mapnulls) = @_;
-		my ($count, $st2) = (0);
-		my (@row);
-		my ($mapto) = (defined $mapnulls && $mapnulls) ? "<<NULL>>" : "";
-
-		&stmt_note("# $stmt\n");
-		# Check that there is some data
-		&stmt_fail() unless ($st2 = $dbh->prepare($stmt));
-		&stmt_fail() unless ($st2->execute);
-		while  (@row = $st2->fetchrow)
-		{
-			my($pad, $i) = ("# ", 0);
-			@row = map { defined $_ ? $_ : $mapto } @row;
-			for ($i = 0; $i < @row; $i++)
-			{
-				&stmt_note("$pad$row[$i]");
-				$pad = " :: ";
-			}
-			&stmt_note("\n");
-			$count++;
-		}
-		&stmt_fail() unless ($count == $num);
-		&stmt_fail() unless ($st2->finish);
-		undef $st2;
-		&stmt_ok();
-	}
-
 	# Check that there is no data
 	sub select_zero_data
 	{
-		&select_some_data($_[0], 0, $_[1], 1);
+		my($dbh, $sql) = @_;
+		my($sth) = $dbh->prepare($sql);
+		(&stmt_nok, return) unless $sth;
+		(&stmt_nok, return) unless $sth->execute;
+		my $ref;
+		while ($ref = $sth->fetchrow_arrayref)
+		{
+			# No data should have been selected!
+			&stmt_nok("Unexpected data returned from $sql: @$ref\n");
+			return;
+		}
+		&stmt_ok;
 	}
 
 	# Check that both the ESQL/C and the database server are IUS-aware
 	# Return database handle if all is OK.
 	sub test_for_ius
 	{
-		my $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
-		my $user1 = $ENV{DBD_INFORMIX_USERNAME};
-		my $pass1 = $ENV{DBD_INFORMIX_PASSWORD};
-
-		$dbase1 = "stores" unless ($dbase1);
-		$user1 = "" if (! defined $user1);
-		$pass1 = "" if (! defined $pass1);
+		my ($dbase1, $user1, $pass1) = &primary_connection();
 
 		my $drh = DBI->install_driver('Informix');
 		print "# Driver Information\n";
@@ -336,8 +375,7 @@
 		print "#     Product Version:       $drh->{ix_ProductVersion}\n";
 		if ($drh->{ix_ProductVersion} < 900)
 		{
-			&stmt_note("1..0\n");
-			&stmt_note("# IUS data types are not supported by $drh->{ix_ProductName}\n");
+			&stmt_note("1..0 # Skip: IUS data types are not supported by $drh->{ix_ProductName}\n");
 			exit(0);
 		}
 
@@ -351,8 +389,7 @@
 		&stmt_fail() unless (($numtabs) = $sth->fetchrow_array);
 		if ($numtabs < 40)
 		{
-			&stmt_note("1..0\n");
-			&stmt_note("# IUS data types are not supported by database server.\n");
+			&stmt_note("1..0 # Skip IUS data types are not supported by database server.\n");
 			$dbh->disconnect;
 			exit(0);
 		}
@@ -471,6 +508,163 @@
 		}
 	}
 
+	# Valid values for $DBD::Informix::TestHarness::verbose are:
+	#	0 -> don't say anything
+	#	1 -> overall status for each row
+	#	2 -> field-by-field detailed commentary
+	# Note that errors are always reported.
+	# our $verbose = 0; # But 'our' not acceptable to Perl 5.005_03!
+	my $verbose = 0;
+	sub set_verbosity
+	{
+		$verbose = $_[0];
+	}
+
+	# Validate that the data returned from the database is correct.
+	# Assume each row in result set is supposed to appear exactly once.
+	# Extra results are erroneous; missing results are erroneous.
+	# The results from fetchrow_hashref() must be unambiguous.
+	# The key data must be a single column.
+	# The data in $val is a hash indexed by the key value containing the
+	# expected values for each column corresponding to the key value:-
+	# &validate_unordered_unique_data($sth, 'c1',
+	# {
+	#	'c1-value1' => { 'c1' => 'c1-value1', 'c2' => 'c2-value1', 'c3' => 'c3-value1' },
+	#	'c1-value2' => { 'c1' => 'c1-value1', 'c2' => 'c2-value2', 'c3' => 'c3-value2' },
+	# });
+	# Note that the key (c1) and expected value (c1-value1) are repeated;
+	# this is a test consistency check.
+
+	sub validate_unordered_unique_data
+	{
+		my($sth, $key, $val) = @_;
+		my(%values) = %$val;
+		my($numexp) = 0;
+
+		# Validate expected values array!
+		foreach my $col (sort keys %values)
+		{
+			my(%columns) = %{$values{$col}};
+			printf "# Key: %-20s = %s\n", "$key:", $col if $verbose >= 2;
+			stmt_fail "### TEST ERROR: key column not in expected data: $key = $col\n"
+				if !defined $columns{$key};
+			stmt_fail "### TEST ERROR: inconsistent expected data: $key = $col and $key = $columns{$key}\n"
+				if $col ne $columns{$key};
+			foreach my $col (sort keys %columns)
+			{
+				printf "#      %-20s = %s\n", "$col:", $columns{$col} if $verbose >= 2;
+			}
+			$numexp++;
+		}
+
+		# Collect the data
+		my ($ref);
+		my (%state) = ('fail' => 0, 'pass' => 0);
+		my $rownum = 0;
+		while ($ref = $sth->fetchrow_hashref)
+		{
+			$rownum++;
+			my %row = %{$ref};
+			if (defined $row{$key} && defined $values{$row{$key}})
+			{
+				my $ok = 0;
+				my $fail = 0;
+				my %expect = %{$values{$row{$key}}};
+
+				# Verify that each returned column has the expected value.
+				foreach my $col (keys %row)
+				{
+					my($got, $want) = ($row{$col}, $expect{$col});
+					if (defined $got && defined $want)
+					{
+						if ($got ne $want)
+						{
+							print "# Row $rownum: Got unexpected value $got for $col (key value = $row{$key}) when $want expected!\n";
+							$fail++;
+						}
+						else
+						{
+							print "# Row $rownum: Got expected value $got for $col (key value = $row{$key})\n" if ($verbose >= 2);
+							$ok++;
+						}
+					}
+					elsif (!defined $got && !defined $want)
+					{
+						# Both values NULL - OK.
+						print "# Row $rownum: Got NULL which was wanted for $col\n" if ($verbose >= 2);
+						$ok++;
+					}
+					elsif (!defined $got)
+					{
+						print "# Row $rownum: Got NULL for $col (key value = $row{$key}) when $want expected!\n";
+						$fail++;
+					}
+					else
+					{
+						print "# Row $rownum: Got $got for $col (key value = $row{$key}) when NULL expected!\n";
+						$fail++;
+					}
+				}
+
+				# Verify that each expected value is returned.
+				foreach my $col (keys %expect)
+				{
+					my($got, $want) = ($row{$col}, $expect{$col});
+					next if (defined $got && defined $want);	# Errors already reported
+					next if (!defined $got && !defined $want);
+					if (!defined $got)
+					{
+						print "# Row $rownum: Did not get result for $col (key value = $row{$key}) when $want expected!\n";
+						$fail++;
+					}
+					# The 'else' clause "cannot happen".
+				}
+
+				if ($ok > 0 && $fail == 0)
+				{
+					$state{pass}++;
+					print "# Row $rownum: PASS\n" if ($verbose >= 1);
+					delete $values{$row{$key}};
+				}
+				else
+				{
+					$state{fail}++;
+					print "# Row $rownum: FAIL (erroneous content)\n" if ($verbose >= 1);
+					# Since the key was found (hence $ok > 0), it is OK to undef this row.
+					delete $values{$row{$key}} if $ok > 0;
+				}
+			}
+			else
+			{
+				print "# Row $rownum: Got unexpected row of data!\n";
+				foreach my $col (sort keys %row)
+				{
+					printf "#     %-20s = %s\n", "$col:", $row{$col};
+				}
+				$state{fail}++;
+				print "# Row $rownum: FAIL (unexpected key value)\n" if ($verbose >= 1);
+			}
+		}
+
+		# Verify that entire expected hash was consumed.
+		foreach my $val (sort keys %values)
+		{
+			print "# Did not get a row corresponding to expected key $val\n";
+			$state{fail}++;
+		}
+
+		# Determine whether test passed or failed overall.
+		if ($state{fail} == 0 && $state{pass} == $numexp)
+		{
+			stmt_note "# Passed $state{pass} row(s) as expected with no failures\n";
+			stmt_ok;
+		}
+		else
+		{
+			stmt_nok "# Passed $state{pass} row(s) out of $numexp expected; failed $state{fail}\n";
+		}
+	}
+
 	1;
 }
 
@@ -486,16 +680,17 @@ DBD::Informix::TestHarness - Test Harness for DBD::Informix
 
 =head1 DESCRIPTION
 
-This document describes DBD::Informix::TestHarness for DBD::Informix version 1.00
-and later.  This is pure Perl code which exploits DBI and DBD::Informix to
-make it easier to write tests.  Most notably, it provides a simple
-mechanism to connect to the user's chosen test database and a uniform set
-of reporting mechanisms.
+This document describes DBD::Informix::TestHarness distributed with
+IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03).
+This is pure Perl code which exploits DBI and DBD::Informix to make it
+easier to write tests.
+Most notably, it provides a simple mechanism to connect to the user's
+chosen test database and a uniform set of reporting mechanisms.
 
 =head2 Loading DBD::Informix::TestHarness
 
-To use the DBD::Informix::TestHarness software, you need to load the DBI software
-and then install the Informix driver:
+To use the DBD::Informix::TestHarness software, you need to load the DBI
+software and then install the Informix driver:
 
     use DBD::Informix::TestHarness;
 
@@ -529,24 +724,26 @@ password in the environment.
 This is horribly insecure -- do not use it for production work.
 The test scripts do not print the password.
 
-=head2 Using connect_noisily
+=head2 Using connect_to_primary
 
-The method connect_noisily is identical to connect_to_test_database.
+The method connect_to_primary takes a flag (0 implies quietly, 1 implies noisily)
+and a set of attributes, and connects to the primary database.
 
-    $dbh = &connect_noisily({ AutoCommit => 0 });
+    $dbh = &connect_to_primary(1, { AutoCommit => 0 });
 
-=head2 Using connect_quietly
+=head2 Using connect_to_secondary
 
-The method connect_quietly does not echo the connection information
-whereas both connect_noisily and connect_to_test_database do.  It is
-used in a very few special cases where the connection information is of
-limited interest -- primarily during 'C<InformixTechSupport -w>' or
-'C<ItWorks>'.
+The method connect_to_secondary takes a flag (0 implies quietly, 1 implies noisily)
+and a set of attributes, and connects to the secondary database.
 
-    $dbh = &connect_quietly({ AutoCommit => 0 });
+    $dbh = &connect_to_secondary(1, { AutoCommit => 0 });
 
-All three connection methods internally use the non-exported
-connect_controllably method.
+=head2 Using connect_to_tertiary
+
+The method connect_to_tertiary takes a flag (0 implies quietly, 1 implies noisily)
+and a set of attributes, and connects to the tertiary database.
+
+    $dbh = &connect_to_tertiary(1, { AutoCommit => 0 });
 
 =head2 Using cleanup_database
 
@@ -630,30 +827,57 @@ handle and prints out salient information about the database.
 =head2 Using all_ok
 
 The &all_ok() function can be used at the end of a test script to report
-that everything was OK.  It exits with status 0.
+whether everything was OK.
+It exits with status 0 if everything was OK, and with status 1 if not.
 
     &all_ok();
 
+=head2 Using stmt_counter
+
+This function returns the current test counter (without altering it).
+It is most frequently used when the number of tests cannot be told in advance.
+
+	$n = &stmt_counter;
+
 =head2 Using stmt_ok
 
-This routine adds 'ok N' to the end of a line.  The N increments
-automatically each time &stmt_ok() or &stmt_fail() is called.  If called
-with a non-false argument, it prints the contents of DBI::errstr as a
-warning message too.  This routine is used internally by stmt_test() but is
-also available for your use.
+The C<stmt_ok> function adds 'ok N' to the end of a line.
+The N increments automatically each time C<stmt_ok>() or C<stmt_nok>()
+is called.
+If called with a non-false argument, it prints the contents of
+DBI::errstr as a warning message too.
+This routine is used both internally and more generally in the tests.
 
     &stmt_ok(0);
 
+=head2 Using stmt_nok
+
+The C<stmt_nok> function adds 'not ok N' to the end of a line.
+The N is incremented automatically, as with C<stmt_ok>().
+This routine is used both internally and more generally in the tests.
+It takes an optional string as an argument, which is printed as well.
+
+    &stmt_nok();
+    &stmt_nok("Reason why test failed");
+
 =head2 Using stmt_fail
 
-This routine adds 'not ok N' to the end of a line, then reports the
-error message in DBI::errstr, and then dies.  The N is incremented
-automatically, as with &stmt_ok().  This routine is used internally by
-stmt_test() but is also available for your use.  It takes an optional
-string as an argument, which is printed as well.
+This routine calls C<stmt_nok>, reports the error using C<stmt_err>, and
+confesses where the failure occurs as it dies.
+This routine is used (too) extensively, both internally and in the main
+test scripts.
+It takes an optional string as an argument, which is printed as well.
 
     &stmt_fail();
     &stmt_fail("Reason why test failed");
+
+Note that because this terminates the test abrubtly, it means that all
+subsequent tests after the one that really failed are deemed to fail.
+This is often sensible because the subsequent tests depend on the
+current test to succeed and it is not possible to get good results if
+this test fails.
+Nevertheless, whereever possible, the test script should continue after
+a failure.
 
 =head2 Using stmt_err
 
@@ -693,40 +917,23 @@ The optional third argument is the day number (1..31).
 The optional fourth argument is the year number (1..9999).
 If the date values are omitted, then values from 1930-10-20 are
 substituted.
-No direct validation is done; if the conversion operations fail, stmt_fail
-is called.
+No direct validation is done; if the conversion operations fail,
+stmt_fail is called.
 The date value is converted to a string by the database server, and the
 result returned to the calling function.
-The string can be enclosed in quotes and will be accepted by the server as
-a valid date.
+The string can be enclosed in quotes and will be accepted by the server
+as a valid date.
 
 Note: the code assumes that the database server supports the '||' string
 concatenation operator; this is believed to be valid for OnLine 5.00 and
-above, and DBD::Informix does not support earlier server versions so it is
-immaterial that it won't work with them.
-
-=head2 Using select_some_data
-
-This routine takes four arguments:
-
-    &select_some_data($dbh, $nrows, $stmt, $mapnulls);
-
-The first argument is the database handle.
-The second is the number of rows that should be returned.
-The third is a string containing the SELECT statement to be executed.
-The fourth argument is optional but if defined and true, any nulls in
-the data will be mapped to the string '<<NULL>>'.
-Otherwise, they will most likely generate a warning when referenced.
-It routine prints all the data returned with a '#' preceding the first
-field and two colons separating the fields.
-It reports OK if the select succeeds and the correct number of rows
-are returned; it fails otherwise.
+above, and DBD::Informix does not support earlier server versions so it
+is immaterial that it won't work with them.
 
 =head2 Using select_zero_data
 
-This routine takes a database handle and a SELECT statement and
-invokes &select_some_data with 0 rows expected and null mapping
-enabled.
+The C<select_zero_data> function takes a database handle and the text of
+a SELECT statement and ensures that no data is returned.
+The test passes unless any data is returned.
 
     &select_zero_data($dbh, $stmt);
 
@@ -765,6 +972,21 @@ Note that the last example is not as reliable as requesting the
 process status of a specific process number; it will probably show the
 grep command and the child Perl process, and maybe random other
 processes.
+
+=head2 Using connect_controllably
+
+The C<connect_controllably> function is primarily used by the explicit
+C<connect_to_primary>, C<connect_to_secondary>, C<connect_to_tertiary>,
+functions, but is also used in its own right.
+
+    $dbh = connect_controllably(1, {PrintError=>1}, \&tertiary_connection);
+
+It takes 3 arguments: a verbose flag (true or false), a reference to the
+connection attributes, if any, and a reference to a function such as
+C<primary_connection> which returns a database name, username and
+password.
+It uses these to connect to the database, logs the connection as a
+successful test (or dies completely), and returns the database handle.
 
 =head2 Using primary_connection
 
@@ -805,6 +1027,65 @@ DBD_INFORMIX_DATABASE2, DBD_INFORMIX_USERNAME2 and
 DBD_INFORMIX_PASSWORD2.
 If the database is not determined, it uses the primary_connection
 method above to specify the values.
+
+=head2 Using tertiary_connection
+
+The C<tertiary_connection> function also returns three values, the
+database name, the username and the password for the tertiary test
+connection.
+This is used in the multiple connection tests.
+
+    my ($dbase, $user, $pass) = &tertiary_connection();
+    my ($dbh) = DBI->connect("dbi:Informix:$dbase", $user, $pass)
+                    or die "$DBI::errstr\n";
+
+In looking for the three values, it examines the environment variables
+DBD_INFORMIX_DATABASE3, DBD_INFORMIX_USERNAME3 and
+DBD_INFORMIX_PASSWORD3.
+If the database is not determined, it uses the primary_connection
+method above to specify the values.
+
+=head2 Using validate_unordered_unique_data
+
+The C<validate_unordered_unique_data> function is used to ensure that
+exactly the correct data is returned from a cursor-like statement handle
+which has already had the $sth->execute method executed on it.
+
+The data in $val is a hash indexed by the key value containing the
+expected values for each column corresponding to the key value:-
+
+    &validate_unordered_unique_data($sth, $keycol, \%expected);
+
+    &validate_unordered_unique_data($sth, 'c1',
+        {
+            'c1-value1' => { 'c1' => 'c1-value1', 'c2' => 'c2-value1', 'c3' => 'c3-value1' },
+            'c1-value2' => { 'c1' => 'c1-value1', 'c2' => 'c2-value2', 'c3' => 'c3-value2' },
+        });
+
+Note that the key (c1) and expected value (c1-value1) are repeated in
+the data for each row; this is a consistency check that the function enforces.
+
+This function assumes that each row in result set is supposed to appear
+exactly once.
+Any extra result rows are erroneous; any missing result rows are
+erroneous.
+Any missing columns are erroneous; any extra columns are erroneous.
+The results from C<fetchrow_hashref>() must be unambiguous, meaning that
+each selected column must have a unique name.
+The key data must be a single column.
+
+This routine (or its hypothetical relatives such as
+C<validate_ordered_unique_data>, C<validate_unordered_duplicate_data>,
+and C<validate_ordered_duplicate_data>) should be used to ensure that
+the correct results are returned.  Note that there might not be any need
+for separate routine for unique and duplicate ordered data.
+
+=head2 Using set_verbosity
+
+The C<set_verbosity> function takes a value 0, 1 or 2 and sets the
+verbosity of the validate_* functions accordingly.
+
+	&set_verbosity(0);
 
 =head2 Note
 

@@ -1,20 +1,19 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t02ixtype.t,v 100.6 2002/02/08 22:50:33 jleffler Exp $ 
+#   @(#)$Id: t02ixtype.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test ix_types attribute
+#   Test ix_types attribute
 #
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix::TestHarness;
 use DBD::Informix qw(:ix_types);
-
-&stmt_note("1..1\n");
+use strict;
 
 # You need to update this list if any types are added (unlikely) or if
 # any types are removed (IX_COLLECTION is the plausible candidate).
-%typeinfo = (
+my %typeinfo = (
 	"IX_ROW"        => [ IX_ROW,          22 ],
 	"IX_SMALLINT"   => [ IX_SMALLINT,      1 ],
 	"IX_INTEGER"    => [ IX_INTEGER,       2 ],
@@ -46,20 +45,25 @@ use DBD::Informix qw(:ix_types);
 	"IX_CLOB"       => [ IX_CLOB,       1012 ]
 );
 
-foreach $key (sort keys %typeinfo)
+my $ntests = keys %typeinfo;
+&stmt_note("1..$ntests\n");
+
+my $fail = 0;
+foreach my $key (sort keys %typeinfo)
 {
-	$arrref = $typeinfo{$key};
-	$val0 = $arrref->[0];
-	$val1 = $arrref->[1];
+	my $arrref = $typeinfo{$key};
+	my $val0 = $arrref->[0];
+	my $val1 = $arrref->[1];
 	if ($val0 == $val1)
 	{
-		printf("%-13s = %d\n", $key, $val0);
+		stmt_ok;
+		printf("# %-13s = %d\n", $key, $val0);
 	}
 	else
 	{
-		stmt_fail("$key is $val0 but should be $val1");
+		stmt_nok "# $key is $val0 but should be $val1\n";
+		$fail++;
 	}
 }
 
-&stmt_ok(0);
-&all_ok;
+all_ok if $fail == 0;

@@ -1,31 +1,34 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t60unlog.t,v 100.6 2002/02/08 22:51:03 jleffler Exp $ 
+#   @(#)$Id: t60unlog.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
 #
-#	Test that unlogged databases refuse to connect with AutoCommit => 0
+#   Test that unlogged databases refuse to connect with AutoCommit => 0
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 my ($dbname) = "dbd_ix_db";
 my ($user) = $ENV{DBD_INFORMIX_USERNAME};
 my ($pass) = $ENV{DBD_INFORMIX_PASSWORD};
 
 &stmt_note("# Test DBI->connect('dbi:Informix:.DEFAULT.')\n");
+my $dbh;
 stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.', $user, $pass));
 
-stmt_note("1..8\n");
+stmt_note("1..9\n");
 stmt_ok;
 
 # Don't care about non-existent database
 $dbh->{PrintError} = 0;
 $dbh->do("drop database $dbname");
 $dbh->{PrintError} = 1;
+$dbh->{ChopBlanks} = 1;
 
-$selver = "SELECT TabName, Owner FROM 'informix'.SysTables WHERE TabName = ' VERSION'";
+my $select = "SELECT TabName, Owner FROM 'informix'.SysTables WHERE TabID = 1";
 
 &stmt_note("# Create unlogged database $dbname\n");
 &stmt_test($dbh, "create database $dbname");
@@ -46,7 +49,12 @@ if ($dbh->{ix_ServerVersion} >= 800 && $dbh->{ix_ServerVersion} < 900)
 	exit 0;
 }
 
-&select_some_data($dbh, 1, $selver);
+my $result = { 'systables' => { 'owner' => 'informix', 'tabname' => 'systables' } };
+
+my $sth = $dbh->prepare($select) or stmt_fail;
+stmt_ok;
+$sth->execute ? validate_unordered_unique_data($sth, 'tabname', $result) : &stmt_nok;
+
 &stmt_test($dbh, "close database");
 stmt_fail unless ($dbh->disconnect);
 stmt_ok;
@@ -60,6 +68,7 @@ $dbh = DBI->connect("dbi:Informix:$dbname", $user, $pass,
 $SIG{__WARN__} = 'DEFAULT';
 # Under DBI 0.85, this connection worked.  Ideally it should have failed.
 # Under DBI 0.90, this connection fails, as it is supposed to!
+&stmt_note("# Connection failed - which is the correct response\n") if (!defined $dbh);
 &stmt_ok if (!defined $dbh);
 &stmt_fail unless ($msg && $msg =~ /-256:/);
 $msg =~ s/\n/ /mg;

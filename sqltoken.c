@@ -3,7 +3,7 @@
 @(#)Author:          J Leffler
 @(#)Copyright:       1998-99 Jonathan Leffler (JLSS)
 @(#)Copyright:       2002    IBM
-@(#)Product:         Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+@(#)Product:         IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 */
 
 /*TABSTOP=4*/
@@ -18,7 +18,7 @@
 #define RCURLY '}'
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltoken.c,v 100.1 2002/02/08 22:49:38 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: sqltoken.c,v 100.2 2002/12/06 22:18:23 jleffler Exp $";
 #endif
 
 /*
@@ -27,7 +27,7 @@ static const char rcs[] = "@(#)$Id: sqltoken.c,v 100.1 2002/02/08 22:49:38 jleff
 ** Returns pointer to start of next SQL token (keyword, string,
 ** punctuation) in given string, or pointer to null at end of string if
 ** there is none.  The end of the token is in the end parameter.
-*/ 
+*/
 char *sqltoken(char *input, char **end)
 {
 	char *token;

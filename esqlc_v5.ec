@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlc_v5.ec,v 100.1 2002/02/08 22:49:15 jleffler Exp $ 
+ * @(#)$Id: esqlc_v5.ec,v 100.2 2002/12/06 22:18:24 jleffler Exp $
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -18,7 +18,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v5.ec,v 100.1 2002/02/08 22:49:15 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqlc_v5.ec,v 100.2 2002/12/06 22:18:24 jleffler Exp $";
 #endif
 
 /* ================================================================= */

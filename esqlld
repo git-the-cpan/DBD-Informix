@@ -1,25 +1,25 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: esqlld,v 100.5 2002/11/20 19:05:31 jleffler Exp $ 
+# @(#)$Id: esqlld,v 2003.1 2003/03/03 19:56:32 jleffler Exp $ 
 #
-# Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+# IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 #
 # Surrogate Linker for Informix ESQL/C versions 4.10.UC1 upwards
 # -- Used to create shared libraries.
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 2000    Informix Software Inc
-# Copyright 2002    IBM
+# Copyright 2002-03 IBM
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
 
-# Ensure we use distributed version of DBD::Informix::Configuration,
+# Ensure we use distributed version of DBD::Informix::Configure,
 # not pre-installed out-of-date version of it.
 BEGIN { unshift @INC, "lib"; }
 
 use strict;
-use DBD::Informix::Configuration;
+use DBD::Informix::Configure;
 
 my $map = ($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR}) ? 0 : 1;
 my @ARGS = $map ? &map_informix_lib_names(@ARGV) : @ARGV;

@@ -3,7 +3,7 @@
 @(#)Author:          J Leffler
 @(#)Copyright:       1996-99 Jonathan Leffler (JLSS)
 @(#)Copyright:       2002    IBM
-@(#)Product:         Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+@(#)Product:         IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char decsci_h[] = "@(#)$Id: decsci.h,v 100.1 2002/02/08 22:49:07 jleffler Exp $";
+static const char decsci_h[] = "@(#)$Id: decsci.h,v 100.2 2002/12/06 22:18:25 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -30,7 +30,7 @@ extern char *decfix(const dec_t *d, int ndigit, int plus);
 extern char *decsci(const dec_t *d, int ndigit, int plus);
 extern char *deceng(const dec_t *d, int ndigit, int plus, int cw);
 
-extern int decfmt(const dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen); 
+extern int decfmt(const dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen);
 extern int decchk(dec_t *d, int sqllen);
 extern int decset(dec_t *d, int sqllen);
 

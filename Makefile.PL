@@ -1,33 +1,96 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 100.29 2002/11/20 18:57:53 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2003.5 2003/03/03 19:01:42 jleffler Exp $
 #
-# Configuration script for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) (aka DBD::Informix)
+# Configuration script for DBD::Informix
+# (IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
 # Copyright 2000    Informix Software Inc
-# Copyright 2002    IBM
+# Copyright 2002-03 IBM
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
 
 #TABSTOP=4
 
-# Ensure we use distributed version of DBD::Informix::Configuration,
-# not pre-installed out-of-date version of it.
-BEGIN { unshift @INC, "lib"; }
+########################
+### AUTOINSTALL CODE ###
+########################
+
+# If the ExtUtils::AutoInstall code causes you angst, place comment
+# markers at the start of the lines between each pair of lines marked
+# with #-HERE-# and #-AND-HERE-#
+# In vi:  :g/^#-HERE-#$/.+1,/#-AND-HERE#$/-1s/^/#-EU-AI-#/
+
+#-HERE-#
+# ExtUtils::AutoInstall Bootstrap Code, version 5.
+BEGIN{my$p='ExtUtils::AutoInstall';my$v=0.40;eval"use $p $v;1
+"or do{my$e=$ENV{PERL_EXTUTILS_AUTOINSTALL};(!defined($e)||$e
+!~m/--(?:default|skip|testonly)/and-t STDIN or eval"use Ext".
+"Utils::MakeMaker;WriteMakefile('PREREQ_PM'=>{'$p',$v});1"and
+exit)and print"==> $p $v required. Install it from CPAN? [Y".
+"/n] "and<STDIN>!~/^n/i and print"*** Installing $p\n"and do{
+eval{require CPANPLUS;CPANPLUS::install $p};eval"use $p $v;1"
+or eval{require CPAN;CPAN::install$p};eval"use $p $v;1"or die
+"*** Please install $p $v manually from cpan.org first.\n"}}}
+#-AND-HERE-#
+
+# postamble handler; generates a string to be appended to Makefile.
+# DBI::DBD::dbd_postamble() returns standardised code to generate
+# Informix.xs from Informix.xsi and the template from DBI (Driver.xst).
+# dbd_informix_postamble() does a similar job for ESQL/C.
+sub MY::postamble
+{
+#-HERE-#
+    return &ExtUtils::AutoInstall::postamble .
+#-AND-HERE-#
+           &DBI::DBD::dbd_postamble .
+           &dbd_informix_postamble;
+}
+
+#-HERE-#
+# The MY::postamble handler must be defined before this BEGIN block.
+BEGIN
+{
+	require ExtUtils::AutoInstall;
+	# Pre-install the DBI module.
+	ExtUtils::AutoInstall->install([], 'DBI' => '1.33');
+}
+use DBI 1.33;
+
+ExtUtils::AutoInstall->import(
+	-version        => '0.43',
+	-config         => {
+		make_args   => '--hello',   # Suppress hello message from CPAN
+	},
+	-core           => [
+		'DBI'         => '1.33',    # DBI version 1.30 or later would do
+	],
+	'High Resolution Timing' => [
+		-default      => 1,         # Install Time::HiRes by default
+		-tests        => [ "t/t66insert.t" ],	# Disable this test if no Time::HiRes
+		'Time::HiRes' => '',
+	],
+);
+#-AND-HERE-#
+
+###############################
+### END OF AUTOINSTALL CODE ###
+###############################
 
 # A sufficiently recent version of Perl and DBI must be installed before we
 # can build the DBD module.  The code in DBD::Informix needs the features
-# present in Perl 5.005 and DBI 1.14.
+# present in Perl 5.005 and DBI 1.33.
 use 5.005;
-use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose);
-use Config;
 use strict;
-use DBI 1.14;
-use DBI::DBD;	# dbd_postamble()
-use DBD::Informix::Configuration;
+use Config;
+use lib 'lib';
+use ExtUtils::MakeMaker;    # Only needed if ExtUtils::AutoInstall is disabled
+use DBI 1.33;               # Only needed if ExtUtils::AutoInstall is disabled
+use DBI::DBD;               # dbd_postamble()
+use DBD::Informix::Configure;
 
 $| = 1;     # Ensure that Perl output is interleaved with test output.
 
@@ -51,36 +114,41 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "1.04.PC1";
+my $dbd_ix = "2003.03.0303";
 # Hack for handling builds directly in Atria Clearcase view.
-$dbd_ix = "1.01.009" unless $dbd_ix =~ /^\d+\.\d+/;
+$dbd_ix = "2003.00.0000" unless $dbd_ix =~ /^\d+\.\d+/;
+
+my $dbd_ix_pm_dir = "lib/DBD/Informix";
 
 my %opts = (
 	NAME         => 'DBD::Informix',
 	VERSION      => "$dbd_ix",
 	EXE_FILES    => [ 'InformixTechSupport' ],
-	clean        => { FILES        => 'Informix.xsi esqlinfo.h esqlvrsn.h t/decgen.sql t/dtgen.sql lib/DBD/Informix/Defaults.pm' },
+	clean        => { FILES        => "Informix.xsi esqlinfo.h esqlvrsn.h t/decgen.sql t/dtgen.sql $dbd_ix_pm_dir/Defaults.pm" },
 	realclean    => { FILES        => 'esql' },
 	dist         => { DIST_DEFAULT => 'clean distcheck disttest tardist',
 					  PREOP        => '$(MAKE) -f Makefile.old distdir',
 					  COMPRESS     => 'gzip -v9',
 					  SUFFIX       => 'gz'
 					},
-	'PREREQ_PM'  =>	{ 'DBI' => 1.14,
+	'PREREQ_PM'  =>	{ 'DBI' => 1.33,
 					  'Time::HiRes' => 0
 					},
-	'PM'         =>	{ 'Informix.pm'                   => '$(INST_LIBDIR)/Informix.pm',
-					  'lib/Bundle/DBD/Informix.pm'    => 'blib/lib/Bundle/DBD/Informix.pm',
-					  'lib/DBD/Informix/Configuration.pm' => '$(INST_LIBDIR)/Informix/Configuration.pm',
-					  'lib/DBD/Informix/Defaults.pm'      => '$(INST_LIBDIR)/Informix/Defaults.pm',
-					  'lib/DBD/Informix/Summary.pm'       => '$(INST_LIBDIR)/Informix/Summary.pm',
-					  'lib/DBD/Informix/TechSupport.pm'   => '$(INST_LIBDIR)/Informix/TechSupport.pm',
-					  'lib/DBD/Informix/TestHarness.pm'   => '$(INST_LIBDIR)/Informix/TestHarness.pm'
+	'PM'         =>	{
+					  'Informix.pm'                   => '$(INST_LIBDIR)/Informix.pm',
+					  "$dbd_ix_pm_dir/Configure.pm"   => '$(INST_LIBDIR)/Informix/Configure.pm',
+					  "$dbd_ix_pm_dir/Defaults.pm"    => '$(INST_LIBDIR)/Informix/Defaults.pm',
+					  "$dbd_ix_pm_dir/GetInfo.pm"     => '$(INST_LIBDIR)/Informix/GetInfo.pm',
+					  "$dbd_ix_pm_dir/Metadata.pm"    => '$(INST_LIBDIR)/Informix/Metadata.pm',
+					  "$dbd_ix_pm_dir/Summary.pm"     => '$(INST_LIBDIR)/Informix/Summary.pm',
+					  "$dbd_ix_pm_dir/TechSupport.pm" => '$(INST_LIBDIR)/Informix/TechSupport.pm',
+					  "$dbd_ix_pm_dir/TestHarness.pm" => '$(INST_LIBDIR)/Informix/TestHarness.pm',
+					  "$dbd_ix_pm_dir/TypeInfo.pm"    => '$(INST_LIBDIR)/Informix/TypeInfo.pm',
 					}
 		   );
 
 print qq%
-Configuring Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -97,7 +165,7 @@ print "Loader:   $Config{ld}\n"
 # Sometimes the 'use' commands above enforce the same restriction as
 # these two lines below.
 &did_not_read("Perl is out of date") unless ($] >= 5.005);
-&did_not_read("DBI is out of date") unless ($DBI::VERSION >= 1.14);
+&did_not_read("DBI is out of date") unless ($DBI::VERSION >= 1.33);
 
 # Assorted hints - these should be move to a hints subdirectory.
 print "\nSee notes about SPARCompiler on Solaris in Notes/solaris\n"
@@ -137,29 +205,33 @@ my $vercode = "esqlc_v6";
 my $multiconn = 1;
 if ($vernum < 100)
 {
-	die qq{
+	die &nlt(qq{
 	The ESQL/C version information found was: <<$infversion>>
 	$opts{NAME} failed to find a version number ($vernum).
 	Please report this to the $opts{NAME} maintenance team.
-	};
+	});
 }
 elsif ($vernum >= 100 && $vernum < 500)
 {
-	die qq{
+	die &nlt(qq{
 	$infversion does not support string-named cursors.
 	This version of $opts{NAME} requires this facility.
 	There are no longer any plans to back-port $opts{NAME}
 	to such old and obsolete versions of ESQL/C.
 	Please investigate upgrading your software.
 	If all else fails, try installing DBD::Informix4 instead.
-	}
+	});
 }
-elsif ($vernum >= 500 && $vernum < 600)
+elsif ($vernum >= 500 && $vernum < 510)
 {
-	warn &nlt(qq%
-			This version of ESQL/C is not considered Y2K-safe by Informix.
-			Please upgrade to version 5.10 or later.
-			%) unless $vernum >= 510;
+	die &nlt(qq%
+			This version of ESQL/C ($infversion) is obsolete.
+			It is also not considered Y2K-safe by Informix.
+			Please upgrade to ESQL/C version 5.10 or later.
+			%);
+}
+elsif ($vernum >= 510 && $vernum < 600)
+{
 	$vercode = "esqlc_v5";
 	$multiconn = 0;
 	if ($NTConfiguration)
@@ -186,28 +258,14 @@ elsif ($vernum >= 500 && $vernum < 600)
 		instead.  Read the Notes/static.build file.\n
 		%);
 }
-elsif ($vernum >= 600 && $vernum < 700)
+elsif ($vernum >= 600 && $vernum < 724)
 {
-	warn &nlt(qq%
-			This version of ESQL/C is obsolete.
-			It is also not considered Y2K-safe by Informix.
-			Please upgrade to version 7.24 or later.
+	die &nlt(qq%
+			This version of ESQL/C ($infversion) is obsolete.
+			Please upgrade to ESQL/C version 7.24 or ClientSDK.
 			%);
-	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
-	$esqlc_flags .= &set_esqlc_linkage("", $NTConfiguration);
 }
-elsif ($vernum >= 700 && $vernum < 720)
-{
-	warn &nlt(qq%
-			This version of ESQL/C is obsolete.
-			It is also not considered Y2K-safe by Informix.
-			Please upgrade to version 7.24 or later.
-			%);
-	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
-	$esqlc_flags .= &set_esqlc_linkage("", $NTConfiguration);
-	&fix_b102265($epp, $esql, $opts{NAME})
-		if ($Config{osname} eq "hpux" && &grep_for_statopt_staticonly($epp));
-}elsif ($vernum >= 720 && $vernum < 800)
+elsif ($vernum >= 724 && $vernum < 800)
 {
 	# 7.2x is already released.  There should not be an ESQL/C version
 	# 7.3x.  The 7.3x server is Informix Dynamic Server, IDS.  You use
@@ -226,15 +284,11 @@ elsif ($vernum >= 700 && $vernum < 720)
 	if ($esql =~ m%(.*/)?c4gl$%)
 	{
 		warn &nlt(qq%
-				This version of Informix 4GL should be upgraded to version 7.31 or later.
+				This version of Informix 4GL should be upgraded to version 7.32 or later.
 		%) if ($vernum < 730);
-	}
-	else
-	{
 		warn &nlt(qq%
-				This version of ESQL/C is not considered Y2K-safe by Informix.
-				Please upgrade to version 7.24 or later.
-				%) if ($vernum < 724);
+			$opts{NAME} will not support builds with Informix 4GL in the future.
+			%);
 	}
 	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 	&fix_b102265($epp, $esql, $opts{NAME})
@@ -243,37 +297,32 @@ elsif ($vernum >= 700 && $vernum < 720)
 elsif ($vernum >= 800 && $vernum < 900)
 {
 	# Informix XPS.  Versions 8.00 through 8.2x probably use ESQL/C 8.xy.
-	# Starting with version 8.30, you are expected to use ClientSDK, normally.
-	# We finally have some feedback from a real user (Robert E Wyrick <rob@wyrick.org>),
-	# so we can say we support 8.x at last.
-	print &nlt(qq%
-				$opts{NAME} is still learning about XPS, so please report
-				your experience installing $opts{NAME} with XPS.  Thanks!
-				%);
+	# Starting with XPS version 8.30, you are expected to use ClientSDK,
+	# normally.  We finally have some feedback from a real user (Robert E
+	# Wyrick <rob@wyrick.org>), so we can say we support 8.x at last.
+	warn &nlt(qq%
+		$opts{NAME} is still learning about XPS, so please report
+		your experience installing $opts{NAME} with XPS.  Thanks!
+		This version of ESQL/C will not be supported in the future.
+		%);
 	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 }
-elsif ($vernum >= 900 && $vernum < 912)
+elsif ($vernum >= 900 && $vernum < 916)
 {
 	# ESQL/C 9.0x and 9.10 or 9.11 were pre-releases of the ESQL/C for
-	# the Informix Universal Server (IUS).  These should not still be
-	# in use.  ESQL/C 9.12 was released as ESQL/C 9.12, to go with the
-	# first generally available (GA) release of IUS.  Since then,
-	# Informix OnLine has been renamed Informix Dynamic Server (IDS),
-	# and IUS has been renamed IDS/UDO (IDS Universal Data Option).
-	# ESQL/C is now a component of ClientSDK, and its version numbers
-	# are independent of the database server.  So, for example, it is
-	# possible to use IDS/UDO 9.14, the latest version at 1998-11-01,
-	# with ClientSDK 2.10 (aka ESQL/C 9.16), also the latest version.
-	print "You should upgrade to a more recent version of ESQL/C.\n";
-	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
-	print $warning;
-	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
-}
-elsif ($vernum >= 912 && $vernum < 1000)
-{
+	# the Informix Universal Server (IUS) - since renamed several times.
+	# ESQL/C 9.12 was released as ESQL/C 9.12.
 	# ESQL/C 9.13 was released as DevSDK 2.00
 	# ESQL/C 9.14 was released as ClientSDK 2.01
 	# ESQL/C 9.15 was released as ClientSDK 2.02
+	# All of these are long obsolete and are no longer supported.
+	die &nlt(qq%
+			This version of ESQL/C ($infversion) is obsolete.
+			Please upgrade to ClientSDK version 2.70 or later.
+			%);
+}
+elsif ($vernum >= 916 && $vernum < 1000)
+{
 	# ESQL/C 9.16 was released as ClientSDK 2.10
 	# ESQL/C 9.20 was released as ClientSDK 2.20
 	# ESQL/C 9.21 was released as ClientSDK 2.30
@@ -751,35 +800,17 @@ sub which
 	return "";
 }
 
-# Microsoft NMAKE manages to evaluate INFORMIX_LICENCE too soon, so that
-# it is evaluated as empty if you place this definition in the
-# MY::postamble code.  The post_initialize section is empty by default
-# (on Solaris, at any rate) so overriding it with this should be OK.
-sub MY::post_initialize
+# Define a postamble function for the makefile which briefs MAKE on how to
+# compile ESQL/C source code.  It gives .ec rules (and files) precedence
+# over .c files with the same name by zapping and reorganizing the entire
+# suffix list.  The .SUFFIXES list was copied from the MakeMaker constants
+# section (circa 1998).  It contains all the extensions that DBD::Informix
+# needs (and a few C++ strays) but isn't complete by 2002 standards.  It's
+# a pity that changing this list cannot be handled more cleanly.
+
+sub dbd_informix_postamble
 {
-q%
-# The default Informix Licence Number (with no support entitlement) is
-# ACN#J334912.
-# If you have support, run "make INFORMIX_LICENCE='DBD#I000000'", where
-# DBD#I000000 is the serial number you were given when you registered
-# for support.  Note: you must do this each time you build the product.
-# Use an @ in place of # because of make comment conventions!
-INFORMIX_LICENCE = 'ACN@J334912'
-
-%;
-}
-
-# Define a postamble for the makefile which briefs MAKE on how to compile
-# ESQL/C source code.  It gives .ec rules (and files) precedence over .c
-# files with the same name by zapping and reorganizing the entire suffix
-# list.  The .SUFFIXES list is copied the MakeMaker constants section.
-# It's a pity that changing this list cannot be handled more cleanly.  It
-# doesn't really matter whether .xs files have precedence over .ec files or
-# not -- it would be OK to place .ec in front of the standard list.
-
-sub MY::postamble
-{
-my ($p1, $p2, $p3, $p4, $p5);
+my ($p1, $p2, $p3, $p4);
 
 $p1 =
 "
@@ -788,7 +819,7 @@ ESQL       = $esql
 ESQL_NT    = $esql_nt
 ESQLCFLAGS = $esqlc_flags
 .SUFFIXES:
-.SUFFIXES: .xs .ec .c .C .cpp .cxx .cc $objext .sh
+.SUFFIXES: .ec .xs .c .C .cpp .cxx .cc $objext .sh
 
 .ec$objext:";
 
@@ -798,9 +829,11 @@ $p2 = q%
 
 # Cribbed from the definition of CCCMD (MakeMaker const_cccmd) and the
 # rules for compiling object files (MakeMakerc_o) in the Makefile.
+# There should be a cleaner way to do this, too.
 # May need fixing if the corresponding rules change.
-# NB: UFLAGS is for user-flags; it should not be set by the Makefile.
-#     The user can add a flag on the make line with "make UFLAGS=-Dxyz".
+# NB: UFLAGS is a DBD::Informix addition - it is for user-flags and should
+#     not be set by the Makefile.  The user can add a flag on the make line
+#     with "make UFLAGS=-Dxyz".
 UFLAGS =
 ESQLFLAGS = $(UFLAGS) $(INC) $(ESQL_NT) $(CCFLAGS) $(OPTIMIZE) \
 		$(PERLTYPE) $(LARGE) $(SPLIT) $(DEFINE_VERSION) \
@@ -830,11 +863,7 @@ clean::
 	-[ ! -f esql ] || mv esql esql.old
 ';
 
-# Standardised code to generate Informix.xs from Informix.xsi and the
-# template from DBI (Driver.xst).  dbd_postamble() is defined by DBI::DBD.
-$p5 = dbd_postamble();
-
-return $p1 . $p2 . $p3 . $p4 . $p5;
+return $p1 . $p2 . $p3 . $p4;
 }
 
 # nlt - no leading tabs.
@@ -1013,13 +1042,13 @@ sub fix_hpux_syslibs
 
 sub Write_DBD_Informix_Defaults
 {
-	my $defaults = "lib/DBD/Informix/Defaults.pm";
+	my $defaults = "$dbd_ix_pm_dir/Defaults.pm";
 	open DEFAULTS, ">$defaults"
 		or die "Cannot create $defaults ($!)";
 	print DEFAULTS <<'EOF';
-#   Default Environment Variables for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+#   Default Environment Variables for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 #
-#   Copyright 2002 IBM
+#   Copyright 2002-03 IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -1031,7 +1060,7 @@ sub Write_DBD_Informix_Defaults
 	@ISA = qw(Exporter);
 	@EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
 
-	$VERSION = "1.04.PC1";
+	$VERSION = "2003.03.0303";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1054,10 +1083,19 @@ use DBD::Informix::Defaults;
 
 =head1 DESCRIPTION
 
-This module was generated automatically by DBD::Informix.
+This module was generated automatically by DBD::Informix
+(IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to.
+
+The recorded default values are:
+
+EOF
+
+	print DEFAULTS "    INFORMIXDIR    = $ENV{INFORMIXDIR}\n";
+	print DEFAULTS "    INFORMIXSERVER = $ENV{INFORMIXSERVER}\n";
+	print DEFAULTS <<'EOF';
 
 You will seldom if ever have cause to use this module directly.
 You should seldom have cause to use it indirectly either because

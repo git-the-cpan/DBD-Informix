@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t66insert.t,v 100.5 2002/02/08 22:51:05 jleffler Exp $ 
+#   @(#)$Id: t66insert.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test INSERT Cursors for DBD::Informix
+#   Test INSERT Cursors for DBD::Informix
 #
-#	Copyright 2000 Paul Palacios, C-Group Inc.
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 2000    Paul Palacios, C-Group Inc.
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use strict;
 use Time::HiRes qw(gettimeofday tv_interval);

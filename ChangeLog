@@ -1,15 +1,74 @@
-Change Log for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) (aka DBD::Informix)
+
+2003.02.2800 Release
+--------------------
+2003-02-28: Upload to PAUSE and CPAN.  NB: dbdimp.c, dbdimp.h, dbdattr.ec
+            based on RCS release 100, not 2003.
+2003-02-28: Improve (fix) formatting of DECIMAL numbers.
+2003-02-27: Do not support ESQL/C versions 5.0x, 6.0x, 7.0x, 7.1x, 7.2x
+            before 7.24, 9.0x or 9.1x before 9.16 (CSDK 2.10) any more.
+            FUTURE DIRECTION: ESQL/C versions 5.0x, and 8.xy will not be
+            supported in the next release; nor will compilation with I4GL.
+2003-01-03: Improve get_info testing, but there are still no teeth in it.
+            Clean up various tests.  Revise test code to use stmt_nok
+            instead of stmt_fail in more places.  Validate more of the data
+            selected by tests - eliminating unchecked select_some_data
+            method from test harness.
+2002-12-31: Add method validate_unordered_unique_data() to TestHarness.pm
+            to stringently validate selected data.  Use it in some places.
+            Revert to 3-part version based on release date (eg 2003.01.01).
+2002-12-23: Use ExtUtils::AutoInstall (after helping fix it; thanks to
+            Autrijus Tang <atrijus@autrijus.org> for assistance).  Move
+            directory lib/DBD to DBD and lib/Bundle to Bundle.  Rename the
+            ESQL/C configuration module to DBD::Informix::Configure.
+2002-12-17: Add support for type_info_all via DBD::Informix::TypeInfo
+            package after creating DBI::DBD::TypeInfo and write_typeinfo()
+            method.
+2002-12-16: Use metadata methods directly without importing them.  Add
+            DBD::Informix::GetInfo package, after debugging DBD::ODBC
+            enough to be able to use write_getinfo_pm() from a modified
+            version of DBI::DBD.
+2002-12-15: Separate the Metadata code into DBD::Informix::Metadata.  Do
+            not need to install Bundle/DBD/Informix.pm.
+2002-12-14: Revert to 2-part version numbering.  Note that if you cannot
+            upgrade to DBI 1.33, you can probably edit Informix.xs, change
+            the reference to dbd_xx_data_sources to dbd_dr_data_sources,
+            and edit Makefile.PL and Informix.pm to reference your earlier
+            version of the code (which should not be earlier than DBI 1.25
+            unless you also undo the changes for DBIc_DBISTATE, see below).
+2002-12-13: Report error on failure to connect via imp_drh, not imp_dbh.
+            Pre-requisite version of DBI is 1.33 (not yet released).
+2002-12-11: Migrate code for data_sources into dbdimp.ec, and other
+            clean-ups to bring DBD::Informix into line with documented
+            practices in DBI::DBD, which is being heavily revised at the
+            same time.
+2002-12-09: Replace PERL_DBI_DEBUG with DBI_TRACE.
+2002-12-06: Fix problem with stray trailing nulls on LVARCHAR data
+            (reported by Mike Langen <mike.langen@tamedia.ch>)
+2002-12-05: Change version numbering (drop .PC1 in favour of .00) and
+            document intended next version number (2003.00.00) in Announce.
+2002-12-02: Fix overlong table name in t/t35cursor.t; fix test_for_ius() in
+            TestHarness.pm to use primary_connection() (reported by Andrew
+            Hamm <AHamm@civica.com.au>).  Fix pre-requisite version of DBI
+            to 1.30 for DBIc_DBISTATE support (reported by Christopher
+            Cosby <christopher.cosby@sciatl.com> but misdiagnosed, then
+            reported by Mike Langen <mike.langen@tamedia.ch> and diagnosed
+            correctly).  If upgrading DBI is unacceptable, change the
+            prerequisite DBI version number in Informix.pm and Makefile.PL
+            (several places) and change uses of DBIc_DBISTATE(xxh) to DBIS
+            in Informix.xs and dbdimp.ec.
 
 1.04.PC1 Release
 ----------------
 2002-11-21: Upload to PAUSE and CPAN.
-2002-11-21: Fix the information in Announce and create new version.
+2002-11-21: Fix the information in Announce and create new version.  The
+            revised release should have been 1.03.PC2.
 
 1.03.PC1 Release
 ----------------
 2002-11-21: Upload to PAUSE and CPAN.
-2002-11-19: Remove MD5 checksum material (added for Informix Tech Support).
-            Move DBD::Informix::* files from DBD to lib/DBD.
+2002-11-19: Remove MD5 checksum material.  Move DBD::Informix::* files from
+            DBD to lib/DBD.
 2002-11-18: Add support for ix_WithoutReplication based on work by Bryan
             Castillo <Bryan_Castillo@eFunds.com>.  Clean up some of the
             documentation in Informix.pm, removing most references to
@@ -932,4 +991,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 100.42 2002/11/21 22:58:59 jleffler Exp $
+@(#)$Id: ChangeLog,v 2003.3 2003/02/28 21:23:39 jleffler Exp $

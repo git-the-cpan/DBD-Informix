@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: dtgen.pl,v 100.5 2002/02/08 22:50:30 jleffler Exp $
+#   @(#)$Id: dtgen.pl,v 2003.1 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Create exhaustive list of DATETIME & INTERVAL types for DBD::Informix
+#   Create exhaustive list of DATETIME & INTERVAL types for DBD::Informix
 #
-# Copyright 1997 Jonathan Leffler
-# Copyright 2000 Informix Software Inc
-# Copyright 2002 IBM
+# Copyright 1997    Jonathan Leffler
+# Copyright 2000    Informix Software Inc
+# Copyright 2002-03 IBM
 
 # Enumerate the DATETIME types
 $i = 0;

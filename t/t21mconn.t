@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t21mconn.t,v 100.6 2002/10/19 00:27:50 jleffler Exp $ 
+#   @(#)$Id: t21mconn.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test Multiple Connections for DBD::Informix
+#   Test Multiple Connections for DBD::Informix
 #
-#	Copyright 1996-99 Jonathan Leffler
-#	Copyright 2000    Informix Software Inc
-#	Copyright 2002    IBM
+#   Copyright 1996-99 Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use strict;
 use DBD::Informix::TestHarness;

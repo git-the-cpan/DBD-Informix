@@ -1,14 +1,15 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t23mconn.t,v 100.6 2002/10/19 00:27:50 jleffler Exp $ 
+#   @(#)$Id: t23mconn.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test abuse of statements after DISCONNECT ALL for DBD::Informix
+#   Test abuse of statements after DISCONNECT ALL for DBD::Informix
 #
-#	Copyright 1996-99 Jonathan Leffler
-#	Copyright 2000    Informix Software Inc
-#	Copyright 2002    IBM
+#   Copyright 1996-99 Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 my ($dbase1, $user1, $pass1) = &primary_connection();
 my ($dbase2, $user2, $pass2) = &secondary_connection();
@@ -20,6 +21,7 @@ if (&is_shared_memory_connection($dbase1) &&
 	exit(0);
 }
 
+my $dbh1;
 &stmt_note("# Connect to: $dbase1\n");
 &stmt_fail() unless ($dbh1 = DBI->connect("DBI:Informix:$dbase1", $user1, $pass1));
 
@@ -50,6 +52,7 @@ print "#\n";
 &stmt_fail() unless $dbh1->{ix_ActiveConnections} == 1;
 &stmt_fail() unless $dbh1->{ix_CurrentConnection} eq $dbh1->{ix_CurrentConnection};
 
+my $dbh2;
 &stmt_note("# Connect to: $dbase2\n");
 &stmt_fail() unless ($dbh2 = DBI->connect("DBI:Informix:$dbase2", $user2, $pass2));
 &stmt_ok();
@@ -63,15 +66,17 @@ print "#\n";
 &stmt_fail() unless $dbh1->{ix_ActiveConnections} == 2;
 &stmt_fail() unless $dbh1->{ix_CurrentConnection} eq $dbh1->{ix_CurrentConnection};
 
-$stmt1 =
+my $stmt1 =
 	"SELECT TabName FROM 'informix'.SysTables" .
 	" WHERE TabID >= 100 AND TabType = 'T'" .
 	" ORDER BY TabName";
 
-$stmt2 =
+my $stmt2 =
 	"SELECT ColName, ColType FROM 'informix'.SysColumns" .
 	" WHERE TabID = 1 ORDER BY ColName";
 
+my $st1;
+my $st2;
 &stmt_fail() unless ($st1 = $dbh1->prepare($stmt1));
 &stmt_ok();
 &stmt_fail() unless ($st2 = $dbh2->prepare($stmt2));
@@ -82,6 +87,8 @@ $stmt2 =
 &stmt_fail() unless ($st2->execute);
 &stmt_ok();
 
+my @row1;
+my $row2;
 LOOP: while (1)
 {
 	# Yes, these are intentionally different!

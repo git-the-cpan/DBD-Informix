@@ -1,20 +1,21 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t76blob.t,v 100.4 2002/10/19 00:27:50 jleffler Exp $
+#   @(#)$Id: t76blob.t,v 2003.5 2003/03/01 01:28:36 jleffler Exp $
 #
-#	Reproduce 451 errors with Perl.
+#   Reproduce 451 errors with Perl.
 #
-#	Copyright 1999 Bibliotech Ltd., 631-633 Fulham Rd., London SW6 5UQ.
-#	Copyright 1999 Jonathan Leffler
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 1999    Bibliotech Ltd., 631-633 Fulham Rd., London SW6 5UQ.
+#   Copyright 1999    Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
-$tablename = "dbd_ix_blobtest";
+my $tablename = "dbd_ix_blobtest";
 
 # Test install...
-$dbh = connect_to_test_database();
+my $dbh = connect_to_test_database();
 
 if (!$dbh->{ix_BlobSupport})
 {
@@ -24,18 +25,8 @@ if (!$dbh->{ix_BlobSupport})
 }
 else
 {
-	print("1..8\n");
+	print("1..5\n");
 	&stmt_ok(0);
-
-	# If prior test fails, it leaves a permanent table in the database.
-	# This has to be removed by this test.
-	# We do not care whether this works or not.
-	{
-	my ($msg);
-	$SIG{__WARN__} = sub { $msg = $_[0]; };
-	$dbh->do(qq{ drop table $tablename });
-	$SIG{__WARN__} = 'DEFAULT';
-	}
 
 	# Create temp table.
 	$dbh->do(qq{ create temp table $tablename (col1 text in table, col2 int)})
@@ -54,27 +45,21 @@ else
 		or &stmt_fail();
 	&stmt_ok(0);
 
+	# Should a zero length blob be treated as undefined/NULL by Perl?
+	my $row1 = { 'col2' => 1, 'col1' => undef };
+	my $row2 = { 'col2' => 2, 'col1' => 'abc' };
+	my $row3 = { 'col2' => 3, 'col1' => 'def' };
+	my $res1 = { 1 => $row1, 2 => $row2, 3 => $row3 };
+
 	# Select the rows. Order them so that the row
 	# containing the empty string blob is fetched first.
-	$sth = $dbh->prepare("select col1, col2 from $tablename order by col2")
+	my $sth = $dbh->prepare("select col1, col2 from $tablename order by col2")
 		or &stmt_fail();
-	$sth->execute()
-		or &stmt_fail();
+	$sth->execute() or &stmt_fail();
 
-	while ($ref = $sth->fetchrow_arrayref)
-	{
-		my @row = @$ref;
-		# Should a zero length blob be treated as undefined by Perl?
-		$row[0] = '' if !defined($row[0]);
-		&stmt_note("# fetched row: $row[1] <<$row[0]>>\n");
-		&stmt_ok(0);
-	}
-	&stmt_fail() unless ($sth->{ix_sqlcode} >= 0);
-	$sth->finish();
-	&stmt_ok(0);
+	&validate_unordered_unique_data($sth, 'col2', $res1);
 }
 
-&stmt_fail() unless $dbh->disconnect;
-&stmt_ok(0);
-&all_ok();
+$dbh->disconnect ? &stmt_ok : &stmt_fail;
 
+&all_ok();

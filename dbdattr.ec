@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdattr.ec,v 100.8 2002/11/18 23:19:42 jleffler Exp $ 
+ * @(#)$Id: dbdattr.ec,v 100.10 2002/12/12 01:31:42 jleffler Exp $
  *
- * @(#)$Product: Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) $ -- attribute handling
+ * @(#)$Product: IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) $ -- attribute handling
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
@@ -14,7 +14,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec,v 100.8 2002/11/18 23:19:42 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 100.10 2002/12/12 01:31:42 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -201,7 +201,7 @@ int dbd_ix_db_STORE_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 	else if (KEY_MATCH(kl, key, ix_worepln))
 	{
 		/* Bryan Castillo: set flag for replication */
-		imp_dbh->no_replication = SvTRUE(valuesv); 
+		imp_dbh->no_replication = SvTRUE(valuesv);
 		dbd_ix_db_commit(dbh, imp_dbh); /* start new tran (with|w/o) repl. */
 	}
 	else
@@ -214,7 +214,7 @@ int dbd_ix_db_STORE_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 	return retval;
 }
 
-/* Convert sqlca.sqlerrd into an AV */
+/* Convert sqlca.sqlerrd into a reference to an array */
 static SV *newSqlerrd(const Sqlca *psqlca)
 {
 	int i;
@@ -229,7 +229,7 @@ static SV *newSqlerrd(const Sqlca *psqlca)
 	return(retsv);
 }
 
-/* Convert sqlca.sqlwarn into an AV */
+/* Convert sqlca.sqlwarn into a reference to an array */
 static SV *newSqlwarn(const Sqlca *psqlca)
 {
 	int i;

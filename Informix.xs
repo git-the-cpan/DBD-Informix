@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: Informix.xs,v 100.5 2002/11/18 23:34:25 jleffler Exp $ 
+ * @(#)$Id: Informix.xs,v 100.9 2002/12/15 00:16:51 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1995-96 Alligator Descartes
@@ -15,21 +15,12 @@
 
 #include "Informix.h"
 
-/* For ActiveState Perl on NT */
-/* Change from Michael Kopchenov <myk@informix.com> */
-#ifdef PERL_OBJECT
-#include "XSLock.h"
-#undef fprintf
-#define fprintf (fprintf)
-#endif
-
 DBISTATE_DECLARE;
 
 /* Assume string concatenation is available */
 #ifndef lint
-static const char rcs[] = "@(#)$Id: Informix.xs,v 100.5 2002/11/18 23:34:25 jleffler Exp $";
-static const char esqlc_ver[] =
-	"@(#)" ESQLC_VERSION_STRING;
+static const char rcs[] = "@(#)$Id: Informix.xs,v 100.9 2002/12/15 00:16:51 jleffler Exp $";
+static const char esqlc_ver[] = "@(#)" ESQLC_VERSION_STRING;
 #endif
 
 MODULE = DBD::Informix	PACKAGE = DBD::Informix
@@ -102,50 +93,29 @@ FETCH(drh, keysv)
 		valuesv = DBIc_DBISTATE(imp_drh)->get_attr(drh, keysv);
 	ST(0) = valuesv;    /* dbd_dr_FETCH_attrib did sv_2mortal  */
 
-# Utility function to list available databases
+#ifdef dbd_xx_data_sources
+
 void
-data_sources(drh)
+data_sources(drh, attr = Nullsv)
 	SV *drh
+	SV *attr
 	PPCODE:
-# Up until recently, a database name could consist of up to 18 characters
-# in OnLine, plus the name of the server (no limit defined, assume 18
-# again), plus the at sign and the NUL at the end.  With the 9.2 release,
-# the server and database names will be able to go to 128 characters, hence
-# the increased limits.
-#define MAXDBS 100
-#define MAXDBSSIZE	(128+128+2)
-#define FASIZE (MAXDBS * MAXDBSSIZE)
-	int sqlcode;
-	int ndbs;
-	int i;
-	char *dbsname[MAXDBS + 1];
-	char dbsarea[FASIZE];
-	sqlcode = sqgetdbs(&ndbs, dbsname, MAXDBS, dbsarea, FASIZE);
-	if (sqlcode != 0)
+	D_imp_drh(drh);
+	AV *av;
+	av = dbd_dr_data_sources(drh, imp_drh, attr);
+    if (av)
 	{
-		dbd_ix_seterror(sqlcode);
-	}
-	else
-	{
-		for (i = 0; i < ndbs; ++i)
+		int i;
+		int n = AvFILL(av)+1;
+		EXTEND(sp, n);
+		for (i = 0; i < n; ++i)
 		{
-			SV *sv = newSVpvf("dbi:Informix", 0);
-			# Let Perl calculate the length of the name
-			XPUSHs(sv_2mortal(newSVpvf("dbi:Informix:%s", dbsname[i])));
+			PUSHs(AvARRAY(av)[i]);
 		}
 	}
 
-MODULE = DBD::Informix    PACKAGE = DBD::Informix::db
+#endif
 
-void
-preset(dbh, dbattr)
-	SV *        dbh
-	SV *        dbattr
-	CODE:
-	{
-	D_imp_dbh(dbh);
-	ST(0) = dbd_ix_db_preset(imp_dbh, dbattr) ? &sv_yes : &sv_no;
-	}
 
 MODULE = DBD::Informix    PACKAGE = DBD::Informix::st
 

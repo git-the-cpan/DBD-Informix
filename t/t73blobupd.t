@@ -1,17 +1,18 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t73blobupd.t,v 100.5 2002/10/19 01:03:58 jleffler Exp $ 
+#   @(#)$Id: t73blobupd.t,v 2003.3 2003/02/28 21:18:29 jleffler Exp $
 #
-#	Test Basic Blobs (INSERT & UPDATE) for DBD::Informix
+#   Test Basic Blobs (INSERT & UPDATE) for DBD::Informix
 #
-#	Copyright 1999 Jonathan Leffler
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 1999    Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix qw(:ix_types);
 use DBD::Informix::TestHarness;
+use strict;
 
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 
 if (!$dbh->{ix_BlobSupport})
 {
@@ -21,29 +22,22 @@ if (!$dbh->{ix_BlobSupport})
 }
 else
 {
-	print("1..19\n");
+	print("1..18\n");
 	&stmt_ok(0);
 
-	$blob_table = "DBD_IX_BlobTest";
+	my $blob_table = "DBD_IX_BlobTest";
 
-	$dbh->{PrintError} = 0;
-	$stmt1 = qq{DROP TABLE $blob_table};
-	$dbh->do($stmt1);
-	# Fail unless table dropped or table not found (-206).
-	# Problem found by Nuno Carneiro de Moura <ncmoura@net.mailcom.pt>
-	$sqlcode = $dbh->{ix_sqlcode};
-	&stmt_fail() unless ($sqlcode == 0 || $sqlcode == -206);
-	&stmt_ok(0);
-	$stmt2 = qq{CREATE TABLE $blob_table (I SERIAL UNIQUE, T TEXT IN TABLE, B BYTE IN TABLE)};
+	my $stmt2 = qq{CREATE TEMP TABLE $blob_table (I SERIAL UNIQUE, T TEXT IN TABLE, B BYTE IN TABLE)};
 	&stmt_test($dbh, $stmt2, 0);
 
-	$stmt3 = qq{INSERT INTO $blob_table VALUES(?, ?, ?)};
+	my $stmt3 = qq{INSERT INTO $blob_table VALUES(?, ?, ?)};
 	&stmt_note("# Testing: \$insert = \$dbh->prepare('$stmt3')\n");
+	my $insert;
 	&stmt_fail() unless ($insert = $dbh->prepare($stmt3));
 	&stmt_ok(0);
 
-	$blob1 = "This is a TEXT blob";
-	$blob2 = "This is a pseudo-BYTE blob";
+	my $blob1 = "This is a TEXT blob";
+	my $blob2 = "This is a pseudo-BYTE blob";
 	&stmt_note("# Testing: \$insert->execute(1, \$blob1, \$blob2)\n");
 	&stmt_fail() unless ($insert->execute(1, $blob1, $blob2));
 	&stmt_ok(0);
@@ -55,8 +49,8 @@ else
 	&stmt_fail() unless ($insert->execute(2, $blob1, $blob2));
 	&stmt_ok(0);
 
-	$blob3 = "This, too, is a TEXT blob\n" x 4;
-	$blob4 = "This, too, is a pseudo-BYTE blob\n" x 10;
+	my $blob3 = "This, too, is a TEXT blob\n" x 4;
+	my $blob4 = "This, too, is a pseudo-BYTE blob\n" x 10;
 	&stmt_note("# Testing: \$insert->execute(3, \$blob3, \$blob4)\n");
 	&stmt_fail() unless ($insert->execute(3, $blob3, $blob4));
 	&stmt_ok(0);
@@ -68,8 +62,10 @@ else
 	$dbh->commit if ($dbh->{ix_InTransaction});
 
 	# Verify that inserted data can be returned
-	$stmt4 = qq{SELECT * FROM $blob_table ORDER BY I};
+	my $stmt4 = qq{SELECT * FROM $blob_table ORDER BY I};
+
 	&stmt_note("# Testing: \$cursor = \$dbh->prepare('$stmt4')\n");
+	my $cursor;
 	&stmt_fail() unless ($cursor = $dbh->prepare($stmt4));
 	&stmt_ok(0);
 
@@ -79,21 +75,23 @@ else
 
 	&stmt_note("# Testing: \$cursor->fetch\n");
 	# Fetch returns a reference to an array!
+	my $ref;
 	while ($ref = $cursor->fetchrow_arrayref)
 	{
 		&stmt_ok(0);
-		@row = @{$ref};
+		my @row = @{$ref};
 		# Verify returned data!
 		&stmt_note("# Values returned: ", $#row + 1, "\n");
-		for ($i = 0; $i <= $#row; $i++)
+		for (my $i = 0; $i <= $#row; $i++)
 		{
 			&stmt_note("# Row value $i: $row[$i]\n");
 		}
 	}
 
 	# BLOB Update - must use bind_param
-	$stmt5 = qq{UPDATE $blob_table SET T = ?, B = ? WHERE I = ?};
+	my $stmt5 = qq{UPDATE $blob_table SET T = ?, B = ? WHERE I = ?};
 	&stmt_note("# Testing: \$upd = \$dbh->prepare('$stmt5')\n");
+	my $upd;
 	&stmt_fail() unless ($upd = $dbh->prepare($stmt5));
 
 	$blob3 = "This, too, is a TEXT blob\n" x 2;
@@ -112,10 +110,10 @@ else
 	while ($ref = $cursor->fetchrow_arrayref)
 	{
 		&stmt_ok(0);
-		@row = @{$ref};
+		my @row = @{$ref};
 		# Verify returned data!
 		&stmt_note("# Values returned: ", $#row + 1, "\n");
-		for ($i = 0; $i <= $#row; $i++)
+		for (my $i = 0; $i <= $#row; $i++)
 		{
 			&stmt_note("# Row value $i: $row[$i]\n");
 		}
@@ -129,8 +127,6 @@ else
 	undef $cursor;
 }
 
-&stmt_note("# Testing: \$dbh->disconnect()\n");
-&stmt_fail() unless ($dbh->disconnect);
-&stmt_ok(0);
+$dbh->disconnect ? &stmt_ok : &stmt_fail;
 
 &all_ok;

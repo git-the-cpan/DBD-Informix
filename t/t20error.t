@@ -1,19 +1,20 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t20error.t,v 100.3 2002/02/08 22:50:41 jleffler Exp $ 
+#   @(#)$Id: t20error.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test error on EXECUTE for DBD::Informix
+#   Test error on EXECUTE for DBD::Informix
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 # Test install...
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 
-$tabname = "dbd_ix_err01";
+my $tabname = "dbd_ix_err01";
 
 &stmt_note("1..5\n");
 &stmt_ok();
@@ -28,12 +29,12 @@ CREATE TEMP TABLE $tabname
 
 stmt_test $dbh, qq{ CREATE UNIQUE INDEX pk_$tabname ON $tabname(Col02) };
 
-$insert01 = qq{ INSERT INTO $tabname VALUES(0, 'Gee Whizz!') };
+my $insert01 = qq{ INSERT INTO $tabname VALUES(0, 'Gee Whizz!') };
 
-$sth = $dbh->prepare($insert01) or die "Prepare failed\n";
+my $sth = $dbh->prepare($insert01) or die "Prepare failed\n";
 
 # Should be OK!
-$rv = $sth->execute();
+my $rv = $sth->execute();
 stmt_fail() if ($rv != 1);
 
 my $msg;
@@ -49,13 +50,16 @@ if (defined $rv)
 &stmt_fail() unless ($msg && $msg =~ /-100:/ && $msg =~ /-239:/);
 $SIG{__WARN__} = 'DEFAULT';
 
-@isam = @{$sth->{ix_sqlerrd}};
+my @isam = @{$sth->{ix_sqlerrd}};
 print "# SQL = $sth->{ix_sqlcode}; ISAM = $isam[1]\n";
 print "# DBI::state: $DBI::state\n";
 print "# DBI::err:   $DBI::err\n";
 print "# DBI::errstr:\n$DBI::errstr\n";
 stmt_ok();
 
-select_some_data $dbh, 1, "SELECT * FROM $tabname";
+my $sel = $dbh->prepare("SELECT * FROM $tabname") or stmt_fail;
+$sel->execute or stmt_fail;
+validate_unordered_unique_data($sel, 'col01',
+	{	1 => { 'col01' => 1, 'col02' => 'Gee Whizz!' }, });
 
 all_ok();

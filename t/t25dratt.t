@@ -1,14 +1,15 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t25dratt.t,v 100.5 2002/02/12 18:12:38 jleffler Exp $ 
+#   @(#)$Id: t25dratt.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Driver Attribute test script for DBD::Informix
+#   Driver Attribute test script for DBD::Informix
 #
-#	Copyright 1997-99 Jonathan Leffler
-#	Copyright 2000    Informix Software Inc
-#	Copyright 2002    IBM
+#   Copyright 1997-99 Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 &stmt_note("1..4\n");
 
@@ -16,7 +17,7 @@ use DBD::Informix::TestHarness;
 # NB: Do not use DBI->install_driver in your code.
 # Use: DBI->connect() instead.
 &stmt_note("# Testing: DBI->install_driver('Informix')\n");
-$drh = DBI->install_driver('Informix');
+my $drh = DBI->install_driver('Informix');
 &stmt_ok(0);
 
 print "# DBI Information\n";
@@ -36,7 +37,7 @@ print "# \n";
 &stmt_fail() unless $drh->{ix_ActiveConnections} == 0;
 &stmt_ok();
 
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 
 print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
 print "#     Active Connections:    $drh->{ix_ActiveConnections}\n";

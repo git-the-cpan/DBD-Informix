@@ -1,22 +1,26 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t10sqlca.t,v 100.3 2002/02/08 22:50:36 jleffler Exp $ 
+#   @(#)$Id: t10sqlca.t,v 2003.4 2003/03/03 19:18:47 jleffler Exp $
 #
-#	Test SQLCA Record Handling for DBD::Informix
+#   Test SQLCA Record Handling for DBD::Informix
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use strict;
+
+# Set date format to ISO 8601.
+$ENV{DBDATE} = "Y4MD-";
 
 # Test install...
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 print_sqlca($dbh);
 
-&stmt_note("1..7\n");
+&stmt_note("1..9\n");
 &stmt_ok();
-$table = "dbd_ix_sqlca";
+my $table = "dbd_ix_sqlca";
 
 # Create table for testing
 stmt_test $dbh, qq{
@@ -26,33 +30,63 @@ CREATE TEMP TABLE $table
 	Col02	CHAR(20) NOT NULL,
 	Col03	DATE NOT NULL,
 	Col04	DATETIME YEAR TO FRACTION(5) NOT NULL,
-	Col05   DECIMAL NOT NULL
+	Col05   DECIMAL(10,9) NOT NULL
 )
 };
 print_sqlca($dbh);
 
-# Insert a row of nulls.
+#my $date = date_as_string($dbh);
+my $date = '2002-12-31';
+my $pi = '3.141592654';
+my $time = "$date 00:00:00.00000";
+
 stmt_test $dbh, qq{
-INSERT INTO $table VALUES(0, 'Some Value', TODAY, CURRENT, 3.14159)
+INSERT INTO $table VALUES(0, 'Some Value', '$date', '$time', $pi)
 };
 
 print_sqlca($dbh);
+stmt_fail "Incorrect SERIAL value" unless $dbh->{ix_sqlerrd}[1] == 1000;
 
-$select = "SELECT * FROM $table";
+my $select = "SELECT * FROM $table";
+my $sth1 = $dbh->prepare($select) or stmt_fail "# failed to prepare $select\n";
+$sth1->execute or stmt_fail "# failed to execute $select\n";
 
 # Check that there is now one row of data
-select_some_data $dbh, 1, $select;
+validate_unordered_unique_data($sth1, 'col01',
+	{ 1000 => { 'col01' => 1000,
+				'col02' => 'Some Value',
+				'col03' => $date,
+				'col04' => $time,
+				'col05' => $pi } });
 
 # Insert a row of values.
-$sth = $dbh->prepare("INSERT INTO $table VALUES(0, ?, ?, ?, ?)");
-&stmt_fail() unless $sth;
+my $sth2 = $dbh->prepare("INSERT INTO $table VALUES(0, ?, ?, ?, ?)");
+&stmt_fail() unless $sth2;
 &stmt_ok;
-print_sqlca $sth;
-&stmt_fail() unless $sth->execute('Another value', 'today', '1997-02-28 00:11:22.55555', 2.8128);
+print_sqlca $sth2;
+my $date2 = date_as_string($dbh, 12, 31, 9999);
+my $e = '2.718281828';
+my $time2 = '1997-02-28 00:11:22.55555';
+&stmt_fail() unless $sth2->execute('Another value', $date2, $time2, $e);
 &stmt_ok;
-print_sqlca $sth;
+print_sqlca $sth2;
+stmt_fail "Incorrect SERIAL value" unless $dbh->{ix_sqlerrd}[1] == 1001;
 
 # Check that there are now two rows of data
-select_some_data $dbh, 2, $select;
+$sth1->execute or stmt_fail "# failed to execute $select\n";
+validate_unordered_unique_data($sth1, 'col01',
+	{ 1000 => { 'col01' => 1000,
+				'col02' => 'Some Value',
+				'col03' => $date,
+				'col04' => $time,
+				'col05' => $pi },
+	  1001 => { 'col01' => 1001,
+				'col02' => 'Another value',
+				'col03' => $date2,
+				'col04' => $time2,
+				'col05' => $e },
+	});
+
+$dbh->disconnect ? stmt_ok : stmt_nok;
 
 &all_ok();

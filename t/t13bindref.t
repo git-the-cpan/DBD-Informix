@@ -1,11 +1,11 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t13bindref.t,v 100.5 2002/10/19 00:27:50 jleffler Exp $ 
+#   @(#)$Id: t13bindref.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
 #
-#	Test handling of bind_param_inout for DBD::Informix
+#   Test handling of bind_param_inout for DBD::Informix
 #
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use strict;
 use DBD::Informix::TestHarness;
@@ -16,7 +16,7 @@ exit;
 # Test install...
 my ($dbh) = connect_to_test_database;
 
-stmt_note "1..7\n";
+stmt_note "1..9\n";
 stmt_ok;
 my ($table) = "dbd_ix_bind_param";
 
@@ -28,16 +28,52 @@ CREATE TEMP TABLE $table
 	Col02	CHAR(20) NOT NULL,
 	Col03	INTEGER NOT NULL,
 	Col04	DATETIME YEAR TO FRACTION(5) NOT NULL,
-	Col05   DECIMAL NOT NULL
+	Col05   DECIMAL(10,9) NOT NULL
 )
 };
 
+my $pi = 3.141592654;
+my $e  = 2.718281828;
 my ($select) = "SELECT * FROM $table";
 
-# Insert a row of values.
-my ($sth) = $dbh->prepare("INSERT INTO $table VALUES(0, ?, ?, ?, ?)");
-&stmt_fail() unless $sth;
+my $sel = $dbh->prepare($select) or &stmt_fail;
 &stmt_ok;
+
+my $sth = $dbh->prepare("INSERT INTO $table VALUES(0, ?, ?, ?, ?)");
+&stmt_fail unless $sth;
+&stmt_ok;
+
+# Expected results.
+my $row1 = { 'col01' => 1000,
+			 'col02' => 'Another value',
+			 'col03' => 987654321,
+			 'col04' => '1997-02-28 00:11:22.55555',
+			 'col05' => 2.718281828
+		   };
+my $row2 = { 'col01' => 1001,
+		     'col02' => 'Another value',
+		     'col03' => 987654321,
+		     'col04' => '1997-02-28 00:11:22.55555',
+		     'col05' => 2.718281828
+		   };
+my $row3 = { 'col01' => 1002,
+		     'col02' => 'Some other data',
+		     'col03' => 987654321,
+		     'col04' => '1997-02-28 00:11:22.55555',
+		     'col05' => 3.141592654
+		   };
+my $row4 = { 'col01' => 1003,
+		     'col02' => 'Some other data',
+		     'col03' => 123456789,
+		     'col04' => '2000-02-29 23:59:59.99999',
+		     'col05' => 3.141592654
+		   };
+my $res1 = { 1000 => $row1 };
+my $res2 = { 1000 => $row1, 1001 => $row2 };
+my $res3 = { 1000 => $row1, 1001 => $row2, 1002 => $row3 };
+my $res4 = { 1000 => $row1, 1001 => $row2, 1002 => $row3, 1003 => $row4 };
+
+# Insert a row of values.
 
 my ($col02, $col03, $col04, $col05);
 
@@ -49,24 +85,24 @@ $sth->bind_param_inout(4, \$col05, 30);
 $col02 = 'Another value';
 $col03 = 987654321;
 $col04 = '1997-02-28 00:11:22.55555';
-$col05 = 2.8128;
+$col05 = $e;
 
 &stmt_fail() unless $sth->execute;
 
 # Check that there is one row of data
-select_some_data $dbh, 1, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res1) : &stmt_nok;
 
 # Check that there are now two rows of data, substantially the same
 &stmt_fail() unless $sth->execute;
-select_some_data $dbh, 2, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res2) : &stmt_nok;
 
 # Try some new bind values
 $col02 = 'Some other data';
-$col05 = 3.141593;
+$col05 = $pi;
 &stmt_fail() unless $sth->execute;
 
 # Check that there are now three rows of data
-select_some_data $dbh, 3, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res3) : &stmt_nok;
 
 # Try some more new bind values
 $col03 = 123456789;
@@ -74,6 +110,8 @@ $col03 = '2000-02-29 23:59:59.99999';
 &stmt_fail() unless $sth->execute;
 
 # Check that there are now four rows of data
-select_some_data $dbh, 4, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res4) : &stmt_nok;
+
+$dbh->disconnect ? &stmt_ok : &stmt_nok;
 
 &all_ok();

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t57tables.t,v 100.3 2002/02/08 22:51:02 jleffler Exp $ 
+#   @(#)$Id: t57tables.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test tables
+#   Test tables
 #
-#	Copyright 1999 Jonathan Leffler
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 1999    Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix::TestHarness;
 use strict;
@@ -44,34 +44,36 @@ if ($dbh->{ix_ModeAnsiDatabase} == 0)
 my @tables = $dbh->tables or &stmt_fail;
 &stmt_ok;
 
-my $table;
-
-my ($cnt, $systab, $syscol, $tbcnt, $vwcnt, $sncnt) = (0, 0, 0, 0, 0, 0);
-foreach $table (@tables)
+my ($systab, $syscol, $tbcnt, $vwcnt, $sncnt) = (0, 0, 0, 0, 0);
+foreach my $table (@tables)
 {
-	print "$table\n";
+	print "# $table\n";
 	$systab++ if ($table =~ /systables/i);
 	$syscol++ if ($table =~ /syscolumns/i);
 	$tbcnt++  if ($table =~ /$tbname/i);
 	$vwcnt++  if ($table =~ /$vwname/i);
 	$sncnt++  if ($table =~ /$pbname/i || $table =~ /$prname/i);
-	$cnt++;
 }
+my($cnt) = $#tables + 1;
 
 # Check multiple uses!
 @tables = $dbh->tables or &stmt_fail;
-my ($chk) = 0;
-foreach $table (@tables)
-{
-	$chk++;
-}
-&stmt_fail unless $chk == $cnt;
+# Could get spurious failure if someone else creates or drops a table while this tests runs
+&stmt_fail unless $#tables + 1 == $cnt;
 
 # Clean up (dropping table drops views and synonyms!)
 $dbh->do("DROP TABLE $tbname") or &stmt_fail;
 &stmt_ok;
 
-&stmt_fail unless $systab == 1 && $syscol == 1 && $tbcnt == 1 && $vwcnt == 1 && $sncnt == $snexp;
+unless ($systab == 1 && $syscol == 1 && $tbcnt == 1 && $vwcnt == 1 && $sncnt == $snexp)
+{
+&stmt_note("# Unexpected number of systables ($systab vs 1)\n") unless $systab == 1;
+&stmt_note("# Unexpected number of syscolumns ($syscol vs 1)\n") unless $syscol == 1;
+&stmt_note("# Unexpected number of $tbname ($tbcnt vs 1)\n") unless $tbcnt == 1;
+&stmt_note("# Unexpected number of $vwname ($vwcnt vs 1)\n") unless $vwcnt == 1;
+&stmt_note("# Unexpected number of synonyms ($sncnt vs $snexp)\n") unless $sncnt == $snexp;
+&stmt_fail("Unexpected number of tables in database.\n");
+}
 &stmt_fail unless $cnt > 10;
 &stmt_ok;
 

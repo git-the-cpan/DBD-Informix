@@ -1,16 +1,12 @@
-#! /usr/bin/perl
+#!/usr/bin/perl -w
 #
-#   @(#)$Id: ItWorks,v 100.4 2002/02/08 22:48:49 jleffler Exp $
+#   @(#)$Id: ItWorks,v 100.5 2002/12/15 00:31:03 jleffler Exp $
 #
-#   Generate a report that Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) works
+#   Generate a report that IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) works
 #
 #   Copyright 1999 Jonathan Leffler
 #   Copyright 2000 Informix Software Inc
 #   Copyright 2002 IBM
-
-### This trick was more or less standard with Perl 4 ###
-eval "exec perl $0 $*"
-		if $running_under_some_shell;
 
 use DBD::Informix::TechSupport;
 it_works;

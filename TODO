@@ -1,19 +1,24 @@
-A List of Things That Need to be Done to Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+A List of Things That Need to be Done to IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 
-At the moment, everything has an added date of 1999-12-29, even though
+At the moment, most items have an added date of 1999-12-29, even though
 many of the items have been valid issues since version 0.25 back in 1996.
 
-T.001: Added 1999-12-29
+T.001: Added 1999-12-29 - Fixed 2002-12-06.
     Find out why t/t75blob.t sometimes fails.  Requires modification to
     test so it actually does something, of course.  The failure is
     intermittent.  Seems to be memory corruption of some sort related to
     how blobs are handled.  It is proving very difficult to track.
+    -- 2002-12-06: Test re-enabled on Solaris for v1.04.PC1 and no longer
+                   failing.  Not clear whether this is a bug fix in Perl,
+                   DBI, DBD::Informix, ESQL/C or something else, or if the
+                   bug has simply moved and no longer shows up.  Ick!!!
 
-T.002: Added 1999-12-29
+T.002: Added 1999-12-29 - Fixed 2002-12-06.
     Fix support for LVARCHAR types.
+    -- 2002-12-06: A bug was fixed in this code (again).
 
 T.003: Added 1999-12-29
-    Add support for DISTINCT types.  This should not be hard; it
+    Add support for DISTINCT types.  This should not be too hard, but it
     requires a change to the code which analyzes the type number to
     recognize that the DISTINCT bit is set.
 
@@ -21,9 +26,10 @@ T.004: Added 1999-12-29
     Worry about the DBI specification changes since 1997-01-01, roughly.
     Especially the metadata changes, meaning things like type_info_all.
 
-T.005: Added 1999-12-29
+T.005: Added 1999-12-29 - Fixed 2002-12-06.
     Worry about decimal number formatting.  The code in decsci.c and
     decsci.h should probably be upgraded.
+    -- 2002-12-06: The code to format decimals has been enhanced.
 
 T.006: Added 1999-12-29
     Worry about ReadLongLen and such attributes.  I still dislike them.
@@ -35,25 +41,30 @@ T.007: Added 1999-12-29
 T.008: Added 1999-12-29
     Revisit the DBIc_ACTIVE_on/off issues.
 
-T.009: Added 1999-12-29
+T.009: Added 1999-12-29 - Resolved 2002-12-06.
     Find out whether it is really necessary to clean up the statements
     for a $dbh, or the $dbh's for a $drh.  If not, remove the list
     support code in link.c, link.h.
+    -- 2002-12-06: It has been established via the tests disconn?.t in the
+                   regression directory that the clean-up functions are
+                   needed if the script does not clean up the DBI handles
+                   properly.  The code in link.c and link.h is still
+                   needed.
 
 T.010: Added 1999-12-29
-	Add support for collection types.
+    Add support for collection types.
 
 T.011: Added 1999-12-29
-	Add support for user-defined types.
+    Add support for user-defined types.
 
 T.012: Added 1999-12-29
-	Review placing blob data in files.
+    Review placing blob data in files.
 
 T.013: Added 1999-12-29
     Review providing a LOAD and UNLOAD capability.  Not a clear cut
     issue.  UNLOAD is pretty simple, but it is hard to do the LOAD data
     validation really well.  And without penalizing everybody with a lot
-	of code.
+    of code.
 
 T.014: Added 1999-12-29
     Review the code that formats values on return from the database.  If
@@ -63,8 +74,17 @@ T.014: Added 1999-12-29
     huge case statement(s) into separate functions -- the existing code
     has grown and is an horrible mess.
 
+T.015: Added 2002-12-13
+    Find a way to automate all pre-requisite versions into various files.
+    Ditto for contact details, etc.  Especially note the ItWorks code in
+    lib/DBD/Informix/TechSupport.pm needs to be in line with README and
+    Announce and Informix.pm and so on.
+
+T.016: Added 2002-02-28
+	Need to review documentation for supported version information, etc.
+
 ---------------------------------------------------------------------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
 
-@(#)$Id: TODO,v 100.2 2002/02/08 22:48:59 jleffler Exp $
+@(#)$Id: TODO,v 2003.1 2003/02/28 21:30:55 jleffler Exp $

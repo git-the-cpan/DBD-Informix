@@ -1,5 +1,5 @@
 /*
- *	@(#)$Id: Informix.h,v 100.1 2002/02/08 22:48:45 jleffler Exp $ 
+ *	@(#)$Id: Informix.h,v 100.3 2002/12/09 22:54:49 jleffler Exp $
  *
  * Copyright 1994-95      Tim Bunce
  * Copyright 1995-96      Alligator Descartes
@@ -15,15 +15,7 @@
 #ifndef INFORMIX_H
 #define INFORMIX_H
 
-#define NEED_DBIXS_VERSION 9
-
-/* For ActiveState Perl on NT */
-/* Change from Michael Kopchenov <myk@informix.com> */
-#ifdef PERL_OBJECT
-#define NO_XSLOCKS
-class CPerlObj;
-extern CPerlObj* pPerl;
-#endif
+#define NEED_DBIXS_VERSION 93
 
 #include <DBIXS.h>		/* Installed by the DBI module */
 #include "dbdimp.h"		/* Informix implementation details */

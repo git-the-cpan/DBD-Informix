@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t53types.t,v 100.6 2002/02/08 22:50:58 jleffler Exp $ 
+#   @(#)$Id: t53types.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test NAME, TYPE, NULLABLE, SCALE, PRECISION attributes
-#	No testing for UDTs
+#   Test NAME, TYPE, NULLABLE, SCALE, PRECISION attributes
+#   No testing for UDTs
 #
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use strict;
 use DBD::Informix::TestHarness;

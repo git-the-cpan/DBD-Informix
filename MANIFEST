@@ -1,5 +1,8 @@
+# @(#)$Id: MANIFEST,v 2003.3 2003/02/26 23:03:42 jleffler Exp $
+# MANIFEST for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 Announce
 BugReport
+Bundle/DBD/Informix.pm
 ChangeLog
 Informix.h
 Informix.pm
@@ -72,11 +75,13 @@ examples/x15cgi_form.pl
 ixblob.ec
 ixblob.h
 kludge.h
-lib/Bundle/DBD/Informix.pm
-lib/DBD/Informix/Configuration.pm
+lib/DBD/Informix/Configure.pm
+lib/DBD/Informix/GetInfo.pm
+lib/DBD/Informix/Metadata.pm
 lib/DBD/Informix/Summary.pm
 lib/DBD/Informix/TechSupport.pm
 lib/DBD/Informix/TestHarness.pm
+lib/DBD/Informix/TypeInfo.pm
 link.c
 link.h
 odbctype.c
@@ -90,6 +95,7 @@ t/t01stproc.t
 t/t02ixtype.t
 t/t05dbase.t
 t/t07dblist.t
+t/t09exec.t
 t/t10sqlca.t
 t/t12bindval.t
 t/t13bindref.t
@@ -114,11 +120,13 @@ t/t43trans.t
 t/t44txansi.t
 t/t46chpblk.t
 t/t50update.t
+t/t51getinfo.t
 t/t53types.t
 t/t54native.t
 t/t55mdata.t
 t/t56tabinfo.t
 t/t57tables.t
+t/t58typeinfoall.t
 t/t60unlog.t
 t/t65updcur.t
 t/t66insert.t
@@ -129,6 +137,8 @@ t/t75blob.t
 t/t76blob.t
 t/t90ius.t
 t/t91udts.t
+t/t92rows.t
+t/t93lvarchar.t
 t/t94bool.t
 t/t99clean.t
 test.all.sh

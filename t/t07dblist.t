@@ -1,21 +1,21 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t07dblist.t,v 100.9 2002/10/19 00:33:23 jleffler Exp $ 
+#   @(#)$Id: t07dblist.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	List of available databases:
-#	@ary = $DBI->data_sources('Informix');
+#   List of available databases:
+#   @ary = $DBI->data_sources('Informix');
 #
-#	Copyright 1996    Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
-#	Copyright 1996-99 Jonathan Leffler
-#	Copyright 2000    Informix Software Inc
-#	Copyright 2002    IBM
-#
+#   Copyright 1996    Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#   Copyright 1996-99 Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
-@ary = DBI->data_sources('Informix');
+my @ary = DBI->data_sources('Informix');
 
-if (!defined @ary)
+if (!@ary)
 {
 	if ($ENV{DBD_INFORMIX_USERNAME} && $ENV{DBD_INFORMIX_PASSWORD} && ($DBI::err == -951 || $DBI::err == -956)) 
 	{
@@ -34,14 +34,14 @@ if (!defined @ary)
 }
 else
 {
-	$x = @ary;
-	$y = $x + 1;
+	my $x = @ary;
+	my $y = $x + 1;
 	print "1..$y\n";
 	# Note that there is not very much we can do to validate database list.
 	&stmt_note("# Test: DBI->data_sources('Informix'):\n");
 	&stmt_fail("# *** No databases to list? ***\n") if ($#ary < 0);
-	$srv = 0;
-	foreach $db (@ary)
+	my $srv = 0;
+	foreach my $db (@ary)
 	{
 		&stmt_note("# Database: $db\n");
 		($db =~ /^dbi:Informix:/) ? &stmt_ok(0) : &stmt_fail();
@@ -52,5 +52,3 @@ else
 }
 
 &all_ok();
-
-exit 0;

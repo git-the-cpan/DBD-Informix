@@ -1,20 +1,21 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t41txacoff.t,v 100.5 2002/11/05 18:40:58 jleffler Exp $ 
+#   @(#)$Id: t41txacoff.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
 #
-#	Test Transactions with AutoCommit Off for DBD::Informix
+#   Test Transactions with AutoCommit Off for DBD::Informix
 #
-#	Copyright 1996-97,1999 Jonathan Leffler
-#	Copyright 2000         Informix Software Inc
-#	Copyright 2002         IBM
+#   Copyright 1996-97,1999 Jonathan Leffler
+#   Copyright 2000         Informix Software Inc
+#   Copyright 2002-03      IBM
 #
 # Simple transaction testing setting AutoCommit Off.
 # Not significantly different from the testing in t43trans.t.
 
 use DBD::Informix::TestHarness;
+use strict;
 
 # Test connection
-$dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });
+my $dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });
 
 if ($dbh->{ix_LoggedDatabase} == 0)
 {
@@ -44,10 +45,10 @@ sub test_conn_tx
 	}
 }
 
-$trans01 = "DBD_IX_Trans01";
+my $trans01 = "DBD_IX_Trans01";
 my $ansi = $dbh->{ix_ModeAnsiDatabase};
 
-stmt_note "1..16\n";
+stmt_note "1..19\n";
 stmt_ok;
 stmt_note "# This is a MODE ANSI database\n" if ($ansi);
 stmt_note "# This is a regular logged database\n" if (!$ansi);
@@ -73,15 +74,15 @@ CREATE TEMP TABLE $trans01
 stmt_note "# InTransaction = $dbh->{ix_InTransaction}\n";
 stmt_fail unless $dbh->{ix_InTransaction};
 
-$date = &date_as_string($dbh, 12, 25, 1996);
+my $date = &date_as_string($dbh, 12, 25, 1996);
+my $time = '2004-02-29 23:59:54.32109';
 
 stmt_fail unless ($dbh->commit());
 test_conn_tx($dbh);
 
 # This transaction will be rolled back.
-$tag1  = 'Elfdom';
-$insert01 = qq{INSERT INTO $trans01
-VALUES(0, '$tag1', '$date', CURRENT YEAR TO FRACTION(5))};
+my $tag1  = 'Elfdom';
+my $insert01 = qq{INSERT INTO $trans01 VALUES(0, '$tag1', '$date', '$time')};
 
 stmt_test $dbh, $insert01;
 print "# InTransaction = $dbh->{ix_InTransaction}\n";
@@ -89,25 +90,35 @@ stmt_fail unless $dbh->{ix_InTransaction};
 
 stmt_fail unless ($dbh->rollback);
 test_conn_tx($dbh);
-stmt_ok();
+&stmt_ok;
 
-$select = "SELECT * FROM $trans01";
+my $select = "SELECT * FROM $trans01";
 
 # This transaction will be rolled back.
 # Check that there is no data
 select_zero_data $dbh, $select;
 stmt_note "# InTransaction = $dbh->{ix_InTransaction}\n";
-print "### Got here!\n";
 stmt_fail unless $dbh->{ix_InTransaction};
 
 # Insert two rows of data.
 stmt_test $dbh, $insert01;
-$tag2 = 'Santa Claus Home';
+my $tag2 = 'Santa Claus Home';
 $insert01 =~ s/$tag1/$tag2/;
 stmt_test $dbh, $insert01;
 
+# Row number 1 is inserted but rolled back...
+my $row1 = { 'col01' => 2, 'col02' => 'Elfdom', 'col03' => $date, 'col04' => $time };
+my $row2 = { 'col01' => 3, 'col02' => 'Santa Claus Home', 'col03' => $date, 'col04' => $time };
+my $res1 = { 2 => $row1, 3 => $row2 };
+my $row3 = { 'col01' => 4, 'col02' => 'Santa Claus Home', 'col03' => $date, 'col04' => $time };
+my $row4 = { 'col01' => 5, 'col02' => 'Elfdom', 'col03' => $date, 'col04' => $time };
+my $res2 = { 4 => $row3, 5 => $row4 };
+
+my $sel = $dbh->prepare($select) or &stmt_fail;
+&stmt_ok;
+
 # Check that there is some data
-select_some_data $dbh, 2, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res1) : &stmt_nok;
 stmt_fail unless $dbh->{ix_InTransaction};
 
 # Rollback!
@@ -126,7 +137,7 @@ $insert01 =~ s/$tag2/$tag1/;
 stmt_test $dbh, $insert01;
 
 # Check that there is some data
-select_some_data $dbh, 2, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res2) : &stmt_nok;
 
 # Commit it
 stmt_fail unless ($dbh->commit);
@@ -134,7 +145,7 @@ test_conn_tx($dbh);
 
 # This transaction will be rolled back.
 # Check that there is still some data
-select_some_data $dbh, 2, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res2) : &stmt_nok;
 stmt_fail unless $dbh->{ix_InTransaction};
 
 # Delete the data.
@@ -148,7 +159,9 @@ stmt_fail unless ($dbh->rollback);
 test_conn_tx($dbh);
 
 # Check that there is still some data
-select_some_data $dbh, 2, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res2) : &stmt_nok;
 stmt_fail unless $dbh->{ix_InTransaction};
+
+$dbh->disconnect ? stmt_ok : stmt_nok;
 
 &all_ok();

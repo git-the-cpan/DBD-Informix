@@ -1,17 +1,18 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t72blob.t,v 100.4 2002/10/19 00:27:50 jleffler Exp $ 
+#   @(#)$Id: t72blob.t,v 2003.3 2003/02/28 21:17:04 jleffler Exp $
 #
-#	Test Basic Blobs (INSERT & SELECT) for DBD::Informix
+#   Test Basic Blobs (INSERT & SELECT) for DBD::Informix
 #
-#	Copyright 1996-97,1999 Jonathan Leffler
-#	Copyright 2000         Informix Software Inc
-#	Copyright 2002         IBM
+#   Copyright 1996-97,1999 Jonathan Leffler
+#   Copyright 2000         Informix Software Inc
+#   Copyright 2002-03      IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 # Test install...
-$dbh = connect_to_test_database();
+my $dbh = connect_to_test_database();
 
 if (!$dbh->{ix_BlobSupport})
 {
@@ -21,44 +22,50 @@ if (!$dbh->{ix_BlobSupport})
 }
 else
 {
-	print("1..15\n");
+	print("1..12\n");
 	&stmt_ok(0);
 
-	$dbh->{PrintError} = 0;
-	$stmt1 = 'DROP TABLE Dbd_IX_BlobTest';
-	$dbh->do($stmt1);
-	# Fail unless table dropped or table not found (-206).
-	# Problem found by Nuno Carneiro de Moura <ncmoura@net.mailcom.pt>
-	$sqlcode = $dbh->{ix_sqlcode};
-	&stmt_fail() unless ($sqlcode == 0 || $sqlcode == -206);
-	&stmt_ok(0);
-	$stmt2 = 'CREATE TABLE Dbd_IX_BlobTest (I SERIAL UNIQUE, ' .
-			 ' T TEXT IN TABLE, B BYTE IN TABLE)';
+	my $tablename = "dbd_ix_blobtest";
+
+	my $stmt2 = "CREATE TEMP TABLE $tablename (I SERIAL UNIQUE, " .
+			 " T TEXT IN TABLE, B BYTE IN TABLE)";
 	&stmt_test($dbh, $stmt2, 0);
 
-	$stmt3 = 'INSERT INTO Dbd_IX_BlobTest VALUES(?, ?, ?)';
+	my $stmt3 = "INSERT INTO $tablename VALUES(?, ?, ?)";
 	&stmt_note("# Testing: \$insert = \$dbh->prepare('$stmt3')\n");
+	my $insert;
 	&stmt_fail() unless ($insert = $dbh->prepare($stmt3));
 	&stmt_ok(0);
 
-	$blob1 = "This is a TEXT blob";
-	$blob2 = "This is a pseudo-BYTE blob";
+	my $value1 = "This is a TEXT blob";
+	my $value2 = "This is a pseudo-BYTE blob";
+	my $blob1 = $value1;
+	my $blob2 = $value2;
 	&stmt_note("# Testing: \$insert->execute(1, \$blob1, \$blob2)\n");
 	&stmt_fail() unless ($insert->execute(1, $blob1, $blob2));
 	&stmt_ok(0);
 
 	# At one time, we got free problems reported when we did this!
-	$blob1 = "This is also a TEXT blob";
-	$blob2 = "This is also a pseudo-BYTE blob";
+	my $value3 = "This is also a TEXT blob";
+	my $value4 = "This is also a pseudo-BYTE blob";
+	$blob1 = $value3;
+	$blob2 = $value4;
 	&stmt_note("# Testing: \$insert->execute(2, \$blob1, \$blob2)\n");
 	&stmt_fail() unless ($insert->execute(2, $blob1, $blob2));
 	&stmt_ok(0);
 
-	$blob3 = "This, too, is a TEXT blob";
-	$blob4 = "This, too, is a pseudo-BYTE blob";
+	my $value5 = "This, too, is a TEXT blob";
+	my $value6 = "This, too, is a pseudo-BYTE blob";
+	my $blob3 = $value5;
+	my $blob4 = $value6;
 	&stmt_note("# Testing: \$insert->execute(3, \$blob3, \$blob4)\n");
 	&stmt_fail() unless ($insert->execute(3, $blob3, $blob4));
 	&stmt_ok(0);
+
+	my $row1 = { 'i' => 1, 't' => $value1, 'b' => $value2 };
+	my $row2 = { 'i' => 2, 't' => $value3, 'b' => $value4 };
+	my $row3 = { 'i' => 3, 't' => $value5, 'b' => $value6 };
+	my $res1 = { 1 => $row1, 2 => $row2, 3 => $row3 };
 
 	&stmt_note("Testing: \$insert->finish\n");
 	&stmt_fail() unless ($insert->finish);
@@ -67,8 +74,9 @@ else
 	$dbh->commit if ($dbh->{ix_InTransaction});
 
 	# Verify that inserted data can be returned
-	$stmt4 = 'SELECT * FROM Dbd_IX_BlobTest ORDER BY I';
+	my $stmt4 = "SELECT * FROM $tablename ORDER BY I";
 	&stmt_note("# Testing: \$cursor = \$dbh->prepare('$stmt4')\n");
+	my $cursor;
 	&stmt_fail() unless ($cursor = $dbh->prepare($stmt4));
 	&stmt_ok(0);
 
@@ -76,34 +84,23 @@ else
 	&stmt_fail() unless ($cursor->execute);
 	&stmt_ok(0);
 
-	&stmt_note("# Re-testing: \$cursor->fetch\n");
-	# Fetch returns a reference to an array!
-	while ($ref = $cursor->fetch)
-	{
-		&stmt_ok(0);
-		@row = @{$ref};
-		# Verify returned data!
-		&stmt_note("# Values returned: ", $#row + 1, "\n");
-		for ($i = 0; $i <= $#row; $i++)
-		{
-			&stmt_note("# Row value $i: $row[$i]\n");
-		}
-	}
+	&validate_unordered_unique_data($cursor, 'i', $res1);
 
 	# Verify data attributes!
-	@type = @{$cursor->{TYPE}};
+	my @type = @{$cursor->{TYPE}};
+	my $i;
 	for ($i = 0; $i <= $#type; $i++) { print ("# Type      $i: $type[$i]\n"); }
-	@name = @{$cursor->{NAME}};
+	my @name = @{$cursor->{NAME}};
 	for ($i = 0; $i <= $#name; $i++) { print ("# Name      $i: $name[$i]\n"); }
-	@null = @{$cursor->{NULLABLE}};
+	my @null = @{$cursor->{NULLABLE}};
 	for ($i = 0; $i <= $#null; $i++) { print ("# Nullable  $i: $null[$i]\n"); }
-	@prec = @{$cursor->{PRECISION}};
+	my @prec = @{$cursor->{PRECISION}};
 	for ($i = 0; $i <= $#prec; $i++) { print ("# Precision $i: $prec[$i]\n"); }
-	@scal = @{$cursor->{SCALE}};
+	my @scal = @{$cursor->{SCALE}};
 	for ($i = 0; $i <= $#scal; $i++) { print ("# Scale     $i: $scal[$i]\n"); }
 
-	$nfld = $cursor->{NUM_OF_FIELDS};
-	$nbnd = $cursor->{NUM_OF_PARAMS};
+	my $nfld = $cursor->{NUM_OF_FIELDS};
+	my $nbnd = $cursor->{NUM_OF_PARAMS};
 	&stmt_note("# Number of Columns: $nfld; Number of Parameters: $nbnd\n");
 
 	&stmt_note("# Testing: \$cursor->finish\n");
@@ -112,12 +109,8 @@ else
 
 	# FREE the cursor and asociated data
 	undef $cursor;
-
-	&stmt_fail() unless $dbh->do($stmt1);
 }
 
-&stmt_note("# Testing: \$dbh->disconnect()\n");
-&stmt_fail() unless ($dbh->disconnect);
-&stmt_ok(0);
+$dbh->disconnect ? &stmt_ok : &stmt_nok;
 
 &all_ok();

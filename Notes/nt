@@ -1,4 +1,4 @@
-Building Informix Database Driver for Perl on Microsoft Windows NT
+Building IBM Informix Database Driver for Perl on Microsoft Windows NT
 
 There are two ways of obtaining Perl for Windows NT, the easy way and
 the hard way.  The easy way uses the pre-built ActiveState version of
@@ -44,7 +44,7 @@ Using ActiveState Perl
 
 4.  Verify that you can connect to a database with the ILogin demo.
 
-5.  Get the source code for DBD::Informix (DBD-Informix-1.04.PC1.tar.gz)
+5.  Get the source code for DBD::Informix (DBD-Informix-2003.03.0303.tar.gz)
     from http://www.cpan.org, unpack it into a temporary directory, and
     then run:
 
@@ -87,8 +87,8 @@ Be brave!  Read everything!
         nmake test
         nmake install
 
-6.  Get the source code for DBD::Informix 1.04.PC1, unpack it into a
-    directory such as C:\tmp\DBD-Informix-1.04.PC1, change to that
+6.  Get the source code for DBD::Informix 2003.03.0303, unpack it into a
+    directory such as C:\tmp\DBD-Informix-2003.03.0303, change to that
     directory, and run:
 
         perl Makefile.PL

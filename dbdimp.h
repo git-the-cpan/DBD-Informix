@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 100.8 2002/11/18 23:22:00 jleffler Exp $ 
+ * @(#)$Id: dbdimp.h,v 100.13 2002/12/13 21:44:01 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1996-99 Jonathan Leffler
@@ -51,7 +51,7 @@
 #define DEFAULT_DATABASE	".DEFAULT."
 
 /*
-** IUS BLOB and CLOB types need special treatment, but are 
+** IUS BLOB and CLOB types need special treatment, but are
 ** of type SQLUDTFIXED in the Informix system catalogue.
 ** Hence invent a pair of numbers to represent them.
 */
@@ -137,19 +137,19 @@ extern void dbd_ix_dr_init(dbistate_t *);
 /* Non-standard driver entry points */
 extern SV *dbd_ix_dr_FETCH_attrib(imp_drh_t *drh, SV *keysv);
 extern int dbd_ix_dr_driver(SV *drh);
+extern AV *dbd_ix_dr_data_sources(SV *drh, imp_drh_t *imp_drh, SV *attr);
 
 /* Standard database entry points */
 extern SV *dbd_ix_db_FETCH_attrib(SV *, imp_dbh_t *, SV *);
 extern int dbd_ix_db_STORE_attrib(SV *, imp_dbh_t *, SV *, SV *);
 extern int dbd_ix_db_commit(SV *, imp_dbh_t *);
-extern int dbd_ix_db_disconnect(SV *, imp_dbh_t *imp_dbh);
+extern int dbd_ix_db_disconnect(SV *, imp_dbh_t *);
 extern int dbd_ix_db_connect(SV *, imp_dbh_t *, char *, char *, char *, SV *);
-extern int dbd_ix_db_rollback(SV *, imp_dbh_t *imp_dbh);
-extern void dbd_ix_db_destroy(SV *, imp_dbh_t *imp_dbh);
+extern int dbd_ix_db_rollback(SV *, imp_dbh_t *);
+extern void dbd_ix_db_destroy(SV *, imp_dbh_t *);
 
 /* Non-standard database entry points */
 extern int dbd_ix_db_begin(imp_dbh_t *);
-extern int dbd_ix_db_preset(imp_dbh_t *, SV *);
 
 /* Standard statement entry points */
 extern AV *dbd_ix_st_fetch(SV *, imp_sth_t *);
@@ -158,7 +158,7 @@ extern int dbd_ix_st_STORE_attrib(SV *, imp_sth_t *, SV *, SV *);
 extern int dbd_ix_st_bind_ph(SV *, imp_sth_t *, SV *, SV *, IV, SV *, int, IV);
 extern int dbd_ix_st_blob_read(SV *, imp_sth_t *, int, long, long, SV *, long);
 extern int dbd_ix_st_execute(SV *, imp_sth_t *);
-extern int dbd_ix_st_finish(SV *, imp_sth_t *);
+extern int dbd_ix_st_finish(SV *sth, imp_sth_t *imp_sth, int gd_flag);
 extern int dbd_ix_st_prepare(SV *, imp_sth_t *, char *, SV *);
 extern int dbd_ix_st_rows(SV *, imp_sth_t *);
 extern void dbd_ix_st_destroy(SV *, imp_sth_t *);
@@ -167,6 +167,5 @@ extern void dbd_ix_st_destroy(SV *, imp_sth_t *);
 extern const char *dbd_ix_module(void);
 extern void dbd_ix_enter(const char *function);
 extern void dbd_ix_exit(const char *function);
-extern void dbd_ix_seterror(ErrNum rc);
 
 #endif	/* DBDIMP_H */

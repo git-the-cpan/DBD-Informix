@@ -1,23 +1,24 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t65updcur.t,v 100.4 2002/11/05 18:40:58 jleffler Exp $ 
+#   @(#)$Id: t65updcur.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
 #
-#	Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
+#   Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 # Test install...
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 
-&stmt_note("1..13\n");
+&stmt_note("1..16\n");
 &stmt_ok();
 
-$table = "DBD_IX_TestTable";
-$select = "SELECT * FROM $table";
+my $table = "DBD_IX_TestTable";
+my $select = "SELECT * FROM $table";
 
 stmt_test $dbh, qq{
 CREATE TEMP TABLE $table
@@ -29,42 +30,54 @@ CREATE TEMP TABLE $table
 )
 };
 
-$date = &date_as_string($dbh, 12, 25, 1996);
-$tag1  = $dbh->quote('Mornington Crescent');
-$insert01 = qq{INSERT INTO $table
-VALUES(0, $tag1, '$date', CURRENT YEAR TO FRACTION(5))};
+my $date = &date_as_string($dbh, 12, 8, 1940);
+my $time = '1940-12-08 06:45:32.54321';
+my $raw1 = 'Mornington Crescent';
+my $tag1 = $dbh->quote($raw1);
+my $raw2 = "King's Cross / St Pancras";
+my $tag2 = $dbh->quote($raw2);
+my $raw3 = "ABC $raw1";
+my $insert01 = qq{INSERT INTO $table VALUES(0, $tag1, '$date', '$time')};
 
 # Insert two rows of data
 stmt_test $dbh, $insert01;
-$tag2 = $dbh->quote("King's Cross / St Pancras");
 $insert01 =~ s/$tag1/$tag2/;
 stmt_test $dbh, $insert01;
 
+my $sel = $dbh->prepare($select) or &stmt_fail;
+&stmt_ok;
+
+my $row1 = { 'col01' => 1, 'col02' => $raw1, 'col03' => $date, 'col04' => $time };
+my $row2 = { 'col01' => 2, 'col02' => $raw2, 'col03' => $date, 'col04' => $time };
+my $row3 = { 'col01' => 1, 'col02' => $raw3, 'col03' => $date, 'col04' => $time };
+my $res1 = { 1 => $row1, 2 => $row2 };
+my $res2 = { 1 => $row3 };
+
 # Check that there is some data
-select_some_data $dbh, 2, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res1) : &stmt_nok;
 
-$selupd = $select . " FOR UPDATE";
-print "# $selupd\n";
-&stmt_fail() unless ($st1 = $dbh->prepare($selupd));
-&stmt_ok();
+my $selupd = $select . " FOR UPDATE";
+my $st1 = $dbh->prepare($selupd) or &stmt_fail;
+&stmt_ok;
 
-# Attribute caching working again!
-$name = $st1->{CursorName};
+# Check that attribute caching is still working!
+my $name = $st1->{CursorName};
+my $i;
 for ($i = 0; $i < 3; $i++)
 {
-	$x = ($name eq $st1->{CursorName}) ? "OK" : "** BROKEN **";
+	my $x = ($name eq $st1->{CursorName}) ? "OK" : "** BROKEN **";
 	print "# Cursor name $i: $st1->{CursorName} $x\n";
 }
 
 $name = $st1->{CursorName};
-$updstmt = "UPDATE $table SET Col02 = ? WHERE CURRENT OF $name";
+my $updstmt = "UPDATE $table SET Col02 = ? WHERE CURRENT OF $name";
 print "# $updstmt\n";
-&stmt_fail() unless ($st2 = $dbh->prepare($updstmt));
+my $st2 = $dbh->prepare($updstmt) or &stmt_fail;
 &stmt_ok();
 
-$delstmt = "DELETE FROM $table WHERE CURRENT OF $name";
+my $delstmt = "DELETE FROM $table WHERE CURRENT OF $name";
 print "# $delstmt\n";
-&stmt_fail() unless ($st3 = $dbh->prepare($delstmt));
+my $st3 = $dbh->prepare($delstmt) or &stmt_fail;
 &stmt_ok();
 
 # In a logged database, must be in a transaction
@@ -72,22 +85,26 @@ print "# $delstmt\n";
 $dbh->{AutoCommit} = 0
 	unless (!$dbh->{ix_LoggedDatabase});
 
-$n = 0;
+my $n = 0;
 &stmt_fail() unless ($st1->execute());
 &stmt_ok();
 
+# Fetch first row
+my $data;
 &stmt_fail() unless ($data = $st1->fetch);
 &stmt_ok();
 $n++;
-@row = @{$data};
+my @row;@row = @{$data};
 for ($i = 0; $i <= $#row; $i++)
 {
 	print "Row $n: Field $i: <<$row[$i]>>\n";
 }
 
+# Update current row
 $row[1] = "ABC " . $row[1];
 &stmt_fail() unless ($st2->execute($row[1]));
 
+# Fetch second row
 &stmt_fail() unless ($data = $st1->fetch);
 &stmt_ok();
 $n++;
@@ -97,6 +114,7 @@ for ($i = 0; $i <= $#row; $i++)
 	print "Row $n: Field $i: <<$row[$i]>>\n";
 }
 
+# Delete it
 &stmt_fail() unless ($st3->execute);
 &stmt_ok;
 
@@ -104,6 +122,8 @@ for ($i = 0; $i <= $#row; $i++)
 $dbh->commit unless (!$dbh->{ix_LoggedDatabase});
 
 # Check that there is some data
-select_some_data $dbh, 1, $select;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res2) : &stmt_nok;
+
+$dbh->disconnect ? stmt_ok : stmt_nok;
 
 &all_ok();

@@ -1,25 +1,44 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org
-Subject: ANNOUNCE: Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) released
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) released
 
-Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
 the driver code that enables Perl 5.005 or later to access Informix
-databases via the DBI module.  You will need the code for DBI version
-1.14 or later as well.  You should be planning to upgrade to at least
-version Perl 5.8.0.  The code is available for download via:
+databases via the DBI module (but if you are not already using Perl
+5.8.0, you should be planning to upgrade to it).  You will need the code
+for DBI version 1.33 or later as well.  The code for DBD::Informix is
+available for download via:
 
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
 http://dbi.perl.org/
 
-** When you successfully build Informix Database Driver for Perl,
-** use the ItWorks (Perl) script to report your configuration to the
-** maintenance team at either dbdinfmx@us.ibm.com (yes, this is a change
-** from the 1.00.PC2 release), and copy Jonathan Leffler.  Note that
-** ItWorks does not send email to anybody; you have to do that yourself.
+** When you successfully build this module, use the ItWorks (Perl)
+** script to report your configuration to the maintenance team (meaning
+** Jonathan Leffler) at jleffler@us.ibm.com.  Note that ItWorks does not
+** send email to anybody; you have to do that yourself.
 
-New in release 1.04:
+New in release 2003.03.0303:
+* Pre-requisite version of DBI is now 1.33.  There were a number of
+  changes made in the support code for DBI that this version of
+  DBD::Informix relies upon.
+* Fix various minor problems as noted in the ChangeLog.
+* Overhaul the infrastructure to align better with DBI specifications.
+* Revise infrastructure to exploit ExtUtils::AutoInstall.  If it causes you
+  problems (because you don't have Internet access, for example), read the
+  notes at the top of Makefile.PL on how to avoid the problems.
+* Provide support for $dbh->get_info() and $dbh->type_info_all().
+* No longer supporting obsolete versions of ESQL/C: 5.0x, 6.0x, 7.0x, 7.1x,
+  7.2x other than 7.24, 9.0x, and 9.1x prior to 9.16.  All of these are at
+  least 5 years out of date.  See also FUTURE DIRECTION in ChangeLog.
+* This release is supported by Jonathan Leffler <jleffler@us.ibm.com>.
+* Moving to version numbering scheme with 3-part major, minor, release
+  numbering as recommended in:
+    http://en.tldp.org/HOWTO/Software-Release-Practice-HOWTO/index.html
+  Just to be contrarian, the version number will be date-based.
+
+New in release 1.04.PC1:
 * This release is supported by Jonathan Leffler.  It isn't clear what
   IBM's official stance on the product is.  However, they do support
   DBD::DB2 so there is likely to be minimal objection to this work.
@@ -35,12 +54,13 @@ New in release 1.04:
   space to use if you don't want to use 'sbspace'.
 * Fix up file locations so it works better with CPAN.
 
-Release 1.03:
-* Functionally the same as 1.04, but with the wrong Announce file.  It's
-  amazing how you never spot these problems until too late.
+Scheduled next version: 2003.02.00.
+* Feature content still dependent on time available.
+* Expected to contain sqlda version of the code (WIP - Work In Progress
+  WIP - at last).
 
 As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce,v 100.8 2002/11/21 23:00:22 jleffler Exp $
+@(#)$Id: Announce,v 2003.3 2003/02/28 21:31:22 jleffler Exp $

@@ -1,14 +1,15 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t90ius.t,v 100.3 2002/02/08 22:51:12 jleffler Exp $ 
+#   @(#)$Id: t90ius.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test basic handling of IUS data types
+#   Test basic handling of IUS data types
 #
-#	Copyright 1998-99 Jonathan Leffler
-#	Copyright 2000    Informix Software Inc
-#	Copyright 2002    IBM
+#   Copyright 1998-99 Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 my ($dbh) = &test_for_ius;
 
@@ -82,7 +83,7 @@ $expect++;
 sub irand { return int rand 1000000; }
 
 &stmt_fail() unless
-	$sth = $dbh->prepare(qq% INSERT INTO $tab VALUES(?, ?, ?, ?, ?) %);
+	my $sth = $dbh->prepare(qq% INSERT INTO $tab VALUES(?, ?, ?, ?, ?) %);
 $lvc = ( &irand . "x" ) x 10 . &irand;
 &stmt_fail() unless
 	$sth->execute(91234567890, 't', $lvc, &irand, &irand);
@@ -95,7 +96,7 @@ $expect++;
 &stmt_ok();
 
 # Fetch and print the data.
-my ($sth,$data,$row);
+my ($data,$row);
 &stmt_fail() unless
 	($sth = $dbh->prepare("SELECT * FROM $tab"));
 &stmt_fail() unless

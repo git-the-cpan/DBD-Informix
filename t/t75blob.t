@@ -1,19 +1,20 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t75blob.t,v 100.5 2002/10/19 01:01:35 jleffler Exp $ 
+#   @(#)$Id: t75blob.t,v 2003.3 2003/02/28 21:17:04 jleffler Exp $
 #
-#	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
+#   Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
-#	Copyright 1996-97,1999 Jonathan Leffler
-#	Copyright 2000         Informix Software Inc
-#	Copyright 2002         IBM
+#   Copyright 1996-97,1999 Jonathan Leffler
+#   Copyright 2000         Informix Software Inc
+#   Copyright 2002-03      IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
-$tablename = "DBD_IX_BlobTest2";
+my $tablename = "DBD_IX_BlobTest2";
 
 # Test install...
-$dbh = connect_to_test_database();
+my $dbh = connect_to_test_database();
 
 if (!$dbh->{ix_BlobSupport})
 {
@@ -27,20 +28,21 @@ else
 	&stmt_ok(0);
 	$dbh->{PrintError} = 1;
 
-	$stmt2 = qq{ CREATE TEMP TABLE $tablename (I SERIAL UNIQUE, B BYTE IN TABLE, 
-				 T TEXT IN TABLE) };
+	my $stmt2 = qq{ CREATE TEMP TABLE $tablename (I SERIAL UNIQUE,
+				    B BYTE IN TABLE, T TEXT IN TABLE) };
 	&stmt_test($dbh, $stmt2, 0);
 
-	$stmt3 = qq{ INSERT INTO $tablename VALUES(?, ?, ?) };
+	my $stmt3 = qq{ INSERT INTO $tablename VALUES(?, ?, ?) };
 	&stmt_note("# Testing: \$insert = \$dbh->prepare('$stmt3')\n");
+	my $insert;
 	&stmt_fail() unless ($insert = $dbh->prepare($stmt3));
 	&stmt_ok(0);
 
-	for ($i = 1; $i <= 20; $i++)
+	for (my $i = 1; $i <= 20; $i++)
 	{
-		$repeat = int(rand 30) + 1;
-		$blob1 = "This is a pseudo-BYTE blob " x $repeat;
-		$blob2 = "This is a TEXT blob " x $repeat;
+		my $repeat = int(rand 30) + 1;
+		my $blob1 = "This is a pseudo-BYTE blob " x $repeat;
+		my $blob2 = "This is a TEXT blob " x $repeat;
 		$blob1 = "<<$repeat>>$blob1";
 		$blob2 = "<<$repeat>>$blob2";
 		chop $blob1;
@@ -65,8 +67,9 @@ else
 	&stmt_ok(0);
 
 	# Verify that inserted data can be returned
-	$stmt4 = qq{ SELECT * FROM $tablename ORDER BY I };
+	my $stmt4 = qq{ SELECT * FROM $tablename ORDER BY I };
 	&stmt_note("# Testing\n\$cursor = \$dbh->prepare('$stmt4')\n");
+	my $cursor;
 	&stmt_fail() unless ($cursor = $dbh->prepare($stmt4));
 	&stmt_ok(0);
 
@@ -76,14 +79,15 @@ else
 
 	&stmt_note("# Testing: \$cursor->fetch\n");
 	# Fetch returns a reference to an array!
+	my $ref;
 	while ($ref = $cursor->fetch)
 	{
-		@row = @{$ref};
+		my @row = @{$ref};
 		# Verify returned data!
 		&stmt_note("# Values returned: ", $#row + 1, "\n");
-		for ($i = 0; $i <= $#row; $i++)
+		for (my $i = 0; $i <= $#row; $i++)
 		{
-			$val = $row[$i];
+			my $val = $row[$i];
 			if (defined $val)
 			{
 				$val = substr($row[$i], 0, 30) . "..."
@@ -99,19 +103,20 @@ else
 	&stmt_ok(0);
 
 	# Verify data attributes!
-	@type = @{$cursor->{TYPE}};
+	my $i;
+	my @type = @{$cursor->{TYPE}};
 	for ($i = 0; $i <= $#type; $i++) { print ("# Type      $i: $type[$i]\n"); }
-	@name = @{$cursor->{NAME}};
+	my @name = @{$cursor->{NAME}};
 	for ($i = 0; $i <= $#name; $i++) { print ("# Name      $i: $name[$i]\n"); }
-	@null = @{$cursor->{NULLABLE}};
+	my @null = @{$cursor->{NULLABLE}};
 	for ($i = 0; $i <= $#null; $i++) { print ("# Nullable  $i: $null[$i]\n"); }
-	@prec = @{$cursor->{PRECISION}};
+	my @prec = @{$cursor->{PRECISION}};
 	for ($i = 0; $i <= $#prec; $i++) { print ("# Precision $i: $prec[$i]\n"); }
-	@scal = @{$cursor->{SCALE}};
+	my @scal = @{$cursor->{SCALE}};
 	for ($i = 0; $i <= $#scal; $i++) { print ("# Scale     $i: $scal[$i]\n"); }
 
-	$nfld = $cursor->{NUM_OF_FIELDS};
-	$nbnd = $cursor->{NUM_OF_PARAMS};
+	my $nfld = $cursor->{NUM_OF_FIELDS};
+	my $nbnd = $cursor->{NUM_OF_PARAMS};
 	print("# Number of Columns: $nfld; Number of Parameters: $nbnd\n");
 
 	&stmt_note("# Re-testing: \$cursor->finish\n");
@@ -124,8 +129,6 @@ else
 	$dbh->do("DROP TABLE $tablename");
 }
 
-&stmt_note("# Testing: \$dbh->disconnect()\n");
-&stmt_fail() unless ($dbh->disconnect);
-&stmt_ok(0);
+$dbh->disconnect ? &stmt_ok : &stmt_nok;
 
 &all_ok();

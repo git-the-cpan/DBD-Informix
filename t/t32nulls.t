@@ -1,41 +1,47 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t32nulls.t,v 100.3 2002/02/08 22:50:50 jleffler Exp $ 
+#   @(#)$Id: t32nulls.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test Null Handling for DBD::Informix
+#   Test Null Handling for DBD::Informix
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 # Test install...
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 
 &stmt_note("1..7\n");
 &stmt_ok();
-$table = "dbd_ix_nulls02";
+my $table = "dbd_ix_nulls02";
 
 stmt_test $dbh, "CREATE TEMP TABLE $table(a CHAR(10), b CHAR(10))";
 
+my $sth;
 stmt_fail unless
 	$sth=$dbh->prepare("INSERT INTO $table(a,b) VALUES (?,?)");
 stmt_ok;
 
-$var1=""; $var2=1;
+my $var1="";
+my $var2=1;
 print "# var1 = <<$var1>>, ", (defined $var1) + 0, "\n";
 print "# var2 = <<$var2>>, ", (defined $var2) + 0, "\n";
 stmt_fail unless $sth->execute($var1,$var2);
 stmt_ok;
 
-undef $var1;$var2=2;
+undef $var1;
+$var2=2;
 print "# var1 = undefined, ", (defined $var1) + 0, "\n";
 print "# var2 = <<$var2>>, ", (defined $var2) + 0, "\n";
 stmt_fail unless $sth->execute($var1,$var2);
 stmt_ok;
 
-$select = "select count(*) from $table ";
+my $sel;
+my @row;
+my $select = "select count(*) from $table ";
 stmt_fail unless $sel = $dbh->prepare($select);
 stmt_fail unless $sel->execute();
 stmt_fail unless (@row = $sel->fetchrow);

@@ -1,16 +1,17 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t01stproc.t,v 100.4 2002/10/19 00:27:50 jleffler Exp $ 
+#   @(#)$Id: t01stproc.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test stored procedure handling for DBD::Informix
+#   Test stored procedure handling for DBD::Informix
 #
-#	Copyright 1999 Jonathan Leffler
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 1999    Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
-$dbh = &connect_to_test_database();
+my $dbh = &connect_to_test_database();
 
 if (!$dbh->{ix_StoredProcedures})
 {
@@ -24,8 +25,9 @@ else
 	&stmt_ok(0);
 
 	# Test stored procedures...
+	my $procname = "dbd_ix_01";
 
-	$stmt10 = "DROP PROCEDURE dbd_ix_01";
+	my $stmt10 = "DROP PROCEDURE $procname";
 	{
 	my ($q) = $dbh->{PrintError};
 	$dbh->{PrintError} = 0;
@@ -33,9 +35,9 @@ else
 	$dbh->{PrintError} = $q;
 	}
 
-	$stmt11 =
-	q{
-	CREATE PROCEDURE dbd_ix_01(val1 DECIMAL, val2 DECIMAL)
+	my $stmt11 =
+	qq{
+	CREATE PROCEDURE $procname(val1 DECIMAL, val2 DECIMAL)
 		-- Sometimes known as ndelta_eq()
 		RETURNING INTEGER;
 		IF (val1 = val2) THEN RETURN 1; END IF;
@@ -45,8 +47,9 @@ else
 	};
 	&stmt_test($dbh, $stmt11, 0);
 
-	$stmt12 = "EXECUTE PROCEDURE dbd_ix_01(23.00, 23)";
+	my $stmt12 = "EXECUTE PROCEDURE $procname(23.00, 23)";
 	&stmt_note("# Testing: \$cursor = \$dbh->prepare('$stmt12')\n");
+	my $cursor;
 	&stmt_fail() unless ($cursor = $dbh->prepare($stmt12));
 	&stmt_ok(0);
 
@@ -55,10 +58,12 @@ else
 	&stmt_ok(0);
 
 	&stmt_note("# Re-testing: \$cursor->fetchrow\n");
+	my @row;
 	&stmt_fail() unless (@row = $cursor->fetchrow);
 	&stmt_ok(0);
 
 	&stmt_note("# Values returned/expected: ", $#row + 1, "/1\n");
+	my $i;
 	for ($i = 0; $i <= $#row; $i++)
 	{
 			&stmt_note("# Row value $i: $row[$i]\n");
@@ -75,8 +80,6 @@ else
 	# Remove stored procedure
 	&stmt_retest($dbh, $stmt10, 0);
 }
-
-
 
 &stmt_note("# Testing: \$dbh->disconnect()\n");
 &stmt_fail() unless ($dbh->disconnect);

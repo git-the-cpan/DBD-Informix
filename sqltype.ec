@@ -3,21 +3,21 @@
 @(#)Author:          J Leffler
 @(#)Copyright:       1988-1993,1995-98 Jonathan Leffler (JLSS)
 @(#)Copyright:       2002              IBM
-@(#)Product:         Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+@(#)Product:         IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 */
 
 /*TABSTOP=4*/
 /*LINTLIBRARY*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltype.ec,v 100.1 2002/02/08 22:49:39 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: sqltype.ec,v 100.2 2002/12/06 22:18:25 jleffler Exp $";
 #endif
 
 #include <string.h>
 #include "esqlc.h"
 #include "esqlutil.h"
 
-static const char * const sqltypes[] = 
+static const char * const sqltypes[] =
 {
 	"CHAR",
 	"SMALLINT",
@@ -83,7 +83,7 @@ static const char dt_second[] = "SECOND";
 static const char dt_unknown[] = "{unknown}";
 static const char dt_year[] = "YEAR";
 
-static const char * const dt_fr_ext[] = 
+static const char * const dt_fr_ext[] =
 {
 	dt_year,
 	dt_unknown,
@@ -103,7 +103,7 @@ static const char * const dt_fr_ext[] =
 	dt_unknown
 };
 
-static const char * const dt_to_ext[] = 
+static const char * const dt_to_ext[] =
 {
 	dt_year,
 	dt_unknown,

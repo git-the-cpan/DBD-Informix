@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlc_v6.ec,v 100.5 2002/02/08 22:49:16 jleffler Exp $ 
+ * @(#)$Id: esqlc_v6.ec,v 100.6 2002/12/06 22:18:24 jleffler Exp $
  *
  * IBM Informix Database Driver for Perl (DBD::Informix)
  * Connection Management for ESQL/C Version 6.0x and later
@@ -19,7 +19,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v6.ec,v 100.5 2002/02/08 22:49:16 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqlc_v6.ec,v 100.6 2002/12/06 22:18:24 jleffler Exp $";
 #endif
 
 /* ================================================================= */

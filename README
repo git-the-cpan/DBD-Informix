@@ -1,4 +1,4 @@
-README file for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+README file for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the Perl README file.
@@ -15,10 +15,10 @@ README file for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
 
 PREREQUISITES
 
-    You need the following five items to build Informix Database Driver for Perl:
+    You need the following five items to build IBM Informix Database Driver for Perl:
 
     1.  Perl 5.005_03 or later.
-    2.  DBI 1.14 or later.
+    2.  DBI 1.33 or later.
     3.  A C compiler that accepts function prototypes (such as GCC 2.95.2).
     4.  Informix ESQL/C 5.00 or later, or Client SDK 2.00 or later.
     5.  A 'stores' database to which you can connect without specifying
@@ -93,11 +93,10 @@ PERL
 
 DBI
 
-    If you do not have DBI Version 1.14 or later installed (version 1.30
-    recommended), you should build, test, and install it.  Some older
-    versions of DBD::Informix allowed you to use older versions of DBI than
-    the version it was developed with, but the current versions of
-    DBD::Informix do not.
+    If you do not have DBI version 1.33 or later installed, you should
+    build, test, and install it.  Some older versions of DBD::Informix
+    allowed you to use older versions of DBI than the version it was
+    developed with, but the current versions of DBD::Informix do not.
 
     Note that "perl -MCPAN -e 'install Bundle::DBI'" gets the latest
     version of DBI and any pre-requisite modules.
@@ -562,7 +561,7 @@ REMEMBER IT IS SUPPOSED TO BE FUN!
 
 Jonathan Leffler (jleffler@us.ibm.com)
 
-@(#)$Id: README,v 100.14 2002/11/18 23:33:31 jleffler Exp $
+@(#)$Id: README,v 100.16 2002/12/14 01:48:46 jleffler Exp $
 
 ---------------------------------------------------------------------------
 

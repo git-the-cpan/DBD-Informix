@@ -1,24 +1,26 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t55mdata.t,v 100.4 2002/02/08 22:51:00 jleffler Exp $ 
+#   @(#)$Id: t55mdata.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test MetaData functions _tables, _columns for DBD::Informix
+#   Test MetaData functions _tables, _columns for DBD::Informix
 #
-#	Copyright 1997,1999 Jonathan Leffler
-#	Copyright 2000      Informix Software Inc
-#	Copyright 2002      IBM
+#   Copyright 1997,1999 Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002-03   IBM
 
 use DBD::Informix::TestHarness;
+use DBD::Informix::Metadata;
+use strict;
 
 print "1..4\n";
 
 # Test connection
-$dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });
+my $dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });
 
-$view = "dbd_ix_view01";
-$private1 = "dbd_ix_private01";
-$private2 = "'informix'.dbd_ix_private02";
-$public1 = "dbd_ix_public01";
+my $view = "dbd_ix_view01";
+my $private1 = "dbd_ix_private01";
+my $private2 = "'informix'.dbd_ix_private02";
+my $public1 = "dbd_ix_public01";
 
 # Drop pre-existing versions of views and synonyms (unchecked)
 $dbh->{PrintError} = 0;
@@ -40,8 +42,8 @@ CREATE VIEW $view AS
 
 # Public and private synonyms were introduced in version 5.00.
 # You cannot use PUBLIC or PRIVATE in a MODE ANSI database.
-$public = "PUBLIC";
-$private = "PRIVATE";
+my $public = "PUBLIC";
+my $private = "PRIVATE";
 if ($dbh->{ix_ModeAnsiDatabase})
 {
 	$public = "";
@@ -62,7 +64,8 @@ sub print_tables
 {
 	my ($dbh, @ctrl) = @_;
 	my @list = $dbh->func(@ctrl, '_tables');
-	print "# Information about @ctrl tables in $dbh->{Name}\n";
+	my $pad = ($#ctrl >= 0) ? " " : "";
+	print "# Information about @ctrl${pad}tables in database $dbh->{Name}\n";
 	my $item;
 	for $item (@list)
 	{
@@ -74,13 +77,16 @@ sub print_columns
 {
 	my ($dbh, @tables) = @_;
 	my @list = $dbh->func(@tables, '_columns');
-	my $plural = ($#list > 0) ? "s" : "";
+	my $plural = ($#tables >= 0) ? "s" : "";
+	{
+	local($") = ", ";		# $" is also known as $LIST_SEPARATOR
 	print "# Information about columns in table$plural @tables\n";
+	}
 	my $rowref;
 	for $rowref (@list)
 	{
 		my @row = @{$rowref};
-		my $tab = "'$row[0]'.$row[1]";
+		my $tab = ix_map_tablename($row[0], $row[1]);
 		my $nulls = ($row[4] >= 256) ? "N" : "Y";
 		$row[4] -= 256 if ($row[4] > 256);
 		printf "# %-30s %3d %-18s %s %4d %4d\n", $tab, $row[2], $row[3],
@@ -93,6 +99,7 @@ print "# DBD::Informix version $dbh->{Driver}->{Version}\n";
 print "# Database $dbh->{Name}\n";
 $dbh->{ChopBlanks} = 1;
 
+# @(#)KLUDGE: Should verify that expected tables are included.
 print_tables($dbh, 'view');
 # Verify correct number of entries?
 print_tables($dbh, 'base', 'user');
@@ -106,13 +113,8 @@ print_tables($dbh, 'system');
 print_tables($dbh);
 stmt_ok();
 
-my @list = $dbh->func('user', '_tables');
-for ($i = 1; $i < $#list; $i += 2)
-{
-	# Remove owner names from every other table name
-	$list[$i] =~ s/'[^']+'\.//;
-}
-print_columns($dbh, @list);
+# @(#)KLUDGE: should verify that columns are as expected!
+print_columns($dbh, $view, $private1, $public1);
 stmt_ok();
 
 $dbh->disconnect or die "DBI::errstr";

@@ -1,11 +1,11 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t94bool.t,v 100.3 2002/02/08 22:51:14 jleffler Exp $
+#   @(#)$Id: t94bool.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
 #   Test basic handling of Boolean data type
 #
-#   Copyright 2000 Informix Software Inc
-#   Copyright 2002 IBM
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use strict;
 use DBD::Informix::TestHarness;

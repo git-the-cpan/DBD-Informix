@@ -1,23 +1,24 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t24mcurs.t,v 100.3 2002/02/08 22:50:45 jleffler Exp $ 
+#   @(#)$Id: t24mcurs.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Tests multiple simultaneous cursors being open
+#   Tests multiple simultaneous cursors being open
 #
-#	Copyright 1996         Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
-#	Copyright 1996-97,1999 Jonathan Leffler
-#	Copyright 2000         Informix Software Inc
-#	Copyright 2002         IBM
+#   Copyright 1996         Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+#   Copyright 1996-97,1999 Jonathan Leffler
+#   Copyright 2000         Informix Software Inc
+#   Copyright 2002-03      IBM
 
 use DBD::Informix::TestHarness;
+use strict;
 
 print "1..17\n";
-$dbh = connect_to_test_database();
+my $dbh = connect_to_test_database();
 &stmt_ok(0);
 $dbh->{PrintError} = 0;
 
-$tablename1 = "dbd_ix_test1";
-$tablename2 = "dbd_ix_test2";
+my $tablename1 = "dbd_ix_test1";
+my $tablename2 = "dbd_ix_test2";
 
 # Should not succeed, but doesn't matter.
 $dbh->do("DROP TABLE $tablename1");
@@ -38,13 +39,13 @@ $dbh->do("DROP TABLE $tablename2");
 
 # Prepare the first SELECT statement
 &stmt_note("# 1st SELECT:\n");
-$sth1 = $dbh->prepare("SELECT id1, id2, id3, id4, name FROM $tablename1");
+my $sth1 = $dbh->prepare("SELECT id1, id2, id3, id4, name FROM $tablename1");
 &stmt_fail() if (!defined $sth1);
 &stmt_ok(0);
 
 # Prepare the second SELECT statement
 &stmt_note("# 2nd SELECT\n");
-$sth2 = $dbh->prepare("SELECT id, name FROM $tablename2");
+my $sth2 = $dbh->prepare("SELECT id, name FROM $tablename2");
 &stmt_fail() if (!defined $sth2);
 &stmt_ok(0);
 
@@ -58,12 +59,14 @@ $sth2 = $dbh->prepare("SELECT id, name FROM $tablename2");
 &stmt_fail() unless $sth2->execute;
 &stmt_ok(0);
 
+my @row1;
+my @row2;
 while (@row1 = $sth1->fetchrow)
 {
     print "# Row1: @row1\n";
 	&stmt_ok(0);
     @row2 = $sth2->fetchrow;
-    if (defined @row2)
+    if (@row2)
 	{
         print "# Row2: @row2\n";
 		&stmt_ok(0);

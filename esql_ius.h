@@ -3,7 +3,7 @@
 @(#)Author:          J Leffler
 @(#)Copyright:       1998 Jonathan Leffler (JLSS)
 @(#)Copyright:       2002 IBM
-@(#)Product:         Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+@(#)Product:         IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql_ius_h[] = "@(#)$Id: esql_ius.h,v 100.1 2002/02/08 22:49:13 jleffler Exp $";
+static const char esql_ius_h[] = "@(#)$Id: esql_ius.h,v 100.2 2002/12/06 22:18:26 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -22,7 +22,7 @@ static const char esql_ius_h[] = "@(#)$Id: esql_ius.h,v 100.1 2002/02/08 22:49:1
 #define CINT8TYPE	117
 #endif
 #ifndef CCOLLTYPE
-#define CCOLLTYPE       118   
+#define CCOLLTYPE       118
 #endif
 #ifndef CLVCHARTYPE
 #define CLVCHARTYPE     119

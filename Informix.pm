@@ -1,11 +1,11 @@
-#   @(#)$Id: Informix.pm,v 100.20 2002/11/18 23:24:41 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2003.3 2003/01/14 23:54:12 jleffler Exp $
 #
-#   @(#)Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+#   @(#)IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
-#   Copyright 2001-02 IBM
+#   Copyright 2001-03 IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -18,8 +18,9 @@
 {
 	package DBD::Informix;
 
-	use DBI;
+	use DBI 1.33;	# Requires features from DBI 1.33 release
 	use DynaLoader;
+	use Exporter;
 	@ISA = qw(DynaLoader Exporter);
 
 	# Make the ix_types values available on request
@@ -41,20 +42,17 @@
 				) ] );
 	Exporter::export_ok_tags('ix_types');
 
-	$VERSION          = "1.04.PC1";
+	$VERSION          = "2003.03.0303";
 	$ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-	$Revision         = '$Id: Informix.pm,v 100.20 2002/11/18 23:24:41 jleffler Exp $';
+	$Revision         = '$Id: Informix.pm,v 2003.3 2003/01/14 23:54:12 jleffler Exp $';
 
-	require_version DBI 1.14;	# Requires features from DBI 1.14 release
-
-	$VERSION = "1.01.009" if ($VERSION =~ m%[:]VERSION[:]%);
+	$VERSION = "2003.00.0000" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	bootstrap DBD::Informix $VERSION;
 
 	$err = 0;		# holds error code   for DBI::err
 	$errstr = "";	# holds error string for DBI::errstr
 	$state = "";    # holds error string for DBI::state
-
 	$drh = undef;	# holds driver handle once initialized
 
 	sub driver
@@ -66,26 +64,24 @@
 		unless ($ENV{INFORMIXDIR})
 		{
 			require DBD::Informix::Defaults;
-			import  DBD::Informix::Defaults qw(default_INFORMIXDIR);
-			foreach (&default_INFORMIXDIR(), qw(/usr/informix /opt/informix))
+			foreach (&DBD::Informix::Defaults::default_INFORMIXDIR(), qw(/usr/informix /opt/informix))
 			{
 				# If Informix-Connect or Informix-ESQL/C is installed,
 				# $INFORMIXDIR must have lib and msg sub-directories.
 				if (-d "$_/lib" && -d "$_/msg")
 				{
 					$ENV{INFORMIXDIR} = $_;
-					# warn "DBD::Informix - INFORMIXDIR set to $ENV{INFORMIXDIR}\n";
+					# warn "DBD::Informix - (warning) INFORMIXDIR defaulted to $ENV{INFORMIXDIR}\n";
 					last;
 				}
 			}
-			warn "INFORMIXDIR not set!\n" unless $ENV{INFORMIXDIR};
+			warn "DBD::Informix - (warning) INFORMIXDIR not set!\n" unless $ENV{INFORMIXDIR};
 		}
 		unless ($ENV{INFORMIXSERVER})
 		{
 			require DBD::Informix::Defaults;
-			import  DBD::Informix::Defaults qw(default_INFORMIXSERVER);
-			$ENV{INFORMIXSERVER} = &default_INFORMIXSERVER();
-			# warn "DBD::Informix - INFORMIXSERVER set to $ENV{INFORMIXSERVER}\n";
+			$ENV{INFORMIXSERVER} = &DBD::Informix::Defaults::default_INFORMIXSERVER();
+			# warn "DBD::Informix - (warning) INFORMIXSERVER defaulted to $ENV{INFORMIXSERVER}\n";
 		}
 
 		$class .= "::dr";
@@ -95,20 +91,22 @@
 		# ix_CurrentConnection and ix_ActiveConnections attributes are
 		# handled by the driver's FETCH_attrib function.
 		$drh = DBI::_new_drh($class, {
-			'Name'                   => 'Informix',
-			'Version'                => $VERSION,
-			'Err'                    => \$DBD::Informix::err,
-			'Errstr'                 => \$DBD::Informix::errstr,
-			'State'                  => \$DBD::Informix::state,
-			'Attribution'            => "$ATTRIBUTION",
-			%{$attr}
-		});
+				'Name'                   => 'Informix',
+				'Version'                => $VERSION,
+				'Err'                    => \$DBD::Informix::err,
+				'Errstr'                 => \$DBD::Informix::errstr,
+				'State'                  => \$DBD::Informix::state,
+				'Attribution'            => "$ATTRIBUTION",
+				%{$attr}
+			})
+			or return undef;
 
 		# Initialize driver data
 		DBD::Informix::dr::driver_init($drh);
 
 		$drh;
 	}
+
 	1;
 }
 
@@ -120,38 +118,40 @@
 	{
 		my ($drh, $dbname, $dbuser, $dbpass, $dbattr) = @_;
 
-		if ($ENV{DBD_INFORMIX_DEBUG_CONNATTR} && defined $dbattr)
-		{
-			my $attr;
-			foreach $attr (keys %$dbattr)
-			{
-				print "# DBD::Informix::dr::connect",
-						" - attribute: $attr => ${$dbattr}{$attr}\n";
-			}
-		}
-
 		$dbname = "" unless(defined $dbname);
 		$dbuser = "" unless(defined $dbuser);
 		$dbpass = "" unless(defined $dbpass);
+		$dbattr = undef unless(defined $dbattr && ref $dbattr eq "HASH");
+
+		if ($ENV{DBD_INFORMIX_DEBUG_CONNATTR} && defined $dbattr)
+		{
+			print STDERR "# DBD::Informix::dr::connect\n";
+			print STDERR "# debugging connection attributes (\$DBD_INFORMIX_DEBUG_CONNATTR set)\n";
+			foreach my $attr (keys %$dbattr)
+			{
+				print STDERR "# attribute: $attr => ${$dbattr}{$attr}\n";
+			}
+			print STDERR "# end of connection attributes\n";
+		}
 
 		# Create new database connection handle for driver
 		my $dbh = DBI::_new_dbh($drh, {
-				'Name' => $dbname,
-				'User' => $dbuser,
-				'Pass' => $dbpass
-			});
-
-		# Preset AutoCommit mode on $dbh.
-		$dbattr = { AutoCommit => 1 } if (!defined $dbattr);
-		${$dbattr}{AutoCommit} = 1 if (!defined ${$dbattr}{AutoCommit});
-		DBD::Informix::db::preset($dbh, $dbattr);
+				'Name'        => $dbname,
+				'Err'         => \my $err,
+				'Errstr'      => \my $errstr,
+				'State'       => \my $state, 
+				'ix_Username' => $dbuser,
+				'ix_Password' => $dbpass,
+			})
+			or return undef;
 
 		# Initialize database connection
-		DBD::Informix::db::_login($dbh, $dbname, $dbuser, $dbpass)
+		DBD::Informix::db::_login($dbh, $dbname, $dbuser, $dbpass, $dbattr)
 			or return undef;
 
 		$dbh;
 	}
+
 	1;
 }
 
@@ -159,19 +159,39 @@
 	package DBD::Informix::db; # ====== DATABASE ======
 	use strict;
 
+	sub get_info
+	{
+		my ($dbh, $info_type) = @_;
+		require DBD::Informix::GetInfo;
+		my $v = $DBD::Informix::GetInfo::info{int($info_type)};
+		$v = $v->($dbh) if ref $v eq 'CODE';
+		return $v;
+	}
+
 	sub prepare
 	{
 		my($dbh, $statement, $attr) = @_;
 
 		my $sth = DBI::_new_sth($dbh, {
 			'Statement' => $statement,
-			});
+			})
+			or return undef;
 
 		DBD::Informix::st::_prepare($sth, $statement, $attr)
 			or return undef;
 
 		$sth;
 	}
+
+	# This type_info_all function was automatically generated by
+	# DBI::DBD::TypeInfo::write_typeinfo v1.00.
+
+    sub type_info_all
+    {
+        my($dbh, $info_type) = @_;
+        require DBD::Informix::TypeInfo;
+        return $DBD::Informix::TypeInfo::type_info_all;
+    }
 
 	# ----------------------------------------------------------------
 	# Use default implementation of do (which is DBD::_::db::do).  
@@ -184,30 +204,34 @@
 	# routine does that, use the default routine.
 	# ----------------------------------------------------------------
 
-	# ----------------------------------------------------------------
-	# Override DBD::_::db::tables because it does not quote table 
-	# owner names. Mostly, this does not matter unless you work with a
-	# MODE ANSI database where informix.systables and 
-	# "informix".systables are two very different tables; 
-	# informix.systables does not usually exist!  It is
-	# almost, but not quite, a copy of the function from DBI.pm.
-	# Note: Using double quotes around the name is correct even if 
-	# DELIMIDENT is set.
+	# ---------------------------------------------------------------------
+	# Override DBD::_::db::tables because it does not quote table owner
+	# names.  Mostly, this does not matter unless you work with a MODE ANSI
+	# database where owner.table and "owner".table are two different tables
+	# (but informix.systables and "informix".systables are still the same
+	# table by some internal chicanery).  Note: Using double quotes around
+	# the name is correct even if DELIMIDENT is set.  Note that it is
+	# necessary to escape double quotes within both the owner name and
+	# table name strings.  Note that table names are only escaped if they
+	# do not match a C identifier (alphabetic or underscore for first
+	# character; alphanumeric or underscore thereafter).
 
 	sub tables
 	{
 		my ($dbh, @args) = @_;
 		my $sth = $dbh->table_info(@args);
 		return () unless $sth;
-		my ($row, @tables);
-		while($row = $sth->fetch)
+		require DBD::Informix::Metadata;
+		my ($owner, $table, @tables, $unwanted1, $unwanted2, $unwanted3);
+		$sth->bind_columns(\$unwanted1, \$owner, \$table, \$unwanted2, \$unwanted3);
+		while($sth->fetchrow_arrayref)
 		{
-			my $name = $row->[2];
-			$name = qq{"$row->[1]".$name} if $row->[1];
-			push @tables, $name;
+			my $result = &DBD::Informix::Metadata::ix_map_tablename($owner, $table);
+			push @tables, $result;
 		}
 		return @tables;
 	}
+
 	# ----------------------------------------------------------------
 
 	# ----------------------------------------------------------------
@@ -215,227 +239,38 @@
 	# ----------------------------------------------------------------
 	# SQL fragments to list tables, views, and synonyms
 
-	my %tables;
-	$tables{'tables'}  =
-		q{ SELECT T.Owner, T.TabName FROM 'informix'.SysTables T
-			WHERE T.TabName NOT LIKE " %" };
-	$tables{'user'}    = q{ AND T.Tabid >= 100 };
-	$tables{'system'}  = q{ AND T.Tabid <  100 };
-	$tables{'base'}    = q{ AND T.TabType = 'T' };
-	$tables{'view'}    = q{ AND T.TabType = 'V' };
-	$tables{'synonym'} =
-		q{ AND (T.TabType = 'S' OR (T.TabType = 'P' AND T.Owner = USER)) };
-	$tables{'order'}   = q{ ORDER BY T.Owner, T.TabName };
-
 	sub _tables
 	{
 		my ($dbh, @info) = @_;
-		my @result = ();
-		my $i;
-		# Build query string
-		my $stmt = $tables{'tables'};
-		for ($i = 0; $i <= $#info; $i++)
-		{
-			$i=~ tr/A-Z/a-z/;
-			$stmt .= $tables{$info[$i]} unless $info[$i] eq 'tables';
-		}
-		$stmt .= $tables{'order'};
-		# Tidy up the statement only if you are going to print it!
-		# $stmt =~ s/^ //;
-		# $stmt =~ s/ $//;
-		# $stmt =~ s/  +/ /g;
-		# print "$stmt\n";
-		my $sth = $dbh->prepare($stmt);
-		if (defined $sth)
-		{
-			return @result unless $sth->execute;
-			my ($ref) = $sth->fetchall_arrayref;
-			my (@arr) = @{$ref};
-			my $i;
-			my @row;
-			for ($i = 0; $i <= $#arr; $i++)
-			{
-				@row = @{$arr[$i]};
-				$result[$i] = qq('$row[0]'.$row[1]);
-			}
-			$sth->finish;
-		}
-		@result;
+		require DBD::Informix::Metadata;
+		return &DBD::Informix::Metadata::ix_tables($dbh, @info);
 	}
-
-	# ----------------------------------------------------------------
-	#
-	# Generating complete lists of columns for local tables, views, 
-	# and synonyms is hard!  For example, you need to do this:
-	#
-	#-- Base Table Information
-	# SELECT T.Owner, T.TabName, C.ColNo, C.ColName, C.ColType, 
-	#	 C.ColLength
-	#     FROM 'informix'.SysTables T, 'informix'.SysColumns C
-	#     WHERE T.Tabid = C.Tabid
-	#       AND T.TabType IN ('T', 'V')
-	#       AND (T.TabName IN ('privsyn', 'pubsyn', 'tabcol') OR
-	# 	 	     ((T.TabName = 'syscolumns' AND 
-	#		     T.Owner = 'informix')))
-	# UNION
-	# -- Local Synonyms (PUBLIC and PRIVATE)
-	# SELECT T.Owner, T.TabName, C.ColNo, C.ColName, C.ColType, 
-	#	 C.ColLength
-	#     FROM 'informix'.SysTables T, 'informix'.SysColumns C,
-	#          'informix'.SysSynTable S
-	#     WHERE T.Tabid = S.Tabid
-	#       AND S.BTabid = C.Tabid
-	#       AND ((T.TabType = 'P' AND T.Owner = USER) 
-	#	OR T.TabType =  'S')
-	#       AND (T.TabName IN ('privsyn', 'pubsyn', 'tabcol') OR
-	# 		     ((T.TabName = 'syscolumns' 
-	#	AND T.Owner = 'informix')))
-	# -- Remote Synonyms are not handled!
-	# ORDER BY 1, 2, 3;
-	#
-	# Mercifully, you cannot build local synonyms on top of other local
-	# synonyms.  You need not even consider whether to add support for  
-	# remote synonyms because they can be chained through an arbitrary 
-	# number of remote sites.
-	#
-	# -----------------------------------------------------------------
-	# SQL fragments to list columns
-	# Note the re-use of $tables{'synonym'} from above!
-
-	my %columns;
-	$columns{'columns'}  =
-		q{
-	SELECT T.Owner, T.TabName, C.ColNo, C.ColName, C.ColType, C.ColLength
-		FROM 'informix'.SysTables T, 'informix'.SysColumns C
-		};
-	$columns{'direct'}  =
-		q{ WHERE T.Tabid = C.Tabid AND T.TabType IN ('T', 'V') };
-	$columns{'synonym'} = qq{ , 'informix'.SysSynTable S
-	WHERE T.Tabid = S.Tabid AND S.BTabid = C.Tabid
-	$tables{'synonym'}
-		};
-	$columns{'order'}   = q{ ORDER BY 1, 2, 3 };
 
 	sub _columns
 	{
 		my ($dbh, @tables) = @_;
-		my @result = ();
-		my $i;
-		# Build query string
-		my $s_list = "";
-		my $s_pad = "";
-		my $d_list = "";
-		my $d_pad = "";
-		for ($i = 0; $i <= $#tables; $i++)
-		{
-			my $tab = $tables[$i];
-			if ($tab =~ /["'](.+)["']\.(.*)/)
-			{
-				$d_list .= "$d_pad (T.TabName = '$2' AND T.Owner = '$1') ";
-				$d_pad = "OR";
-			}
-			else
-			{
-				$s_list .= "$s_pad '$tab'";
-				$s_pad = ", ";
-			}
-		}
-		$s_list = "T.TabName IN ($s_list)" if $s_list;
-		my $cond = "";
-		if ($d_list && $s_list)
-		{
-			$cond = " AND (($s_list) OR ($d_list))"
-		}
-		elsif ($s_list)
-		{
-			$cond = " AND ($s_list)" if $s_list;
-		}
-		elsif ($d_list)
-		{
-			$cond = " AND ($d_list)" if $d_list;
-		}
-		my $stmt  = "$columns{'columns'} $columns{'direct'} $cond";
-		$stmt .= "UNION $columns{'columns'} $columns{'synonym'} $cond";
-		$stmt .= " $columns{'order'}";
-		# Tidy up the statement only if you are going to 
-		# print it!
-		#$stmt =~ s/^ //;
-		#$stmt =~ s/ $//;
-		#$stmt =~ s/  +/ /g;
-		#print "$stmt\n";
-		my $sth = $dbh->prepare($stmt);
-		if (defined $sth)
-		{
-			return @result unless $sth->execute;
-			my ($ref) = $sth->fetchall_arrayref;
-			@result = @{$ref};
-			$sth->finish;
-		}
-		@result;
+		require DBD::Informix::Metadata;
+		return &DBD::Informix::Metadata::ix_columns($dbh, @tables);
 	}
 
 	#-----------------------------------------------------------------
-	# table_info function - originally by David Bitseff <dbitsef@uswest.com>
-	# Note: DBI spec says it needs: 
-	# 	TABLE_QUALIFIER, TABLE_OWNER, TABLE_NAME,
-	# 	TABLE_TYPE, and TABLE_REMARKS in that order, 
-	# possibly with extra data.
-	# There is no explanation of what a TABLE_QUALIFIER is, so null (undef)
-	# should be returned.  The table type is supposed to be one of:
-	# "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL
-	# TEMPORARY", "ALIAS", "SYNONYM", or a data-source-specific type.
-	# Informix cannot identify temporary tables;  there are no
-	# ALIAS tables; there are private and public synonyms, so we will 
-	# return the data-source specific 'PRIVATE SYNONYM' for them.
-	# Note that the temp table cannot be dropped until the statement handle
-	# is destroyed. Because we do not know when the handle is destroyed, we
-	# either have to drop it and recreate it each time, or check whether
-	# it has already been created and create it only if not yet created.
+	# table_info function
+	# - originally by David Bitseff <dbitsef@uswest.com>
 
 	sub table_info
 	{
 		my($dbh) = @_;
-		my($tab) = "dbd_ix_tabinfo_typ";
-		my($msg);
-		my($handler) = $SIG{__WARN__};
-		$SIG{__WARN__} = sub { $msg = $_[0]; };
-		my ($ok) = $dbh->do("CREATE TEMP TABLE $tab (tabtype CHAR(1) NOT NULL UNIQUE, typename CHAR(20) NOT NULL);");
-		$SIG{__WARN__} = $handler;
-		if ($ok)
-		{
-			$dbh->do("INSERT INTO $tab VALUES('T', 'TABLE');
-					  INSERT INTO $tab VALUES('C', 'SYSTEM TABLE');
-					  INSERT INTO $tab VALUES('V', 'VIEW');
-					  INSERT INTO $tab VALUES('A', 'ALIAS');
-					  INSERT INTO $tab VALUES('S', 'SYNONYM');
-					  INSERT INTO $tab VALUES('P', 'PRIVATE SYNONYM');
-					  INSERT INTO $tab VALUES('G', 'GLOBAL TEMPORARY');
-					  INSERT INTO $tab VALUES('L', 'LOCAL TEMPORARY');
-					 ") or return undef;
-		}
-		my $sth = $dbh->prepare(qq{
-			SELECT
-				'' AS TABLE_QUALIFIER,
-				T.Owner AS TABLE_OWNER,
-				T.TabName AS TABLE_NAME,
-				I.TypeName AS TABLE_TYPE,
-				'TabID: ' || T.TabID || ' Created: ' || EXTEND(T.Created, YEAR TO DAY) AS TABLE_REMARKS
-			FROM "informix".systables T, $tab I
-			WHERE (T.TabID >= 100 AND I.TabType = T.TabType)
-			   OR (T.TabID < 100 AND T.TabType = 'T' AND I.TabType = 'C')
-			ORDER BY TABLE_OWNER, TABLE_NAME
-			}) or return undef;
-		$sth->execute or return undef;
-		$sth;
+		require DBD::Informix::Metadata;
+		return &DBD::Informix::Metadata::ix_table_info($dbh);
 	}
-
-	# -----------------------------------------------------------------
 
 	1;
 }
 
 {
 	package DBD::Informix::st; # ====== STATEMENT ======
+
+	# No non-standard methods needed by DBD::Informix
 
 	1;
 }
@@ -451,7 +286,7 @@ __END__
 
 =head1 NAME
 
-DBD::Informix - Informix Database Driver for Perl
+DBD::Informix - IBM Informix Database Driver for Perl
 
 =head1 SYNOPSIS
 
@@ -459,7 +294,7 @@ DBD::Informix - Informix Database Driver for Perl
 
 =head1 DESCRIPTION
 
-This document describes Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21).
+This document describes IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.
@@ -508,15 +343,15 @@ strings for cursor names and statement names, and these features were
 not available before Version 5.00.
 
 For information about Informix software, you should also read the
-Notes/FAQ file that is distributed with Informix Database Driver for Perl.
+Notes/FAQ file that is distributed with IBM Informix Database Driver for Perl.
 
 =head2 TECHNICAL SUPPORT
 
-For information on technical support for Informix Database Driver for Perl, please run:
+For information on technical support for IBM Informix Database Driver for Perl, please run:
 
         perldoc DBD::Informix::TechSupport
 
-For information on reporting bugs in Informix Database Driver for Perl, please review the
+For information on reporting bugs in IBM Informix Database Driver for Perl, please review the
 Notes/bug.reports file as well.
 
 =head2 JAPANESE DOCUMENTATION
@@ -655,7 +490,7 @@ sources.
 
 =over 4
 
-Issue: DBI (up to and including version 1.30) does not provide a
+Issue: DBI (up to and including version 1.33) does not provide a
 mechanism to connect to the server with a username and password, so
 DBI->data_sources('Informix') will fail if you need to specify the
 username and password and you have not yet connected to some Informix
@@ -923,8 +758,8 @@ Private synonyms are reported for just the current user.
 
 The lists are each references to an array of values corresponding to
 the owner name, table name, column number, column name, basic 
-data type (ix_ColType value--see below), and data length
-(ix_ColLength--see below).
+data type (C<ix_ColType> value--see below), and data length
+(C<ix_ColLength> value--see below).
 If no tables are listed, all columns in the database are listed.
 This can be quite slow because handling synonyms properly requires a
 UNION operation.
@@ -935,6 +770,8 @@ See the examples in t/t55mdata.t for how to use these methods.
 Exercise for the reader: Extend '_columns' to get reports on the
 columns in remote synonyms, including relocated remote synonyms where
 the original referenced site now forwards the name to a third site!
+
+See also C<DBD::Informix::Metadata(3)>.
 
 =head2 DISCONNECTING FROM A DATABASE
 
@@ -1175,9 +1012,11 @@ You do this with:
     @scal = @{$sth->{SCALE}};       # ODBC SCALE numbers (or undef)
 
     # Native (Informix) type equivalents
-    @tnam = @{$sth->{ix_NativeTypeName}};# Type name
-    @tnum = @{$sth->{ix_ColType}};       # Type number from SysColumns.ColType
-    @tlen = @{$sth->{ix_ColLength}};     # Type length from SysColumns.ColLength
+    @tnam = @{$sth->{ix_NativeTypeName}};   # Type name
+    @tnum = @{$sth->{ix_ColType}};          # Type number from SysColumns.ColType
+    @tlen = @{$sth->{ix_ColLength}};        # Type length from SysColumns.ColLength
+    @tlen = @{$sth->{ix_ExtendedType}};     # Extended type number from SysColumns.Extended_ID
+    @tlen = @{$sth->{ix_ExtendedTypeName}}; # Extended type name from SysColumns.Extended_ID
 
 =over 4
 
@@ -1628,7 +1467,10 @@ DBD::Informix::TestHarness - Test harness used when testing DBD::Informix
 DBD::Informix::Summary - Standardized summary of DBD::Informix properties
 
 =item *
-DBD::Informix::Configuration - Tools used in configuring DBD::Informix
+DBD::Informix::Configure - Tools used in configuring DBD::Informix
+
+=item *
+DBD::Informix::Metadata - Functions used by DBD::Informix for metadata queries
 
 =item *
 DBI::DBD - How to write a driver for Perl DBI

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t54native.t,v 100.7 2002/02/08 22:50:59 jleffler Exp $ 
+#   @(#)$Id: t54native.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
 #
-#	Test NAME, ix_NativeTypeName, ix_ColType, ix_ColLength attributes.
-#	No testing for UDTs.
+#   Test NAME, ix_NativeTypeName, ix_ColType, ix_ColLength attributes.
+#   No testing for UDTs.
 #
-#	Copyright 2000 Informix Software Inc
-#	Copyright 2002 IBM
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
 
 use strict;
 use DBD::Informix::TestHarness;

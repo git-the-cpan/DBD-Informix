@@ -1,4 +1,4 @@
-Key Environment Variables for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
+Key Environment Variables for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
 
 There are many possible environment variables which affect Informix
 software and therefore which affect DBD::Informix.  All of the ones
@@ -119,11 +119,25 @@ DBD_INFORMIX_AUXILLIARY_OBJECT_FILES
 DBD_INFORMIX_DATABASE
     The primary test database.  You need DBA permissions on this
     database.  It does not matter which logging mode you use, but a
-    logging mode gives better test coverage.
+    logged database (buffered, unbuffered or MODE ANSI) gives better
+    test coverage.
 
 DBD_INFORMIX_DATABASE2
     The secondary test database.  You need CONNECT permissions on this
-    database.  It does not matter which logging mode you use.
+    database.  It does not matter which logging mode you use, but a
+    different logging mode from the primary test database is
+    recommended.
+
+DBD_INFORMIX_DATABASE3
+    The tertiary test database.  You need CONNECT permissions on this
+    database.  Although it does not matter which logging you use, it
+    exists to allow the t/t51getinfo.t tests to validate the third
+    distinct logging mode (unlogged, logged, MODE ANSI) in a single test
+    run.
+
+DBD_INFORMIX_DEBUG_CONNATTR
+    Set to debug the handling of connection attributes.  Seldom set by
+    users.
 
 DBD_INFORMIX_DEBUG_ESQLCC
     Set to debug what the esqlcc script is doing.  Seldom set by users.
@@ -192,8 +206,8 @@ DBD_INFORMIX_HPUX_USELIBCL
     variables must be set to any non-false value (so 'yes' is a good
     value to use).  If you get a link failure or a runtime failure with
     missing symbols, you could try setting these environment variables.
-	These libraries are also included on HP-UX 10.20, but don't seem to
-	spoil things there -- but they can equally well be removed.
+    These libraries are also included on HP-UX 10.20, but don't seem to
+    spoil things there -- but they can equally well be removed.
 
 DBD_INFORMIX_NO_ESQLTEST
     Suppress the esqltest phase of the checking.  Do not attempt to
@@ -209,6 +223,9 @@ DBD_INFORMIX_PASSWORD
 
 DBD_INFORMIX_PASSWORD2
     Password for connection to secondary test database.
+
+DBD_INFORMIX_PASSWORD3
+    Password for connection to tertiary test database.
 
 DBD_INFORMIX_RELOCATABLE_INFORMIXDIR
     Set if the shared libraries should be linked specifying relative
@@ -228,6 +245,9 @@ DBD_INFORMIX_USERNAME
 DBD_INFORMIX_USERNAME2
     Username for connection to secondary test database.
 
+DBD_INFORMIX_USERNAME3
+    Username for connection to tertiary test database.
+
 DBD_INFORMIX_USE_EPRINTF_CODE
     If you run into problems with GCC and missing symbol eprintf
     (possibly with one or two leading underscore characters), then set
@@ -237,4 +257,4 @@ DBD_INFORMIX_USE_EPRINTF_CODE
 ---------------------------------------------------------------------------
 
 Author: Jonathan Leffler (jleffler@us.ibm.com)
-@(#)$Id: environment.variables,v 100.8 2002/11/18 23:25:41 jleffler Exp $
+@(#)$Id: environment.variables,v 2003.1 2003/01/03 01:27:35 jleffler Exp $
