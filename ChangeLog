@@ -188,9 +188,19 @@ Serge Davidov - serge@fcmc.com
           Thanks to Serge Davidov (serge@fcmc.com) for finding the problem.
           You can also use DBI->connect('@server','','','Informix'), which
           actually worked in v0.25.  DBD::Informix is still confused, in
-		  general, by statements such as CLOSE DATABASE.
+          general, by statements such as CLOSE DATABASE.
+
+0.51 Release
+------------
+97-02-25: Version bumped to 0.51.  Nulls on SELECT handled correctly.  Test
+          nulls01.t added.  Notes on access to the SQLCA record added to the
+          POD in Informix.PM, after this omission was noted by Torsten Stein
+          (stein@cls.de).
+97-02-26: Add $sth->{CursorName} and $dbh->{ConnectionName}.  Add test
+          updcursor.t to check that you can do 'UPDATE ... WHERE CURRENT OF'.
+          Add ".DEFAULT." as an explicit way of making the default connection.
 
 --------------
 
 Jonathan Leffler (johnl@informix.com)
-@(#)ChangeLog	50.3 97/02/13 12:52:17
+@(#)ChangeLog	51.2 97/02/26 12:08:36

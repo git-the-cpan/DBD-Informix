@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)multicursor.t	50.1 97/01/12 17:52:30
+# @(#)multicursor.t	51.1 97/02/25 19:43:03
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -15,8 +15,8 @@ $dbh = connect_to_test_database();
 &stmt_ok(0);
 $dbh->{AutoErrorReport} = 0;
 
-$tablename1 = "test1";
-$tablename2 = "test2";
+$tablename1 = "dbd_ix_test1";
+$tablename2 = "dbd_ix_test2";
 
 # Should not succeed, but doesn't matter.
 $dbh->do("DROP TABLE $tablename1");
@@ -83,5 +83,3 @@ undef $sth2;
 $dbh->disconnect;
 
 &all_ok();
-
-exit;

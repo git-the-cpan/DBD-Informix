@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)blob03.t	50.1 97/01/12 17:52:28
+#	@(#)blob03.t	51.1 97/02/25 19:43:01
 #
 #	Test Basic Blobs (SELECT) for DBD::Informix
 #
@@ -21,10 +21,10 @@ else
 	print("1..8\n");
 	&stmt_ok(0);
 
-	# Assumes table BlobTest has been created and populated by test t/blob02.t
+	# Assumes table Dbd_IX_BlobTest has been created and populated by test t/blob02.t
 
 	# Verify that inserted data can be returned
-	$stmt4 = 'SELECT * FROM BlobTest ORDER BY I';
+	$stmt4 = 'SELECT * FROM Dbd_IX_BlobTest ORDER BY I';
 	&stmt_note("# Testing: \$cursor = \$dbh->prepare('$stmt4')\n");
 	&stmt_fail() unless ($cursor = $dbh->prepare($stmt4));
 	&stmt_ok(0);

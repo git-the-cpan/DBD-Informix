@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)original.t	50.1 97/01/12 17:52:31
+# @(#)original.t	51.1 97/02/25 19:43:04
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -28,9 +28,16 @@ print "# Selecting data as an array ***\n";
 
 # Do not rely on the number of tables in Systables -- it varies too much!
 my $i = 0;
+my $j = 0;
 while (@row = $cursor->fetchrow)
 {
 	$i++;
+	# Convert nulls (typically found in the dbase, npused, site or locklevel
+	# columns) to empty strings.
+	for ($j = 0; $j <= $#row; $j++)
+	{
+		$row[$j] = '' unless defined $row[$j];
+	}
     print "# Row: @row\n";
 }
 
@@ -51,7 +58,7 @@ $cursor2 = $dbh->prepare("SELECT tabname, owner FROM 'informix'.SysTables" .
 &stmt_fail() unless $cursor2->execute;
 &stmt_ok;
 
-print # Selecting data as a list of specified vars ***\n";
+print "# Selecting data as a list of specified vars ***\n";
 
 $i = 0;
 while (($tabname, $owner) = $cursor2->fetchrow)
@@ -67,7 +74,7 @@ while (($tabname, $owner) = $cursor2->fetchrow)
 &stmt_ok;
 undef $cursor2;
 
-&stmt_fail() unless $dbh->do("CREATE TEMP TABLE pants2 (a INTEGER)");
+&stmt_fail() unless $dbh->do("CREATE TEMP TABLE dbd_ix_pants2 (a INTEGER)");
 &stmt_ok;
 
 &stmt_fail() unless $dbh->disconnect;

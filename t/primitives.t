@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)primitives.t	50.1 97/01/12 17:52:32
+# @(#)primitives.t	51.1 97/02/25 19:43:05
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -18,10 +18,10 @@ $dbh = connect_to_test_database();
 stmt_ok;
 print "# Installed and connected\n" ;
 
-stmt_test $dbh, "CREATE TEMP TABLE Test (x DATETIME YEAR TO SECOND)", 0;
-stmt_test $dbh, "INSERT INTO Test VALUES (CURRENT YEAR TO SECOND)", 0;
+stmt_test $dbh, "CREATE TEMP TABLE DBD_IX_Test (x DATETIME YEAR TO SECOND)", 0;
+stmt_test $dbh, "INSERT INTO DBD_IX_Test VALUES (CURRENT YEAR TO SECOND)", 0;
 
-stmt_fail unless ($cursor = $dbh->prepare("SELECT x FROM test"));
+stmt_fail unless ($cursor = $dbh->prepare("SELECT x FROM DBD_IX_Test"));
 stmt_ok;
 print "# Prepared\n" ;
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)multiconn01.t	50.1 97/01/12 17:52:32
+#	@(#)multiconn01.t	51.1 97/02/25 19:43:06
 #
 #	Test Multiple Connections for DBD::Informix
 #

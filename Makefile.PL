@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)Makefile.PL	50.2 97/02/13 12:51:57
+# @(#)Makefile.PL	51.2 97/02/26 12:14:47
 #
 # Portions Copyright (c) 1996,1997 Jonathan Leffler (johnl@informix.com)
 # Portions Copyright (c) 1996 Alligator Descartes (descarte@hermetica.com)
@@ -15,7 +15,7 @@ use Config;
 
 %opts = (
 	'NAME'    => 'DBD::Informix',
-	'VERSION' => '0.50',
+	'VERSION' => '0.51',
 );
 
 print "\nConfiguring DBD::Informix version $opts{VERSION}...\n";
@@ -329,7 +329,7 @@ print "\nSee README notes about SPARCompiler on Solaris\n"
 	if ($Config{osname} eq 'solaris' and &which($Config{cc}) =~ m%/SUNWspro/%);
 print "\n";
 
-WriteMakefile(%opts);
+WriteMakefile(%opts, dist => { COMPRESS => 'gzip', SUFFIX => 'gz' });
 
 # Define a postamble for the makefile which briefs MAKE on how to compile
 # ESQL/C source code.  It gives .ec rules (and files) precedence over .c

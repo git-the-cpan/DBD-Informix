@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.h	50.2 97/02/13 12:51:33
+ * @(#)dbdimp.h	51.1 97/02/26 12:08:08
  *
  * $Derived-From: dbdimp.h,v 1.5 1995/06/22 00:37:04 timbo Archaic $
  *
@@ -14,6 +14,7 @@
 #define DBDIMP_H
 
 #define NAMESIZE 19				/* 18 character name plus '\0' */
+#define DEFAULT_DATABASE	".DEFAULT."
 
 /* Different states for a statement */
 enum State

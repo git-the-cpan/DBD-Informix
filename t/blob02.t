@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)blob02.t	50.1 97/01/12 17:52:27
+#	@(#)blob02.t	51.1 97/02/25 19:43:00
 #
 #	Test Basic Blobs (INSERT) for DBD::Informix
 #
@@ -23,13 +23,13 @@ else
 	&stmt_ok(0);
 
 	$dbh->{AutoErrorReport} = 0;
-	$stmt1 = 'DROP TABLE BlobTest';
+	$stmt1 = 'DROP TABLE Dbd_IX_BlobTest';
 	&stmt_test($dbh, $stmt1, 1);
-	$stmt2 = 'CREATE TABLE BlobTest (I SERIAL UNIQUE, T TEXT IN TABLE, ' .
-				'B BYTE IN TABLE)';
+	$stmt2 = 'CREATE TABLE Dbd_IX_BlobTest (I SERIAL UNIQUE, ' .
+			 ' T TEXT IN TABLE, B BYTE IN TABLE)';
 	&stmt_test($dbh, $stmt2, 0);
 
-	$stmt3 = 'INSERT INTO BlobTest VALUES(?, ?, ?)';
+	$stmt3 = 'INSERT INTO Dbd_IX_BlobTest VALUES(?, ?, ?)';
 	&stmt_note("# Testing: \$insert = \$dbh->prepare('$stmt3')\n");
 	&stmt_fail() unless ($insert = $dbh->prepare($stmt3));
 	&stmt_ok(0);

@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.ec	50.2 97/02/13 12:51:30
+ * @(#)dbdimp.ec	51.1 97/02/26 10:11:12
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)dbdimp.ec	50.2 97/02/13";
+static const char sccs[] = "@(#)dbdimp.ec	51.1 97/02/26";
 #endif
 
 #include <stdio.h>
@@ -545,6 +545,10 @@ SV *dbd_db_FETCH(imp_dbh_t *imp_dbh, SV *keysv)
 	{
 		retsv = newSVpv(imp_dbh->sqlca.sqlerrp, 0);
 	}
+	else if (KEY_MATCH(kl, key, "ConnectionName"))
+	{
+		retsv = newSVpv(imp_dbh->nm_connection, 0);
+	}
 	else if (KEY_MATCH(kl, key, "sqlerrd"))
 	{
 		AV             *av = newAV();
@@ -767,6 +771,13 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 		blob.loc_bufsize = len + 1;
 		blob.loc_size = len;
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index DATA = :blob;
+	}
+	else if (!SvOK(val))
+	{
+		/* It's a null! */
+		type = SQLCHAR;
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, DATA = "", LENGTH = 1, INDICATOR = -1;
 	}
 	else if (SvIOK(val))
 	{
@@ -1159,6 +1170,10 @@ SV             *keysv;
 		/* Should return a string! */
 		retsv = newSViv((IV)imp_sth->blob_bind);
 	}
+	else if (KEY_MATCH(kl, key, "CursorName"))
+	{
+		retsv = newSVpv(imp_sth->nm_cursor, 0);
+	}
 	else if (KEY_MATCH(kl, key, "sqlcode"))
 	{
 		retsv = newSViv((IV)imp_sth->dbh->sqlca.sqlcode);
@@ -1302,6 +1317,7 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 			result = coldata;
 			length = 0;
 			result[length] = '\0';
+			(void)SvOK_off(sv);
 			/*warn("NULL Data: %d <<%s>>\n", length, result);*/
 		}
 		else
@@ -1407,20 +1423,20 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 				result[length] = '\0';
 				break;
 			}
-		}
-		dbd_ix_sqlcode(imp_sth->dbh);
-		if (sqlca.sqlcode < 0)
-		{
-			*result = '\0';
-		}
-		sv_setpvn(sv, result, length);
-		if (result != coldata)
-		{
+			dbd_ix_sqlcode(imp_sth->dbh);
+			if (sqlca.sqlcode < 0)
+			{
+				*result = '\0';
+			}
+			sv_setpvn(sv, result, length);
+			if (result != coldata)
+			{
 #if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
-			if (result != longchar)
+				if (result != longchar)
 #endif /* ESQLC_VERSION in {500, 501} */
-			if (coltype != SQLBYTES && coltype != SQLTEXT)
-				free(result);
+				if (coltype != SQLBYTES && coltype != SQLTEXT)
+					free(result);
+			}
 		}
 	}
 	dbd_ix_debug(1, "Exit %s::dbd_st_fetch()\n", module);

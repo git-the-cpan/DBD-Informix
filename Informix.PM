@@ -1,4 +1,4 @@
-#	@(#)Informix.PM	50.1 97/01/12 17:54:42
+#	@(#)Informix.PM	51.1 97/02/26 12:06:10
 #
 #   Portions Copyright (c) 1994,1995 Tim Bunce
 #   Portions Copyright (c) 1996,1997 Jonathan Leffler
@@ -20,7 +20,7 @@
 	my $PRODUCTVERSION      = "<<Product Version>>";
 	my $MultipleConnections = "<<Multiple Connections>>";
 	my $ATTRIBUTION         = 'By Alligator Descartes and Jonathan Leffler';
-	my $Revision            = substr(q@(#)Informix.PM 50.1 (97/01/12)@, 3);
+	my $Revision            = substr(q@(#)Informix.PM 51.1 (97/02/26)@, 3);
 
 	require_version DBI 0.69;
 
@@ -224,7 +224,7 @@ basic information:
     print "    Type:                  $drh->{Type}\n";
     # Name is always 'Informix'.
     print "    Name:                  $drh->{Name}\n";
-    # Version is the version of DBD::Informix (eg 0.25).
+    # Version is the version of DBD::Informix (eg 0.51).
     print "    Version:               $drh->{Version}\n";
     # The ProductName is the version of ESQL/C; it corresponds to
     # the first line of the output from "esql -V".
@@ -239,15 +239,14 @@ basic information:
     # supports multiple connections (1) or not (0).
     print "    Multiple Connections:  $drh->{MultipleConnections}\n";
 
-    # -- Not implemented in DBD::Informix 0.25 --
+    # -- Not implemented in DBD::Informix yet --
     # ActiveConnections identifies the number of open connections.
     print "    Active Connections:      $drh->{ActiveConnections}\n";
     # CurrentConnection identifies the current connection.
     print "    Current Connections:     $drh->{CurrentConnection}\n";
 
 Once you have the driver loaded, you can connect to a database, or you
-can (in theory) sever all connections to databases with disconnect_all,
-but this has not been implemented in 0.25b2.
+can sever all connections to databases with disconnect_all.
 
     $drh->disconnect_all;
 
@@ -269,8 +268,17 @@ done by DBI, not by DBD::Informix.
 
     $dbh = $drh->connect($database, $username, $password);
 
-The 5.0x versions ignore the username and password data, and the
-statement is equivalent to: EXEC SQL DATABASE :database;
+You can also use the equivalent statement below which does not require the
+explicit driver handle (and which is the officially approved way of making
+the connection), but it requires you to specify the username and password,
+whereas if these are omitted in the form above, you can still specify the
+database and it will work correctly.
+
+    $dbh = DBI->connect($database, $username, $password, 'Informix');
+
+The 5.0x versions ignore the username and password data, and the statement
+is equivalent to "EXEC SQL DATABASE :database;".  If an empty string is
+passed as the database name, this is a no-op; no database is opened.
 
 The 6.0x versions only use the username and password if both are supplied,
 but it is equivalent to:
@@ -290,9 +298,15 @@ CONNECT statements.  Examples include:
     @server1            # Connection to (remote) server but no database
     /some/where/dbase   # Connect to local SE database
 
-The database name is not supplied implicitly.
-Contrary to some other documentation, the DBD::Informix code does not
-default the database to the value in %ENV{PERL_DBI_DATABASE}.
+The database name is not supplied implicitly by DBD::Informix, but the
+DBI driver will supply the value in $ENV{DBI_DBNAME} if the environment
+variable is set and no database name is supplied in the connect call.
+If DBD::Informix sees an empty string, then it makes no connection to
+any database with ESQL/C 5.0x, and it makes a default connection with
+ESSQL/C 6.00 and later.  There is an additional string, ".DEFAULT.",
+which can be specified explicitly as the database name and which will
+be interpreted as a request for a default connection.  Note that this
+is not a valid Informix database name, so there can be no confusion.
 
 Once you have a database handle, you can interrogate it for some basic
 information about the database, etc.
@@ -318,6 +332,9 @@ information about the database, etc.
      print "    AutoErrorReport:         $dbh->{AutoErrorReport}\n";
      # InTransaction is 1 (true) if the database is in a transaction
      print "    Transaction Active:      $dbh->{InTransaction}\n";
+     # ConnectionName is the name of the ESQL/C connection.
+     # Mainly applicable with Informix-ESQL/C 6.00 and later.
+     print "    Connection Name:         $dbh->{ConnectionName}\n";
 
 If $dbh->{AutoErrorReport} is true, then DBD::Informix will report each
 error automatically on STDERR when it is detected.  The error is also
@@ -343,7 +360,7 @@ and START DATABASE statements.
 Note that you cannot prepare CONNECT statements, so they do not have to be
 tracked.
 
-= back
+=back
 
 =head2 DISCONNECTING FROM A DATABASE
 
@@ -418,7 +435,7 @@ ORDER BY etc), and then closed and freed without fetching any data.  A more
 robust version would generate an error condition without declaring the
 cursor, etc.
 
-= back
+=back
 
 You can embed an arbitrary string inside a statement with any quote marks
 correctly handled by invoking:
@@ -426,7 +443,7 @@ correctly handled by invoking:
     $dbh->quote($string);
 
 This method is provided by the DBI package implementation and is inherited
-by the DBD::Informix package.  The string is enclosed in singel quotes, and
+by the DBD::Informix package.  The string is enclosed in single quotes, and
 any embedded single quotes are doubled up, which conforms to the SQL-92
 standard.
 
@@ -468,7 +485,7 @@ using:
 BUG: There is no way to tell whether the statement is just executable or
 whether it is a cursory (fetchable) statement.  You are assumed to know.
 
-= back
+=back
 
 Once the statement is prepared, you can execute it:
 
@@ -498,7 +515,7 @@ BUG: The various bind routines defined by DBI (primarily to support
 DBD::Oracle) are not implemented in DBD::Informix because there are no
 clearly documented semantics associated with the calls.
 
-= back
+=back
 
 For cursory statements, you can discover what the returned column names, types,
 nullability, etc are.  You do this with:
@@ -526,7 +543,7 @@ of definition.
 BUG: You might be able to do the same with INSERT statements, except that
 some internal machinations mean that it probably does not work in 0.25.
 
-= back
+=back
 
 If the statement is a cursory statement, you can retrieve the values in either
 of two ways:
@@ -547,7 +564,7 @@ normally, therefore, use:
         ...
     }
     # Investigate whether an error occurred or the SELECT
-	# simply had nothing more to return.
+    # simply had nothing more to return.
     if ($sth->{sqlcode} < 0)
     {
         # Process error...
@@ -583,7 +600,7 @@ at the statement level.
 
 BUG: BlobLocation is not honoured.
 
-= back
+=back
 
 When you have fetched as many rows as required, you close the cursor using:
 
@@ -594,8 +611,61 @@ That is done when you destroy (undef) the statement handle:
 
     undef $sth;
 
-You can also implicitly rebind a statement handle to a new statement by
-simply using the same variable again.  This does not cause any memory leaks.
+You can also implicitly rebind a statement handle to a new statement
+by simply using the same variable again.
+This does not cause any memory leaks.
+
+=head2 CURSORS FOR UPDATE
+
+With DBD::Informix v0.51 and later, you can use the attribute
+$sth->{CursorName} to retrieve the name of a cursor.
+If the statement for $sth is actually a SELECT, and the cursor is in a
+MODE ANSI database or is declared with the 'FOR UPDATE [OF col,...'
+tag, then you can use the cursor name in a 'DELETE...WHERE CURRENT OF'
+or 'UPDATE...WHERE CURRENT OF' statement.
+
+    $st1 = $dbh->prepare("SELECT * FROM SomeTable FOR UPDATE");
+    $wc = "WHERE CURRENT OF $st1->{CursorName}";
+    $st2 = $dbh->prepare("UPDATE SomeTable SET SomeColumn = ? $wc");
+    $st3 = $dbh->prepare("DELETE FROM SomeTable $wc");
+    $st1->execute;
+    $row = $st1->fetch;
+    $st2->execute("New Value");
+    $row = $st1->fetch;
+    $st3->execute();
+
+=over 4
+
+BUG: Attribute caching is not working correctly in DBD::Informix.
+Once you've retrieved the cursor name once, you cannot retrieve it a
+second time.
+Hence the assignment to $wc is necessary in the example code above.
+This applies to all attributes.
+
+=back
+
+=head2 ACCESSING THE SQLCA RECORD
+
+You can access the SQLCA record via either a database handle or a statement
+handle.
+
+    $sqlcode = $sth->{sqlcode};
+    $sqlerrm = $sth->{sqlerrm};
+    $sqlerrp = $sth->{sqlerrp};
+    @sqlerrd = $sth->{sqlerrd};
+    @sqlwarn = $sth->{sqlwarn};
+
+Note that the warning information is treated as an array (as in Informix-4GL)
+rather than as a bunch of separate fields (as in Informix-ESQL/C).  Inspect
+the code in the print_sqlca() function in InformixTest.pm for more ideas on
+the use of these.  You cannot set the sqlca record.
+
+=over 4
+
+BUG: DBD::Informix is over-zealous at handling the sqlca record and is apt
+to lose valuable information.
+
+=back
 
 =head1 TRANSACTION MANAGEMENT
 
@@ -716,7 +786,7 @@ necessary.
 BUG: DBD::Informix does not create WITH HOLD cursors for MODE ANSI databases
 when AutoCommit mode is On.
 
-= back
+=back
 
 =head2 Logged Databases
 

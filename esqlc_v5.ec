@@ -1,5 +1,5 @@
 /*
- * @(#)esqlc_v5.ec	50.2 97/02/13 12:51:28
+ * @(#)esqlc_v5.ec	51.1 97/02/26 12:03:40
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -13,11 +13,12 @@
 
 /*TABSTOP=4*/
 
-#ifndef lint
-static const char sccs[] = "@(#)esqlc_v5.ec	50.2 97/02/13";
-#endif
-
+#include <string.h>
 #include "Informix.h"
+
+#ifndef lint
+static const char sccs[] = "@(#)esqlc_v5.ec	51.1 97/02/26";
+#endif
 
 /* ================================================================= */
 /* =================== Database Level Operations =================== */
@@ -32,16 +33,18 @@ dbd_ix_opendatabase(char *dbase)
 	EXEC SQL END DECLARE SECTION;
 	Boolean         conn_ok = False;
 
-	if (dbase != (char *)0 && *dbase != '\0')
+	if (dbase == (char *)0 || *dbase == '\0' ||
+		strcmp(dbase, DEFAULT_DATABASE) == 0)
+	{
+		dbd_ix_debug(1, "ESQL/C 5.0x 'implicit' DATABASE - %s\n", "no-op");
+		conn_ok = True;
+	}
+	else
 	{
 		dbd_ix_debug(1, "DATABASE %s\n", dbname);
 		EXEC SQL DATABASE :dbname;
 		if (sqlca.sqlcode == 0)
 			conn_ok = True;
-	}
-	else
-	{
-		dbd_ix_debug(1, "ESQL/C 5.0x 'implicit' DATABASE - %s\n", "no-op");
 	}
 	return(conn_ok);
 }

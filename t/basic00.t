@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)basic00.t	50.1 97/01/12 17:52:26
+#	@(#)basic00.t	51.1 97/02/25 19:42:59
 #
 #	Primary test script for DBD::Informix
 #
@@ -10,7 +10,7 @@
 
 use DBD::InformixTest;
 
-$testtable = "testaa";
+$testtable = "dbd_ix_test01";
 
 &stmt_note("1..51\n");
 

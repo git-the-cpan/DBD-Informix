@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)blob04.t	50.1 97/01/12 17:52:29
+#	@(#)blob04.t	51.1 97/02/25 19:43:02
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
@@ -23,11 +23,11 @@ else
 	&stmt_ok(0);
 	$dbh->{AutoErrorReport} = 1;
 
-	$stmt2 = 'CREATE TEMP TABLE BlobList2 (I SERIAL UNIQUE, B BYTE IN TABLE, ' .
+	$stmt2 = 'CREATE TEMP TABLE DBD_IX_BlobTest2 (I SERIAL UNIQUE, B BYTE IN TABLE, ' .
 				'T TEXT IN TABLE)';
 	&stmt_test($dbh, $stmt2, 0);
 
-	$stmt3 = 'INSERT INTO BlobList2 VALUES(?, ?, ?)';
+	$stmt3 = 'INSERT INTO DBD_IX_BlobTest2 VALUES(?, ?, ?)';
 	&stmt_note("# Testing: \$insert = \$dbh->prepare('$stmt3')\n");
 	&stmt_fail() unless ($insert = $dbh->prepare($stmt3));
 	&stmt_ok(0);
@@ -55,7 +55,7 @@ else
 	&stmt_ok(0);
 
 	# Verify that inserted data can be returned
-	$stmt4 = 'SELECT * FROM BlobList2 ORDER BY I';
+	$stmt4 = 'SELECT * FROM DBD_IX_BlobTest2 ORDER BY I';
 	&stmt_note("# Testing\n\$cursor = \$dbh->prepare('$stmt4')\n");
 	&stmt_fail() unless ($cursor = $dbh->prepare($stmt4));
 	&stmt_ok(0);

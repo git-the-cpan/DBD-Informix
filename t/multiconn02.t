@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)multiconn02.t	50.1 97/01/12 17:52:33
+#	@(#)multiconn02.t	51.1 97/02/25 19:43:06
 #
 #	Test DISCONNECT ALL for DBD::Informix
 #

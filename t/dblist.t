@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)dblist.t	50.1 97/01/12 17:52:29
+# @(#)dblist.t	51.1 97/02/25 19:43:02
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #

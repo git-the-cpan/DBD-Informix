@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)numerics.t	50.1 97/01/12 17:52:31
+# @(#)numerics.t	51.1 97/02/25 19:43:04
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -8,7 +8,7 @@
 #
 # Basic Numeric type testing
 
-$tablename = "test3";
+$tablename = "dbd_ix_test3";
 
 use DBD::InformixTest;
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)transact04.t	50.1 97/01/12 17:52:37
+#	@(#)transact04.t	51.1 97/02/25 19:43:10
 #
 #	Test AutoCommit On for DBD::Informix
 #
@@ -32,7 +32,7 @@ $dbh->{AutoCommit} = 1;
 $ac = $dbh->{AutoCommit} ? "On" : "Off";
 print "# AutoCommit was set to $ac\n";
 
-$trans01 = "Trans01";
+$trans01 = "DBD_IX_Trans01";
 $select = "SELECT * FROM $trans01";
 
 stmt_test $dbh, qq{

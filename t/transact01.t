@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)transact01.t	50.1 97/01/12 17:52:35
+#	@(#)transact01.t	51.1 97/02/25 19:43:08
 #
 #	Test Transactions for DBD::Informix
 #
@@ -26,7 +26,7 @@ if ($dbh->{ModeAnsiDatabase})
 else
 { &stmt_note("# This is a regular logged database\n"); }
 
-$trans01 = "Trans01";
+$trans01 = "DBD_IX_Trans01";
 $select = "SELECT * FROM $trans01";
 
 stmt_test $dbh, qq{

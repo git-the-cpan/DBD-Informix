@@ -1,5 +1,5 @@
 /*
- * @(#)esqlc_v6.ec	50.3 97/02/13 12:51:29
+ * @(#)esqlc_v6.ec	51.1 97/02/26 12:03:41
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -13,11 +13,12 @@
 
 /*TABSTOP=4*/
 
-#ifndef lint
-static const char sccs[] = "@(#)esqlc_v6.ec	50.3 97/02/13";
-#endif
-
+#include <string.h>
 #include "Informix.h"
+
+#ifndef lint
+static const char sccs[] = "@(#)esqlc_v6.ec	51.1 97/02/26";
+#endif
 
 /* ================================================================= */
 /* =================== Database Level Operations =================== */
@@ -43,7 +44,8 @@ Boolean dbd_ix_connect(char *connection, char *dbase, char *user, char *pass)
 	EXEC SQL END DECLARE SECTION;
 	Boolean         conn_ok = False;
 
-	if (dbase == (char *)0)
+	if (dbase == (char *)0 || *dbase == '\0' ||
+		strcmp(dbase, DEFAULT_DATABASE) == 0)
 	{
 		/* Not frequently used, but valid */
 		/* Reset connection name to empty string, and connect to default */
