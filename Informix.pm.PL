@@ -1,4 +1,33 @@
-#	@(#)$Id: Informix.pm,v 60.6 1998/08/13 00:44:25 jleffler Exp $ 
+#	@(#)$Id: Informix.pm.PL,v 61.4 1998/12/15 01:04:13 jleffler Exp $ 
+#
+#   Portions Copyright (c) 1994-95 Tim Bunce
+#   Portions Copyright (c) 1996-98 Jonathan Leffler
+#
+#   You may distribute under the terms of either the GNU General Public
+#   License or the Artistic License, as specified in the Perl README file.
+
+use Config;
+my $filename = $0;
+$filename =~ s/\.PL$//;
+
+my $dir = '/usr/informix';
+my $server = 'localhost';
+while (@ARGV and $ARGV[0] =~ /^-d(\w+)=(.*)/)
+	{
+	my ($tag, $value) = ($1, $2);
+	$tag eq 'INFORMIXDIR' and $dir = $value;
+	$tag eq 'INFORMIXSERVER' and $server = $value;
+	shift;
+	}
+
+open OUT,">$filename" or die "Can't create $filename: $!";
+chmod(0755, $filename);
+print "Extracting $filename from $0\n",
+		"\t* setting default INFORMIXDIR to `$dir'\n",
+		"\t* setting default INFORMIXSERVER to `$server'\n";
+
+print OUT <<'EOF';
+#	@(#)$Id: Informix.pm.PL,v 61.4 1998/12/15 01:04:13 jleffler Exp $ 
 #
 #   Portions Copyright (c) 1994-95 Tim Bunce
 #   Portions Copyright (c) 1996-98 Jonathan Leffler
@@ -13,15 +42,22 @@
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.60";
-	$ATTRIBUTION = 'By Jonathan Leffler';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 60.6 $ ($Date: 1998/08/13 00:44:25 $)@, 3);
+	$VERSION     = "0.61_02";
+	$ATTRIBUTION = 'Jonathan Leffler <j.leffler@acm.org>';
+	$Revision    = substr(q@(#)$RCSfile: Informix.pm.PL,v $ $Revision: 61.4 $ ($Date: 1998/12/15 01:04:13 $)@, 3);
 	$Revision    =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
 
-	require_version DBI 0.90;	# Requires features from DBI 0.90 release
+	require_version DBI 1.02;	# Requires features from DBI 1.02 release
 
 	bootstrap DBD::Informix $VERSION;
 
+EOF
+
+print OUT <<"EOF";
+	\$ENV{INFORMIXSERVER} = q($server) unless defined \$ENV{INFORMIXSERVER};
+EOF
+
+print OUT <<'EOF';
 	$err = 0;		# holds error code   for DBI::err
 	$errstr = "";	# holds error string for DBI::errstr
 	$state = "";    # holds error string for DBI::state
@@ -40,12 +76,18 @@
 
 		unless ($ENV{INFORMIXDIR})
 		{
-			foreach (qw(/usr/informix))
+EOF
+
+print OUT <<"EOF";
+			foreach (qw($dir))
+EOF
+
+print OUT <<'EOF';
 			{
 				if (-d "$_/lib")
 				{
 					$ENV{INFORMIXDIR} = $_;
-					warn "DBD::Informix - INFORMIXDIR set to $_\n";
+					### warn "DBD::Informix - INFORMIXDIR set to $_\n";
 					last;
 				}
 			}
@@ -333,7 +375,7 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes DBD::Informix version 0.57.
+This document describes DBD::Informix version 0.61.
 
 You should also read the documentation for DBI as this document
 qualifies what is stated there.
@@ -453,29 +495,24 @@ See also test file "t/dblist.t".
 
 =head1 CONNECTING TO A DATABASE
 
-NB: this section is more subject to change than most.
-Read the DBI specification for information about "dbi:Informix:" as
-the initial portion of the connect string.
-
 To connect to a database, you can use the connect function, which
 yields a valid reference or database handle if it is successful.
 If the driver itself cannot be loaded (by the DBI->install_driver()
 method mentioned above), DBI aborts the script (and DBD::Informix can
 do nothing about it because it wasn't loaded successfully).
 
-=head2 "New Style"
-
     $dbh = DBI->connect("dbi:Informix:$database");
     $dbh = DBI->connect("dbi:Informix:$database", $user, $pass);
     $dbh = DBI->connect("dbi:Informix:$database", $user, $pass, %attr);
 
-The 'new style' connections are distinguished by the presence of the
-'dbi:Informix:' portion at the front of the first argument.
+The DBI connect method strips the 'dbi:' prefix from the
+first argument, loads the DBD module identified by the next
+strin (Informix in this case).
 The string following the second colon is all that is passed to the
 DBD::Informix code.
 With this format, you do not have to specify the username or password.
-Note that if you specify the username but not the password, the
-username will be ignored.
+Note that if you specify the username but not the password, DBD::Informix
+will silently ignore the username.
 You can also specify certain attributes in the connect call.
 These include:
 
@@ -507,20 +544,12 @@ you connect to an UnLogged database.
 See also the extensive notes in the TRANSACTION MANAGEMENT section
 later in this document.
 
-=over 4
-
-Note that there are problems with the new style connection syntax if
-the connection fails; DBI does not give the correct error indications.
-This means that the tests do not, in general, exploit the new syntax.
-
-=back
-=head2 "Old Style"
+=head2 "Obsolescent Connection Method"
 
 The older style of connection does not use the string "dbi:Informix:"
-at the start of the first argument (or uses a string as the fourth
-argument).
-This style is strongly deprecated, notwithstanding the fact that many of
-the tests use it.
+at the start of the first argument.
+This style is strongly deprecated, notwithstanding the fact that one of
+the tests uses it.
 
     $dbh = DBI->connect($database, $username, $password, 'Informix');
 
@@ -536,6 +565,9 @@ $username arguments empty and they will be ignored.
     $dbh = DBI->connect($database, $username);
     $dbh = DBI->connect($database);
 
+
+=head2 "Informix Connection Semantics"
+
 If you are using 5.0x versions of ESQL/C, then DBD::Informix ignores
 the username and password data, and the statement is equivalent to
 "EXEC SQL DATABASE :database;".
@@ -549,9 +581,8 @@ is then equivalent to:
 
 The connection is given a name by DBD::Informix.
 
-For DBD::Informix using either the old or new style of connection
-syntax, the database name is any valid format for the DATABASE or
-CONNECT statements.
+For DBD::Informix, the database name is any valid format for the DATABASE
+or CONNECT statements.
 
 Examples include:
 
@@ -889,12 +920,15 @@ WHERE ...", both the return columns are described as 'column'.
 If the statement is a cursory statement, you can retrieve the values
 in any of a number of ways, as described in the DBI specification.
 
-    $ref = $sth->fetch;
+	$ref = $sth->fetchrow_arrayref;
+    $ref = $sth->fetch;					# Alternative spelling...
     @row = @{$ref};
 
-    @row = @{$sth->fetch};  # Shorthand for above...
+    @row = @{$sth->fetchrow_arrayref};  # Shorthand for above...
 
-    @row = $sth->fetchrow;
+    @row = $sth->fetchrow_array;
+
+    $ref = $sth->fetchall_arrayref;
 
 As usual, you have to worry about whether this worked or not.  You would
 normally, therefore, use:
@@ -942,7 +976,7 @@ overriding it at the statement level.
 
 =over 4
 
-BUG: ix_BlobLocation is not honoured properly.
+BUG: ix_BlobLocation is not handled properly.
 
 =back
 
@@ -950,7 +984,10 @@ When you have fetched as many rows as required, you close the cursor using:
 
     $sth->finish;
 
-This simply closes the cursor; it does not free the cursor or the statement.
+You do not have to finish a cursor explicitly if you executed a fetch
+which failed to retrieve any data.
+
+Doing $sth->finish simply closes the cursor; it does not free the cursor or the statement.
 That is done when you destroy (undef) the statement handle:
 
     undef $sth;
@@ -1219,13 +1256,13 @@ At various times:
 Tim Bunce (Tim.Bunce@ig.co.uk)
 
 =item *
-Alligator Descartes (descarte@hermetica.com)
+Alligator Descartes (descarte@hermetica.com) # Obsolete email address
 
 =item *
 Alligator Descartes (descarte@arcana.co.uk)
 
 =item *
-Jonathan Leffler (johnl@informix.com)
+Jonathan Leffler (johnl@informix.com) # Obsolete email address
 
 =item *
 Jonathan Leffler (j.leffler@acm.org)
@@ -1240,3 +1277,5 @@ Jonathan Leffler (jleffler@informix.com)
 perl(1), perldoc for DBI.
 
 =cut
+
+EOF

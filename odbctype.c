@@ -1,25 +1,18 @@
-/*
+/* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil -*-
 @(#)File:            $RCSfile: odbctype.c,v $
-@(#)Version:         $Revision: 56.2 $
-@(#)Last changed:    $Date: 1998/08/05 21:19:13 $
+@(#)Version:         $Revision: 61.3 $
+@(#)Last changed:    $Date: 1998/10/27 20:58:37 $
 @(#)Purpose:         Map Informix SQL Types to ODBC Types
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1997
-@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
+@(#)Copyright:       (C) JLSS 1997-98
+@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
 */
 
 /*TABSTOP=4*/
 
 #include <sqltypes.h>
 #include "esqlc.h"
-#include "esqlvrsn.h"	/* Defines USE_INSTALLED_ODBC */
-
-#if USE_INSTALLED_ODBC == 1
-#include <qeodbc.h>
-#include <sqlext.h>
-#else
 #include "odbctype.h"
-#endif /* USE_INSTALLED_ODBC */
 
 /* Cover pre-6.00 versions of ESQL/C */
 #ifndef SQLNCHAR
@@ -38,7 +31,10 @@ typedef enum IxSQLType
 	ix_INTEGER    = SQLINT,
 #ifdef SQLBOOL
 	ix_BOOL       = SQLBOOL,
-#endif /* SQLBOOL */
+#endif
+#ifdef SQLLVARCHAR
+	ix_LVARCHAR   = SQLLVARCHAR,
+#endif
 	ix_SMALLINT   = SQLSMINT,
 	ix_SERIAL     = SQLSERIAL,
 	ix_TEXT       = SQLTEXT,
@@ -53,20 +49,21 @@ typedef enum IxSQLType
 } IxSQLType;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: odbctype.c,v 56.2 1998/08/05 21:19:13 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: odbctype.c,v 61.3 1998/10/27 20:58:37 jleffler Exp $";
 #endif
 
 /* Map Informix DATETIME types to equivalent ODBC types */
-static int  dtmap(int collen)
+static int
+dtmap(int collen)
 {
-	int tu_s = TU_START(collen);
-	int tu_e = TU_END(collen);
-	int odbctype;
+	int             tu_s = TU_START(collen);
+	int             tu_e = TU_END(collen);
+	int             odbctype;
 
-	/**
-	** Most of Informix's DATETIME types do not have corresponding ODBC types.
-	** Regard them as undefined types (SQL_TYPE_NULL).
-	*/
+	/*
+    ** Most of Informix's DATETIME types do not have corresponding ODBC types.
+    ** Regard them as undefined types (SQL_TYPE_NULL).
+    */
 	if (tu_s == TU_YEAR && tu_e == TU_DAY)
 		odbctype = SQL_DATE;
 	else if (tu_s == TU_YEAR && tu_e >= TU_SECOND)
@@ -79,11 +76,12 @@ static int  dtmap(int collen)
 }
 
 /* Map Informix INTERVAL types to equivalent ODBC types */
-static int  ivmap(int collen)
+static int
+ivmap(int collen)
 {
-	int tu_s = TU_START(collen);
-	int tu_e = TU_END(collen);
-	int odbctype;
+	int             tu_s = TU_START(collen);
+	int             tu_e = TU_END(collen);
+	int             odbctype;
 
 	if (tu_s == TU_YEAR && tu_e == TU_YEAR)
 		odbctype = SQL_INTERVAL_YEAR;
@@ -114,19 +112,20 @@ static int  ivmap(int collen)
 	else
 	{
 		/**
-		** Should never happen.
-		** ODBC supports all interval types Informix does
-		*/
+	     ** Should never happen.
+	     ** ODBC supports all interval types Informix does
+	     */
 		odbctype = SQL_CHAR;
 	}
 	return(odbctype);
 }
 
 /* Map Informix types to equivalent ODBC types */
-int map_type_ifmx_to_odbc(int coltype, int collen)
+int
+map_type_ifmx_to_odbc(int coltype, int collen)
 {
-	IxSQLType	ifmxtype = (IxSQLType) coltype;
-	int odbctype;
+	IxSQLType       ifmxtype = (IxSQLType)coltype;
+	int             odbctype;
 
 	switch (ifmxtype)
 	{
@@ -136,6 +135,11 @@ int map_type_ifmx_to_odbc(int coltype, int collen)
 	case ix_NCHAR:
 		odbctype = SQL_CHAR;
 		break;
+#ifdef SQLLVARCHAR
+	case ix_LVARCHAR:
+		odbctype = SQL_LONGVARCHAR;
+		break;
+#endif
 	case ix_VARCHAR:
 		odbctype = SQL_VARCHAR;
 		break;
@@ -147,7 +151,7 @@ int map_type_ifmx_to_odbc(int coltype, int collen)
 		break;
 #ifdef SQLBOOL
 	case ix_BOOL:
-#endif /* SQLBOOL */
+#endif
 	case ix_SMALLINT:
 		odbctype = SQL_SMALLINT;
 		break;
@@ -189,10 +193,11 @@ int map_type_ifmx_to_odbc(int coltype, int collen)
 }
 
 /* Map Informix type information to ODBC precision */
-int map_prec_ifmx_to_odbc(int coltype, int collen)
+int
+map_prec_ifmx_to_odbc(int coltype, int collen)
 {
-	IxSQLType	ifmxtype = (IxSQLType) coltype;
-	int odbcprec;
+	IxSQLType       ifmxtype = (IxSQLType)coltype;
+	int             odbcprec;
 
 	switch (ifmxtype)
 	{
@@ -211,7 +216,7 @@ int map_prec_ifmx_to_odbc(int coltype, int collen)
 	case ix_SMALLINT:
 #ifdef SQLBOOL
 	case ix_BOOL:
-#endif /* SQLBOOL */
+#endif
 		odbcprec = 5;
 		break;
 	case ix_FLOAT:
@@ -244,10 +249,11 @@ int map_prec_ifmx_to_odbc(int coltype, int collen)
 	return(odbcprec);
 }
 
-int map_scale_ifmx_to_odbc(int coltype, int collen)
+int
+map_scale_ifmx_to_odbc(int coltype, int collen)
 {
-	IxSQLType	ifmxtype = (IxSQLType) coltype;
-	int odbcscale;
+	IxSQLType       ifmxtype = (IxSQLType)coltype;
+	int             odbcscale;
 
 	switch (ifmxtype)
 	{
@@ -255,6 +261,9 @@ int map_scale_ifmx_to_odbc(int coltype, int collen)
 	case ix_NCHAR:
 	case ix_VARCHAR:
 	case ix_NVARCHAR:
+#ifdef SQLLVARCHAR
+	case ix_LVARCHAR:
+#endif
 	case ix_TEXT:
 	case ix_BYTE:
 	case ix_FLOAT:
@@ -265,7 +274,7 @@ int map_scale_ifmx_to_odbc(int coltype, int collen)
 	case ix_SMALLINT:
 #ifdef SQLBOOL
 	case ix_BOOL:
-#endif /* SQLBOOL */
+#endif
 	case ix_SERIAL:
 		odbcscale = 0;
 		break;

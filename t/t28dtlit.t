@@ -1,11 +1,11 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t28dtlit.t,v 60.1 1998/07/30 01:50:45 jleffler Exp $
+# @(#)$Id: t28dtlit.t,v 61.1 1998/10/29 22:45:23 jleffler Exp $
 #
 # Copyright (C) 1998 Jonathan Leffler (johnl@informix.com)
 #
 # Test for handling DATETIME literals in SQL statements
-# Note that DBD::Informix would mangle a time such as '12:30:23' to '12??'
+# Note that DBD::Informix used to mangle a time such as '12:30:23' to '12??'
 # because dbd_ix_preparse() would treat the :30 as a positional parameter
 # (in a misguided attempt to accommodate Oracle scripts).
 
@@ -13,34 +13,27 @@ use DBI;
 use DBD::InformixTest qw(stmt_ok stmt_fail stmt_note all_ok stmt_test
 connect_to_test_database select_some_data);
 
-print("1..11\n");
+print("1..10\n");
 
-# Test installation of driver
-# NB: Do not use install_driver in your own code.
-#     Use DBI->connect as documented in the POD.
-&stmt_note("# Testing: DBI->install_driver('Informix')\n");
-$drh = DBI->install_driver('Informix');
-&stmt_ok(0);
+$dbh = connect_to_test_database(1);
+&stmt_ok;
 
 print "# DBI Information\n";
 print "#     Version:               $DBI::VERSION\n";
 print "# Generic Driver Information\n";
-print "#     Type:                  $drh->{Type}\n";
-print "#     Name:                  $drh->{Name}\n";
-print "#     Version:               $drh->{Version}\n";
-print "#     Attribution:           $drh->{Attribution}\n";
+print "#     Type:                  $dbh->{Driver}->{Type}\n";
+print "#     Name:                  $dbh->{Driver}->{Name}\n";
+print "#     Version:               $dbh->{Driver}->{Version}\n";
+print "#     Attribution:           $dbh->{Driver}->{Attribution}\n";
 print "# Informix Driver Information\n";
-print "#     Product:               $drh->{ix_ProductName}\n";
-print "#     Product Version:       $drh->{ix_ProductVersion}\n";
-print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
-print "#     Active Connections:    $drh->{ix_ActiveConnections}\n";
-print "#     Current Connection:    $drh->{ix_CurrentConnection}\n";
+print "#     Product:               $dbh->{ix_ProductName}\n";
+print "#     Product Version:       $dbh->{ix_ProductVersion}\n";
+print "#     Multiple Connections:  $dbh->{ix_MultipleConnections}\n";
+print "#     Active Connections:    $dbh->{ix_ActiveConnections}\n";
+print "#     Current Connection:    $dbh->{ix_CurrentConnection}\n";
 print "# \n";
 
 $tablename = "dbd_ix_test3";
-
-$dbh = connect_to_test_database(1);
-&stmt_ok;
 
 $stmt1 = qq{
 CREATE TEMP TABLE $tablename

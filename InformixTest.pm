@@ -1,4 +1,4 @@
-#	@(#)$Id: InformixTest.pm,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
+#	@(#)$Id: InformixTest.pm,v 61.3 1998/10/30 00:41:16 jleffler Exp $ 
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
@@ -15,6 +15,7 @@
 	@EXPORT = qw(
 		all_ok
 		connect_to_test_database
+		print_dbinfo
 		print_sqlca
 		select_some_data
 		select_zero_data
@@ -24,10 +25,11 @@
 		stmt_ok
 		stmt_retest
 		stmt_test
+		test_for_ius
 		);
 
 	use DBI;
-	require_version DBI 0.89;
+	require_version DBI 1.02;
 
 	# Report on the connect command and any attributes being set.
 	sub print_connection
@@ -51,8 +53,8 @@
 		# It will should be OK for 6.0x and later versions of OnLine.
 		# You may run into problems with SE and 5.00 systems.
 		# If you do, send details to the maintenance team.
-		my ($dbname, $dbhost, $dbuser, $dbpass) =
-			($ENV{DBD_INFORMIX_DATABASE}, $ENV{DBD_INFORMIX_SERVER},
+		my ($dbname, $dbuser, $dbpass) =
+			($ENV{DBD_INFORMIX_DATABASE},
 			 $ENV{DBD_INFORMIX_USERNAME}, $ENV{DBD_INFORMIX_PASSWORD});
 
 		# Do not print out actual password!
@@ -61,10 +63,6 @@
 		my ($xxpass) = 'X' x length($dbpass); 
 
 		$dbname = "stores" if (!$dbname);
-		# Unless we do an DBI->install_driver() and interrogate the driver,
-		# we cannot determine whether we should pay attention to INFORMIXSERVER.
-		$dbhost = $ENV{INFORMIXSERVER} if (!$dbhost);
-		$dbname = $dbname . '@' . $dbhost if ($dbhost && $dbname !~ m%[/@]%);
 
 		my ($part2) = "'$dbuser', '$xxpass'";
 		my ($dbh) = "";
@@ -86,6 +84,20 @@
 		# Override in test cases as necessary.
 		$dbh->{ChopBlanks} = 1;
 		$dbh;
+	}
+
+	sub print_dbinfo
+	{
+		my ($dbh) = @_;
+		print "# Database Information\n";
+		print "#     Database Name:           $dbh->{Name}\n";
+		print "#     AutoCommit:              $dbh->{AutoCommit}\n";
+		print "#     Informix-OnLine:         $dbh->{ix_InformixOnLine}\n";
+		print "#     Logged Database:         $dbh->{ix_LoggedDatabase}\n";
+		print "#     Mode ANSI Database:      $dbh->{ix_ModeAnsiDatabase}\n";
+		print "#     AutoErrorReport:         $dbh->{ix_AutoErrorReport}\n";
+		print "#     Transaction Active:      $dbh->{ix_InTransaction}\n";
+		print "#\n";
 	}
 
 	sub print_sqlca
@@ -114,12 +126,15 @@
 	my $ok_counter = 0;
 	sub stmt_err
 	{
-			# NB: error messages ${DBI::errstr} end with a newline.
-			my ($str) = @_;
-			$str = "Error Message" unless ($str);
-			$str .= ":\n${DBI::errstr}SQLSTATE = ${DBI::state}\n";
-			$str =~ s/^/# /gm;
-			&stmt_note($str);
+		# NB: error messages ${DBI::errstr} end with a newline.
+		my ($str) = @_;
+		my ($err, $state);
+		$str = "Error Message" unless ($str);
+		$err = (defined ${DBI::errstr}) ? ${DBI::errstr} : "<<no error string>>";
+		$state = (defined ${DBI::state}) ? ${DBI::state} : "<<no state string>>";
+		$str .= ":\n${err}SQLSTATE = ${state}\n";
+		$str =~ s/^/# /gm;
+		&stmt_note($str);
 	}
 
 	sub stmt_ok
@@ -127,14 +142,13 @@
 		my ($warn) = @_;
 		$ok_counter++;
 		&stmt_note("ok $ok_counter\n");
-		if ($warn)
-		{
-			&stmt_err("Warning Message");
-		}
+		&stmt_err("Warning Message") if ($warn);
 	}
 
 	sub stmt_fail
 	{
+		my ($warn) = @_;
+		&stmt_note($warn) if ($warn);
 		$ok_counter++;
 		&stmt_note("not ok $ok_counter\n");
 		&stmt_err("Error Message");
@@ -202,6 +216,48 @@
 		&select_some_data($_[0], 0, $_[1]);
 	}
 
+	# Check that both the ESQL/C and the database server are IUS-aware
+	# Return database handle if all is OK.
+	sub test_for_ius
+	{
+		my $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
+		my $user1 = $ENV{DBD_INFORMIX_USERNAME};
+		my $pass1 = $ENV{DBD_INFORMIX_PASSWORD};
+		$dbase1 = "stores" unless ($dbase1);
+
+		my $drh = DBI->install_driver('Informix');
+		print "# Driver Information\n";
+		print "#     Name:                  $drh->{Name}\n";
+		print "#     Version:               $drh->{Version}\n";
+		print "#     Product:               $drh->{ix_ProductName}\n";
+		print "#     Product Version:       $drh->{ix_ProductVersion}\n";
+		if ($drh->{ix_ProductVersion} < 900)
+		{
+			&stmt_note("1..1\n");
+			&stmt_note("# IUS data types are not supported by $drh->{ix_ProductName}\n");
+			&stmt_ok(0);
+			&all_ok();
+		}
+
+		my ($dbh, $sth, $numtabs);
+		&stmt_note("# Connect to: $dbase1\n");
+		&stmt_fail() unless ($dbh = DBI->connect("DBI:Informix:$dbase1", $user1, $pass1));
+		&stmt_fail() unless ($sth = $dbh->prepare(q%
+			SELECT COUNT(*) FROM "informix".SysTables WHERE TabID < 100
+			%));
+		&stmt_fail() unless ($sth->execute);
+		&stmt_fail() unless (($numtabs) = $sth->fetchrow_array);
+		if ($numtabs < 40)
+		{
+			&stmt_note("1..1\n");
+			&stmt_note("# IUS data types are not supported by database server.\n");
+			&stmt_ok(0);
+			&all_ok();
+		}
+		&stmt_note("# IUS data types can be tested!\n");
+		return $dbh;
+	}
+
 }
 
 1;
@@ -252,26 +308,34 @@ If $style is omitted or is zero, then the old style connect where
 'Informix' is specified as the fourth argument will be used, and the
 attributes will not be passed to DBI->connect().
 
-This code exploits 4 environment variables:
+This code exploits 3 environment variables:
 
     DBD_INFORMIX_DATABASE
-    DBD_INFORMIX_SERVER
     DBD_INFORMIX_USERNAME
     DBD_INFORMIX_PASSWORD
 
 The database variable can be simply the name of the database, or it
 can be 'database@server', or it can be one of the SE notations such
 as '/opt/dbase' or '//hostname/dbase'.
-If the database name does not contain either slashes or at-signs,
-then the value in the server variable, which defaults to
-$INFORMIXSERVER (which must be set for 6.00 and later Informix
-database systems) is appended to the database name after an at-sign.
 If INFORMIXSERVER is not set, then you had better be on a 5.0x
 system as otherwise the connection will fail.
 With 6.00 and above, you can optionally specify a user name and
 password in the environment.
 This is horribly insecure -- do not use it for production work.
 The test scripts do not print the password.
+
+=head2 Using test_for_ius
+
+If the test explicitly requires Informix Universal Server (IUS)
+or IDS/UDO (Informix Dynamic Server with Universal Data Option --
+essentially the product as IUS, but with a longer, more recent,
+name), then the mechanism to use is:
+
+	my ($dbh) = &test_for_ius();
+
+If this returns, then the ESQL/C is capable of handling IUS data
+types, the database connection worked, and the database server is
+capable of handling IUS data types.
 
 =head2 Using stmt_test
 
@@ -308,6 +372,13 @@ the SQLCA record.
     &print_sqlca($dbh);
     &print_sqlca($sth);
 
+=head2 Using print_dbinfo
+
+The &print_dbinfo() function takes a single argument which should be a database
+handle and prints out salient information about the database.
+
+    &print_dbinfo($dbh);
+
 =head2 Using all_ok
 
 The &all_ok() function can be used at the end of a test script to report
@@ -330,9 +401,11 @@ also available for your use.
 This routine adds 'not ok N' to the end of a line, then reports the
 error message in DBI::errstr, and then dies.  The N is incremented
 automatically, as with &stmt_ok().  This routine is used internally by
-stmt_test() but is also available for your use.
+stmt_test() but is also available for your use.  It takes an optional
+string as an argument, which is printed as well.
 
     &stmt_fail();
+    &stmt_fail("Reason why test failed");
 
 =head2 Using stmt_err
 

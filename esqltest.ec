@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqltest.ec,v 60.2 1998/06/16 16:45:28 jleffler Exp $ 
+ * @(#)$Id: esqltest.ec,v 61.3 1998/11/09 18:24:35 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -16,18 +16,8 @@
 #include <string.h>
 #include "esqlperl.h"
 
-#ifndef WIN32
-/* NT's MSVC does not necessarily define __STDC__ but does handle prototypes */
-/* Maybe the __STDC__ test is obsolete; do all C compilers always handle     */
-/* prototypes?  Probably ... but maybe the HP-UX basic compiler is K&R only? */
-/* Since esqlperl.h is included before this and it declares some prototypes, */
-/* the damage is already done, so the whole test should probably go, which   */
-/* may, in turn, allow us to simplify Makefile.PL.  Leave intact pro tem...  */
-#ifndef __STDC__
-/* Using this is more reliable than using #error */
-error "Please read the README file, and Makefile.PL, and get __STDC__ defined"
-#endif /* __STDC__ */
-#endif /* WIN32 */
+/* JL 1998-11-03: test for __STDC__ removed */
+/* Perl 5.005 requires a compiler which accepts prototypes */
 
 /* SunOS 4.1.3 <stdlib.h> does not provide EXIT_SUCCESS/EXIT_FAILURE */
 #ifndef EXIT_FAILURE
@@ -40,7 +30,7 @@ error "Please read the README file, and Makefile.PL, and get __STDC__ defined"
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 60.2 1998/06/16 16:45:28 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 61.3 1998/11/09 18:24:35 jleffler Exp $";
 #endif
 
 /*
@@ -144,10 +134,11 @@ int main(int argc, char **argv)
 	char *dbase0 = getenv("DBI_DBNAME");
 	char *dbase1 = getenv("DBD_INFORMIX_DATABASE");
 	char *dbase2 = getenv("DBD_INFORMIX_DATABASE2");
-	char *user = getenv("DBD_INFORMIX_USERNAME");
-	char *pass =  getenv("DBD_INFORMIX_PASSWORD");
-	char *server =  getenv("DBD_INFORMIX_SERVER");
-	char  dbname[60];
+	char *user1 = getenv("DBD_INFORMIX_USERNAME");
+	char *pass1 =  getenv("DBD_INFORMIX_PASSWORD");
+	char *srvr1 =  getenv("DBD_INFORMIX_SERVER");	/* Obsolete */
+	char *user2 = getenv("DBD_INFORMIX_USERNAME2");
+	char *pass2 =  getenv("DBD_INFORMIX_PASSWORD2");
 	Boolean conn_ok;
 	static char  conn1[20] = "connection_1";
 	static char  conn2[20] = "connection_2";
@@ -157,9 +148,15 @@ int main(int argc, char **argv)
 	/* Check whether the default connection variable is set */
 	if (dbidsn != 0 && *dbidsn != '\0')
 	{
-		printf("\tFYI: $DBI_DSN is set to '%s'.\n", dbidsn);
+		printf("!!!\tFYI: $DBI_DSN is set to '%s'.\n", dbidsn);
 		printf("\t\tIt is not used by any of the DBD::Informix tests.\n");
 		printf("\t\tIt is unset by the tests which would otherwise break.\n");
+	}
+
+	/* Test whether the server name is set. */
+	if (srvr1 != 0 && *srvr1 != '\0')
+	{
+		printf("!!!\t$DBD_INFORMIX_SERVER is set.  Read the README file!\n");
 	}
 
 	/* Set the basic default database name */
@@ -191,52 +188,57 @@ int main(int argc, char **argv)
 	else
 		printf("\t$DBD_INFORMIX_DATABASE2 set to '%s'.\n", dbase2);
 
-	/* Test whether the server name should be set. */
-	if (server == 0 || *server == '\0')
-	{
-		server = getenv("INFORMIXSERVER");
-		if (server == 0 || *server == '\0')
-			printf("\t$DBD_INFORMIX_SERVER and $INFORMIXSERVER both unset - no default.\n");
-		else
-			printf("\t$DBD_INFORMIX_SERVER unset - defaulting to $INFORMIXSERVER '%s'.\n", server);
-	}
-	else
-		printf("\t$DBD_INFORMIX_SERVER set to '%s'.\n", server);
-
-	/* Convert to dbase@server notation if appropriate */
-	if (strpbrk(dbase1, "/@") == 0 && server != 0 && *server != '\0')
-	{
-		sprintf(dbname, "%s@%s", dbase1, server);
-		dbase1 = dbname;
-	}
-
 	/* Report whether username is set, and what it is */
-	if (user == 0 || *user == '\0')
+	if (user1 == 0 || *user1 == '\0')
 	{
-		user = 0;
+		user1 = 0;
 		printf("\t$DBD_INFORMIX_USERNAME is unset.\n");
 	}
 	else
-		printf("\t$DBD_INFORMIX_USERNAME is set to '%s'.\n", user);
+		printf("\t$DBD_INFORMIX_USERNAME is set to '%s'.\n", user1);
+
+	/* Report whether username is set, and what it is */
+	if (user2 == 0 || *user2 == '\0')
+	{
+		user2 = 0;
+		printf("\t$DBD_INFORMIX_USERNAME2 is unset.\n");
+	}
+	else
+		printf("\t$DBD_INFORMIX_USERNAME2 is set to '%s'.\n", user2);
 
 	/* Report whether password is set, but not what it is */
-	if (pass == 0 || *pass == '\0')
+	if (pass1 == 0 || *pass1 == '\0')
 	{
-		pass = 0;
+		pass1 = 0;
 		printf("\t$DBD_INFORMIX_PASSWORD is unset.\n");
 	}
 	else
 		printf("\t$DBD_INFORMIX_PASSWORD is set.\n");
 
+	/* Report whether password is set, but not what it is */
+	if (pass2 == 0 || *pass2 == '\0')
+	{
+		pass2 = 0;
+		printf("\t$DBD_INFORMIX_PASSWORD2 is unset.\n");
+	}
+	else
+		printf("\t$DBD_INFORMIX_PASSWORD2 is set.\n");
+
 	printf("Testing connection to %s\n", dbase1);
 #if ESQLC_VERSION >= 600
-    /* 6.00 and later versions of Informix-ESQL/C support CONNECT */
-	if ((user == 0 && pass != 0) || (user != 0 && pass == 0))
+	/* Test whether $INFORMIXSERVER is set. */
+	srvr1 = getenv("INFORMIXSERVER");
+	if (srvr1 == 0 || *srvr1 == '\0')
 	{
-		printf("\tDBD_INFORMIX_USERNAME & DBD_INFORMIX_PASSWORD are ignored\n");
+		printf("!!!\t$INFORMIXSERVER is not set but should be.  Read the README file!\n");
+	}
+    /* 6.00 and later versions of Informix-ESQL/C support CONNECT */
+	if ((user1 == 0 && pass1 != 0) || (user1 != 0 && pass1 == 0))
+	{
+		printf("!!!\tDBD_INFORMIX_USERNAME & DBD_INFORMIX_PASSWORD are ignored\n");
 		printf("\t\tunless both variables are set.\n");
 	}
-    conn_ok = dbd_ix_connect(conn1, dbase1, user, pass);
+    conn_ok = dbd_ix_connect(conn1, dbase1, user1, pass1);
 #else
     /* Pre-6.00 versions of Informix-ESQL/C do not support CONNECT */
     /* Use DATABASE statement */
@@ -252,9 +254,14 @@ int main(int argc, char **argv)
 		test_permissions(dbase1);
 
 #if ESQLC_VERSION >= 600
+	if ((user2 == 0 && pass2 != 0) || (user2 != 0 && pass2 == 0))
+	{
+		printf("!!!\tDBD_INFORMIX_USERNAME2 & DBD_INFORMIX_PASSWORD2 are ignored\n");
+		printf("\t\tunless both variables are set.\n");
+	}
 	printf("Testing concurrent connection to %s\n", dbase2);
     /* 6.00 and later versions of Informix-ESQL/C support CONNECT */
-    conn_ok = dbd_ix_connect(conn2, dbase2, user, pass);
+    conn_ok = dbd_ix_connect(conn2, dbase2, user2, pass2);
 #else
     /* Pre-6.00 versions of Informix-ESQL/C do not support CONNECT */
     /* Use DATABASE statement */
@@ -270,7 +277,7 @@ int main(int argc, char **argv)
 		test_permissions(dbase2);
 
 	if (estat == EXIT_SUCCESS)
-		printf("Your Informix environment is OK\n\n");
+		printf("Your Informix environment is (probably) OK\n\n");
 	else
 	{
 		printf("\n*** Your Informix environment is not usable");

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlutil.h,v $
-@(#)Version:         $Revision: 1.11 $
-@(#)Last changed:    $Date: 1998/04/21 17:27:58 $
+@(#)Version:         $Revision: 2.1 $
+@(#)Last changed:    $Date: 1998/11/05 18:39:10 $
 @(#)Purpose:         ESQL/C Utility Functions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1995-98
-@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
+@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
 */
 
 /*TABSTOP=4*/
@@ -15,12 +15,18 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 1.11 1998/04/21 17:27:58 jleffler Exp $";
+static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2.1 1998/11/05 18:39:10 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
 #include <stdio.h>
 #include "esqlc.h"
+
+/* Code which depends on ESQL/C version should embed a call to ESQL_VERSION_CHECKER() */
+#define ESQLC_PASTE2(x, y)	x ## y
+#define ESQLC_PASTE(x, y)	ESQLC_PASTE2(x, y)
+#define ESQLC_VERSION_CHECKER	ESQLC_PASTE(esqlc_version_, ESQLC_VERSION)
+extern int ESQLC_VERSION_CHECKER(void);
 
 /*
 ** The sqltype() routine is deprecated because it is not thread safe.
@@ -39,9 +45,10 @@ static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 1.11 1998/04/21 17:27:58
 **
 */
 
-#define SQLTYPENAME_BUFSIZ sizeof("INTERVAL MINUTE(2) TO FRACTION(5)")
+#define SQLTYPENAME_BUFSIZ sizeof("DISTINCT INTERVAL MINUTE(2) TO FRACTION(5)")
 extern char *sqltypename(int coltype, int collen, char *buffer);
-extern const char *sqltype(int coltype, int collen);
+extern char *iustypename(int coltype, int collen, int xtd_id, char *buffer, size_t buflen);
+extern const char *sqltype(int coltype, int collen);	/* Deprecated! */
 extern int sqltypemode(int mode);
 
 /*
@@ -55,6 +62,7 @@ extern void dump_decimal(FILE *fp, const char *tag, const dec_t *dp);
 extern void dump_interval(FILE *fp, const char *tag, const intrvl_t *ip);
 extern void dump_sqlca(FILE *fp, const char *tag, const Sqlca *psqlca);
 extern void dump_sqlda(FILE *fp, const char *tag, const Sqlda *sqlda);
+extern void dump_sqlva(FILE *fp, int item, const Sqlva *sqlva);
 extern void dump_value(FILE *fp, const char *tag, const value_t *vp);
 
 /* Simple interface for dumping the global sqlca structure */

@@ -3,8 +3,67 @@ Change Log for DBD::Informix for DBI
 - Written by Alligator Descartes <descarte@arcana.co.uk>
 - Rewritten by Jonathan Leffler <j.leffler@acm.org>
 
+0.61_02 Release
+---------------
+98-12-14: Go for general release with know 'bad free()' problems.
+
+0.61_01 Release
+---------------
+98-12-07; Released internally at Informix.
+98-11-25: Fix the code to detect NT (Win32) using suggestion from Andy
+          Williams <andy_williams@pa.press.net>.  Ken Scott
+          <kscott@pcisys.net> first identified the problem and sent in an
+          alternative fix using an exact match rather than a regular
+          expression.
+98-11-23: The code did not get uploaded to CPAN.  Proving tests show that
+          there were problems, especially bad frees on blob testing when
+          run with 'make test', but not when run with the test.one script.
+          Added t/t99clean.t to remove most of the debris from the test
+          database, and add warning to README emphasizing this.  Need to
+          split dbdimp.ec into components (eg dbdimpdr.ec, dbdimpdb.ec,
+          dbdimpst.ec) and amend dbdimp.h to declare newly visible
+          functions because it's over 2000 lines, it's too damn big, and
+          it's going to grow some more before IUS support is really
+          complete.  Drop version numbers from MANIFEST, and tools to
+          maintain them.
+98-11-17: Add code from Honza Pazdziora <adelton@fi.muni.cz> which records
+          the value of INFORMIXDIR and INFORMIXSERVER used at build time to
+          set the defaults at run-time.  Set version 0.61_01 (experimental).
+98-11-09: Add DBD_INFORMIX_ESQLC_LINKAGE environment variable after report
+          by Duc H Nguyen <dhn@benvolio.nova.att.com> who states that
+          ESQL/C 7.24.UC[56] (probably on HP-UX 10.20) links with static
+          libraries by default.  He provided a workaround hacking esql.
+          Robert Cowham <CowhamR@logica.com> ran into this problem.
+98-11-04: Revise assert handling so that assertions are off by default.
+          Code now ignores DBD_INFORMIX_DISABLE_ASSERT and only responds to
+          DBD_INFORMIX_ENABLE_ASSERT instead.
+98-11-03: Remove test for __STDC__ in esqltest.ec -- it causes unwarranted
+          problems on, for example, AIX and NT and gives minimal benefit on
+          any system, especially since Perl 5.005 has to be compiled by an
+          ANSI C compiler (prototype aware compiler).  Reported by both
+          David Edge <dedge@ak.blm.gov> and Geoffrey Rommel
+          <grommel@sears.com>.
+98-11-02: Add bundles for DBI and DBD::Informix to simplify the builds.
+98-10-29: Merge in threading patch from Jan Iven <j.iven@rz.uni-sb.de>.
+98-10-28: Commence work on IUS compatability.  Abolish DBD_INFORMIX_SERVER;
+          DBD_INFORMIX_DATABASE should contain required server information
+          in the appropriate format.  Add variables DBD_INFORMIX_USERNAME2
+          and DBD_INFORMIX_PASSWORD2.  Fix multi-connection tests so that
+          they use the username and password information (problem found by
+          both Ben Laurie <ben@algroup.co.uk> and Geoffrey Rommel
+          <grommel@sears.com>).  Add and use DBD_IX_BOOLEAN macro to fix
+          problems with MSVC on NT found by Manish Dharwadker
+          <manishd@informix.com>.
+98-10-27: Add examples subdirectory, and initial examples.
+98-09-25: Fix esqlc.h for 7.1x ESQL/C so it explicitly includes value.h,
+          thanks to David Edge <dedge@ak.blm.gov>.
+98-09-04: Fix misuse of $user for $pass in t/t00basic.t, thanks to Kevin
+          White <kwhite@redroof.com>.
+98-08-13: Version numbering changes.
+
 0.60 Release
 ------------
+98-08-12: Final tidying up and release.
 98-08-10: Release to Albert W Dorrington <awdorrin@ictest.delcoelect.com>
           as 0.60b1 to give him HP-UX and GCC fixes.  Partially rework the
           t00basic.t test to fix the problems accessing databases which
@@ -32,7 +91,7 @@ Change Log for DBD::Informix for DBI
           Add two new attributes, $sth->{ix_StatementText} and
           $dbh->{ix_DatabaseName}.  Note that $dbh->{Name} returns the name
           of the database when DBI->connect() is called, but the name of
-          the current database can be changed by things such as CLOSE
+          he current database can be changed by things such as CLOSE
           DATABASE and DATABASE or CREATE DATABASE statements;
           $dbh->{ix_DatabaseName} reports the current database name.  When
           last row is fetched, implicitly close (finish) the cursor, as
@@ -511,4 +570,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <johnl@informix.com>
-@(#)$Id: ChangeLog,v 60.8 1998/08/13 00:43:34 jleffler Exp $
+@(#)$Id: ChangeLog,v 61.8 1998/12/15 01:00:39 jleffler Exp $

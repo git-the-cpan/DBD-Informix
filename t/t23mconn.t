@@ -1,31 +1,40 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t23mconn.t,v 54.4 1997/05/13 15:38:08 johnl Exp $ 
+#	@(#)$Id: t23mconn.t,v 61.2 1998/10/29 23:08:07 jleffler Exp $ 
 #
 #	Test abuse of statements after DISCONNECT ALL for DBD::Informix
 #
-#	Copyright (C) 1996,1997 Jonathan Leffler
+#	Copyright (C) 1996-98 Jonathan Leffler
 
 use DBD::InformixTest;
 
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);
 $dbase2 = $ENV{DBD_INFORMIX_DATABASE2};
-$dbase2 = $dbase1 unless ($dbase2);
+$user1 = $ENV{DBD_INFORMIX_USERNAME};
+$user2 = $ENV{DBD_INFORMIX_USERNAME2};
+$pass1 = $ENV{DBD_INFORMIX_PASSWORD};
+$pass2 = $ENV{DBD_INFORMIX_PASSWORD2};
 
-# Test install...
-&stmt_note("# Testing: DBI->install_driver('Informix')\n");
-$drh = DBI->install_driver('Informix');
+if (!$dbase2)
+{
+	$dbase2 = $dbase1;
+	$user2 = $user1;
+	$pass2 = $pass1;
+}
+
+&stmt_note("# Connect to: $dbase1\n");
+&stmt_fail() unless ($dbh1 = DBI->connect("DBI:Informix:$dbase1", $user1, $pass1));
 
 print "# Driver Information\n";
-print "#     Name:                  $drh->{Name}\n";
-print "#     Version:               $drh->{Version}\n";
-print "#     Product:               $drh->{ix_ProductName}\n";
-print "#     Product Version:       $drh->{ix_ProductVersion}\n";
-print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
+print "#     Name:                  $dbh1->{Driver}->{Name}\n";
+print "#     Version:               $dbh1->{Driver}->{Version}\n";
+print "#     Product:               $dbh1->{ix_ProductName}\n";
+print "#     Product Version:       $dbh1->{ix_ProductVersion}\n";
+print "#     Multiple Connections:  $dbh1->{ix_MultipleConnections}\n";
 print "# \n";
 
-if ($drh->{ix_MultipleConnections} == 0)
+if ($dbh1->{ix_MultipleConnections} == 0)
 {
 	&stmt_note("1..1\n");
 	&stmt_note("# Multiple connections are not supported\n");
@@ -33,42 +42,31 @@ if ($drh->{ix_MultipleConnections} == 0)
 	&all_ok();
 }
 
-&stmt_note("1..13\n");
+&stmt_note("1..12\n");
 &stmt_ok();
 
-&stmt_note("# Connect to: $dbase1\n");
-&stmt_fail() unless ($dbh1 = $drh->connect($dbase1));
-&stmt_ok();
+&print_dbinfo($dbh1);
 
-print "# Database Information\n";
-print "#     Database Name:           $dbh1->{Name}\n";
-print "#     AutoCommit:              $dbh1->{AutoCommit}\n";
-print "#     Informix-OnLine:         $dbh1->{ix_InformixOnLine}\n";
-print "#     Logged Database:         $dbh1->{ix_LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh1->{ix_ModeAnsiDatabase}\n";
-print "#     AutoErrorReport:         $dbh1->{ix_AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh1->{ix_InTransaction}\n";
 print "# Connection Information\n";
-print "#     Active Connections:      $drh->{ix_ActiveConnections}\n";
-print "#     Current Connection:      $drh->{ix_CurrentConnection}\n";
+print "#     Active Connections:      $dbh1->{ix_ActiveConnections}\n";
+print "#     Current Connection:      $dbh1->{ix_CurrentConnection}\n";
 print "#\n";
+
+&stmt_fail() unless $dbh1->{ix_ActiveConnections} == 1;
+&stmt_fail() unless $dbh1->{ix_CurrentConnection} eq $dbh1->{ix_CurrentConnection};
 
 &stmt_note("# Connect to: $dbase2\n");
-&stmt_fail() unless ($dbh2 = $drh->connect($dbase2));
+&stmt_fail() unless ($dbh2 = DBI->connect("DBI:Informix:$dbase2", $user2, $pass2));
 &stmt_ok();
 
-print "# Database Information\n";
-print "#     Database Name:           $dbh2->{Name}\n";
-print "#     AutoCommit:              $dbh2->{AutoCommit}\n";
-print "#     Informix-OnLine:         $dbh2->{ix_InformixOnLine}\n";
-print "#     Logged Database:         $dbh2->{ix_LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh2->{ix_ModeAnsiDatabase}\n";
-print "#     AutoErrorReport:         $dbh2->{ix_AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh2->{ix_InTransaction}\n";
+&print_dbinfo($dbh2);
+
 print "# Connection Information\n";
-print "#     Active Connections:      $drh->{ix_ActiveConnections}\n";
-print "#     Current Connection:      $drh->{ix_CurrentConnection}\n";
+print "#     Active Connections:      $dbh1->{ix_ActiveConnections}\n";
+print "#     Current Connection:      $dbh1->{ix_CurrentConnection}\n";
 print "#\n";
+&stmt_fail() unless $dbh1->{ix_ActiveConnections} == 2;
+&stmt_fail() unless $dbh1->{ix_CurrentConnection} eq $dbh1->{ix_CurrentConnection};
 
 $stmt1 =
 	"SELECT TabName FROM 'informix'.SysTables" .
@@ -92,8 +90,8 @@ $stmt2 =
 LOOP: while (1)
 {
 	# Yes, these are intentionally different!
-	last LOOP unless (@row1 = $st1->fetchrow);
-	last LOOP unless ($row2 = $st2->fetch);
+	last LOOP unless (@row1 = $st1->fetchrow_array);
+	last LOOP unless ($row2 = $st2->fetchrow_arrayref);
 	print "# 1: $row1[0]\n";
 	print "# 2: ${$row2}[0]\n";
 	print "# 2: ${$row2}[1]\n";
@@ -101,32 +99,32 @@ LOOP: while (1)
 &stmt_ok();
 
 &stmt_note("# Test DISCONNECT ALL.\n");
-&stmt_fail() unless ($drh->disconnect_all);
+&stmt_fail() unless ($dbh1->{Driver}->disconnect_all);
 &stmt_ok();
 
 print "# Connection Information\n";
-print "#     Active Connections:      $drh->{ix_ActiveConnections}\n";
-print "#     Current Connection:      $drh->{ix_CurrentConnection}\n";
+print "#     Active Connections:      $dbh1->{ix_ActiveConnections}\n";
+print "#     Current Connection:      $dbh1->{ix_CurrentConnection}\n";
 
 # Turn off automatic error reporting...
-$dbh1->{ix_AutoErrorReport} = 0;
-$dbh2->{ix_AutoErrorReport} = 0;
+$dbh1->{PrintError} = 0;
+$dbh2->{PrintError} = 0;
 
-# Resume as if nothing had happened (see multiconn02.t)
-while (@row1 = $st1->fetchrow)
+# Resume as if nothing had happened (see t21mconn.t)
+while (@row1 = $st1->fetchrow_array)
 {
 	# Should not be able to fetch successfully!
-	&stmt_fail();
+	&stmt_fail("Fetch succeeded but should have failed\n");
 }
-&stmt_fail() unless ($st1->{ix_sqlcode} < 0);
+&stmt_fail("SQLCODE non-negative (unexpectedly)\n") unless ($st1->{ix_sqlcode} < 0);
 &stmt_ok();
 
-while ($row2 = $st2->fetch)
+while ($row2 = $st2->fetchrow_arrayref)
 {
 	# Should not be able to fetch successfully!
-	&stmt_fail();
+	&stmt_fail("Fetch succeeded but should have failed\n");
 }
-&stmt_fail() unless ($st2->{ix_sqlcode} < 0);
+&stmt_fail("SQLCODE non-negative (unexpectedly)\n") unless ($st2->{ix_sqlcode} < 0);
 &stmt_ok();
 
 undef $st2;

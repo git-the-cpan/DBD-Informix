@@ -1,31 +1,40 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t22mconn.t,v 54.3 1997/05/13 12:55:21 johnl Exp $ 
+#	@(#)$Id: t22mconn.t,v 61.2 1998/10/29 23:08:07 jleffler Exp $ 
 #
 #	Test DISCONNECT ALL for DBD::Informix
 #
-#	Copyright (C) 1996,1997 Jonathan Leffler
+#	Copyright (C) 1996-98 Jonathan Leffler
 
 use DBD::InformixTest;
 
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);
 $dbase2 = $ENV{DBD_INFORMIX_DATABASE2};
-$dbase2 = $dbase1 unless ($dbase2);
+$user1 = $ENV{DBD_INFORMIX_USERNAME};
+$user2 = $ENV{DBD_INFORMIX_USERNAME2};
+$pass1 = $ENV{DBD_INFORMIX_PASSWORD};
+$pass2 = $ENV{DBD_INFORMIX_PASSWORD2};
 
-# Test install...
-&stmt_note("# Testing: DBI->install_driver('Informix')\n");
-$drh = DBI->install_driver('Informix');
+if (!$dbase2)
+{
+	$dbase2 = $dbase1;
+	$user2 = $user1;
+	$pass2 = $pass1;
+}
+
+&stmt_note("# Connect to: $dbase1\n");
+&stmt_fail() unless ($dbh1 = DBI->connect("DBI:Informix:$dbase1", $user1, $pass1));
 
 print "# Driver Information\n";
-print "#     Name:                  $drh->{Name}\n";
-print "#     Version:               $drh->{Version}\n";
-print "#     Product:               $drh->{ix_ProductName}\n";
-print "#     Product Version:       $drh->{ix_ProductVersion}\n";
-print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
+print "#     Name:                  $dbh1->{Driver}->{Name}\n";
+print "#     Version:               $dbh1->{Driver}->{Version}\n";
+print "#     Product:               $dbh1->{ix_ProductName}\n";
+print "#     Product Version:       $dbh1->{ix_ProductVersion}\n";
+print "#     Multiple Connections:  $dbh1->{ix_MultipleConnections}\n";
 print "# \n";
 
-if ($drh->{ix_MultipleConnections} == 0)
+if ($dbh1->{ix_MultipleConnections} == 0)
 {
 	&stmt_note("1..1\n");
 	&stmt_note("# Multiple connections are not supported\n");
@@ -33,36 +42,16 @@ if ($drh->{ix_MultipleConnections} == 0)
 	&all_ok();
 }
 
-&stmt_note("1..9\n");
+&stmt_note("1..8\n");
 &stmt_ok();
 
-&stmt_note("# Connect to: $dbase1\n");
-&stmt_fail() unless ($dbh1 = $drh->connect($dbase1));
-&stmt_ok();
-
-print "# Database Information\n";
-print "#     Database Name:           $dbh1->{Name}\n";
-print "#     AutoCommit:              $dbh1->{AutoCommit}\n";
-print "#     Informix-OnLine:         $dbh1->{ix_InformixOnLine}\n";
-print "#     Logged Database:         $dbh1->{ix_LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh1->{ix_ModeAnsiDatabase}\n";
-print "#     AutoErrorReport:         $dbh1->{ix_AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh1->{ix_InTransaction}\n";
-print "#\n";
+&print_dbinfo($dbh1);
 
 &stmt_note("# Connect to: $dbase2\n");
-&stmt_fail() unless ($dbh2 = $drh->connect($dbase2));
+&stmt_fail() unless ($dbh2 = DBI->connect("DBI:Informix:$dbase2", $user2, $pass2));
 &stmt_ok();
 
-print "# Database Information\n";
-print "#     Database Name:           $dbh2->{Name}\n";
-print "#     AutoCommit:              $dbh2->{AutoCommit}\n";
-print "#     Informix-OnLine:         $dbh2->{ix_InformixOnLine}\n";
-print "#     Logged Database:         $dbh2->{ix_LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh2->{ix_ModeAnsiDatabase}\n";
-print "#     AutoErrorReport:         $dbh2->{ix_AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh2->{ix_InTransaction}\n";
-print "#\n";
+&print_dbinfo($dbh2);
 
 $stmt1 =
 	"SELECT TabName FROM 'informix'.SysTables" .
@@ -94,7 +83,7 @@ LOOP: while (1)
 }
 &stmt_ok();
 
-&stmt_fail() unless ($drh->disconnect_all);
+&stmt_fail() unless ($dbh1->{Driver}->disconnect_all);
 &stmt_ok();
 
 &all_ok();

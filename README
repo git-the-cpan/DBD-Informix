@@ -6,10 +6,8 @@ README for DBD::Informix -- an Informix interface for Perl 5 using DBI.
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the Perl README file.
 
---- The following is a standard warning for all DBI and DBD::* software ---
-       WARNING: THIS IS ALPHA SOFTWARE. IT IS POSSIBLY UNRELIABLE!
------ Read the documentation associated with DBI for more information -----
-
+---------------------------------------------------------------------------
+        ***  Note that DBI 1.00 and above is not alpha code!  ***
 ---------------------------------------------------------------------------
 
 PREREQUISITES
@@ -17,21 +15,18 @@ PREREQUISITES
     If you do not have Perl version 5.004 or later, then build, test and
     install it before doing anything else!  You should be using at least
     Perl version 5.004_04.  Please ensure that you compile it with whatever
-    options are necessary to get __STDC__ defined.  You are also strongly
-    encouraged to use the C compiler to create shared libraries, even if
-    the Perl configuration script suggests that you use the 'ld' program
-    directly.  There have been endless problems for people who do not use
-    the C compiler to create the shared libraries, and very few for those
-    who do.
+    options are necessary to make the C compiler accept prototypes; the
+    DBD::Informix code uses prototypes (almost) everywhere.  You are also
+    strongly encouraged to use the C compiler to create shared libraries,
+    even if the Perl configuration script suggests that you use the 'ld'
+    program directly.  There have been endless problems for people who do
+    not use the C compiler to create the shared libraries, and very few for
+    those who do.
 
-    If you do not have DBI version 0.90 or later installed, then build,
-    test and install it.  Note that previous versions of DBD::Informix
-    allowed you to use older versions of DBI than the version it was built
-    with.  This policy changed with DBD::Informix v0.54.  In addition, the
-    code in DBD::Informix v0.58 requires bug fixes present in DBI 0.90
-    which were not in DBI 0.89.  You should be using at least DBI 0.93, and
-    will be encouraged to upgrade if you are not doing so.  It has been
-    tested with both DBI 0.94 and DBI 0.95 and seems to work OK.
+    If you do not have DBI version 1.00 or later (preferably at least 1.02)
+    installed, then build, test and install it.  Although some old versions
+    of DBD::Informix allowed you to use older versions of DBI than the
+    version it was built with, the current versions do not.
 
     To build DBD::Informix, the C compiler must accept function prototypes.
     This is not a problem on any machine to which Informix is currently
@@ -45,14 +40,17 @@ PREREQUISITES
     You must have a version of Informix ESQL/C or Informix ClientSDK
     available to you.  You should read the Informix.Licence file for
     information about what you need.  At the moment, ESQL/C Versions 4.0x
-    or 4.1x are not supported, nor are any earlier versions.  ESQL/C
-    Versions 5.00 upwards should be OK.  If you do not have ESQL/C and are
-    not prepared to buy it, then please don't try to use DBD::Informix --
-    it won't work.  If you have Informix ODBC drivers available to you,
-    consider using DBD::ODBC instead.  If you are on Linux, you should
-    investigate the software available from the main Informix web site:
+    and 4.1x are not supported by DBD::Informix; nor are any earlier
+    versions.  ESQL/C Versions 5.00 upwards should be OK.  If you do not
+    have ESQL/C and are not prepared to buy it, then please don't try to
+    use DBD::Informix; it won't work.  You can probably get Informix
+    ClientSDK at a reasonable cost.  If you have Informix ODBC drivers
+    available to you, consider using DBD::ODBC instead.  If you are on
+    Linux, you should investigate the software available from the main
+    Informix web site:
 
                          http://www.informix.com/
+                       http://www.informix.com/idn
 
     You must also be able to compile and link ESQL/C programs with your
     setup.  The Makefile.PL will test that you can do this, but it will
@@ -62,8 +60,8 @@ PREREQUISITES
 
                               *** BEWARE ***
 
-    DBD::Informix version 0.58 has been tested on Informix Universal Server
-    version 9.12.UC2 (on a Sparc 20 running Solaris 2.5.1).  Where the IUS
+    DBD::Informix version 0.61 has been tested on Informix Universal Server
+    version 9.14.UC4 (on a Sparc 20 running Solaris 2.6).  Where the IUS
     database uses the same types as were available in earlier versions of
     Informix products, there doesn't seem to be any problem.  However, it
     is known to fail badly (sometimes with an assert firing and a core
@@ -106,26 +104,55 @@ PREREQUISITES
 
                   *** YOU WERE WARNED ABOUT THIS TOO ***
 
+    DBD::Informix will compile under ClientSDK 2.01.UC1, but some tests
+    will fail.  This appears to be a bug in this version of ClientSDK.
+    Working with the same code under ClientSDK 2.02.UC2 and 2.10.UC1, the
+    failures in t/t31nulls.t and t/t32nulls.t now pass.
+
+                 *** YOU WERE ALSO WARNED ABOUT THIS ***
+
+    Most versions of ESQL/C which support shared libraries have shared
+    linking as the default behaviour, which is correct.  Other versions
+    reportedly have static linking as the default behaviour, which is a
+    pain in the posterior.  The Makefile.PL will add the '-shared' flag to
+    the ESQL/C command line to try to force shared libraries for ESQL/C
+    versions 7.20 and upwards.  If this does not work for you, or if you
+    are building a static Perl, you will need to set the environment
+    variable DBD_INFORMIX_ESQLC_LINKAGE either to nothing if your version
+    of ESQL/C does not support the '-shared' option at all, or to '-static'
+    to force static linkage.  You could also use this environment variable
+    to bootstrap any special ESQL/C compiler options into the build process
+    (eg '-thread' if you are experimenting with threaded Perl and threaded
+    ESQL/C); you are advised to set '-static' or '-shared' as well.
+
+                 *** YOU WERE ALSO WARNED ABOUT THIS ***
+
     You need to have a fully working Informix environment before you try to
     build and test DBD::Informix.  This means you need to have access to at
     least one database where you have at least RESOURCE level privileges.
-    (If you don't understand what this means, read the "Informix Guide to
-    SQL: Syntax" manual, and especially the GRANT section).  If you don't
-    have DBA privileges on any databases, you should consider creating the
-    'stores' database using the dbaccessdemoN program (where N is a version
-    number, such as 7) which comes with your server.  The multiple
-    connection tests use two databases for preference (though the tests
-    will use the same database twice if you do not specify two separate
-    databases), and the test will fail if you use olipcshm or onipcshm
-    (shared memory) connections to both databases.  If you run into
-    problems with shared memory connections (for example, error -27000 from
-    the esqltest program), then read hints/olipcshm.  If your databases
-    are not on the machine where you are building DBD::Informix, you will
-    need to ensure that you have the necessary privileges to connect to the
-    machine where the databases are.  This may be as simple as setting
-    DBD_INFORMIX_PASSWORD (see below); it may be require you to get your
-    systems administrators to set you up with a login account on the
-    machine.
+    If you don't understand what this means, read the "Informix Guide to
+    SQL: Syntax" manual, and especially the GRANT section.  You can obtain
+    a PDF version of any Informix documentation from:
+
+                     http://www.informix.com/answers
+
+    If you don't have DBA privileges on any databases, you should consider
+    creating the 'stores' database using the dbaccessdemoN program (where N
+    is a version number, such as 7) which comes with your server.  The
+    multiple connection tests use two databases for preference (though the
+    tests will use the same database twice if you do not specify two
+    separate databases), and the test will fail if you use olipcshm or
+    onipcshm (shared memory) connections to both databases.  If you run
+    into problems with shared memory connections (for example, error -27000
+    from the esqltest program), then read hints/olipcshm.  If your
+    databases are not on the machine where you are building DBD::Informix,
+    you will need to ensure that you have the necessary privileges to
+    connect to the machine where the databases are.  This may be as simple
+    as setting DBD_INFORMIX_PASSWORD (see below); it may be require you to
+    get your systems administrators to set you up with a login account on
+    the machine.
+
+BUILD AND TEST ENVIRONMENT
 
     Please ensure that you have $INFORMIXDIR set even if the software is
     installed in /usr/informix, and that $INFORMIXDIR/bin is on your PATH.
@@ -133,32 +160,67 @@ PREREQUISITES
     Also, if you are using ESQL/C version 6.x or later, you may be using
     ESQL/C shared libraries which are found in $INFORMIXDIR/lib and
     $INFORMIXDIR/lib/esql.  You need to ensure that these will be found
-    when you run Perl with DBD::Informix.  On SVR4 machines, this means
-    adding these directories to LD_LIBRARY_PATH; on HP-UX, the variable is
-    SHLIB_PATH; other systems may have other variable names.  You need to
-    set INFORMIXSERVER correctly if you are using version 6.0x or later.
-    You may need to set other environment variables too -- consult the
-    Informix manuals for more information.
+    when you run Perl with DBD::Informix.  On SVR4 and Linux machines, this
+    means adding these directories to LD_LIBRARY_PATH; on HP-UX, the
+    variable is SHLIB_PATH; other systems may have other variable names.
+    You need to set INFORMIXSERVER correctly if you are using version 6.0x
+    or later.  You may need to set other environment variables too, such as
+    DBPATH to locate your database, especially with SE (eg on Linux).
+    Consult the Informix manuals for more information.  And, if you are not
+    yet familiar with how to set environment variables, then please get
+    yourself a Unix primer (eg "Learning the Unix System, 4th Edition" from
+    O'Reilly, http://www.oreilly.com/) and read it -- believe it or not,
+    I've been bothered by people asking "How do I set the XYZ environment
+    variable?", and that irritates me a lot!
 
     You should take a look at the documentation in InformixTest.pm, and set
     the DBD_INFORMIX_DATABASE, DBD_INFORMIX_USERNAME, DBD_INFORMIX_PASSWORD
-    and DBD_INFORMIX_SERVER environment variables as appropriate for your
-    system.  Although the testing does as little damage as possible, it is
-    not a good idea to use your prize database for this.  The stores
-    database is a good bet (unless you are using an old version of Fourgen
-    software and it is using the stores database for its data dictionary).
-    Note that these variables only have significance when running the
-    DBD::Informix tests.  They are not used by DBD::Informix itself, only
-    by DBD::InformixTest.  However, the variables should be set before you
-    start the build and not changed until after you complete the testing.
-    If you do change them, you should check that the esqltest program run
-    by 'perl Makefile.PL' still gives your new environment a clean bill of
-    health.
+    environment variables as appropriate for your system.  Note that
+    DBD_INFORMIX_SERVER is no longer used at all.  There is now also a
+    parallel set of environment variables (DBD_INFORMIX_DATABASE2,
+    DBD_INFORMIX_USERNAME2, DBD_INFORMIX_PASSWORD2), which can be set to
+    specify the second test database completely independently of the first.
+    Note that you do not have to set any of these 6 environment variables
+    if the defaults are OK.  The default database is 'stores'; no username
+    and password are supplied if none is specified.  If you set the
+    username, you must also set the password to have any effect.  Although
+    the testing does as little damage as possible, it is not a good idea to
+    use your prize database for this.  The stores database is a good bet
+    (unless you are using an old version of Fourgen software and it is
+    using the stores database for its data dictionary).  Note that these
+    variables only have significance when running the DBD::Informix tests.
+    They are not used by DBD::Informix itself, only by DBD::InformixTest.
+    However, the variables should be set before you start the build and not
+    changed until after you complete the testing.  If you do change them,
+    you should check that the esqltest program run by 'perl Makefile.PL'
+    still gives your new environment a clean bill of health.
 
     One step in the setup process tests that you have permissions on the
     databases which will be used by the testing.  It does this by compiling
     and running a relatively simple ESQL/C program which simply opens a few
     databases, creates and drops some tables, and exits.
+
+BUILDING DBD::Informix WITH BUNDLES
+
+    If your environment is set up correctly, you can simply type:
+
+        perl -MCPAN -e 'install Bundle::DBD::Informix'
+
+    This will go and fetch the latest version of DBI (and its pre-requisite
+    modules), and the latest version of DBD::Informix, and compile, test
+    and install them all completely automatically.  Before doing this, you
+    need to be confident that things will work correctly (or that you've
+    got good backups of your Perl installation).  On the other hand, for
+    sheer convenience, it takes a lot of beating.  You could even arrange
+    to do this once a week via cron, if you wanted to.
+
+    When you first run this, the CPAN module will ask you a number of
+    questions, including the name of a CPAN site that you wish to download
+    the material from, but it remembers this information for the next time.
+
+    You should consider installing the latest CPAN bundle first:
+
+        perl -MCPAN -e 'install Bundle::CPAN'
 
 BUILDING DBD::Informix
 
@@ -196,10 +258,12 @@ BUILDING DBD::Informix
     The tests are designed to work whether the tables and database are
     present when the tests start or not; that means they get dropped.  Do
     not run the tests if you have precious tables or databases that begin
-    'dbd_ix_'!
+    'dbd_ix_'!  As of version 0.61, the cleanup script t/t99clean.t is run
+    at the end of the testing.  It removes the tables, views, synonyms, etc
+    which might have been created by DBD::Informix.
 
     On the reference system (Sun Sparc 20 running Solaris 2.6, compiling
-    with GCC 2.8.1 or SUNWspro SC4.0.1, using either Perl 5.00404 or 5.00501),
+    with GCC 2.8.1 or SUNWspro SC4.0.1, using either Perl 5.00404 or 5.00502),
     all the tests pass when DBD::Informix is built with ESQL/C versions
     5.08.UD1, 6.00.UE1, 7.24.UC1 and 9.14.UC1.
 
@@ -332,7 +396,7 @@ IF YOU HAVE PROBLEMS BUILDING DBD::INFORMIX
 Firstly, check the Frequently Asked Questions, Known Bugs and any other
 pertinent documents at:
 
-    http://www.arcana.co.uk/technologia/DBI
+    http://www.arcana.co.uk/technologia/perl/DBI
 
 Note that (as of 1998-08-12), the version numbers recorded at this site are
 mostly up to date, but they might be a little out of date.  The other
@@ -464,16 +528,16 @@ DBD::Informix.  Do not use the connection method shown in the code for test
 t/basic00.t; it is officially obsolete.  DBD::Informix needs to use it, but
 you should not.
 
+There are some simple examples of DBI scripts for Informix databases in the
+examples sub-directory.  Read the examples/README file for more details.
+
 Remember -- it is supposed to be fun!
 
 Jonathan Leffler (j.leffler@acm.org)
 
-@(#)$Id: README,v 60.3 1998/08/13 00:45:59 jleffler Exp $
+@(#)$Id: README,v 61.6 1998/11/24 03:53:48 jleffler Exp $
 
 ---------------------------------------------------------------------------
-
-NOTE: This document is derived from the DBD::Oracle README.  Many of the
-points made in that will apply to DBD::Informix too.
 
 Original document: (c) Tim Bunce <Tim.Bunce@ig.co.uk>
 Amendments 1:      (c) Alligator Descartes <descarte@arcana.co.uk>

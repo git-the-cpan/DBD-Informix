@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdattr.ec,v 60.1 1998/07/30 04:03:22 jleffler Exp $ 
+ * @(#)$Id: dbdattr.ec,v 61.2 1998/10/30 00:32:11 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- attribute handling
  *
@@ -12,7 +12,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec,v 60.1 1998/07/30 04:03:22 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 61.2 1998/10/30 00:32:11 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -286,7 +286,10 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 	}
 
 	else
-		return FALSE;
+	{
+		/* Treat it as a driver query */
+		return dbd_ix_dr_FETCH_attrib(imp_dbh->drh, keysv);
+	}
 
 	return sv_2mortal(retsv);
 }
@@ -424,7 +427,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	}
 	else if (KEY_MATCH(kl, key, "ix_Fetchable"))
 	{
-		Boolean rv = ((imp_sth->st_type == SQ_SELECT) ||
+		Boolean rv = DBD_IX_BOOLEAN((imp_sth->st_type == SQ_SELECT) ||
 						(imp_sth->st_type == SQ_EXECPROC && imp_sth->n_columns > 0));
 		retsv = newSViv((IV)rv);
 	}

@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: ixblob.ec,v $
-@(#)Version:        $Revision: 50.8 $
-@(#)Last changed:   $Date: 1998/05/15 22:26:15 $
+@(#)Version:        $Revision: 50.9 $
+@(#)Last changed:   $Date: 1998/10/28 18:42:12 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) Jonathan Leffler 1996-98
-@(#)Product:        $Product: DBD::Informix Version 0.60 (1998-08-12) $
+@(#)Product:        $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
 */
 
 /*TABSTOP=4*/
@@ -36,7 +36,7 @@
 static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec,v 50.8 1998/05/15 22:26:15 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: ixblob.ec,v 50.9 1998/10/28 18:42:12 jleffler Exp $";
 #endif
 
 BlobLocn blob_getlocmode(void)
@@ -69,11 +69,12 @@ static int blob_locinnamefile(Blob *blob)
 	strcpy(tmp, sql_dbtemp());
 	strcat(tmp, "/blob.XXXXXX");
 	mktemp(tmp);
+	/* Cast result of malloc() to placate C++ compilers (eg MSVC) */
+	blob->loc_fname = (char *)malloc(strlen(tmp) + 1);
 	if (blob->loc_fname == (char *)0)
 		return(-1);
-	blob->loc_loctype = LOCFNAME;
-	blob->loc_fname = malloc(strlen(tmp) + 1);
 	strcpy(blob->loc_fname, tmp);
+	blob->loc_loctype = LOCFNAME;
 	blob->loc_mode = 0666;
 	blob->loc_oflags = LOC_WONLY | LOC_RONLY;
 	blob->loc_size = -1;

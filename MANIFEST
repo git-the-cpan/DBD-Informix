@@ -1,87 +1,112 @@
-Announce                                        60.4
-ChangeLog                                       60.8
-Informix.Licence                                60.1
-Informix.h                                      57.2
-Informix.pm                                     60.6
-Informix.xs                                     60.1
-InformixTest.pm                                 58.1
-MANIFEST                                        $Revision: 60.11 $
-Makefile.PL                                     60.3
-README                                          60.3
-Working.Versions                                60.3
-chkbuild.sh                                     1.8
-dbdattr.ec                                      60.1
-dbdimp.ec                                       60.5
-dbdimp.h                                        60.1
-dbdixmap.h                                      58.1
-decsci.c                                        1.11
-decsci.h                                        1.5
-eprintf.c                                       60.1
-esql4_00.h                                      1.7
-esql4_10.h                                      1.8
-esql5_00.h                                      1.14
-esql7_20.h                                      1.2
-esqlbasic.ec                                    58.2
-esqlc.h                                         2.3
-esqlc_v5.ec                                     58.1
-esqlc_v6.ec                                     58.1
-esqlcc                                          58.1
-esqlld                                          58.1
-esqllib.h                                       1.10
-esqlperl.h                                      58.1
-esqlsed                                         60.2
-esqltest.ec                                     60.2
-esqlutil.h                                      1.11
-hints/M88K.SVR4                                 54.1
-hints/eprintf                                   60.2
-hints/hpux-10.20                                60.1
-hints/long.strings                              60.1
-hints/nonroot.install                           60.1
-hints/olipcshm                                  56.2
-hints/solaris                                   56.2
-hints/static.build                              57.1
-ixblob.ec                                       50.8
-ixblob.h                                        50.3
-link.c                                          56.2
-odbctype.c                                      56.2
-odbctype.h                                      54.3
-sqltoken.c                                      1.7
-sqltype.ec                                      56.1
-t/decgen.pl                                     54.1
-t/dtgen.pl                                      54.1
-t/t00basic.t                                    60.2
-t/t05dbase.t                                    56.2
-t/t07dblist.t                                   60.1
-t/t10sqlca.t                                    57.1
-t/t20error.t                                    57.1
-t/t21mconn.t                                    54.3
-t/t22mconn.t                                    54.3
-t/t23mconn.t                                    54.4
-t/t24mcurs.t                                    57.1
-t/t25dratt.t                                    57.1
-t/t28dtlit.t                                    60.1
-t/t29update.t                                   60.1
-t/t30update.t                                   60.2
-t/t31nulls.t                                    57.1
-t/t32nulls.t                                    57.1
-t/t40rows.t                                     57.1
-t/t41trans.t                                    57.1
-t/t42trans.t                                    57.1
-t/t43trans.t                                    57.1
-t/t44trans.t                                    57.1
-t/t46chpblk.t                                   57.1
-t/t50update.t                                   60.1
-t/t55mdata.t                                    57.4
-t/t60unlog.t                                    56.4
-t/t65updcur.t                                   57.1
-t/t72blob.t                                     60.1
-t/t73blob.t                                     57.1
-t/t74blob.t                                     57.1
-t/t75blob.t                                     60.1
-t/t80prim.t                                     57.1
-t/t81orig.t                                     57.1
-t/t82number.t                                   57.1
-test.all.sh                                     1.9
-test.c4gl.sh                                    1.1
-test.one.sh                                     1.5
-test.run.sh                                     1.1
+Announce
+ChangeLog
+Informix.Licence
+Informix.h
+Informix.pm.PL
+Informix.xs
+InformixTest.pm
+MANIFEST
+Makefile.PL
+README
+README
+Working.Versions
+chkbuild.sh
+dbdattr.ec
+dbdimp.ec
+dbdimp.h
+dbdixmap.h
+decsci.c
+decsci.h
+eprintf.c
+esql4_00.h
+esql4_10.h
+esql5_00.h
+esql7_20.h
+esql_ius.h
+esqlbasic.ec
+esqlc.h
+esqlc_v5.ec
+esqlc_v6.ec
+esqlcc
+esqlcver.ec
+esqlld
+esqllib.h
+esqlperl.h
+esqlsed
+esqltest.ec
+esqlutil.h
+examples/README
+examples/README
+examples/x01fetchall.pl
+examples/x02fetchrow_array.pl
+examples/x03fetchrow_arrayref.pl
+examples/x04fetchrow_hashref.pl
+examples/x05fetchall_arrayref.pl
+examples/x06chopblanks.pl
+examples/x07fetchrow_array.pl
+examples/x10cgi_nodbi.pl
+examples/x11cgi_nodbi.pl
+examples/x12cgi_noform.pl
+examples/x13cgi_noform.pl
+examples/x14cgi_form.pl
+examples/x15cgi_form.pl
+hints/M88K.SVR4
+hints/eprintf
+hints/hpux-10.20
+hints/long.strings
+hints/nonroot.install
+hints/olipcshm
+hints/solaris
+hints/static.build
+ixblob.ec
+ixblob.h
+kludge.h
+lib/Bundle/DBD/Informix.pm
+lib/Bundle/DBI.pm
+link.c
+link.h
+odbctype.c
+odbctype.h
+sqltoken.c
+sqltype.ec
+t/decgen.pl
+t/dtgen.pl
+t/t00basic.t
+t/t05dbase.t
+t/t07dblist.t
+t/t10sqlca.t
+t/t20error.t
+t/t21mconn.t
+t/t22mconn.t
+t/t23mconn.t
+t/t24mcurs.t
+t/t25dratt.t
+t/t28dtlit.t
+t/t29update.t
+t/t30update.t
+t/t31nulls.t
+t/t32nulls.t
+t/t40rows.t
+t/t41trans.t
+t/t42trans.t
+t/t43trans.t
+t/t44trans.t
+t/t46chpblk.t
+t/t50update.t
+t/t55mdata.t
+t/t60unlog.t
+t/t65updcur.t
+t/t72blob.t
+t/t73blob.t
+t/t74blob.t
+t/t75blob.t
+t/t80prim.t
+t/t81orig.t
+t/t82number.t
+t/t90ius.t
+t/t99clean.t
+test.all.sh
+test.c4gl.sh
+test.one.sh
+test.quiet.sh
+test.run.sh

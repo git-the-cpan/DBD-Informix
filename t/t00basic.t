@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t00basic.t,v 60.2 1998/08/10 18:07:45 jleffler Exp $ 
+#	@(#)$Id: t00basic.t,v 61.3 1998/11/25 17:15:16 jleffler Exp $ 
 #
-#	Primary test script for DBD::Informix
+#	Initial test script for DBD::Informix
 #
 #	Copyright (C) 1996-98 Jonathan Leffler
 
@@ -10,32 +10,26 @@ use DBD::InformixTest;
 
 $testtable = "dbd_ix_test01";
 
-&stmt_note("1..49\n");
+&stmt_note("1..48\n");
 
-# Test installation of driver
-# NB: Do not use install_driver in your own code.
-#     Use DBI->connect as shown below.
-&stmt_note("# Testing: DBI->install_driver('Informix')\n");
-$drh = DBI->install_driver('Informix');
+$dbh = &connect_to_test_database(1);
 &stmt_ok(0);
 
 print "# DBI Information\n";
 print "#     Version:               $DBI::VERSION\n";
 print "# Generic Driver Information\n";
-print "#     Type:                  $drh->{Type}\n";
-print "#     Name:                  $drh->{Name}\n";
-print "#     Version:               $drh->{Version}\n";
-print "#     Attribution:           $drh->{Attribution}\n";
+print "#     Type:                  $dbh->{Driver}->{Type}\n";
+print "#     Name:                  $dbh->{Driver}->{Name}\n";
+print "#     Version:               $dbh->{Driver}->{Version}\n";
+print "#     Attribution:           $dbh->{Driver}->{Attribution}\n";
 print "# Informix Driver Information\n";
-print "#     Product:               $drh->{ix_ProductName}\n";
-print "#     Product Version:       $drh->{ix_ProductVersion}\n";
-print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
-print "#     Active Connections:    $drh->{ix_ActiveConnections}\n";
-print "#     Current Connection:    $drh->{ix_CurrentConnection}\n";
+print "#     Product:               $dbh->{ix_ProductName}\n";
+print "#     Product Version:       $dbh->{ix_ProductVersion}\n";
+print "#     Multiple Connections:  $dbh->{ix_MultipleConnections}\n";
+print "#     Active Connections:    $dbh->{ix_ActiveConnections}\n";
+print "#     Current Connection:    $dbh->{ix_CurrentConnection}\n";
 print "# \n";
 
-$dbh = &connect_to_test_database(1);
-&stmt_ok(0);
 $dbname = $dbh->{Name};
 
 &stmt_note("# Testing: \$dbh->disconnect()\n");
@@ -46,15 +40,16 @@ $dbname = $dbh->{Name};
 &stmt_fail() unless ($dbh->disconnect);
 &stmt_ok();
 
-# Use empty user & password
-# Old-style connect -- do not use this notation!
-&stmt_note("# Testing: DBI->connect('$dbname', '', '', 'Informix')\n");
+# Reconnect.  Old-style connect -- do not use this notation!
 {
 my $user = $ENV{DBD_INFORMIX_USERNAME};
 my $pass = $ENV{DBD_INFORMIX_PASSWORD};
 $user = "" if (!defined $user);
 $pass = "" if (!defined $pass);
-&stmt_fail() unless ($dbh = DBI->connect($dbname, $user, $user, 'Informix'));
+my $mask = $pass;
+$pass =~ s/./X/g;
+&stmt_note("# Testing: DBI->connect('$dbname', '$user', '$mask', 'Informix')\n");
+&stmt_fail() unless ($dbh = DBI->connect($dbname, $user, $pass, 'Informix'));
 &stmt_ok();
 }
 
@@ -242,7 +237,7 @@ sub select_all
 &stmt_retest($dbh, $stmt1, 0);
 
 # Test stored procedures...
-if ($drh->{ix_ProductVersion} >= 500)
+if ($dbh->{ix_ProductVersion} >= 500)
 {
 	$stmt10 = "DROP PROCEDURE dbd_ix_01";
 	&stmt_test($dbh, $stmt10, 1);

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlc.h,v $
-@(#)Version:         $Revision: 2.3 $
-@(#)Last changed:    $Date: 1998/07/30 21:03:36 $
+@(#)Version:         $Revision: 3.1 $
+@(#)Last changed:    $Date: 1998/11/05 21:03:49 $
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-98
-@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
+@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
 */
 
 #ifndef ESQLC_H
@@ -13,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 2.3 1998/07/30 21:03:36 jleffler Exp $";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 3.1 1998/11/05 21:03:49 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -75,6 +75,38 @@ extern "C" {
 /* on some machines do complain if you try to define __STDC__.       */
 #include <sqlhdr.h>
 
+#if ESQLC_VERSION >= 710 && ESQLC_VERSION < 720
+/*
+** Apparently not included by sqlhdr.h on 7.1x platforms.  The problem
+** was found by David Edge <dedge@ak.blm.gov> in 7.10.UC1 on AIX 4.2.1.
+** Some code, notably esqlutil.h, relies on the typedef for value_t.
+*/
+#include <value.h>
+#endif /* 7.1x */
+
+/*
+** ClientSDK 2.01 or later needs sqliapi.h; it is unknown whether
+** ClientSDK 2.00 does too.  It is also unknown which version is
+** reported by the ESQL/C compiler in ClientSDK 2.00 (with 2.01,
+** the ESQL/C compiler reports 9.14).
+*/
+#if ESQLC_VERSION >= 730 && ESQLC_VERSION < 800
+/* Probably an inaccurate value for ESQLC_VERSION -- should be 914 or greater */
+#include <sqliapi.h>
+#elif ESQLC_VERSION >= 914
+#include <sqliapi.h>
+#endif
+
+/*
+** Supply missing type information for IUS (IDS/UDO) data types.
+** Two edged sword; it means you have to test rather carefully in
+** your code whether to build with IUS data types or not.
+** Should be keyed of ESQLC_VERSION, rather than features...
+*/
+#if ESQLC_VERSION < 900
+#include "esql_ius.h"
+#endif
+
 #ifdef _WIN32
 #include <sqlproto.h>
 #else
@@ -96,8 +128,9 @@ extern int      sqgetdbs(int *ret_fcnt,
 /* A table name may be: database@server:"owner".table */
 /* This contains 5 punctuation characters and a null */
 /*
-** Note that from 9.2 up (and maybe 7.3 up) and from 8.3 up,
-** identifier names can be much longer -- up to 128 bytes each.
+** Note that from 9.2 up (and maybe 7.3 up and maybe from 8.3
+** up), identifier names can be much longer -- up to 128 bytes
+** each -- and user names can be up to 32 characters.
 ** Prior versions only allowed 18 characters for table, column,
 ** database and server names, and only 8 characters for user
 ** identifiers.
@@ -126,6 +159,13 @@ typedef struct intrvl	Interval;
 typedef struct sqlca_s	Sqlca;
 typedef struct sqlda	Sqlda;
 typedef struct sqlva	Sqlva;
+
+#if ESQLC_VERSION >= 900
+
+/* Type for casting dynamic SQL types to LVARCHAR */
+typedef void *Lvarchar;
+
+#endif /* ESQLC_VERSION >= 900 */
 
 #ifdef __cplusplus
 }

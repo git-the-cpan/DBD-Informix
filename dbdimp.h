@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 60.1 1998/07/30 04:06:55 jleffler Exp $ 
+ * @(#)$Id: dbdimp.h,v 61.5 1998/11/05 00:36:18 jleffler Exp $ 
  *
  * Copyright (c) 1994-95 Tim Bunce
  *           (c) 1996-98 Jonathan Leffler
@@ -11,15 +11,33 @@
 #ifndef DBDIMP_H
 #define DBDIMP_H
 
+/**
+** Handle assert.
+** A test '#ifndef assert' was added around #include <assert.h> by Jan Iven
+** <j.iven@rz.uni-sb.de> for Linux in October 1998.  The test was removed
+** in November 1998 by Jonathan Leffler in favour of rewriting the whole
+** test block because assertions are needed during development and the
+** empty form of assert() was defined somewhere along the line.
+** Makefile.PL has been modified so that the explicit environment variable
+** DBD_INFORMIX_ENABLE_ASSERT has to be set for assertions to be active.
+**                  Caveat developer!
+** This code below assumes that <assert.h> has been implemented accurately
+** everywhere, which has not always been the case.  Specifically, at least
+** one platform did not notice changes in NDEBUG even though the ANSI
+** standard clearly states that it must.  Let's hope...
+*/
+#undef assert
+#undef NDEBUG
+#ifndef DBD_INFORMIX_ENABLE_ASSERT
+#define NDEBUG
+#endif /* DBD_INFORMIX_ENABLE_ASSERT */
+#include <assert.h>
+
 #include "dbdixmap.h"	/* Defines for functions called in Informix.xs */
 #include "esqlc.h"		/* Prototypes for ESQL/C version 5.0x etc */
 #include "esqlperl.h"	/* Declarations for code used in esqltest.ec */
 #include "esqlvrsn.h"	/* Defines ESQLC_VERSION_STRING */
-
-#ifndef DBD_INFORMIX_NO_ASSERTS
-#undef NDEBUG
-#include <assert.h>
-#endif /* DBD_INFORMIX_NO_ASSERTS */
+#include "link.h"		/* Declares Link data type and functions */
 
 #define NAMESIZE 19				/* 18 character name plus '\0' */
 #define DEFAULT_DATABASE	".DEFAULT."
@@ -27,22 +45,12 @@
 /* Different states for a statement */
 enum State
 {
-	Unused, Prepared, Allocated, Described, Declared, Opened, Finished
+	Unused, Prepared, Allocated, Described, Declared, Opened, NoMoreData, Finished
 };
 
 typedef enum State State;		/* Cursor/Statement states */
 typedef long ErrNum;			/* Informix Error Number */
 typedef char Name[NAMESIZE];
-
-/* Doubly linked list for tracking connections and statements */
-typedef struct Link Link;
-
-struct Link
-{
-	Link	*next;
-	Link	*prev;
-	void	*data;
-};
 
 /* Define drh implementor data structure */
 struct imp_drh_st
@@ -69,25 +77,26 @@ struct imp_dbh_st
 	Sqlca           ix_sqlca;       /* Last SQLCA record for connection */
 	Link            chain;          /* Link in list of connections */
 	Link            head;           /* Head of list of statements */
+	imp_drh_t      *drh;            /* Driver handle for connection */
 };
 
 /* Define sth implementor data structure */
 struct imp_sth_st
 {
-	dbih_stc_t      com;		/* MUST be first element in structure   */
-	Name            nm_stmnt;	/* Name of prepared statement */
-	Name            nm_obind;	/* Name of allocated descriptor */
-	Name            nm_cursor;	/* Name of declared cursor */
-	Name            nm_ibind;	/* Name of input (bind) descriptor */
-	State           st_state;	/* State of statement */
-	int             st_type;	/* Type of statement */
-	SV             *st_text;	/* Text of statement */ 
-	BlobLocn        blob_bind;	/* Blob Binding */
-	int             n_blobs;	/* Number of blobs for statement */
-	int             n_columns;	/* Number of output fields */
-	int             n_bound;	/* Number of input fields */
-	int             n_rows;		/* Number of rows processed */
-	imp_dbh_t	   *dbh;		/* Database handle for statement */
+	dbih_stc_t      com;        /* MUST be first element in structure   */
+	Name            nm_stmnt;   /* Name of prepared statement */
+	Name            nm_obind;   /* Name of allocated descriptor */
+	Name            nm_cursor;  /* Name of declared cursor */
+	Name            nm_ibind;   /* Name of input (bind) descriptor */
+	State           st_state;   /* State of statement */
+	int             st_type;    /* Type of statement */
+	SV             *st_text;    /* Text of statement */
+	BlobLocn        blob_bind;  /* Blob Binding */
+	int             n_blobs;    /* Number of blobs for statement */
+	int             n_columns;  /* Number of output fields */
+	int             n_bound;    /* Number of input fields */
+	int             n_rows;     /* Number of rows processed */
+	imp_dbh_t      *dbh;        /* Database handle for statement */
 	Link            chain;      /* Link in list of statements */
 };
 
@@ -133,9 +142,5 @@ extern void dbd_ix_st_destroy(SV *, imp_sth_t *);
 /* Other non-standard entry points */
 extern const char *dbd_ix_module(void);
 extern void dbd_ix_seterror(ErrNum rc);
-extern void add_link(Link *link_1, Link *link_n);
-extern void delete_link(Link *link_d, void (*function)(void *));
-extern void destroy_chain(Link *head, void (*function)(void *));
-extern void new_headlink(Link *link);
 
 #endif	/* DBDIMP_H */

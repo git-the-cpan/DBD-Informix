@@ -5,7 +5,7 @@
 @(#)Purpose:         Function prototypes for ESQL/C Versions 7.20..7.22
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
-@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
+@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
 */
 
 /*TABSTOP=4*/

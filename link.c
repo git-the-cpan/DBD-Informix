@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: link.c,v $
-@(#)Version:         $Revision: 56.2 $
-@(#)Last changed:    $Date: 1997/07/08 21:56:43 $
+@(#)Version:         $Revision: 61.1 $
+@(#)Last changed:    $Date: 1998/10/29 19:30:58 $
 @(#)Purpose:         Specialized doubly-linked list management routines
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) Jonathan Leffler 1996,1997
-@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
+@(#)Copyright:       (C) Jonathan Leffler 1996-98
+@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
 */
 
 /*TABSTOP=4*/
@@ -24,7 +24,7 @@
 #endif /* DBD_IX_DEBUG_LINK */
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: link.c,v 56.2 1997/07/08 21:56:43 johnl Exp $";
+static const char rcs[] = "@(#)$Id: link.c,v 61.1 1998/10/29 19:30:58 jleffler Exp $";
 #endif
 
 #ifdef DBD_IX_DEBUG_LINK
@@ -50,53 +50,54 @@ static void	print_list(const char *s, Link *x)
 #endif /* DBD_IX_DEBUG_LINK */
 
 /* Initialize the head link of a list */
-void new_headlink(Link *link)
+void dbd_ix_link_newhead(Link *link)
 {
 	link->next = link;
 	link->prev = link;
 	link->data = 0;
-	PRINT_LIST("new_headlink", link);
+	PRINT_LIST("dbd_ix_link_newhead", link);
 }
 
 /* Delete the link from the list and cleanup the data */
-void delete_link(Link *link_d, void (*function)(void *))
+void dbd_ix_link_delete(Link *link_d, void (*function)(void *))
 {
 	Link	*link_1;
 	Link	*link_2;
 
 	link_1 = link_d->prev;
 	link_2 = link_d->next;
-	PRINT_LINK("delete_link:delete", link_d);
-	PRINT_LIST("delete_link:before", link_d);
+	PRINT_LINK("dbd_ix_link_delete:delete", link_d);
+	PRINT_LIST("dbd_ix_link_delete:before", link_d);
 	link_1->next = link_2;
 	link_2->prev = link_1;
-	PRINT_LIST("delete_link:after", link_2);
+	PRINT_LIST("dbd_ix_link_delete:after", link_2);
 	link_d->next = link_d->prev = link_d;
 	(*function)(link_d->data);
 }
 
-void destroy_chain(Link *head, void (*function)(void *))
+void dbd_ix_link_delchain(Link *head, void (*function)(void *))
 {
 	/* Delete all links */
-	dbd_ix_debug(1, "%s::destroy_chain()\n", "DBD::Informix");
-	PRINT_LIST("destroy_chain:before", head);
+	dbd_ix_debug(1, "-->> %s::dbd_ix_link_delchain()\n", "DBD::Informix");
+	PRINT_LIST("dbd_ix_link_delchain:before", head);
 	while (head->next->data != 0)
-		delete_link(head->next, function);
-	PRINT_LIST("destroy_chain:after", head);
+		dbd_ix_link_delete(head->next, function);
+	PRINT_LIST("dbd_ix_link_delchain:after", head);
+	dbd_ix_debug(1, "<<-- %s::dbd_ix_link_delchain()\n", "DBD::Informix");
 }
 
 /* Add the link (link_n) after a pre-existing link in a list (link_1) */
-void add_link(Link *link_1, Link *link_n)
+void dbd_ix_link_add(Link *link_1, Link *link_n)
 {
 	Link	*link_2 = link_1->next;
 
-	PRINT_LINK("add_link:insert", link_n);
-	PRINT_LIST("add_link:before", link_1);
+	PRINT_LINK("dbd_ix_link_add:insert", link_n);
+	PRINT_LIST("dbd_ix_link_add:before", link_1);
 	assert(link_2->prev == link_1);
 	link_n->next = link_2;
 	link_n->prev = link_1;
 	link_1->next = link_n;
 	link_2->prev = link_n;
-	PRINT_LIST("add_link:after", link_1);
+	PRINT_LIST("dbd_ix_link_add:after", link_1);
 }
 

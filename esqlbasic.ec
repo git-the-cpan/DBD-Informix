@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlbasic.ec,v 58.2 1998/01/06 02:53:23 johnl Exp $
+ * @(#)$Id: esqlbasic.ec,v 61.1 1998/10/28 21:46:20 jleffler Exp $
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -35,7 +35,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlbasic.ec,v 58.2 1998/01/06 02:53:23 johnl Exp $";
+static const char rcs[] = "@(#)$Id: esqlbasic.ec,v 61.1 1998/10/28 21:46:20 jleffler Exp $";
 #endif
 
 /*
@@ -123,8 +123,6 @@ int main(int argc, char **argv)
 	char *dbidsn = getenv("DBI_DSN");
 	char *dbase0 = getenv("DBI_DBNAME");
 	$char *dbase1 = getenv("DBD_INFORMIX_DATABASE");
-	char *server =  getenv("DBD_INFORMIX_SERVER");
-	char  dbname[60];
 
 	/* Check whether the default connection variable is set */
 	if (dbidsn != 0 && *dbidsn != '\0')
@@ -153,25 +151,6 @@ int main(int argc, char **argv)
 	}
 	else
 		printf("\t$DBD_INFORMIX_DATABASE set to '%s'.\n", dbase1);
-
-	/* Test whether the server name should be set. */
-	if (server == 0 || *server == '\0')
-	{
-		server = getenv("INFORMIXSERVER");
-		if (server == 0 || *server == '\0')
-			printf("\t$DBD_INFORMIX_SERVER and $INFORMIXSERVER both unset - no default.\n");
-		else
-			printf("\t$DBD_INFORMIX_SERVER unset - defaulting to $INFORMIXSERVER '%s'.\n", server);
-	}
-	else
-		printf("\t$DBD_INFORMIX_SERVER set to '%s'.\n", server);
-
-	/* Convert to dbase@server notation if appropriate */
-	if (strpbrk(dbase1, "/@") == 0 && server != 0 && *server != '\0')
-	{
-		sprintf(dbname, "%s@%s", dbase1, server);
-		dbase1 = dbname;
-	}
 
 	printf("Testing connection to %s\n", dbase1);
 

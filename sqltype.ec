@@ -1,23 +1,22 @@
 /*
 @(#)File:            $RCSfile: sqltype.ec,v $
-@(#)Version:         $Revision: 1.13 $
-@(#)Last changed:    $Date: 1998/06/29 20:36:12 $
+@(#)Version:         $Revision: 2.2 $
+@(#)Last changed:    $Date: 1998/11/17 21:30:43 $
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1988-1993,1995-97
-@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
+@(#)Copyright:       (C) JLSS 1988-1993,1995-98
+@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
 */
 
 /*TABSTOP=4*/
 /*LINTLIBRARY*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltype.ec,v 1.13 1998/06/29 20:36:12 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: sqltype.ec,v 2.2 1998/11/17 21:30:43 jleffler Exp $";
 #endif
 
 #include <string.h>
-#include <sqltypes.h>
-#include <varchar.h>
+#include "esqlc.h"
 #include "esqlutil.h"
 
 static const char * const sqltypes[] = 
@@ -39,6 +38,37 @@ static const char * const sqltypes[] =
 	"INTERVAL",
 	"NCHAR",
 	"NVARCHAR",
+	"INT8",
+	"SERIAL8",
+	"SET",
+	"MULTISET",
+	"LIST",
+	"ROW",
+	"COLLECTION",
+	"ROWREF",
+	"[reserved25]",
+	"[reserved26]",
+	"[reserved27]",
+	"[reserved28]",
+	"[reserved29]",
+	"[reserved30]",
+	"[reserved31]",
+	"[reserved32]",
+	"[reserved33]",
+	"[reserved34]",
+	"[reserved35]",
+	"[reserved36]",
+	"[reserved37]",
+	"[reserved38]",
+	"[reserved39]",
+	"FIXED UDT",
+	"VARIABLE UDT",
+	"REFSER8",
+	"LVARCHAR",
+	"SENDRECV",
+	"BOOLEAN",
+	"IMPEXP",
+	"IMPEXPBIN",
 };
 
 static const char dt_day[] = "DAY";
@@ -120,18 +150,22 @@ char	*sqltypename(int coltype, int collen, char *buffer)
 	int		vc_min;
 	int		vc_max;
 	int		scale;
+	int		type = MASKNONULL(coltype);
+	char   *start = buffer;
 
-	if (coltype >= 256)
-		coltype -= 256;	/* Indicates a not null column */
+	if (coltype & SQLDISTINCT)
+	{
+		strcpy(start, "DISTINCT ");
+		start += strlen(start);
+	}
 
-	switch (coltype)
+	switch (type)
 	{
 	case SQLCHAR:
-#ifdef SQLNCHAR
 	case SQLNCHAR:
-#endif /* SQLNCHAR */
-		sprintf(buffer, "%s(%d)", sqltypes[coltype], collen);
+		sprintf(start, "%s(%d)", sqltypes[type], collen);
 		break;
+
 	case SQLSMINT:
 	case SQLINT:
 	case SQLFLOAT:
@@ -141,63 +175,79 @@ char	*sqltypename(int coltype, int collen, char *buffer)
 	case SQLNULL:
 	case SQLTEXT:
 	case SQLBYTES:
-		strcpy(buffer, sqltypes[coltype]);
+	case SQLINT8:
+	case SQLSERIAL8:
+		strcpy(start, sqltypes[type]);
 		break;
+
+	/* IUS types -- may need more work in future */
+	case SQLSET:
+	case SQLLIST:
+	case SQLMULTISET:
+	case SQLCOLLECTION:
+	case SQLROW:
+	case SQLROWREF:
+		strcpy(start, sqltypes[type]);
+		break;
+
 	case SQLDECIMAL:
 	case SQLMONEY:
 		precision = (collen >> 8) & 0xFF;
 		scale = (collen & 0xFF);
 		if (scale == 0xFF)
-			sprintf(buffer, "%s(%d)", sqltypes[coltype], precision);
+			sprintf(start, "%s(%d)", sqltypes[type], precision);
 		else
-			sprintf(buffer, "%s(%d,%d)", sqltypes[coltype], precision, scale);
+			sprintf(start, "%s(%d,%d)", sqltypes[type], precision, scale);
 		break;
+
 	case SQLVCHAR:
-#ifdef SQLNVCHAR
 	case SQLNVCHAR:
-#endif /* SQLNVCHAR */
 		vc_min = VCMIN(collen);
 		vc_max = VCMAX(collen);
 		if (vc_min == 0)
-			sprintf(buffer, "%s(%d)", sqltypes[coltype], vc_max);
+			sprintf(start, "%s(%d)", sqltypes[type], vc_max);
 		else
-			sprintf(buffer, "%s(%d,%d)", sqltypes[coltype], vc_max, vc_min);
+			sprintf(start, "%s(%d,%d)", sqltypes[type], vc_max, vc_min);
 		break;
+
 	case SQLDTIME:
 		dt_fr = TU_START(collen);
 		dt_to = TU_END(collen);
 		if (sqlmode != 1)
-			sprintf(buffer, "%s %s TO %s", sqltypes[coltype], dt_fr_ext[dt_fr],
+			sprintf(start, "%s %s TO %s", sqltypes[type], dt_fr_ext[dt_fr],
 					dt_to_ext[dt_to]);
 		else if (dt_fr == TU_FRAC)
-			sprintf(buffer, "%s %s", sqltypes[coltype], dt_to_ext[dt_to]);
+			sprintf(start, "%s %s", sqltypes[type], dt_to_ext[dt_to]);
 		else if (dt_fr == dt_to)
-			sprintf(buffer, "%s %s", sqltypes[coltype], dt_to_ext[dt_to]);
+			sprintf(start, "%s %s", sqltypes[type], dt_to_ext[dt_to]);
 		else
-			sprintf(buffer, "%s %s TO %s", sqltypes[coltype], dt_fr_ext[dt_fr],
+			sprintf(start, "%s %s TO %s", sqltypes[type], dt_fr_ext[dt_fr],
 					dt_to_ext[dt_to]);
 		break;
+
 	case SQLINTERVAL:
 		dt_fr = TU_START(collen);
 		dt_to = TU_END(collen);
 		dt_ld = TU_FLEN(collen);
 		if (sqlmode != 1 && dt_fr == TU_FRAC)
-			sprintf(buffer, "%s %s TO %s", sqltypes[coltype],
+			sprintf(start, "%s %s TO %s", sqltypes[type],
 					dt_fr_ext[dt_fr], dt_to_ext[dt_to]);
 		else if (sqlmode != 1)
-			sprintf(buffer, "%s %s(%d) TO %s", sqltypes[coltype],
+			sprintf(start, "%s %s(%d) TO %s", sqltypes[type],
 					dt_fr_ext[dt_fr], dt_ld, dt_to_ext[dt_to]);
 		else if (dt_fr == TU_FRAC)
-			sprintf(buffer, "%s %s", sqltypes[coltype], dt_to_ext[dt_to]);
+			sprintf(start, "%s %s", sqltypes[type], dt_to_ext[dt_to]);
 		else if (dt_fr == dt_to)
-			sprintf(buffer, "%s %s(%d)", sqltypes[coltype], dt_to_ext[dt_to],
+			sprintf(start, "%s %s(%d)", sqltypes[type], dt_to_ext[dt_to],
 					dt_ld);
 		else
-			sprintf(buffer, "%s %s(%d) TO %s", sqltypes[coltype],
+			sprintf(start, "%s %s(%d) TO %s", sqltypes[type],
 					dt_fr_ext[dt_fr], dt_ld, dt_to_ext[dt_to]);
 		break;
+
 	default:
-		sprintf(buffer, "Unknown (type %d, len %d)", coltype, collen);
+		sprintf(start, "Unknown (type %d, len %d)", coltype, collen);
+		ESQLC_VERSION_CHECKER();
 		break;
 	}
 	return(buffer);

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlperl.h,v $
-@(#)Version:         $Revision: 58.1 $
-@(#)Last changed:    $Date: 1998/01/06 02:53:23 $
+@(#)Version:         $Revision: 61.2 $
+@(#)Last changed:    $Date: 1998/11/17 17:08:25 $
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1996-98
-@(#)Product:         $Product: DBD::Informix Version 0.60 (1998-08-12) $
+@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 58.1 1998/01/06 02:53:23 johnl Exp $";
+static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 61.2 1998/11/17 17:08:25 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -30,11 +30,17 @@ enum Boolean
 typedef enum Boolean Boolean;
 
 /*
+** Under some circumstances, MSVC gets horrendously fussy and rejects
+** valid C code.  This is a sop to MSVC and to other C++ compilers.
+*/
+#define DBD_IX_BOOLEAN(x)	((x) ? True : False)
+
+/*
 ** The sqltypename() routine assumes is has a buffer of at least
 ** SQLTYPENAME_BUFSIZ bytes in which too work.
 ** The return address is the start of the buffer.
 */
-#define SQLTYPENAME_BUFSIZ sizeof("INTERVAL MINUTE(2) TO FRACTION(5)")
+#define SQLTYPENAME_BUFSIZ sizeof("DISTINCT INTERVAL MINUTE(2) TO FRACTION(5)")
 extern char *sqltypename(int coltype, int collen, char *buffer);
 
 extern void dbd_ix_debug(int n, char *fmt, const char *arg);
