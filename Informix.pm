@@ -13,7 +13,7 @@
     require DynaLoader;
     @ISA = qw(DynaLoader);
 
-	$VERSION = substr(q$Revision: 1.18 $, 10);
+	$VERSION = "0.20pl1";
 
     bootstrap DBD::Informix;
 
@@ -25,12 +25,12 @@
 	return $drh if $drh;
 	my($class, $attr) = @_;
 
-	unless ($ENV{'MSQL_HOME'}){
-	    foreach(qw(/usr/local/Minerva /opt/msql /opt/Minerva)){
-		$ENV{'MSQL_HOME'}=$_,last if -d "$_/rdbms/lib";
+	unless ($ENV{'INFORMIXDIR'}){
+	    foreach(qw(/usr/informix /opt/informix /opt/Informix)){
+		$ENV{'INFORMIXDIR'}=$_,last if -d "$_/rdbms/lib";
 	    }
-	    my $msg = ($ENV{MSQL_HOME}) ? "set to $ENV{MSQL_HOME}" : "not set!";
-	    warn "MSQL_HOME $msg\n";
+	    my $msg = ($ENV{INFORMIXDIR}) ? "set to $ENV{INFORMIXDIR}" : "not set!";
+	    warn "INFORMIXDIR $msg\n";
 	}
 
 	$class .= "::dr";
@@ -71,7 +71,7 @@
             'Pass' => $pass
 	    });
 
-	# Call Informix OCI orlon func in Informix.xs file
+	# Call Informix login func in the Informix.xs file
 	# and populate internal handle data.
 
 	DBD::Informix::db::_login($this, $host, $dbname, $user, $pass)

@@ -1,51 +1,138 @@
-#!/usr/bin/perl -w
-#
-#
-
-$dbhost = 'localhost';		# Leave this just now
-$dbname = 'test';		# Alter this to the name of a local database
+BEGIN{unshift @INC, "../../lib", "./lib";}
 
 use DBI;
 
-DBI->internal->{DebugDispatch} = 0;
+$testtable = "testaa";
 
-$drh = DBI->install_driver( 'Informix' );
+$dbname = 'test';
 
-$dbh = $drh->connect( $dbhost, $dbname, 'user', 'pass' );
-die "Cannot connect to test\n" unless $dbh;
+print "Testing: DBI->install_driver( 'Informix' ): ";
+( $drh = DBI->install_driver( 'Informix' ) )
+  and print( "ok\n" )
+  or die "not ok: $DBI::errstr\n";
 
-print "*** Preparing SELECT * from systables ***\n";
+print "Testing: \$drh->connect( 'dbhost', '$dbname', 'dbuser', 'dbpass' ): ";
+( $dbh = $drh->connect( 'dbhost', $dbname, 'dbuser', 'dbpass' ) )
+    and print("ok\n") 
+    or die "not ok: $DBI::errstr\n";
 
-$cursor = 
-    $dbh->prepare( "SELECT * FROM systables" );
+print "Testing: \$dbh->disconnect(): ";
+( $dbh->disconnect )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-$cursor->execute;
+print "Re-testing: \$drh->connect( 'dbhost', '$dbname', 'dbuser', 'dbpass' ): ";
+( $dbh = $drh->connect( 'dbhost', $dbname, 'dbuser', 'dbpass' ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-print "*** Selecting data as an ary ***\n";
+print STDERR "*** Testing: \$dbh->do FUNCTION: Just ignore: \n
+              Statement handle DBI::st=HASH(0x80dedf0) destroyed without
+              finish()\n\n    errors ***\n";
+print "Testing: \$dbh->do( 'CREATE TABLE $testtable
+                       (
+                        id INTEGER,
+                        name CHAR(64)
+                       )' ): ";
+( $dbh->do( "CREATE TABLE $testtable ( id INTEGER, name CHAR(64) )" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-while ( @row = $cursor->fetchrow ) {
-    print "Row: @row\n";
-  }
+print "Testing: \$dbh->do( 'DROP TABLE $testtable' ): ";
+( $dbh->do( "DROP TABLE $testtable" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-$cursor->finish;
+print "Re-testing: \$dbh->do( 'CREATE TABLE $testtable
+                       (
+                        id INTEGER,
+                        name CHAR(64)
+                       )' ): ";
+( $dbh->do( "CREATE TABLE $testtable ( id INTEGER, name CHAR(64) )" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
+
+# List the fields of the table we've just created in here.....
+
+#print "Testing: \$dbh->func( $testtable, '_ListFields' ): ";
+#( $ref = $dbh->func( $testtable, '_ListFields' ) )
+#    and print( "ok\n" )
+#    or die "not ok: $DBI::errstr\n";
+
+# List the fields. Uncomment this if you're the curious type........
+
+print "Testing: \$dbh->do( 'INSERT INTO $testtable VALUES ( 1, 'Alligator Descartes' )' ): ";
+( $dbh->do( "INSERT INTO $testtable VALUES( 1, 'Alligator Descartes' )" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
+
+print "Testing: \$dbh->do( 'DELETE FROM $testtable WHERE id = 1' ): ";
+( $dbh->do( "DELETE FROM $testtable WHERE id = 1" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
+
+print "Testing: \$cursor = \$dbh->prepare( 'SELECT FROM $testtable WHERE id = 1' ): ";
+( $cursor = $dbh->prepare( "SELECT * FROM $testtable WHERE id = 1" ) )
+    and print( "ok\n" )
+    or print( "not ok: $DBI::errstr\n" );
+
+print "Testing: \$cursor->execute: ";
+( $cursor->execute )
+    and print( "ok\n" )
+    or print( "not ok: $DBI::errstr\n" );
+
+print "*** Expect this test to fail with NO error message!\n";
+print "Testing: \$cursor->fetchrow: ";
+( @row = $cursor->fetchrow ) 
+    and print( "ok: $row\n" )
+    or print( "not ok: $DBI::errstr\n" );
+
+print "Testing: \$cursor->finish: ";
+( $cursor->finish )
+    and print( "ok\n" )
+    or print( "not ok: $DBI::errstr\n" );
+
+# Temporary bug-plug
 undef $cursor;
 
-print "*** Preparing SELECT * FROM systables WHERE tabname = 'systables' ***\n";
+print "Re-testing: \$dbh->do( 'INSERT INTO $testtable VALUES ( 1, 'Alligator Descartes' )' ): ";
+( $dbh->do( "INSERT INTO $testtable VALUES( 1, 'Alligator Descartes' )" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-$cursor2 = 
-    $dbh->prepare( "SELECT tabname, owner
-                    FROM systables
-                    WHERE tabname = 'systables'" );
+print "Re-testing: \$cursor = \$dbh->prepare( 'SELECT FROM $testtable WHERE id = 1' ): ";
+( $cursor = $dbh->prepare( "SELECT * FROM $testtable WHERE id = 1" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-$cursor2->execute;
+#print "Rows returned should be: 1\nActual rows returned: $numrows\n";
 
-print "*** Selecting data as a list of specified vars ***\n";
+print "Re-testing: \$cursor->execute: ";
+( $cursor->execute )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-while ( ( $tabname, $owner ) = $cursor2->fetchrow ) {
-    print "tabname: $tabname\towner: $owner\n";
-  }
+print "Re-testing: \$cursor->fetchrow: ";
+( @row = $cursor->fetchrow ) 
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-$cursor2->finish;
-undef $cursor2;
+print "Re-testing: \$cursor->finish: ";
+( $cursor->finish )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
 
-$dbh->disconnect;
+# Temporary bug-plug
+undef $cursor;
+
+print "Testing: \$dbh->do( 'UPDATE $testtable SET id = 2 WHERE name = 'Alligator Descartes'' ): ";
+( $dbh->do( "UPDATE $testtable SET id = 2 WHERE name = 'Alligator Descartes'" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
+
+print "Re-testing: \$dbh->do( 'DROP TABLE $testtable' ): ";
+( $dbh->do( "DROP TABLE $testtable" ) )
+    and print( "ok\n" )
+    or die "not ok: $DBI::errstr\n";
+
+print "*** Testing of DBD::Informix complete! You appear to be normal! ***\n";

@@ -9,9 +9,11 @@
 */
 
 /* these are (almost) random values ! */
-#define MAX_COLS 99
-#define MAX_COL_NAME_LEN 99
-#define MAX_BIND_VARS	99
+
+#define MAX_BIND_VARS 99
+#define MAX_COLS 128
+
+/* */
 
 #ifndef HDA_SIZE
 #define HDA_SIZE 512
@@ -95,6 +97,12 @@ struct imp_sth_st {
     U32       dbh_generation; 
     U16       flags; */
 
+    int is_create,
+        is_drop,
+        is_delete,
+        is_insert,
+        is_update;
+
     /* Current index of statement in cursor index? */
 
     int cursoridx;
@@ -149,6 +157,8 @@ struct phs_st { /* scalar placeholder EXPERIMENTAL      */
     sb2 indp;           /* null indicator                       */
 };
 
+extern SV *dbd_errnum;
+extern SV *dbd_errstr;
 
 /*void    do_error _((SV *h, Lda_Def *lda, int rc, char *what)); */
 void	do_error _((int rc));

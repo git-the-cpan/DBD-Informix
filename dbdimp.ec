@@ -1,17 +1,25 @@
 /*
-   $Id: dbdimp.c,v 1.4 1995/06/22 00:37:04 timbo Rel $
-
-   Copyright (c) 1994,1995  Tim Bunce
-
-   You may distribute under the terms of either the GNU General Public
-   License or the Artistic License, as specified in the Perl README file.
-
-*/
+ * $Id: dbdimp.ec,v 1.2 1996/04/14 17:18:19 descarte Exp descarte $
+ *
+ * Copyright (c) 1994,1995  Tim Bunce
+ *           (c)1995, 1996 Alligator Descartes
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Artistic License, as specified in the Perl README file.
+ *
+ * $Log: dbdimp.ec,v $
+ * Revision 1.2  1996/04/14 17:18:19  descarte
+ * Added CREATE, DROP, DELETE, INSERT and UPDATE primitives. Patched some other
+ * bits.
+ *
+ * Revision 1.1  1996/04/14 16:21:57  descarte
+ * Initial revision
+ *
+ *
+ */
 
 #include "Informix.h"
 $include sqlca.h;
-
-static cursor cursors[MAXCURSORS + 1];
 
 /* see oparse for usage */
 /*static sword oparse_defer = 0;*/  /* PARSE_NO_DEFER */
@@ -26,8 +34,8 @@ dbd_init(dbistate)
     dbistate_t *dbistate;
 {
     DBIS = dbistate;
-/*    dbd_errnum = GvSV(gv_fetchpv("DBD::Informix::err",    1, SVt_IV));
-    dbd_errstr = GvSV(gv_fetchpv("DBD::Informix::errstr", 1, SVt_PV));*/
+    dbd_errnum = GvSV(gv_fetchpv("DBD::Informix::err",    1, SVt_IV));
+    dbd_errstr = GvSV(gv_fetchpv("DBD::Informix::errstr", 1, SVt_PV));
 }
 
 
@@ -39,7 +47,11 @@ void do_error( rc )
 
     sql_num = rgetmsg( rc, errbuf, 100 );
     if ( sql_num == 0 ) { 
-        printf( "RC: %i Error: %s\n", rc, errbuf ); 
+        sv_setiv( dbd_errnum, (IV)rc );
+        sv_setpv( dbd_errstr, (char*)errbuf );
+      } else {
+        sv_setiv( dbd_errnum, (IV)666 );
+        sv_setpv( dbd_errstr, (char*)"No defined error in Informix!" );
       }
 }
 
@@ -254,21 +266,6 @@ free_imp_sth(imp_sth)
 */
 
 int
-sthidx()
-{
-    int i;
-
-    for (i = 0; i < MAXCURSORS; ++i) {
-        if (!cursors[i].is_open) {
-/*            bzero(&cursors[i], sizeof (cursor)); */
-            return i;
-          }
-      }
-    sqlca.sqlcode = -276;       /* fake: `Cursor not found' */
-    return -1;
-}
-
-int
 dbd_st_prepare(sth, statement)
     SV *sth;
     $char *statement;
@@ -302,7 +299,55 @@ dbd_st_prepare(sth, statement)
         if ( isupper( func[i] ) )
             func[i] = tolower( func[i] );
 
-    /* Bind values */
+    if ( strstr( func, "insert" ) != 0 ) {
+        if ( dbis->debug >= 2 )
+            warn( "INSERT present in statement\n" );
+        imp_sth->is_insert = 1;
+      }
+
+    if ( strstr( func, "create" ) != 0 ) {
+        if ( dbis->debug >= 2 )
+            warn( "CREATE present in statement\n" );
+        imp_sth->is_create = 1;
+      }
+
+    if ( strstr( func, "update" ) != 0 ) {
+        if ( dbis->debug >= 2 )
+            warn( "UPDATE present in statement\n" );
+        imp_sth->is_update = 1;
+      }
+
+    if ( strstr( func, "drop" ) != 0 ) {
+        if ( dbis->debug >= 2 )
+            warn( "DROP present in statement\n" );
+        imp_sth->is_drop = 1;
+      }
+
+    if ( strstr( func, "delete" ) != 0 ) {
+        if ( dbis->debug >= 2 )
+            warn( "DELETE present in statement\n" );
+        imp_sth->is_delete = 1;
+      }
+
+    /** Do the special case stuff first */
+    if ( ( imp_sth->is_create == 1 ) || ( imp_sth->is_drop == 1 ) ||
+         ( imp_sth->is_insert == 1 ) || ( imp_sth->is_delete == 1 ) ||
+         ( imp_sth->is_update == 1 ) ) {
+        $prepare tmp_stmt from $statement;
+        if ( sqlca.sqlcode < 0 ) {
+            do_error( sqlca.sqlcode );
+            return 0;
+          }
+        $execute tmp_stmt;
+        if ( sqlca.sqlcode < 0 ) {
+            do_error( sqlca.sqlcode );
+            return 0;
+          }
+        DBIc_IMPSET_on( imp_sth );
+        return 1;
+      }
+
+    /** Bind values for the SELECT statement */
 
     $prepare usqlobj from $statement;
     $declare democursor cursor for usqlobj;
@@ -601,7 +646,7 @@ dbd_describe(h, imp_sth)
 }
 
 SV *
-readblob(sth, field, offset, len, destsv)
+dbd_st_readblob(sth, field, offset, len, destsv)
     SV *sth;
     int field;
     long offset;

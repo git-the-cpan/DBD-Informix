@@ -1,8 +1,15 @@
 #!/usr/local/bin/perl -sw
-# $Id: Makefile.PL,v 1.21 1995/06/22 00:37:04 timbo Rel $
+# $Id: Makefile.PL,v 1.1 1996/04/14 17:25:11 descarte Exp descarte $
 #
-# Modification History:
-# By:		Date:		Description:
+# (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
+# From an original by Tim Bunce
+#
+# Covered by GPL - License to be added!
+#
+# $Log: Makefile.PL,v $
+# Revision 1.1  1996/04/14 17:25:11  descarte
+# Initial revision
+#
 
 use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose %att);
 use Getopt::Std;
@@ -12,15 +19,8 @@ use DBI;	# The DBI must be installed before we can build a DBD
 
 %opts = (
     'NAME'    => 'DBD::Informix',
-    'VERSION' => '0.20pl0',
+    'VERSION' => '0.20pl1',
 );
-
-# Options, typically only used for debugging
-#$opt_m = '';		# path to proc.mk or oracle.mk file to read
-
-#getopts('m:') or die "Invalid arguments";
-
-# --- Introduction
 
 print "\nConfiguring DBD::Informix version $opts{VERSION}...\n";
 print "Remember to actually read the README file!\n\n";
@@ -29,61 +29,61 @@ print "Remember to actually read the README file!\n\n";
 
 unless ($ENV{INFORMIXDIR}){
     warn "\$INFORMIXDIR not defined. Searching for Informix...\n";
-    foreach(qw(/usr/Informix /opt/Informix /usr/soft/Informix)){
-	$ENV{INFORMIXDIR}=$_,last if -d "$_/lib/esql";
+    foreach(qw(/usr/informix /opt/informix /usr/soft/informix)){
+	$ENV{INFORMIXDIR}=$_,last if -d "$_";
     }
     die "Unable to determine \$INFORMIXDIR!\n" unless $ENV{INFORMIXDIR};
 }
 my $ID = $ENV{INFORMIXDIR};
 
-print "Using Informix in $ID\n";
+print "What version of Informix are you using? [5/6/7] ";
+open TTY, "/dev/tty";
+$infversion = <TTY>;
+chomp( $infversion );
+close TTY;
+
+print "Using Informix version $infversion in $ID\n";
 
 # --- What Informix is installed...
 
 # Validate we have the right stuff installed
 
-warn "Warning: Informix library does not appear to be installed.\n"
-	unless -f "$ID/lib/esql/libgen.a"
-           and -f "$ID/lib/esql/libos.a"
-           and -f "$ID/lib/esql/libsql.a";
+if ( $infversion eq '5' ) {
+    warn "Warning: Informix library does not appear to be installed.\n"
+    	unless -f "$ID/lib/esql/libgen.a"
+               and -f "$ID/lib/esql/libos.a"
+               and -f "$ID/lib/esql/libsql.a";
+    $sysliblist = "-L$ID/lib/esql -lsql -lgen -los -lm";
+  } else {
+        if ( $infversion eq '6' || $infversion eq '7' ) {
+            warn "Warning: Informix library does not appear to be installed.\n"
+                unless -f "$ID/lib/esql/libgen.a"
+                   and -f "$ID/lib/esql/libos.a"
+                   and -f "$ID/lib/esql/libsql.a"
+                   and -f "$ID/lib/libasf.a";
+            $sysliblist = "-L$ID/lib -L$ID/lib/esql -lsql -lasf -lgen -los -lm";
+          }
+  }
 
-# read list of libs that oracle requires (eg -lm -lnsl)
-$sysliblist = "-L$ID/lib/esql -lsql -lgen -los -lm";
+# Display the list of libs that we reckon the stated version of Informix 
+# - requires to build
 print "Informix sysliblist: $sysliblist\n";
 
-#$oraclemk = $opt_m || "$OH/proc/lib/proc.mk";
-# Apparently some Oracle 7.1.3 Pro*C makefiles might be here:
-#$oraclemk = "$OH/proc16/lib/proc16.mk" unless -f $oraclemk;
-#die "Unable to locate proc.mk (use -m /path/to/proc.mk to specify)\n"
-#    unless -f $oraclemk;
-# We need -R if we're on Solaris.....
-
 if ( $Config{osname} eq 'solaris' ) {
-    $linkwith = "-L$ID/lib -R$ID/lib";
+    $linkwith = "-L$ID/lib -R$ID/lib -L$ID/lib/esql -R$ID/lib/esql";
   } else {
-    $linkwith = "-L$ID/lib";
+    if ( $Config{osname} eq 'aix' ) {
+        $linkwith = "-L$ID/lib -lbsd";
+      } else {
+        $linkwith = "-L$ID/lib";
+      }
   }
  
-#print "Using $oraclemk version $MK{mkver}\n";
-
-#$OCIINCLUDE = $MK{INCLUDE} || '';
-
 $opts{LIBS} = [ $sysliblist ];
-$opts{INC}  = "-I$ID/include -I$Config{archlib}/DBI";
-#$opts{dynamic_lib} = { OTHERLDFLAGS => '-L$(LIBHOME)' .$linkwith };
+$opts{INC}  = "-I$ID/incl/esql -I$Config{archlib}/DBI -I$Config{sitearch}/DBI";
 $opts{dynamic_lib} = { OTHERLDFLAGS => '-L$(INFORMIXDIR)/lib ' .$linkwith };
 $opts{OBJECT} = '$(O_FILES) dbdimp.o';
 $opts{macro} = { 'ESQL_LIB' => '$(INFORMIXDIR)/include' };
-
-# --- Handle special cases ---
-
-# Since HPUX can't mix -pic & non-pic (.a) in a dynamically loadable
-# file and oracle only supply .a libs we have to build static.
-if ($Config{osname} eq 'hpux' || $Config{osname} eq 'i386-sysv' ) {
-    print "Warning: forced to build static not dynamic on $Config{osname}\n";
-    print "         See README file for more information.\n";
-    $opts{LINKTYPE} = 'static';
-}
 
 $opts{DEFINE} = '-Wall -pedantic -Wno-comment -Wpointer-arith -Wcast-align'
 	    . ' -Wconversion -Wtraditional -Wpointer-arith'
@@ -91,14 +91,6 @@ $opts{DEFINE} = '-Wall -pedantic -Wno-comment -Wpointer-arith -Wcast-align'
 	if $Config{cc} eq 'gcc';	# Just me asking gcc to be paranoid.
 
 $opts{DEFINE} .= ' -Xa' if $Config{cc} eq 'clcc';	# CenterLine CC
-
-
-# Set some private WriteMakefile options if this is 'me' :-)
-if ($ENV{LOGNAME} eq 'timbo' and $ENV{S_ARCH_SW}){  # a reasonable guess
-    $Verbose = 1;
-    $opts{INST_LIB}     = $Config{installprivlib};
-    $opts{INST_ARCHLIB} = $Config{installarchlib};
-}
 
 # log key platform information to help me help you quickly
 print "System: perl$] @Config{qw(myuname archname dlsrc)}\n";
@@ -111,6 +103,18 @@ print "See README notes about SPARCompiler on Solaris\n"
 print "\n";
 
 WriteMakefile(%opts);
+
+# We need to add some fake targets to the Makefile to make dbdimp.ec
+# - build.....Horrible hack, and it doesn't make dbdimp.c dependent on
+# - dbdimp.ec
+
+system( "echo \".SUFFIXES: .ec\" >> Makefile" );
+system( "echo \"\" >> Makefile" );
+system( "echo \".ec.o:\" >> Makefile" );
+system( "echo \"	esql -c -I\$(ESQL_LIB) -I\$(PERL_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_ARCHLIB)/DBI -I\$(PERL_ARCHLIB)/CORE dbdimp.ec\
+\" >> Makefile" );
+
+# Cleanly exit from the Makefile-build process
 
 exit 0;
 

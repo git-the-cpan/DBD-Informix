@@ -12,3 +12,9 @@ v.0.20pl0 Disney
 	o Error checking needs tightened.
 	o test program needs updated.
 	o Any primitives other than SELECT need tested!
+
+v.0.20pl1
+---------
+
+	o Stored Procedure support
+	o BLOB support

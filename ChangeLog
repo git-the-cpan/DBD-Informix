@@ -11,3 +11,10 @@ DBD::Informix for DBI - Written by Alligator Descartes <descarte@mcqueen.com>
 
 		Released 0.20pl0 Disney on ftp.mcqueen.com. Limited hacker
 		release.
+
+14/04/96:18:04	Added support for CREATE, DROP, INSERT, UPDATE and DELETE.
+		Fixed $DBI::errnum and $DBI::errstr problems
+		Fixed Informix.pm to stop reporting MSQL_HOME errors
+		Fixed Makefile.PL
+		Removed hacky 'build' file and uses Makefile.PL exclusively
+		now.

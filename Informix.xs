@@ -1,12 +1,17 @@
 /*
-   $Id: Informix.xs,v 1.27 1995/06/22 00:37:04 timbo Rel $
-
-   Copyright (c) 1994,1995  Alligator Descartes
-
-   You may distribute under the terms of either the GNU General Public
-   License or the Artistic License, as specified in the Perl README file.
-
-*/
+ * $Id: Informix.xs,v 1.1 1996/04/14 16:21:36 descarte Exp descarte $
+ *
+ * Copyright (c) 1994,1995  Tim Bunce
+ *           (c)1995, 1996 Alligator Descartes
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Artistic License, as specified in the Perl README file.
+ *
+ * $Log: Informix.xs,v $
+ * Revision 1.1  1996/04/14 16:21:36  descarte
+ * Initial revision
+ *
+ */
 
 #include "Informix.h"
 

@@ -30,7 +30,7 @@ BUILDING
 
     If Perl5 is installed do:
 
-	build
+	perl Makefile.PL
 
     If Perl5 is NOT installed install it, and come back here later!
 
