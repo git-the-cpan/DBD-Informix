@@ -1,6 +1,6 @@
 # $Id: Summary.pm,v 100.5 2002/02/08 22:49:46 jleffler Exp $
 #
-# Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
+# Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
 #
 # This driver summary is for DBD::Informix
 #
@@ -14,7 +14,7 @@
 {
 	package DBD::Informix::Summary;
 
-	$VERSION = "1.03.PC1";
+	$VERSION = "1.04.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	1;
@@ -38,7 +38,7 @@ This file is an updated version of the information about DBD::Informix in the DB
 
 =head2 Driver Version
 
-C<DBD::Informix> version 1.03.PC1.
+C<DBD::Informix> version 1.04.PC1.
 
 =head2 Feature Summary
 

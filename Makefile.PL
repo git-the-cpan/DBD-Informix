@@ -2,7 +2,7 @@
 #
 # @(#)$Id: Makefile.PL,v 100.29 2002/11/20 18:57:53 jleffler Exp $
 #
-# Configuration script for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) (aka DBD::Informix)
+# Configuration script for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) (aka DBD::Informix)
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -51,7 +51,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "1.03.PC1";
+my $dbd_ix = "1.04.PC1";
 # Hack for handling builds directly in Atria Clearcase view.
 $dbd_ix = "1.01.009" unless $dbd_ix =~ /^\d+\.\d+/;
 
@@ -80,7 +80,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) (aka $opts{NAME})
+Configuring Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -1017,7 +1017,7 @@ sub Write_DBD_Informix_Defaults
 	open DEFAULTS, ">$defaults"
 		or die "Cannot create $defaults ($!)";
 	print DEFAULTS <<'EOF';
-#   Default Environment Variables for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
+#   Default Environment Variables for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
 #
 #   Copyright 2002 IBM
 #
@@ -1031,7 +1031,7 @@ sub Write_DBD_Informix_Defaults
 	@ISA = qw(Exporter);
 	@EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
 
-	$VERSION = "1.03.PC1";
+	$VERSION = "1.04.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF

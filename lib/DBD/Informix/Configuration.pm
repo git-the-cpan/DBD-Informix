@@ -1,6 +1,6 @@
 #   @(#)$Id: Configuration.pm,v 100.10 2002/11/06 21:45:14 jleffler Exp $ 
 #
-#   Informix ESQL/C Support Routines for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
+#   Informix ESQL/C Support Routines for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
 #
 #   Copyright 1999 Jonathan Leffler
 #   Copyright 2000 Informix Software Inc
@@ -24,7 +24,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(find_informixdir_and_esql get_esqlc_version map_informix_lib_names);
 
-	$VERSION = "1.03.PC1";
+	$VERSION = "1.04.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -220,7 +220,7 @@ use DBD::Informix::Configuration;
 
 =head1 DESCRIPTION
 
-This module is used by Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) in the build and bug reporting code.
+This module is used by Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) in the build and bug reporting code.
 You will seldom if ever have cause to use this module directly.
 
 =head2 Using find_informixdir_and_esql

@@ -1,15 +1,19 @@
-Change Log for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) (aka DBD::Informix)
+Change Log for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) (aka DBD::Informix)
+
+1.04.PC1 Release
+----------------
+2002-11-21: Upload to PAUSE and CPAN.
+2002-11-21: Fix the information in Announce and create new version.
 
 1.03.PC1 Release
 ----------------
-2002-??-??: Upload to PAUSE and CPAN.
+2002-11-21: Upload to PAUSE and CPAN.
 2002-11-19: Remove MD5 checksum material (added for Informix Tech Support).
             Move DBD::Informix::* files from DBD to lib/DBD.
 2002-11-18: Add support for ix_WithoutReplication based on work by Bryan
-            Castillo <Bryan_Castillo@eFunds.com> (who called it
-            ix_Replicated with the opposite logic).  Clean up some of the
-            documentation in Informix.pm, removing references to behaviour
-            in versions prior to 1.00.
+            Castillo <Bryan_Castillo@eFunds.com>.  Clean up some of the
+            documentation in Informix.pm, removing most references to
+            behaviour in versions prior to 1.00.
 2002-11-06: Retrofit INSTALLVENDORARCH (courtesy Roderick Schertler
             <roderick@argon.org> circa 2002-07) and SITEARCHEXP (courtesy
             Joachim Schrod <jscrod@acm.org> circa 1998-01) into list of
@@ -928,4 +932,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 100.41 2002/11/19 19:41:31 jleffler Exp $
+@(#)$Id: ChangeLog,v 100.42 2002/11/21 22:58:59 jleffler Exp $

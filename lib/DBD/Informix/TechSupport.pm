@@ -1,6 +1,6 @@
 #   @(#)$Id: TechSupport.pm,v 100.13 2002/11/20 01:12:08 jleffler Exp $
 #
-#	Technical Support Tools for Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
+#	Technical Support Tools for Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
 #
 #   Copyright 2000-01 Informix Software Inc
 #   Copyright 2002    IBM
@@ -15,7 +15,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(print_versions bug_report it_works);
 
-	$VERSION = "1.03.PC1";
+	$VERSION = "1.04.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -273,14 +273,14 @@ use DBD::Informix::TechSupport;
 =head1 DESCRIPTION
 
 This document describes how to obtain technical support for
-Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
+Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
 (which is also known as DBD::Informix).
 It also describes how to use the Perl module to report information to
 any of technical support channels.
 
 =head1 INFORMIX TECHNICAL SUPPORT
 
-Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
+Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
 is a supported product of Informix Software, Inc.,
 provided that you are using a supported configuration.
 
@@ -302,7 +302,7 @@ weekends.
 
 =head1 CONFIGURATIONS SUPPORTED BY INFORMIX
 
-Informix Technical Support will only support Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21)
+Informix Technical Support will only support Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21)
 if you are using certain supported versions of ESQL/C or Client SDK:
 
 =over 2
@@ -333,7 +333,7 @@ above.
 
 =head1 OTHER CONFIGURATIONS WHICH PROBABLY WORK
 
-Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) is believed to work with all versions of ESQL/C and
+Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) is believed to work with all versions of ESQL/C and
 ClientSDK from ESQL/C 5.00.UC1 upwards.
 However, you may run into problems with shared libraries if you use
 versions of ESQL/C which are not explicitly supported.
@@ -389,7 +389,7 @@ builds it (classes B, C, D) and tests it (classes C, D).
 =head2 Using it_works
 
 This generates the information needed for a report that you have managed
-to get Informix Database Driver for Perl Version 1.03.PC1 (2002-11-21) working.
+to get Informix Database Driver for Perl Version 1.04.PC1 (2002-11-21) working.
 
 	it_works;
 
