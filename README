@@ -1,4 +1,4 @@
-README for Informix Database Driver for Perl Version 0.97005 (2000-02-10)
+README for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
 
    Portions Copyright 1994-96 Alligator Descartes
    Portions Copyright 1996-99 Jonathan Leffler
@@ -38,9 +38,26 @@ PREREQUISITES
 
     When you have DBD::Informix working *and* installed, use the ItWorks
     Perl script (previously a shell script) to report your successful
-    installation.  Be sure to check the output (especially the email
+    installation.  Be sure to review the output (especially the email
     address it deduces), and send it in an email to the maintainers at
     dbd-informix@informix.com with the subject "DBD::Informix - It Works".
+
+TECHNICAL SUPPORT
+
+    For information on Informix Technical Support, please run:
+
+        perldoc DBD::Informix::TechSupport
+
+    If you have purchased technical support, you will be given a licence
+    number.  You can build DBD::Informix and specify that licence number
+    when you compile it:
+
+        perl Makefile.PL
+        make INFORMIX_LICENCE="DBD#I000000"
+
+    Alternatively, once you have installed the product, you can use:
+
+        InformixTechSupport -l DBD#I000000
 
 PERL
 
@@ -94,15 +111,15 @@ ESQL/C OR CLIENT SDK
 
     You must have a version of Informix ESQL/C or Informix Client SDK
     installed on the computer where you wish to compile DBD::Informix.
-    Informix Connect is not sufficient.  The Notes/Informix.Licence file
-    contains more information about what you need.  ESQL/C Versions 4.1x
-    and earlier are not (and will not be) supported by DBD::Informix.
-    ESQL/C Versions 5.00 and up should be OK.  If you do not have ESQL/C,
-    DBD::Informix will not work.  You can probably get Informix Client SDK
-    at a reasonable cost.  If you have Informix Open Database Connectivity
-    (ODBC) drivers available to you, consider using DBD::ODBC instead.  If
-    you are on Linux, you should investigate the software available from
-    the following Informix Web sites:
+    Informix Connect is not sufficient.  The Notes/FAQ file contains more
+    information about what you need.  ESQL/C Versions 4.1x and earlier are
+    not (and will not be) supported by DBD::Informix.  ESQL/C Versions 5.00
+    and up should be OK.  If you do not have ESQL/C, DBD::Informix will not
+    work.  You can probably get Informix Client SDK at a reasonable cost.
+    If you have Informix Open Database Connectivity (ODBC) drivers
+    available to you, consider using DBD::ODBC instead.  If you are on
+    Linux, you should investigate the software available from the following
+    Informix Web sites:
 
                          http://www.informix.com/
                        http://www.informix.com/idn
@@ -116,7 +133,7 @@ ESQL/C OR CLIENT SDK
     file.  (If you are not yet familiar with how to set environment
     variables, be sure to get and read a UNIX primer such as "Learning the
     Unix System, 4th Edition" from O'Reilly, http://www.oreilly.com/, and
-	be prepared for a major learning exercise).
+    be prepared for a major learning exercise).
 
     DBD::Informix, Version 1.00, provides limited support for user-defined
     data types (UDTs), treating them as CHAR(255).  To handle BLOBs and
@@ -434,14 +451,17 @@ KNOWN PROBLEMS:
       build DBD::Informix on HP-UX with ESQL/C Version 5.x or 6.x without
       doing it statically, be sure to tell everyone.
 
-    * Compiling on HP-UX 10.20 has been problematic.  See the guidelines in
-      the Notes/hpux file, some of which were supplied by Reed White
-      (REED_WHITE@HP-Corvallis-om1.om.hp.com).  Note that the non-ANSI C
-      compiler that is distributed with the HP-UX base package is not
-      suitable for compiling DBD::Informix because it does not accept
-      prototypes.  However, the file also contains information on how to
-      compile GCC (and the other GNU software required) on HP-UX, using the
-      bundled C compiler to start the process.
+    * Compiling on HP-UX 10.20 has often been problematic.  See the
+      guidelines in the Notes/hpux file, some of which were supplied by
+      Reed White (REED_WHITE@HP-Corvallis-om1.om.hp.com).  Note that the
+      non-ANSI C compiler that is distributed with the HP-UX base package
+      is not suitable for compiling DBD::Informix because it does not
+      accept prototypes.  However, the file also contains information on
+      how to compile GCC (and the other GNU software required) on HP-UX,
+      using the bundled C compiler to start the process.  If you are using
+      ESQL/C 7.24.UC8A or Client SDK 2.30 or 2.40, you should be able to
+      build a dynamically loadable DBD::Informix using either the ANSI C
+      compiler or GCC without any special actions on your part.
 
     * Some problems have been encountered on SCO and seem to be related
       to the equivalent of LD_LIBRARY_PATH on System V Release 4 computers.
@@ -493,9 +513,9 @@ IF YOU HAVE PROBLEMS USING DBD::INFORMIX
     6. Clearly indicate when the test succeeds.
     7. The test script should not use DBI->install_driver().
 
-    If your test is failing with a core dump, the stack trace is useful if
-    it lists function names.  The stack trace is not useful if it does not
-    list them.
+    If your test is failing with a core dump, the stack trace may be useful
+    if it lists function names.  The stack trace is not useful if it does
+    not list them.
 
     The tests which come with DBD::Informix show a variety of ways of using
     DBD::Informix.  Do not use the connection method shown in the code for
@@ -513,13 +533,13 @@ REMEMBER IT IS SUPPOSED TO BE FUN!
 Jonathan Leffler (j.leffler@acm.org)
 Michael Kopchenov (myk@informix.com)
 
-@(#)$Id: README version /main/60 2000-02-08 17:46:35 $
+@(#)$Id: README version /main/63 2000-02-17 13:57:04 $
 
 ---------------------------------------------------------------------------
 
-Original document: (c) Tim Bunce <Tim.Bunce@ig.co.uk>
-Amendments 1:      (c) Alligator Descartes <descarte@arcana.co.uk>
-Amendments 2:      (c) Jonathan Leffler <johnl@informix.com>
-Amendments 3:      (c) Jonathan Leffler <j.leffler@acm.org>
-Amendments 4:      (c) Jonathan Leffler <jleffler@informix.com>
-Amendments 5:      (c) Informix Software Inc
+Original document: Copyright 1994    Tim Bunce <Tim.Bunce@ig.co.uk>
+Amendments 1:      Copyright 1994-96 Alligator Descartes <descarte@arcana.co.uk>
+Amendments 2:      Copyright 1996-98 Jonathan Leffler <johnl@informix.com>
+Amendments 3:      Copyright 1998    Jonathan Leffler <j.leffler@acm.org>
+Amendments 4:      Copyright 1998-99 Jonathan Leffler <jleffler@informix.com>
+Amendments 5:      Copyright 2000    Informix Software Inc

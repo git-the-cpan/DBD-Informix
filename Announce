@@ -1,8 +1,8 @@
 To: dbi-announce@isc.org, dbi-dev@isc.org, dbi-users@isc.org,
         informix-list@iiug.org, descarte@symbolstone.org
-Subject: ANNOUNCE: Informix Database Driver for Perl Version 0.97005 (2000-02-10) released
+Subject: ANNOUNCE: Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) released
 
-Informix Database Driver for Perl Version 0.97005 (2000-02-10) has been uploaded to CPAN.
+Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) has been uploaded to CPAN.
 
 Informix Database Driver for Perl (previously known as DBD::Informix)
 is the driver code that enables Perl 5.004 or 5.005 to access Informix

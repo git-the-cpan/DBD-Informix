@@ -1,9 +1,10 @@
 /*
- * @(#)$Id: Informix.xs version /main/29 1999-12-23 18:44:27 $ 
+ * @(#)$Id: Informix.xs version /main/31 2000-02-24 14:22:10 $ 
  *
- * Portions Copyright (c) 1994-95 Tim Bunce
- * Portions Copyright (c) 1995-96 Alligator Descartes
- * Portions Copyright (c) 1996-99 Jonathan Leffler
+ * Portions Copyright 1994-95 Tim Bunce
+ * Portions Copyright 1995-96 Alligator Descartes
+ * Portions Copyright 1996-99 Jonathan Leffler
+ * Portions Copyright 2000    Informix Software Inc
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -17,14 +18,15 @@
 /* Change from Michael Kopchenov <myk@informix.com> */
 #ifdef PERL_OBJECT
 #include "XSLock.h"
+#undef fprintf
+#define fprintf (fprintf)
 #endif
 
 DBISTATE_DECLARE;
 
 /* Assume string concatenation is available */
 #ifndef lint
-static const char rcs[] =
-	"@(#)$Id: Informix.xs version /main/29 1999-12-23 18:44:27 $";
+static const char rcs[] = "@(#)$Id: Informix.xs version /main/31 2000-02-24 14:22:10 $";
 static const char esqlc_ver[] =
 	"@(#)" ESQLC_VERSION_STRING;
 #endif

@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD/Informix/TestHarness.pm version /main/3 2000-02-01 13:46:24 $ 
+#   @(#)$Id: DBD/Informix/TestHarness.pm version /main/6 2000-02-25 10:40:27 $ 
 #
-#   Pure Perl Test Harness for Informix Database Driver for Perl Version 0.97005 (2000-02-10)
+#   Pure Perl Test Harness for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
 #
 #   Portions Copyright 1996-99 Jonathan Leffler
 #   Portions Copyright 2000    Informix Software Inc
@@ -20,8 +20,11 @@
 		connect_quietly
 		connect_to_test_database
 		is_shared_memory_connection
+		memory_leak_test
+		primary_connection
 		print_dbinfo
 		print_sqlca
+		secondary_connection
 		select_some_data
 		select_zero_data
 		stmt_err
@@ -34,16 +37,19 @@
 		);
 
 	use DBI;
+	use Config;
 	require_version DBI 1.02;
 
-	$VERSION = "0.97005";
+	$VERSION = "1.00.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
 	sub print_connection
 	{
-		my ($str, $attr) = @_;
-		&stmt_note("# DBI->connect($str);\n");
+		my ($dbase, $user, $pass, $attr) = @_;
+		my ($xxpass) = (defined $dbpass) ? 'X' x length($dbpass) : "";
+
+		&stmt_note("# DBI->connect('dbi:Informix:$dbase', '$user', '$xxpass');\n");
 		if (defined $attr)
 		{
 			my ($key);
@@ -52,6 +58,36 @@
 				&stmt_note("#\tConnect Attribute: $key => $$attr{$key}\n");
 			}
 		}
+	}
+
+	sub primary_connection
+	{
+		# This section may need rigging for some versions of Informix.
+		# It will should be OK for 6.0x and later versions of OnLine.
+		# You may run into problems with SE and 5.00 systems.
+		# If you do, send details to the maintenance team.
+		my ($dbname) = $ENV{DBD_INFORMIX_DATABASE};
+		my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME};
+		my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD};
+
+		$dbpass = "" unless ($dbpass);
+		$dbuser = "" unless ($dbuser);
+		# Respect $DBI_DBNAME since the esqltest code does.
+		# Problem reported by Paul Watson <paulw@wfsoftware.com>
+		$dbname = $ENV{DBI_DBNAME} if (!$dbname);
+		$dbname = "stores" if (!$dbname);
+		return ($dbname, $dbuser, $dbpass);
+	}
+
+	sub secondary_connection
+	{
+		my ($dbname) = $ENV{DBD_INFORMIX_DATABASE2};
+		my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME2};
+		my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD2};
+
+		($dbname, $dbuser, $dbpass) = &primary_connection()
+			unless (defined $dbname);
+		return ($dbname, $dbuser, $dbpass);
 	}
 
 	sub connect_quietly
@@ -76,30 +112,16 @@
 	sub connect_controllably
 	{
 		my ($verbose, $attr) = @_;
-		# This section may need rigging for some versions of Informix.
-		# It will should be OK for 6.0x and later versions of OnLine.
-		# You may run into problems with SE and 5.00 systems.
-		# If you do, send details to the maintenance team.
-		my ($dbname, $dbuser, $dbpass) =
-			($ENV{DBD_INFORMIX_DATABASE},
-			 $ENV{DBD_INFORMIX_USERNAME}, $ENV{DBD_INFORMIX_PASSWORD});
+		my ($dbname, $dbuser, $dbpass) = &primary_connection();
 
-		$dbpass = "" unless ($dbpass);
-		$dbuser = "" unless ($dbuser);
-		$dbname = "stores" if (!$dbname);
+		&print_connection($dbname, $dbuser, $dbpass, $attr)
+			if ($verbose);
 
-		if ($verbose)
-		{
-			# Do not print out actual password!
-			my ($xxpass) = 'X' x length($dbpass); 
-			my ($part2) = "'$dbuser', '$xxpass'";
-			&print_connection("'dbi:Informix:$dbname', $part2", $attr)
-		}
+		my ($dbh) = DBI->connect("dbi:Informix:$dbname", $dbuser, $dbpass, $attr);
 
-		my ($dbh) = "";
-		$dbh = DBI->connect("dbi:Informix:$dbname", $dbuser, $dbpass, $attr);
-
+		# Unconditionally fail if connection does not work!
 		&stmt_fail() unless (defined $dbh);
+
 		# Unconditionally chop trailing blanks.
 		# Override in test cases as necessary.
 		$dbh->{ChopBlanks} = 1;
@@ -306,7 +328,7 @@
 			}
 		}
 
-		# IUS test debris!
+		# IUS test debris!  This will need to be upgraded.
 		$dbh->do(q% DROP TABLE dbd_ix_maker %);
 		$dbh->do(q% DROP TABLE dbd_ix_location %);
 		$dbh->do(q% DROP ROW TYPE dbd_ix_location RESTRICT %);
@@ -319,10 +341,14 @@
 	}
 
 	# Verify whether specified database name will use a shared memory connection.
+	# AFAIK, NT does not support shared memory connections.
 	# The use of grep (the Unix command) probably renders this worthless on NT.
+	# Obviously, if it became desirable, we could write a grep-like function in
+	# Perl (but beware the built-in grep which is different).
 	# NB: Error checking is minimal and assumes that esqltest at least ran OK.
 	sub is_shared_memory_connection
 	{
+		return 0 if $Config{archname} =~ /MSWin32/;
 		my($dbs) = @_;
 		my ($server) = $dbs;
 		if ($dbs !~ /.*@/)
@@ -339,6 +365,53 @@
 		$ent = 'server protocol host service' unless $ent;
 		my(@ent) = split ' ', $ent;
 		return (($ent[1] =~ /o[ln]ipcshm/) ? 1 : 0);
+	}
+
+	# Run a memory leak test.
+	# The main program will normally read:
+	#		use strict;
+	#		use DBD::Informix::TestHarness;
+	#		&memory_leak_test(\&test_subroutine);
+	#		exit;
+	# The remaining code in the test file will implement a test
+	# which shows the memory leak.  You should not connect to the
+	# test database before invoking memory_leak_test.
+	sub memory_leak_test
+	{
+		my($sub, $nap, $pscmd) = @_;
+		use vars qw($ppid $cpid $nap);
+
+		$|=1;
+		print "# Bug is fixed if size of process stabilizes (fairly quickly!)\n";
+		$ppid = $$;
+		$nap  = 5 unless defined $nap;
+		$pscmd = "ps -lp" unless defined $pscmd;
+		$pscmd .= " $ppid";
+
+		$cpid = fork();
+		die "failed to fork\n" unless (defined $cpid);
+		if ($cpid)
+		{
+			# Parent
+			print "# Parent: $ppid, Child: $cpid\n";
+			# Invoke the subroutine given by reference to do the real database work.
+			&$sub();
+			# Try to ensure that the child gets a chance to report at least once more...
+			sleep ($nap * 2);
+			kill 15, $cpid;
+			exit(0);
+		}
+		else
+		{
+			# Child -- monitor size of parent, while parent exists!
+			system "$pscmd | sed 's/^/# /'";
+			sleep $nap;
+			while (kill 0, $ppid)
+			{
+				system "$pscmd | sed -e 1d -e 's/^/# /'";
+				sleep $nap;
+			}
+		}
 	}
 
 	1;
@@ -562,6 +635,82 @@ This routine takes a database handle and a SELECT statement and invokes
 
     &select_zero_data($dbh, $stmt);
 
+=head2 Using memory_leak_test
+
+This routine takes a reference to a subroutine, and optionally a nap
+time in seconds (default 5) and a C<ps> command string (default "ps
+-lp", suitable for Solaris 2.x and Solaris 7).
+
+Normally, your test script will simply call this routine and exit.
+The remaining code in the test file will implement a test which shows
+the memory leak.
+You should not connect to the test database before invoking
+memory_leak_test.
+
+	use strict;
+	use DBD::Informix::TestHarness;
+	&memory_leak_test(\&test_subroutine);
+	exit;
+
+When it is called, memory_leak_test forks, and the parent process runs
+the given subroutine with no arguments.
+The subroutine will do the sequence of database operations which show
+that there is a memory leak, or that the memory leak is fixed.
+The child process checks that the parent is still alive, and runs the
+C<ps> command to determine the size of the process.
+The output of C<ps> is not parsed, so you have to run the test in a
+verbose mode to see whether there is a memory leak or not.
+
+    &memory_leak_test(\&test_subroutine);
+    &memory_leak_test(\&test_subroutine, 10, "ps -l | grep");
+
+The C<ps> command string has a process number appended to the end
+after a space, and should report the size of the given process.
+Note that the last example is not as reliable as requesting the
+process status of a specific process number; it will probably show the
+grep command and the child Perl process, and maybe random other
+processes.
+
+=head2 Using primary_connection
+
+The primary_connection function returns three values, the database
+name, the username and the password for the primary test connection.
+This is used internally by the connect_controllably function, and
+hence by the connect_to_test_database function.
+
+    my ($dbase, $user, $pass) = &primary_connection();
+    my ($dbh) = DBI->connect("dbi:Informix:$dbase", $user, $pass)
+                    or die "$DBI::errstr\n";
+
+In looking for the three values, it examines the environment variables
+DBD_INFORMIX_DATABASE, DBD_INFORMIX_USERNAME and
+DBD_INFORMIX_PASSWORD.
+If the database is not determined, it looks at the DBI_DBNAME
+environment variable (which is essentially obsolete as far as DBI is
+concerned, but which is documented by the esqltest code -- an
+alternative was to remove support for DBI_DBNAME from esqltest.ec).
+If DBI_DBNAME is not set, then the default database name is 'stores'
+with no version suffix.
+If the username and password are not set, then empty strings are
+returned.
+
+=head2 Using secondary_connection
+
+The secondary_connection function also returns three values, the
+database name, the username and the password for the secondary test
+connection.
+This is used in the multiple connection tests.
+
+    my ($dbase, $user, $pass) = &secondary_connection();
+    my ($dbh) = DBI->connect("dbi:Informix:$dbase", $user, $pass)
+                    or die "$DBI::errstr\n";
+
+In looking for the three values, it examines the environment variables
+DBD_INFORMIX_DATABASE2, DBD_INFORMIX_USERNAME2 and
+DBD_INFORMIX_PASSWORD2.
+If the database is not determined, it uses the primary_connection
+method above to specify the values.
+
 =head2 Note
 
 All these routines can also be used without parentheses or the &, so that
@@ -576,10 +725,13 @@ At various times:
 =over 2
 
 =item *
-Jonathan Leffler (johnl@informix.com)
+Jonathan Leffler (johnl@informix.com) # obsolete email address
 
 =item *
 Jonathan Leffler (j.leffler@acm.org)
+
+=item *
+Jonathan Leffler (jleffler@informix.com)
 
 =back
 

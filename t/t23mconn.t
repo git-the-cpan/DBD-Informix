@@ -1,31 +1,16 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t23mconn.t version /main/23 2000-01-27 16:20:39 $ 
+#	@(#)$Id: t/t23mconn.t version /main/24 2000-02-24 15:50:52 $ 
 #
 #	Test abuse of statements after DISCONNECT ALL for DBD::Informix
 #
-#	Portions Copyright (C) 1996-99 Jonathan Leffler
-#	Portions Copyright (C) 2000    Informix Software Inc
+#	Portions Copyright 1996-99 Jonathan Leffler
+#	Portions Copyright 2000    Informix Software Inc
 
 use DBD::Informix::TestHarness;
 
-$dbase1 = $ENV{DBD_INFORMIX_DATABASE};
-$dbase1 = "stores" unless ($dbase1);
-$dbase2 = $ENV{DBD_INFORMIX_DATABASE2};
-$user1 = $ENV{DBD_INFORMIX_USERNAME};
-$user2 = $ENV{DBD_INFORMIX_USERNAME2};
-$pass1 = $ENV{DBD_INFORMIX_PASSWORD};
-$pass2 = $ENV{DBD_INFORMIX_PASSWORD2};
-
-$user1 = "" if (! defined $user1);
-$pass1 = "" if (! defined $pass1);
-
-if (!$dbase2)
-{
-	$dbase2 = $dbase1;
-	$user2 = $user1;
-	$pass2 = $pass1;
-}
+my ($dbase1, $user1, $pass1) = &primary_connection();
+my ($dbase2, $user2, $pass2) = &secondary_connection();
 
 if (&is_shared_memory_connection($dbase1) &&
 	&is_shared_memory_connection($dbase2))

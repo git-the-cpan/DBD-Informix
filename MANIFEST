@@ -14,8 +14,7 @@ MANIFEST
 MD5-DIGEST
 MD5-DIGEST.MD5
 Makefile.PL
-Notes/Informix.Licence
-Notes/Informix.faq
+Notes/FAQ
 Notes/M88K.SVR4
 Notes/Working.Versions
 Notes/bug.reports
@@ -26,11 +25,11 @@ Notes/hpux
 Notes/hpux-gcc-build.sh
 Notes/linux
 Notes/nonroot.install
+Notes/nt
 Notes/olipcshm
 Notes/sco
 Notes/solaris
 Notes/static.build
-Notes/updating.blobs
 Notes/web.servers
 README
 Release.Checklist
@@ -95,6 +94,9 @@ t/t01stproc.t
 t/t05dbase.t
 t/t07dblist.t
 t/t10sqlca.t
+t/t12bindval.t
+t/t13bindref.t
+t/t14bindcol.t
 t/t20error.t
 t/t21mconn.t
 t/t22mconn.t

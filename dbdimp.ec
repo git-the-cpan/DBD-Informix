@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec version /main/133 2000-02-08 14:52:13 $
+ * @(#)$Id: dbdimp.ec version /main/137 2000-02-29 10:07:52 $
  *
- * @(#)$Product: Informix Database Driver for Perl Version 0.97005 (2000-02-10) $ -- implementation details
+ * @(#)$Product: Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) $ -- implementation details
  *
  * Portions Copyright 1994-95 Tim Bunce
  * Portions Copyright 1995-96 Alligator Descartes
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec version /main/133 2000-02-08 14:52:13 $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec version /main/137 2000-02-29 10:07:52 $";
 #endif
 
 #include <stdio.h>
@@ -729,10 +729,11 @@ new_statement(imp_dbh_t *imp_dbh, imp_sth_t *imp_sth)
 	imp_sth->st_state = Unused;
 	imp_sth->st_type = 0;
 	imp_sth->st_text = 0;
-	imp_sth->n_blobs = 0;
-	imp_sth->n_bound = 0;
+	imp_sth->n_iblobs = 0;
+	imp_sth->n_oblobs = 0;
+	imp_sth->n_icols = 0;
 	imp_sth->n_rows = 0;
-	imp_sth->n_columns = 0;
+	imp_sth->n_ocols = 0;
 	imp_sth->is_holdcursor = False;
 	imp_sth->is_scrollcursor = False;
 	dbd_ix_link_add(&imp_dbh->head, &imp_sth->chain);
@@ -767,6 +768,56 @@ dbd_ix_close(imp_sth_t *imp_sth)
 	return 1;
 }
 
+/* Release a complete SQL DESCRIPTOR, including any blobs */
+static void dbd_ix_st_deallocate(char *p_name, int nblobs, int ncols)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char *name = p_name;
+	EXEC SQL END DECLARE SECTION;
+
+	/* ESQL/C does not (always) deallocate blob space automatically */
+	/* Verified unfixed for ESQL/C 6.00.UE1 on Solaris 2.4 */
+	/* Verified unfixed for ESQL/C 7.21.UC1 on Solaris 2.4 with Purify */
+	/* Verified unfixed for ESQL/C 7.23.UC1 on Solaris 2.4 */
+	/* Verified *fixed* in 7.24.UC1 on Solaris 2.5.1 (bad frees reported) */
+	/* Verified as a bad fix on Windows 95/NT by Harald Ums (no version) */
+#if ESQLC_VERSION < 724
+#define DBD_IX_RELEASE_BLOBS
+#endif
+#ifdef WIN32
+#undef DBD_IX_RELEASE_BLOBS
+#endif /* WIN32 */
+
+#ifdef DBD_IX_RELEASE_BLOBS
+	if (nblobs > 0)
+	{
+		EXEC SQL BEGIN DECLARE SECTION;
+		int             colno;
+		int             coltype;
+		loc_t           blob;
+		EXEC SQL END DECLARE SECTION;
+
+		for (colno = 1; colno <= ncols; colno++)
+		{
+			EXEC SQL GET DESCRIPTOR :name VALUE :colno :coltype = TYPE;
+			if (sqlca.sqlcode != 0)
+				break;
+			if (coltype == SQLBYTES || coltype == SQLTEXT)
+			{
+				EXEC SQL GET DESCRIPTOR :name VALUE :colno :blob = DATA;
+				if (sqlca.sqlcode != 0)
+					break;
+				if (blob.loc_loctype == LOCMEMORY && blob.loc_buffer != 0)
+					free(blob.loc_buffer);
+			}
+		}
+	}
+#endif /* DBD_IX_RELEASE_BLOBS */
+
+	EXEC SQL DEALLOCATE DESCRIPTOR :name;
+	dbd_ix_debug(3, "dbd_ix_deallocate() DEALLOCATE descriptor %s\n", name);
+}
+
 /* Release all database and allocated resources for statement */
 static void
 del_statement(imp_sth_t *imp_sth)
@@ -792,66 +843,27 @@ del_statement(imp_sth_t *imp_sth)
 		/* FALLTHROUGH */
 
 	case Opened:
-		dbd_ix_debug(3, "del_statement() %s\n", "CLOSE cursor");
 		name = imp_sth->nm_cursor;
 		EXEC SQL CLOSE :name;
+		dbd_ix_debug(3, "del_statement() CLOSE cursor %s\n", name);
 		/* FALLTHROUGH */
 
 	case Declared:
-		dbd_ix_debug(3, "del_statement() %s\n", "FREE cursor");
 		name = imp_sth->nm_cursor;
 		EXEC SQL FREE :name;
+		dbd_ix_debug(3, "del_statement() FREE cursor %s\n", name);
 		/* FALLTHROUGH */
 
 	case Described:
 	case Allocated:
-		name = imp_sth->nm_obind;
-
-		/* ESQL/C does not (always) deallocate blob space automatically */
-		/* Verified unfixed for ESQL/C 6.00.UE1 on Solaris 2.4 */
-		/* Verified unfixed for ESQL/C 7.21.UC1 on Solaris 2.4 with Purify */
-		/* Verified unfixed for ESQL/C 7.23.UC1 on Solaris 2.4 */
-		/* Verified *fixed* in 7.24.UC1 on Solaris 2.5.1 (bad frees reported) */
-		/* Verified as a bad fix on Windows 95/NT by Harald Ums (no version) */
-#if ESQLC_VERSION < 724
-#define DBD_IX_RELEASE_BLOBS
-#endif
-#ifdef WIN32
-#undef DBD_IX_RELEASE_BLOBS
-#endif /* WIN32 */
-
-#ifdef DBD_IX_RELEASE_BLOBS
-		if (imp_sth->n_blobs > 0)
-		{
-			EXEC SQL BEGIN DECLARE SECTION;
-			int             colno;
-			int             coltype;
-			loc_t           blob;
-			EXEC SQL END DECLARE SECTION;
-
-			for (colno = 1; colno <= imp_sth->n_columns; colno++)
-			{
-				EXEC SQL GET DESCRIPTOR :name VALUE :colno :coltype = TYPE;
-				/* dbd_ix_sqlcode(imp_sth->dbh); */
-				if (coltype == SQLBYTES || coltype == SQLTEXT)
-				{
-					EXEC SQL GET DESCRIPTOR :name VALUE :colno :blob = DATA;
-					/* dbd_ix_sqlcode(imp_sth->dbh); */
-					if (blob.loc_loctype == LOCMEMORY && blob.loc_buffer != 0)
-						free(blob.loc_buffer);
-				}
-			}
-		}
-#endif /* DBD_IX_RELEASE_BLOBS */
-
-		dbd_ix_debug(3, "del_statement() %s\n", "DEALLOCATE descriptor");
-		EXEC SQL DEALLOCATE DESCRIPTOR :name;
+		dbd_ix_st_deallocate(imp_sth->nm_obind, imp_sth->n_oblobs, imp_sth->n_ocols);
+		dbd_ix_st_deallocate(imp_sth->nm_ibind, imp_sth->n_iblobs, imp_sth->n_icols);
 		/* FALLTHROUGH */
 
 	case Prepared:
-		dbd_ix_debug(3, "del_statement() %s\n", "FREE statement");
 		name = imp_sth->nm_stmnt;
 		EXEC SQL FREE :name;
+		dbd_ix_debug(3, "del_statement() FREE statement %s\n", name);
 		/* FALLTHROUGH */
 
 	case Unused:
@@ -883,19 +895,21 @@ dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 		return 0;
 	}
 
-	if (items > imp_sth->n_bound)
+	if (items > imp_sth->n_icols)
 	{
-		if (imp_sth->n_bound > 0)
+		if (imp_sth->n_icols > 0)
 		{
+			dbd_ix_debug(3, "dbd_ix_setbindnum() DEALLOCATE descriptor %s\n", nm_ibind);
 			EXEC SQL DEALLOCATE DESCRIPTOR :nm_ibind;
 			dbd_ix_sqlcode(imp_sth->dbh);
-			imp_sth->n_bound = 0;
+			imp_sth->n_icols = 0;
 			if (sqlca.sqlcode < 0)
 			{
 				dbd_ix_exit(function);
 				return 0;
 			}
 		}
+		dbd_ix_debug(3, "dbd_ix_setbindnum() ALLOCATE descriptor %s\n", nm_ibind);
 		EXEC SQL ALLOCATE DESCRIPTOR :nm_ibind WITH MAX :bind_size;
 		dbd_ix_sqlcode(imp_sth->dbh);
 		if (sqlca.sqlcode < 0)
@@ -903,7 +917,7 @@ dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 			dbd_ix_exit(function);
 			return 0;
 		}
-		imp_sth->n_bound = items;
+		imp_sth->n_icols = items;
 	}
 	dbd_ix_exit(function);
 	return 1;
@@ -1101,17 +1115,17 @@ dbd_ix_blobs(imp_sth_t *imp_sth)
 	int 			colno;
 	int coltype;
 	EXEC SQL END DECLARE SECTION;
-	int             n_columns = imp_sth->n_columns;
+	int             n_ocols = imp_sth->n_ocols;
 
 	dbd_ix_enter(function);
-	imp_sth->n_blobs = count_blobs(nm_obind, n_columns);
-	if (imp_sth->n_blobs == 0)
+	imp_sth->n_oblobs = count_blobs(nm_obind, n_ocols);
+	if (imp_sth->n_oblobs == 0)
 	{
 		dbd_ix_exit(function);
 		return;
 	}
 
-	/* warn("dbd_ix_blobs: %d blobs\n", imp_sth->n_blobs); */
+	/* warn("dbd_ix_blobs: %d blobs\n", imp_sth->n_oblobs); */
 
 	/* Set blob location */
 	if (blob_locate(&blob, imp_sth->blob_bind) != 0)
@@ -1119,7 +1133,7 @@ dbd_ix_blobs(imp_sth_t *imp_sth)
 		croak("memory allocation error 3 in dbd_ix_blobs\n");
 	}
 
-	for (colno = 1; colno <= n_columns; colno++)
+	for (colno = 1; colno <= n_ocols; colno++)
 	{
 		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno :coltype = TYPE;
 		dbd_ix_sqlcode(imp_sth->dbh);
@@ -1147,7 +1161,7 @@ dbd_ix_udts(imp_sth_t *imp_sth)
 
     dbd_ix_enter(function);
 #if ESQLC_VERSION > 900
-    for (colno = 1; colno <= imp_sth->n_columns; colno++)
+    for (colno = 1; colno <= imp_sth->n_ocols; colno++)
 	{ 
 		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno :coltype = TYPE;
         dbd_ix_sqlcode(imp_sth->dbh);
@@ -1391,7 +1405,29 @@ count_descriptors(char *stmt)
 	if (sqlca.sqlcode >= 0)
 	{
 		n = u->sqld;
+#if defined(PERL_OBJECT) && (ESQLC_VERSION >= 720 || (ESQLC_VERSION >= 501 && ESQLC_VERSION < 600))
+		/**
+		** JL 2000-02-29:
+		** Using SqlFreeMem() is the recommended fix for PTS Bug B83831
+		** on Win32 platforms.  See the notes in the file Notes/nt for
+		** more details about this.  SqlFreeMem() is not necessarily
+		** documented, but it should be.  Apparently, SqlFreeMem() was
+		** available in 5.01.WC1, so it should be available in all 5.x
+		** versions.  It was reinstated in 7.20.TD1; the conditions
+		** above document this.  It was only ever available on Win32
+		** (Windows NT) and never on Unix.  The PERL_OBJECT define is
+		** associated with ActiveState's Active Perl on NT and only
+		** optionally with a manual build of Perl on NT.  If there is a
+		** better platform indicator, we can change that part of the
+		** condition.  Note that even if the DBD::Informix code only
+		** uses Sqlda structures, the NT platform will probably use
+		** SqlFreeMem().  You may run into crashes if SqlFreeMem() is
+		** not available for your version of ESQL/C on NT.
+		*/
+		SqlFreeMem(u, SQLDA_FREE);
+#else
 		free(u);
+#endif
 	}
 	dbd_ix_debug_l(1, "number of described fields %ld\n", (long)n);
 	return(n);
@@ -1474,6 +1510,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	/* SQL DESCRIPTORS must have WITH MAX of at least one (-470) */
 	if (desc_count == 0)
 		desc_count = 1;
+	dbd_ix_debug(3, "dbd_ix_st_prepare() ALLOCATE descriptor %s\n", nm_obind);
 	EXEC SQL ALLOCATE DESCRIPTOR :nm_obind WITH MAX :desc_count;
 	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
@@ -1507,7 +1544,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	}
 
 	/* Record the number of fields in the cursor for DBI and DBD::Informix  */
-	DBIc_NUM_FIELDS(imp_sth) = imp_sth->n_columns = desc_count;
+	DBIc_NUM_FIELDS(imp_sth) = imp_sth->n_ocols = desc_count;
 
 	/**
 	** Only non-cursory statements need an output descriptor.
@@ -1523,10 +1560,10 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 #endif	/* SQ_EXECPROC */
 	else if (imp_sth->st_type == SQ_INSERT && desc_count > 0)
 	{
-        int nudts = dbd_ix_udts( imp_sth );
+        int nudts = dbd_ix_udts(imp_sth);
 
 		dbd_ix_blobs(imp_sth);
-		if (imp_sth->n_blobs > 0 || nudts > 0)
+		if (imp_sth->n_oblobs > 0 || nudts > 0)
 		{
 			/**
 			** Switch the nm_obind and nm_ibind names so that when
@@ -1535,10 +1572,14 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 			** correctly.
 			*/
 			Name tmpname;
+			dbd_ix_debug(3, "dbd_ix_st_prepare() switch descriptor names: old ibind %s\n", imp_sth->nm_ibind);
+			dbd_ix_debug(3, "dbd_ix_st_prepare() switch descriptor names: old obind %s\n", imp_sth->nm_obind);
 			strcpy(tmpname, imp_sth->nm_ibind);
 			strcpy(imp_sth->nm_ibind, imp_sth->nm_obind);
 			strcpy(imp_sth->nm_obind, tmpname);
-			imp_sth->n_bound = desc_count;
+			dbd_ix_debug(3, "dbd_ix_st_prepare() switch descriptor names: new ibind %s\n", imp_sth->nm_ibind);
+			dbd_ix_debug(3, "dbd_ix_st_prepare() switch descriptor names: new obind %s\n", imp_sth->nm_obind);
+			imp_sth->n_icols = desc_count;
 		}
 		rc = 1;
 	}
@@ -1563,7 +1604,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 		dbd_ix_debug(0, "*** %s -- blob update not fully implemented!!!\n", dbd_ix_module());
 #if 0
 		dbd_ix_blobs(imp_sth);
-		if (imp_sth->n_blobs > 0)
+		if (imp_sth->n_iblobs > 0)
 		{
 			/**
 			** Switch the nm_obind and nm_ibind names so that when
@@ -1575,7 +1616,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 			strcpy(tmpname, imp_sth->nm_ibind);
 			strcpy(imp_sth->nm_ibind, imp_sth->nm_obind);
 			strcpy(imp_sth->nm_obind, tmpname);
-			imp_sth->n_bound = desc_count;
+			imp_sth->n_icols = desc_count;
 		}
 #endif /* 0 */
 		rc = 1;
@@ -1588,7 +1629,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 		rc = 1;
 	}
 
-	dbd_ix_debug_2(2, "%s'imp_sth->n_columns: %d\n", function, imp_sth->n_columns);
+	dbd_ix_debug_2(2, "%s'imp_sth->n_ocols: %d\n", function, imp_sth->n_ocols);
 
 	dbd_ix_exit(function);
 	return rc;
@@ -1772,7 +1813,7 @@ $endif; -- IUS_DATA_TYPES
 
 	av = DBIS->get_fbav(imp_sth);
 
-	for (index = 1; index <= imp_sth->n_columns; index++)
+	for (index = 1; index <= imp_sth->n_ocols; index++)
 	{
 		SV             *sv = AvARRAY(av)[index - 1];
 		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
@@ -2078,7 +2119,7 @@ dbd_ix_open(imp_sth_t *imp_sth)
 	if (imp_sth->st_state == Opened || imp_sth->st_state == Finished)
 		dbd_ix_close(imp_sth);
 	assert(imp_sth->st_state == Declared);
-	if (imp_sth->n_bound > 0)
+	if (imp_sth->n_icols > 0)
 		EXEC SQL OPEN :nm_cursor USING SQL DESCRIPTOR :nm_ibind;
 	else
 		EXEC SQL OPEN :nm_cursor;
@@ -2173,7 +2214,7 @@ dbd_ix_exec(imp_sth_t *imp_sth)
 
 	if (exec_stmt == True)
 	{
-		if (imp_sth->n_bound > 0)
+		if (imp_sth->n_icols > 0)
 		{
 			EXEC SQL EXECUTE :nm_stmnt USING SQL DESCRIPTOR :nm_ibind;
 		}
@@ -2300,6 +2341,7 @@ dbd_ix_st_execute(SV *sth, imp_sth_t *imp_sth)
 	int rc;
 
 	dbd_ix_enter(function);
+
 	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
@@ -2311,7 +2353,7 @@ dbd_ix_st_execute(SV *sth, imp_sth_t *imp_sth)
 	if (imp_sth->st_type == SQ_SELECT)
 		rc = dbd_ix_open(imp_sth);
 #ifdef SQ_EXECPROC
-	else if (imp_sth->st_type == SQ_EXECPROC && imp_sth->n_columns > 0)
+	else if (imp_sth->st_type == SQ_EXECPROC && imp_sth->n_ocols > 0)
 		rc = dbd_ix_open(imp_sth);
 #endif /* SQ_EXECPROC */
 	else

@@ -77,15 +77,21 @@ decsci.o \
 \
       -lifgls -lV3 -lcl -lsec /home/ius913/lib/esql/checkapi.o -lifglx eprintf.o
 
-There are probably other ways as you suggest above, but I fould this one
+There are probably other ways as you suggest above, but I found this one
 relatively quick and easy.
 
-Regards,
-    Bernd
 --
 Bernd Gill                                   DSI Consulting
 bernd@dsi.co.nz                              PO Box 11-466
 http://www.netlink.co.nz/~bernd              Wellington
 Phone: +64-4-389-6658, Fax +64-4-389-6798
 
-@(#)$Id: Notes/eprintf version /main/2 1998-06-17 16:04:44 $
+---------------------------------------------------------------------------
+1999-10-31:
+You can automatically include the code for _eprintf (in file eprintf.c)
+into the build by specifying:
+    export DBD_INFORMIX_USE_EPRINTF_CODE=yes
+    perl Makefile.PL
+You should not need to hack the generated Makefile.
+
+@(#)$Id: Notes/eprintf version /main/3 2000-02-11 12:19:33 $

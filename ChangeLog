@@ -1,7 +1,19 @@
-Change Log for Informix Database Driver for Perl Version 0.97005 (2000-02-10) (aka DBD::Informix)
+Change Log for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) (aka DBD::Informix)
 
 1.00.PC1 Release
 ----------------
+2000-02-29: Bug fix for crash on free() under ActiveState Perl.  Finalize
+            for release to Informix operations and PAUSE/CPAN.
+2000-02-25: Improve build for NT and ActiveState Perl.  Fix memory leak
+            found by Wang Yan <wangyan@buptnortel.com> and Kevin Brannen
+            <kbrannen@physiciansdata.com>.  Add memory_leak_test method to
+            TestHarness, and assume that NT does not support shared memory
+            connections.
+2000-02-17: Finalize the tech support arrangements for this release.
+2000-02-15: Rename Informix.faq to FAQ and merge Informix.Licence and
+            updating.blobs into it.
+2000-02-11: Fix t/t50update.t to use username and password instead of
+            username twice -- spotted by Nick Goddard <nickg@clic.co.uk>.
 2000-02-10: Since XPS does not support unlogged databases at all, skip the
             unlogged database test.  Some versions of ESQL/C 7.2x (and
             7.1x) will only link with static libraries regardless of
@@ -84,6 +96,27 @@ Change Log for Informix Database Driver for Perl Version 0.97005 (2000-02-10) (a
             alpha, beta or gamma version numbers.  Version number stamping
             is quite different under ClearCase.
 
+Test Releases
+-------------
+The following experimental releases were placed on CPAN to check that
+certain aspects of the distribution actually worked.  The 0.96 series of
+releases and 0.97.PC1 were primarily to check whether CPAN/PAUSE would
+accept the non-numeric characters in the version number (it does).  The
+0.9700x series of releases could be regarded as beta versions.  Any of
+these versions still on CPAN will soon be removed.
+
+2000-02-10: Version 0.97005
+2000-02-10: Version 0.97004
+2000-02-07: Version 0.97003
+2000-01-24: Version 0.97002
+2000-01-19: Version 0.97001
+2000-01-19: Version 0.97.PC1
+2000-01-17: Version 0.96.PC2X2
+2000-01-17: Version 0.96.PC2X1
+2000-01-17: Version 0.96.PC2
+2000-01-17: Version 0.96.PC1X1
+2000-01-17: Version 0.96.PC1
+
 0.95 Release
 ------------
 1999-12-30: Create ItWorks script to report on working versions.  Update
@@ -115,6 +148,7 @@ Change Log for Informix Database Driver for Perl Version 0.97005 (2000-02-10) (a
 1999-11-27: Modify esqltest to allow shared memory connections.  Modify the
             multiple connection tests so that they are skipped.  Update notes
             to match.
+1999-11-19: Make ix_AutoErrorReport obsolete and ineffective.
 1999-11-18: Remove the 'record INFORMIXDIR and INFORMIXSERVER' code and
             reinstate Informix.pm (instead of Informix.pm.PL) because PAUSE
             and CPAN get confused when there is no Informix.pm file.  Use
@@ -805,4 +839,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@informix.com>
-@(#)$Id: ChangeLog version /main/111 2000-02-10 15:34:33 $
+@(#)$Id: ChangeLog version /main/116 2000-02-29 14:15:19 $

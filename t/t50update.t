@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t50update.t version /main/7 2000-02-03 15:54:00 $
+# @(#)$Id: t/t50update.t version /main/8 2000-02-11 10:44:27 $
 #
 # Portions Copyright 1998-99 Jonathan Leffler
 # Portions Copyright 2000    Informix Software Inc
@@ -13,7 +13,7 @@ use DBD::Informix::TestHarness;
 
 my ($dbname) = "dbd_ix_db";
 my ($user) = $ENV{DBD_INFORMIX_USERNAME};
-my ($pass) = $ENV{DBD_INFORMIX_USERNAME};
+my ($pass) = $ENV{DBD_INFORMIX_PASSWORD};
 
 stmt_note("1..9\n");
 

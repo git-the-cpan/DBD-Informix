@@ -5,7 +5,7 @@
 @(#)Purpose:         Fixed, Exponential and Engineering formatting of DECIMALs
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1991-93,1996-97,1999
-@(#)Product:         Informix Database Driver for Perl Version 0.97005 (2000-02-10)
+@(#)Product:         Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
 */
 
 #include "esqlc.h"

@@ -1,11 +1,11 @@
 /*
-@(#)File:           $RCSfile: ixblob.ec,v $
-@(#)Version:        $Revision: 50.9 $
-@(#)Last changed:   $Date: 1998/10/28 18:42:12 $
+@(#)File:           $Id: ixblob.ec version /main/15 2000-03-03 11:02:33 $
+@(#)Based on:       ixblob.ec 50.9 1998-10-28 18:42:12
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) Jonathan Leffler 1996-98
-@(#)Product:        Informix Database Driver for Perl Version 0.97005 (2000-02-10)
+@(#)Copyright:      1996-98 Jonathan Leffler
+@(#)Copyright:      2000    Informix Software Inc
+@(#)Product:        Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
 */
 
 /*TABSTOP=4*/
@@ -36,7 +36,7 @@
 static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec version /main/14 1998-10-28 18:42:12 $";
+static const char rcs[] = "@(#)$Id: ixblob.ec version /main/15 2000-03-03 11:02:33 $";
 #endif
 
 BlobLocn blob_getlocmode(void)
@@ -132,10 +132,18 @@ static int blob_locinmem(Blob *blob)
 ** Initialise a Blob data structure ready for use.
 ** Returns: 0 => OK, non-zero => fail
 */
-int blob_locate(Blob * blob, BlobLocn locn)
+int blob_locate(Blob *blob, BlobLocn locn)
 {
 	int rc;
 
+	/**
+	** JL 2000-03-03: Using memset is a hack; it is not really
+	** understood why it is necessary, but it seems to avoid some
+	** problems on NT and with Purify.  An alternative to memset would
+	** create a static variable "static Blob zero_blob = { 0 };" and use
+	** "*blob = zero_blob;" to initialize the data.
+	*/
+	memset(blob, 0, sizeof(Blob));
 	blob->loc_status = 0;
 	blob->loc_type = SQLTEXT;
 	blob->loc_xfercount = 0;

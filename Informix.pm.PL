@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $
+#   @(#)$Id: Informix.pm.PL version /main/8 2000-02-17 12:13:36 $
 #
-#   Generate configured Informix.pm file for Informix Database Driver for Perl Version 0.97005 (2000-02-10)
+#   Generate configured Informix.pm file for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
 #
 #   Script to create annotated version of Informix.pm recording
 #   default values of INFORMIXDIR and INFORMIXSERVER during build.
@@ -65,13 +65,13 @@ exit 0;
 
 __END__
 
-#	@(#)$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $
+#	@(#)$Id: Informix.pm.PL version /main/8 2000-02-17 12:13:36 $
 #
-#   @(#)Informix Database Driver for Perl Version 0.97005 (2000-02-10)
+#   @(#)Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
 #
-#   Portions Copyright 1994-95   Tim Bunce
-#   Portions Copyright 1996-1999 Jonathan Leffler
-#   Portions Copyright 2000      Informix Software Inc
+#   Portions Copyright 1994-95 Tim Bunce
+#   Portions Copyright 1996-99 Jonathan Leffler
+#   Portions Copyright 2000    Informix Software Inc
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -88,9 +88,9 @@ __END__
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION          = "0.97005";
+	$VERSION          = "1.00.PC1";
 	$ATTRIBUTION      = 'Jonathan Leffler <j.leffler@acm.org>';
-	$Revision         = '$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $';
+	$Revision         = '$Id: Informix.pm.PL version /main/8 2000-02-17 12:13:36 $';
 	$INFORMIX_LICENCE = ":INFORMIX_LICENCE:";
 
 	require_version DBI 1.02;	# Requires features from DBI 1.02 release
@@ -496,7 +496,7 @@ __END__
 
 =head1 NAME
 
-DBD::Informix - Access to Informix Databases
+DBD::Informix - Informix Database Driver for Perl
 
 =head1 SYNOPSIS
 
@@ -504,7 +504,7 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes Informix Database Driver for Perl Version 0.97005 (2000-02-10).
+This document describes Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03).
 
 You should also read the documentation for DBI C<perldoc DBI> as this document
 qualifies what is stated there.
@@ -541,7 +541,18 @@ strings for cursor names and statement names, and these features were
 not available before Version 5.00.
 
 For information about Informix software, you should also read the
-Notes/Informix.License file that is distributed with DBD::Informix. 
+Notes/FAQ file that is distributed with Informix Database Driver for Perl. 
+
+=head2 TECHNICAL SUPPORT
+
+For information on technical support for Informix Database Driver for Perl, please run:
+
+		perldoc DBD::Informix::TechSupport
+
+For information on reporting bugs in Informix Database Driver for Perl, please review the
+Notes/bug.reports file as well.
+
+=head2 JAPANESE DOCUMENTATION
 
 For a Japanese translation of a recent version of this
 documentation (maintained by Kawai Takanori <kawai@nippon-rad.co.jp>),
@@ -570,6 +581,7 @@ Note that you do not write:
 
 =head2 DRIVER ATTRIBUTES AND METHODS
 
+Most people should skip this section.
 If you have a burning desire to explicitly install the
 Informix driver independently of connecting to any database, use:
 
@@ -612,12 +624,14 @@ can sever all connections to databases with disconnect_all.
 
     $drh->disconnect_all;
 
+=head1 AVAILABLE DATA SOURCES
+
 To find out which databases are available, you can use the function:
 
     @dbnames = DBI->data_sources('Informix');
 
 Note that you might also be able to connect to other databases not
-listed by DBI->datasources using other notations to identify the
+listed by DBI->data_sources using other notations to identify the
 database.
 For example, you can connect to "dbase@server" if "server" appears in
 the sqlhosts file and the database "dbase" exists on the server and
@@ -682,12 +696,12 @@ These attributes include:
     RaiseError
 
 Note that you cannot specify ChopBlanks in this list.
-DBD::Informix formerly recognized the ix_AutoErrorReport attribute as a
-synonym for the PrintError attribute, except that ix_AutoErrorReport
+DBD::Informix formerly recognized the ix_AutoErrorReport attribute as
+a synonym for the PrintError attribute, except that ix_AutoErrorReport
 was not recognized in the connect call.
-However, because ix_AutoErrorReport now generates a warning and is
-otherwise ignored, you should upgrade any code that uses it to use the
-standard DBI attribute PrintError instead.
+Starting with version 0.95, using ix_AutoErrorReport generates a
+warning and is otherwise ignored, so you should upgrade any code that
+uses it to use the standard DBI attribute PrintError instead.
 If you use the new style connect, you could therefore specify that the
 database is not to operate in AutoCommit mode, but errors should be
 reported automatically by specifying:
@@ -1511,6 +1525,33 @@ ChangeLog file.
 
 =head1 SEE ALSO
 
-perl(1), "perldoc DBI", "perldoc DBI::DBD".
+perl(1)
+
+Using 'perldoc', read the pages on:
+
+=over 2
+
+=item *
+DBI - main documentation on Perl DBI
+
+=item *
+DBI::FAQ - Separately installable module of Frequently Asked Questions
+
+=item *
+DBD::Informix::TechSupport - How to report problems with DBD::Informix
+
+=item *
+DBD::Informix::TestHarness - Test harness used when testing DBD::Informix
+
+=item *
+DBD::Informix::Summary - Standardized summary of DBD::Informix properties
+
+=item *
+DBD::Informix::Configuration - Tools used in configuring DBD::Informix
+
+=item *
+DBI::DBD - How to write a driver for Perl DBI
+
+=back
 
 =cut

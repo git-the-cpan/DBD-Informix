@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD/Informix/Configuration.pm version /main/4 2000-02-03 16:04:38 $ 
+#   @(#)$Id: DBD/Informix/Configuration.pm version /main/5 2000-02-10 19:36:21 $ 
 #
-#   Informix ESQL/C Support Routines for Informix Database Driver for Perl Version 0.97005 (2000-02-10)
+#   Informix ESQL/C Support Routines for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
 #
 #   Portions Copyright 1999 Jonathan Leffler
 #   Portions Copyright 2000 Informix Software Inc
@@ -23,7 +23,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(find_informixdir_and_esql get_esqlc_version map_informix_lib_names);
 
-	$VERSION = "0.97005";
+	$VERSION = "1.00.PC1";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -87,6 +87,7 @@
 	# --- Find out which version of Informix ESQL/C by running 'esql -V'
 	# NB: Argument should be name of esql program which can be executed.
 	#     The checks for Unix in find_informixdir_and_esql should be OK.
+	#     Allow for version 10.00 and later -- still hypothetical but...
 	sub get_esqlc_version
 	{
 		my ($esql) = @_;
@@ -100,10 +101,12 @@
 		close ESQL;
 
 		chomp($infv);
-		$infv =~ s/[ 	]+$//;
-		($vers = $infv) =~ s/INFORMIX.* Version (....).*/$1/;
-		die "Unexpected message from esql script -- $vers\n"
-			unless ($vers =~ /[0-9]\.[0-9][0-9]/);
+		$infv =~ s/\s+$//;	# Delete trailing white space
+		$infv =~ s/\s+/ /g;	# Replace white space with single blanks
+		$vers = $infv;
+		$vers =~ s/INFORMIX.* Version (\d+[.]\d+).*/$1/;
+		die "Unexpected message from esql script -- $infv\n"
+			unless ($vers =~ /\d+[.]\d+/);
 		$vers =~ s/^([0-9])\./$1/;
 
 		return $infv, $vers;
@@ -203,7 +206,7 @@ use DBD::Informix::Configuration;
 
 =head1 DESCRIPTION
 
-This module is used by Informix Database Driver for Perl Version 0.97005 (2000-02-10) in the build and bug reporting code.
+This module is used by Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) in the build and bug reporting code.
 You will seldom if ever have cause to use this module directly.
 
 =head2 Using find_informixdir_and_esql

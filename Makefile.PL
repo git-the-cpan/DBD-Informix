@@ -1,8 +1,8 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL version /main/126 2000-02-10 17:14:27 $
+# @(#)$Id: Makefile.PL version /main/128 2000-02-25 10:30:23 $
 #
-# Configuration script for Informix Database Driver for Perl Version 0.97005 (2000-02-10) (aka DBD::Informix)
+# Configuration script for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) (aka DBD::Informix)
 #
 # Portions Copyright 1996-99 Jonathan Leffler
 # Portions Copyright 1996    Alligator Descartes
@@ -46,7 +46,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "0.97005";
+my $dbd_ix = "1.00.PC1";
 # Hack for handling builds directly in Atria Clearcase view.
 $dbd_ix = "0.97002" unless $dbd_ix =~ /^\d+\.\d+/;
 
@@ -72,7 +72,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring Informix Database Driver for Perl Version 0.97005 (2000-02-10) (aka $opts{NAME})
+Configuring Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -185,7 +185,7 @@ elsif ($vernum >= 600 && $vernum < 700)
 			Please upgrade to version 7.24 or later.
 			%);
 	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
-	$esqlc_flags .= &set_esqlc_linkage("");
+	$esqlc_flags .= &set_esqlc_linkage("", $NTConfiguration);
 }
 elsif ($vernum >= 700 && $vernum < 720)
 {
@@ -196,7 +196,7 @@ elsif ($vernum >= 700 && $vernum < 720)
 			Please upgrade to version 7.24 or later.
 			%);
 	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
-	$esqlc_flags .= &set_esqlc_linkage("");
+	$esqlc_flags .= &set_esqlc_linkage("", $NTConfiguration);
 	&fix_b102265($epp, $esql, $opts{NAME})
 		if ($Config{osname} eq "hpux" && &grep_for_statopt_staticonly($epp));
 }elsif ($vernum >= 720 && $vernum < 800)
@@ -218,7 +218,7 @@ elsif ($vernum >= 700 && $vernum < 720)
 			Please check out the Y2K page at the Informix web site (http://www.informix.com)
 			Please upgrade to version 7.24 or later.
 			%) if ($vernum < 724);
-	$esqlc_flags .= &set_esqlc_linkage("-shared");
+	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 	&fix_b102265($epp, $esql, $opts{NAME})
 		if ($Config{osname} eq "hpux" && &grep_for_statopt_staticonly($epp));
 }
@@ -232,7 +232,7 @@ elsif ($vernum >= 800 && $vernum < 900)
 				$opts{NAME} is still learning about XPS, so please report
 				your experience installing $opts{NAME} with XPS.  Thanks!
 				%);
-	$esqlc_flags .= &set_esqlc_linkage("-shared");
+	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 }
 elsif ($vernum >= 900 && $vernum < 912)
 {
@@ -249,7 +249,7 @@ elsif ($vernum >= 900 && $vernum < 912)
 	print "You should upgrade to a more recent version of ESQL/C.\n";
 	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
 	print $warning;
-	$esqlc_flags .= &set_esqlc_linkage("-shared");
+	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 }
 elsif ($vernum >= 912 && $vernum < 1000)
 {
@@ -265,7 +265,7 @@ elsif ($vernum >= 912 && $vernum < 1000)
 			Please upgrade to a more recent version of ClientSDK.
 		%) if ($vernum == 914);
 	print $warning;
-	$esqlc_flags .= &set_esqlc_linkage("-shared");
+	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 }
 else
 {
@@ -334,12 +334,12 @@ printf ESQLINFO "%s%s IUS_DATA_TYPES;\n", '$', (($vernum >= 900) ? "define" : "u
 close ESQLINFO;
 }
 
-# Add extra definitions to compile the code under GCC if DBD_GCC_DEBUG set.
+# Add extra definitions to compile the code under GCC if DBD_INFORMIX_DEBUG_GCC set.
 # Perl configuration headers contain lots of /* inside comments (-Wno-comment)
 #$opts{DEFINE} .= ' -Wall -pedantic -Wno-comment -Wpointer-arith -Wcast-align'
 #	    . ' -Wconversion -Wtraditional -Wcast-qual'
 $opts{DEFINE} .= ' -Wall -pedantic -Wno-comment'
-	if $Config{cc} eq 'gcc' and $ENV{DBD_GCC_DEBUG};
+	if $Config{cc} eq 'gcc' and $ENV{DBD_INFORMIX_DEBUG_GCC};
 
 # Ensure that __STDC__ is defined under CenterLine CC
 $opts{DEFINE} .= ' -Xa'
@@ -875,7 +875,11 @@ sub customize_esql
 
 sub set_esqlc_linkage
 {
-	my ($def_link) = @_;
+	my ($def_link, $nt) = @_;
+	# The NT ESQL/C compiler (version 9.30.TC1 at least, probably all) does
+	# not recognize the "-shared" option (it passes it through to the C
+	# compiler, which doesn't recognize it either), so never set it.
+	return "" if ($nt);
 	my $env_link = $ENV{DBD_INFORMIX_ESQLC_LINKAGE};
 	print "** Using $env_link from DBD_INFORMIX_ESQLC_LINKAGE environment variable.\n\n"
 		if (defined $env_link);

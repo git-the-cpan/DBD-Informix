@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdattr.ec version /main/39 2000-02-07 17:40:09 $ 
+ * @(#)$Id: dbdattr.ec version /main/40 2000-02-25 10:02:30 $ 
  *
- * @(#)$Product: Informix Database Driver for Perl Version 0.97005 (2000-02-10) $ -- attribute handling
+ * @(#)$Product: Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) $ -- attribute handling
  *
  * Portions Copyright 1997-99 Jonathan Leffler
  * Portions Copyright 2000    Informix Software Inc
@@ -13,7 +13,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec version /main/39 2000-02-07 17:40:09 $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec version /main/40 2000-02-25 10:02:30 $";
 #endif
 
 #include <stdio.h>
@@ -367,7 +367,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	{
 		av = newAV();
 		retsv = newRV((SV *)av);
-		for (i = 1; i <= imp_sth->n_columns; i++)
+		for (i = 1; i <= imp_sth->n_ocols; i++)
 		{
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
 				:colname = NAME;
@@ -379,7 +379,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	{
 		av = newAV();
 		retsv = newRV((SV *)av);
-		for (i = 1; i <= imp_sth->n_columns; i++)
+		for (i = 1; i <= imp_sth->n_ocols; i++)
 		{
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
 				:colnull = NULLABLE;
@@ -391,7 +391,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 		/* Returns ODBC (CLI) type numbers. */
 		av = newAV();
 		retsv = newRV((SV *)av);
-		for (i = 1; i <= imp_sth->n_columns; i++)
+		for (i = 1; i <= imp_sth->n_ocols; i++)
 		{
 			SV		*sv;
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
@@ -405,7 +405,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 		/* Should return CLI precision numbers. */
 		av = newAV();
 		retsv = newRV((SV *)av);
-		for (i = 1; i <= imp_sth->n_columns; i++)
+		for (i = 1; i <= imp_sth->n_ocols; i++)
 		{
 			SV		*sv;
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
@@ -419,7 +419,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 		/* Should return CLI scale numbers. */
 		av = newAV();
 		retsv = newRV((SV *)av);
-		for (i = 1; i <= imp_sth->n_columns; i++)
+		for (i = 1; i <= imp_sth->n_ocols; i++)
 		{
 			SV		*sv;
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
@@ -434,8 +434,8 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	}
 	else if (KEY_MATCH(kl, key, "NUM_OF_FIELDS"))
 	{
-		assert(imp_sth->n_columns == DBIc_NUM_FIELDS(imp_sth));
-		retsv = newSViv((IV)imp_sth->n_columns);
+		assert(imp_sth->n_ocols == DBIc_NUM_FIELDS(imp_sth));
+		retsv = newSViv((IV)imp_sth->n_ocols);
 	}
 	else if (KEY_MATCH(kl, key, "CursorName"))
 	{
@@ -452,7 +452,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 			dbd_ix_deprecate("ix_NativeTypeNames", "ix_NativeTypeName");
 		av = newAV();
 		retsv = newRV((SV *)av);
-		for (i = 1; i <= imp_sth->n_columns; i++)
+		for (i = 1; i <= imp_sth->n_ocols; i++)
 		{
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
 				:coltype = TYPE, :collength = LENGTH;
@@ -463,7 +463,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	else if (KEY_MATCH(kl, key, "ix_Fetchable"))
 	{
 		Boolean rv = DBD_IX_BOOLEAN((imp_sth->st_type == SQ_SELECT) ||
-						(imp_sth->st_type == SQ_EXECPROC && imp_sth->n_columns > 0));
+						(imp_sth->st_type == SQ_EXECPROC && imp_sth->n_ocols > 0));
 		retsv = newSViv((IV)rv);
 	}
 	else if (KEY_MATCH(kl, key, "ix_BlobLocation"))
@@ -478,7 +478,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	{
 		av = newAV();
 		retsv = newRV((SV *)av);
-		for (i = 1; i <= imp_sth->n_columns; i++)
+		for (i = 1; i <= imp_sth->n_ocols; i++)
 		{
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
 				:coltype = TYPE;
@@ -489,7 +489,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	{
 		av = newAV();
 		retsv = newRV((SV *)av);
-		for (i = 1; i <= imp_sth->n_columns; i++)
+		for (i = 1; i <= imp_sth->n_ocols; i++)
 		{
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
 				:collength = LENGTH;

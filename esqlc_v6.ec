@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlc_v6.ec version /main/25 2000-02-09 15:31:03 $ 
+ * @(#)$Id: esqlc_v6.ec version /main/26 2000-02-24 15:51:57 $ 
  *
  * Informix Database Driver for Perl (DBD::Informix)
  * Connection Management for ESQL/C Version 6.0x and later
@@ -18,7 +18,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v6.ec version /main/25 2000-02-09 15:31:03 $";
+static const char rcs[] = "@(#)$Id: esqlc_v6.ec version /main/26 2000-02-24 15:51:57 $";
 #endif
 
 /* ================================================================= */
@@ -76,8 +76,6 @@ Boolean dbd_ix_connect(char *connection, char *dbase, char *user, char *pass)
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *dbconn;
 	char           *dbname;
-	char           *dbpass;
-	char           *dbuser;
 	EXEC SQL END DECLARE SECTION;
 	Boolean         conn_ok = False;
 

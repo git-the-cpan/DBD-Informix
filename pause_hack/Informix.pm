@@ -6,7 +6,7 @@
 
 package DBD::Informix;
 
-$VERSION = "0.97005";
+$VERSION = "1.00.PC1";
 
 # Zero so that require fails.
 

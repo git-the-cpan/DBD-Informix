@@ -1,31 +1,17 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t/t21mconn.t version /main/21 2000-01-27 16:20:33 $ 
+#	@(#)$Id: t/t21mconn.t version /main/22 2000-02-24 15:50:48 $ 
 #
 #	Test Multiple Connections for DBD::Informix
 #
-#	Portions Copyright (C) 1996-99 Jonathan Leffler
-#	Portions Copyright (C) 2000    Informix Software Inc
+#	Portions Copyright 1996-99 Jonathan Leffler
+#	Portions Copyright 2000    Informix Software Inc
 
+use strict;
 use DBD::Informix::TestHarness;
 
-$dbase1 = $ENV{DBD_INFORMIX_DATABASE};
-$dbase1 = "stores" unless ($dbase1);
-$dbase2 = $ENV{DBD_INFORMIX_DATABASE2};
-$user1 = $ENV{DBD_INFORMIX_USERNAME};
-$user2 = $ENV{DBD_INFORMIX_USERNAME2};
-$pass1 = $ENV{DBD_INFORMIX_PASSWORD};
-$pass2 = $ENV{DBD_INFORMIX_PASSWORD2};
-
-$user1 = "" if (! defined $user1);
-$pass1 = "" if (! defined $pass1);
-
-if (!$dbase2)
-{
-	$dbase2 = $dbase1;
-	$user2 = $user1;
-	$pass2 = $pass1;
-}
+my ($dbase1, $user1, $pass1) = &primary_connection();
+my ($dbase2, $user2, $pass2) = &secondary_connection();
 
 if (&is_shared_memory_connection($dbase1) &&
 	&is_shared_memory_connection($dbase2))
@@ -35,35 +21,10 @@ if (&is_shared_memory_connection($dbase1) &&
 	exit(0);
 }
 
-sub info_usertables
-{
-	my ($dbh) = @_;
-	my ($sth);
-	my ($row);
-
-	my ($stmt) =
-		"SELECT TabName FROM 'informix'.SysTables" .
-		" WHERE TabID >= 100 AND TabType = 'T'" .
-		" ORDER BY TabName";
-	&stmt_fail() unless ($sth = $dbh->prepare($stmt));
-	&stmt_ok();
-	&stmt_fail() unless ($sth->execute());
-	&stmt_ok();
-	$n = 0;
-	while ($row = $sth->fetch())
-	{
-		@row = @{$row};
-		print "# $n: $row[0]\n";
-		$n++;
-	}
-	&stmt_fail() unless ($sth->finish());
-	&stmt_ok();
-}
-
 # Test connections...
-
 &stmt_note("# Connect to: $dbase1\n");
-&stmt_fail() unless ($dbh1 = DBI->connect("DBI:Informix:$dbase1", $user1, $pass1));
+my ($dbh1) = DBI->connect("dbi:Informix:$dbase1", $user1, $pass1);
+&stmt_fail() unless defined $dbh1;
 
 print "# Driver Information\n";
 print "#     Name:                  $dbh1->{Driver}->{Name}\n";
@@ -87,7 +48,8 @@ if ($dbh1->{ix_MultipleConnections} == 0)
 &info_usertables($dbh1);
 
 &stmt_note("# Connect to: $dbase2\n");
-&stmt_fail() unless ($dbh2 = DBI->connect("DBI:Informix:$dbase2", $user2, $pass2));
+my ($dbh2) = DBI->connect("DBI:Informix:$dbase2", $user2, $pass2);
+&stmt_fail() unless defined $dbh2;
 &stmt_ok();
 
 &print_dbinfo($dbh2);
@@ -96,15 +58,16 @@ if ($dbh1->{ix_MultipleConnections} == 0)
 # Demonstrate that previous database is still accessible...
 &info_usertables($dbh1);
 
-$stmt1 =
+my ($stmt1) =
 	"SELECT TabName FROM 'informix'.SysTables" .
 	" WHERE TabID >= 100 AND TabType = 'T'" .
 	" ORDER BY TabName";
 
-$stmt2 =
+my ($stmt2) =
 	"SELECT ColName, ColType FROM 'informix'.SysColumns" .
 	" WHERE TabID = 1 ORDER BY ColName";
 
+my ($st1, $st2);
 &stmt_fail() unless ($st1 = $dbh1->prepare($stmt1));
 &stmt_ok();
 &stmt_fail() unless ($st2 = $dbh2->prepare($stmt2));
@@ -114,6 +77,8 @@ $stmt2 =
 &stmt_ok();
 &stmt_fail() unless ($st2->execute);
 &stmt_ok();
+
+my (@row1, $row2);
 
 LOOP: while (1)
 {
@@ -151,3 +116,31 @@ while ($row2 = $st2->fetch)
 &stmt_ok();
 
 &all_ok();
+
+sub info_usertables
+{
+	my ($dbh) = @_;
+	my ($sth);
+	my ($row);
+	my (@row);
+	my ($n);
+
+	&stmt_note("# Generate a list of user-defined tables\n");
+	my ($stmt) =
+		"SELECT TabName FROM 'informix'.SysTables" .
+		" WHERE TabID >= 100 AND TabType = 'T'" .
+		" ORDER BY TabName";
+	&stmt_fail() unless ($sth = $dbh->prepare($stmt));
+	&stmt_ok();
+	&stmt_fail() unless ($sth->execute());
+	&stmt_ok();
+	$n = 0;
+	while ($row = $sth->fetch())
+	{
+		@row = @{$row};
+		print "# $n: $row[0]\n";
+		$n++;
+	}
+	&stmt_fail() unless ($sth->finish());
+	&stmt_ok();
+}

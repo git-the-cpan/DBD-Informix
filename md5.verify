@@ -1,5 +1,20 @@
-# @(#)$Id: md5.verify version /main/2 1999-11-11 01:22:41 $
+# @(#)$Id: md5.verify version /main/4 2000-02-17 13:40:26 $
 #
 # Validate files listed in MANIFEST against MD5-DIGEST
 
-perl md5.chksum `grep -v MD5-DIGEST MANIFEST` | diff MD5-DIGEST -
+: ${PERL:=perl}
+
+rc=0
+if [ -s MD5-DIGEST ]
+then $PERL md5.chksum `grep -v MD5-DIGEST MANIFEST` | diff MD5-DIGEST -
+else
+	echo "$0: MD5-DIGEST is empty" 2>&1
+	rc=1
+fi
+if [ -s MD5-DIGEST.MD5 ]
+then $PERL md5.chksum MD5-DIGEST | diff MD5-DIGEST.MD5 -
+else
+	echo $0: MD5-DIGEST.MD5 is empty 2>&1
+	rc=1
+fi
+exit $rc
