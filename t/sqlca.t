@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)sqlca.t	52.1 97/03/05 15:52:40
+#	@(#)$Id: sqlca.t,v 52.1 1997/03/05 15:52:40 johnl Exp $ 
 #
 #	Test SQLCA Record Handling for DBD::Informix
 #

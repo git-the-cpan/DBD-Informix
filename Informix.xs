@@ -1,5 +1,5 @@
 /*
- * @(#)Informix.xs	54.2 97/05/14 17:21:54
+ * @(#)$Id: Informix.xs,v 56.5 1997/07/08 01:47:09 johnl Exp $ 
  *
  * Portions Copyright (c) 1994,1995 Tim Bunce
  * Portions Copyright (c) 1995,1996 Alligator Descartes
@@ -19,7 +19,7 @@ DBISTATE_DECLARE;
 
 /* Assume string concatenation is available */
 #ifndef lint
-static const char sccs[] = "@(#)Informix.xs	54.2 97/05/14";
+static const char rcs[] = "@(#)$Id: Informix.xs,v 56.5 1997/07/08 01:47:09 johnl Exp $";
 static const char esqlc_ver[] = "@(#)" ESQLC_VERSION_STRING;
 #endif
 
@@ -89,7 +89,7 @@ FETCH(drh, keysv)
 
 # Utility function to list available databases
 void
-_ListDBs( drh )
+data_sources(drh)
 	SV *drh
 	PPCODE:
 # Note that a database name could consist of up to 18 characters in OnLine,
@@ -129,16 +129,6 @@ connect(dbh, dbname, uid, pwd)
 	CODE:
 	D_imp_dbh(dbh);
 	ST(0) = dbd_db_connect(imp_dbh, dbname, uid, pwd) ? &sv_yes : &sv_no;
-
-# Begin work (analogue of commit and rollback, below)
-# Cannot be called using "$dbh->begin", unlike commit and rollback
-# Would have to use: DBD::Informix::db::begin();
-void
-begin(dbh)
-	SV *        dbh
-	CODE:
-	D_imp_dbh(dbh);
-	ST(0) = dbd_db_begin(imp_dbh) ? &sv_yes : &sv_no;
 
 # Commit work
 void
@@ -195,15 +185,6 @@ disconnect(dbh)
 	}
 	ST(0) = dbd_db_disconnect(imp_dbh) ? &sv_yes : &sv_no;
 
-# Execute immediate for a statement without parameter attributes
-void
-immediate(dbh, stmt)
-	SV	*dbh
-	char *stmt
-	CODE:
-	D_imp_dbh(dbh);
-	ST(0) = dbd_db_immediate(imp_dbh, stmt) ? &sv_yes : &sv_no;
-
 # Destroy the database handle
 # The conditional code is a legacy -- it is neither clear what it means
 # nor why it is necessary.
@@ -248,33 +229,13 @@ prepare(sth, statement, attribs=Nullsv)
 	ST(0) = dbd_st_prepare(imp_sth, statement, attribs) ? &sv_yes : &sv_no;
 	}
 
-# Some sort of count of the number of rows, exact semantics undefined.
+# Count of the number of rows affected by the statement
 void
 rows(sth)
 	SV *        sth
 	CODE:
-	croak("DBD::Informix::rows is not implemented\n");
-
-# Some parameter binding, exact semantics undefined
-void
-bind_param(sth, param, value, attribs=Nullsv)
-	SV *	sth
-	SV *	param
-	SV *	value
-	SV *	attribs
-	CODE:
-	croak("DBD::Informix::bind_param_inout is not implemented\n");
-
-# More parameter binding, exact semantics undefined
-void
-bind_param_inout(sth, param, value_ref, maxlen, attribs=Nullsv)
-	SV *	sth
-	SV *	param
-	SV *	value_ref
-	IV 		maxlen
-	SV *	attribs
-	CODE:
-	croak("DBD::Informix::bind_param_inout is not implemented\n");
+	D_imp_sth(sth);
+	ST(0) = newSViv((IV)imp_sth->n_rows);
 
 # Execute a statement or open a cursor, possibly with bound values
 void
@@ -303,12 +264,13 @@ execute(sth, ...)
 	}
 
 	retval = dbd_st_execute(imp_sth);
-	if (retval < 0)
-		XST_mUNDEF(0);		/* error        		*/
-	else if (retval == 0)
-		XST_mPV(0, "0E0");	/* true but zero		*/
+	/* remember that dbd_st_execute must return <= -2 for error */
+	if (retval == 0)            /* ok with no rows affected     */
+		XST_mPV(0, "0E0");      /* (true but zero)              */
+	else if (retval < -1)       /* -1 == unknown number of rows */
+		XST_mUNDEF(0);          /* <= -2 means error            */
 	else
-		XST_mIV(0, retval);	/* typically 1 or rowcount	*/
+		XST_mIV(0, retval);     /* typically 1, rowcount or -1  */
 
 # Return a row as a reference to an array
 void

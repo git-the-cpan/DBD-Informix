@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)basic00.t	54.2 97/05/15 16:27:48
+#	@(#)$Id: basic00.t,v 56.1 1997/06/12 18:58:14 johnl Exp $ 
 #
 #	Primary test script for DBD::Informix
 #
@@ -160,7 +160,7 @@ while ($ref = $cursor->fetch)
 @type = @{$cursor->{TYPE}};
 for ($i = 0; $i <= $#type; $i++) { print ("# Type      $i: $type[$i]\n"); }
 @name = @{$cursor->{NAME}};
-for ($i = 0; $i <= $#name; $i++) { print ("# Name      $i: $name[$i]\n"); }
+for ($i = 0; $i <= $#name; $i++) { print ("# Name      $i: <<$name[$i]>>\n"); }
 @null = @{$cursor->{NULLABLE}};
 for ($i = 0; $i <= $#null; $i++) { print ("# Nullable  $i: $null[$i]\n"); }
 @prec = @{$cursor->{PRECISION}};

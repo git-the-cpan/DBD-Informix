@@ -1,11 +1,11 @@
 /*
-@(#)File:            esql4_00.h
-@(#)Version:         1.6
-@(#)Last changed:    97/01/28
+@(#)File:            $RCSfile: esql4_00.h,v $
+@(#)Version:         $Revision: 1.7 $
+@(#)Last changed:    $Date: 1997/06/02 16:24:26 $
 @(#)Purpose:         Function prototypes for ESQL/C Version 4.00
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         :PRODUCT:
+@(#)Product:         $Product: DBD::Informix Version 0.56 (1997-07-08) $
 */
 
 /*TABSTOP=4*/
@@ -22,7 +22,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql4_00_h[] = "@(#)esql4_00.h	1.6 97/01/28";
+static const char esql4_00_h[] = "@(#)$Id: esql4_00.h,v 1.7 1997/06/02 16:24:26 johnl Exp $";
 #endif	/*lint */
 #endif	/*MAIN_PROGRAM */
 

@@ -1,11 +1,11 @@
 /*
-@(#)File:            esql7_20.h
-@(#)Version:         1.1
-@(#)Last changed:    97/04/24
+@(#)File:            $RCSfile: esql7_20.h,v $
+@(#)Version:         $Revision: 1.2 $
+@(#)Last changed:    $Date: 1997/06/02 16:24:26 $
 @(#)Purpose:         Function prototypes for ESQL/C Versions 7.20..7.22
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
-@(#)Product:         :PRODUCT:
+@(#)Product:         $Product: DBD::Informix Version 0.56 (1997-07-08) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql7_20_h[] = "@(#)esql7_20.h	1.1 97/04/24";
+static const char esql7_20_h[] = "@(#)$Id: esql7_20.h,v 1.2 1997/06/02 16:24:26 johnl Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

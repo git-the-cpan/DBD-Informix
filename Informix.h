@@ -1,5 +1,5 @@
 /*
- *	@(#)Informix.h	50.1 97/01/12 17:54:43
+ *	@(#)$Id: Informix.h,v 50.1 1997/01/12 17:54:43 johnl Exp $ 
  *
  *	$Derived-From: Informix.h,v 1.3 1995/05/25 21:18:56 timbo Archaic $
  *

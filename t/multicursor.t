@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)multicursor.t	53.1 97/03/06 20:37:36
+# @(#)$Id: multicursor.t,v 53.1 1997/03/06 20:37:36 johnl Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #

@@ -1,4 +1,4 @@
-#	@(#)InformixTest.pm	54.4 97/05/14 17:24:46
+#	@(#)$Id: InformixTest.pm,v 56.2 1997/07/11 04:24:54 johnl Exp $ 
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
@@ -31,32 +31,33 @@
 
 	sub connect_to_test_database
 	{
-	# This section may need rigging for some versions of Informix.
-	# It will should be OK for 6.0x and later versions of OnLine.
-	# You may run into problems with SE and 5.00 systems.
-	# If you do, send details to the maintenance team.
-	my ($dbname, $dbhost, $dbuser, $dbpass) =
-		($ENV{DBD_INFORMIX_DATABASE}, $ENV{DBD_INFORMIX_SERVER},
-		 $ENV{DBD_INFORMIX_USERNAME}, $ENV{DBD_INFORMIX_PASSWORD});
+		# This section may need rigging for some versions of Informix.
+		# It will should be OK for 6.0x and later versions of OnLine.
+		# You may run into problems with SE and 5.00 systems.
+		# If you do, send details to the maintenance team.
+		my ($dbname, $dbhost, $dbuser, $dbpass) =
+			($ENV{DBD_INFORMIX_DATABASE}, $ENV{DBD_INFORMIX_SERVER},
+			 $ENV{DBD_INFORMIX_USERNAME}, $ENV{DBD_INFORMIX_PASSWORD});
 
-	# Do not print out actual password!
-	$dbpass = "" unless ($dbpass);
-	$dbuser = "" unless ($dbuser);
-	my ($xxpass) = 'X' x length($dbpass); 
+		# Do not print out actual password!
+		$dbpass = "" unless ($dbpass);
+		$dbuser = "" unless ($dbuser);
+		my ($xxpass) = 'X' x length($dbpass); 
 
-	$dbname = "stores" if (!$dbname);
-	# Unless we do an DBI->install_driver() and interrogate the driver,
-	# we cannot determine whether we should pay attention to INFORMIXSERVER.
-	$dbhost = $ENV{INFORMIXSERVER} if (!$dbhost);
-	$dbname = $dbname . '@' . $dbhost if ($dbhost && $dbname !~ m%[/@]%);
+		$dbname = "stores" if (!$dbname);
+		# Unless we do an DBI->install_driver() and interrogate the driver,
+		# we cannot determine whether we should pay attention to INFORMIXSERVER.
+		$dbhost = $ENV{INFORMIXSERVER} if (!$dbhost);
+		$dbname = $dbname . '@' . $dbhost if ($dbhost && $dbname !~ m%[/@]%);
 
-	&stmt_note("# DBI->connect('$dbname', '$dbuser', '$xxpass', 'Informix')\n");
-	my ($dbh) = DBI->connect($dbname, $dbuser, $dbpass, 'Informix');
-	&stmt_fail() unless (defined $dbh);
-	# Unconditionally chop trailing blanks.
-	# Override in test cases as necessary.
-	$dbh->{ChopBlanks} = 1;
-	$dbh;
+		my ($str) = "'$dbname', '$dbuser', '$xxpass', 'Informix'";
+		&stmt_note("# DBI->connect($str)\n");
+		my ($dbh) = DBI->connect($dbname, $dbuser, $dbpass, 'Informix');
+		&stmt_fail() unless (defined $dbh);
+		# Unconditionally chop trailing blanks.
+		# Override in test cases as necessary.
+		$dbh->{ChopBlanks} = 1;
+		$dbh;
 	}
 
 	sub print_sqlca
@@ -77,7 +78,9 @@
 		{
 			print "#     SQLCA.SQLWARN[$i] = '$warn[$i]'\n";
 		}
-			print "# SQLSTATE             = '$DBI::state'\n";
+		print "# SQLSTATE             = '$DBI::state'\n";
+		my ($rows) = $sth->rows();
+		print "# ROWS                 = $rows\n";
 	}
 
 	my $ok_counter = 0;
@@ -86,7 +89,7 @@
 			# NB: error messages ${DBI::errstr} end with a newline.
 			my ($str) = @_;
 			$str = "Error Message" unless ($str);
-			$str .= ":\n${DBI::errstr}SQLSTATE = $DBI::state\n";
+			$str .= ":\n${DBI::errstr}SQLSTATE = ${DBI::state}\n";
 			$str =~ s/^/# /gm;
 			&stmt_note($str);
 	}

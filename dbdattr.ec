@@ -1,5 +1,5 @@
 /*
- * @(#)dbdattr.ec	55.1 97/05/19 13:29:57
+ * @(#)$Id: dbdattr.ec,v 56.10 1997/07/11 03:40:32 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- attribute handling
  *
@@ -12,7 +12,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)dbdattr.ec	55.1 97/05/19";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 56.10 1997/07/11 03:40:32 johnl Exp $";
 #endif
 
 #include <stdio.h>
@@ -32,7 +32,7 @@ static const int  esql_prodvrsn   = ESQLC_VERSION;
 /* Print message deprecating old feature and indicating new */
 static void dbd_ix_deprecate(const char *old)
 {
-	warn("%s - deprecated attribute name %s ignored\n",
+	croak("%s - do not use deprecated attribute name %s (use 'ix_' prefix)\n",
 		 dbd_ix_module(), old);
 }
 
@@ -137,7 +137,7 @@ int dbd_db_STORE_attrib(imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 {
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
-	int             on = SvTRUE(valuesv);
+	int             newval = SvTRUE(valuesv);
 	int             retval = True;
 
 	dbd_ix_debug(1, "Enter %s::dbd_db_STORE_attrib()\n", dbd_ix_module());
@@ -145,23 +145,33 @@ int dbd_db_STORE_attrib(imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 	{
 		if (imp_dbh->is_loggeddb == False)
 		{
-			assert(imp_dbh->autocommit == True);
-			if (on == False)
-				warn("Cannot unset AutoCommit for unlogged databases\n");
+			assert(DBI_AutoCommit(imp_dbh));
+			if (newval == False)
+				dbd_ix_debug(0,
+					"%s - Cannot unset AutoCommit for unlogged databases\n",
+					dbd_ix_module());
 		}
 		else
 		{
-			imp_dbh->autocommit = on;
-			if (imp_dbh->is_modeansi == False && imp_dbh->autocommit == False)
-				retval = dbd_db_begin(imp_dbh);
+			int oldval = DBI_AutoCommit(imp_dbh);
+			DBIc_set(imp_dbh, DBIcf_AutoCommit, newval);
+			if (oldval == False && newval == True)
+			{
+				/* Commit any outstanding changes (it is AutoCommit!) */
+				retval = dbd_db_commit(imp_dbh);
+			}
+			else if (oldval == True && newval == False)
+			{
+				/* AutoCommit turned off - start TX in non-ANSI databases */
+				if (imp_dbh->is_modeansi == False)
+					retval = dbd_db_begin(imp_dbh);
+			}
+			else
+			{
+				/* AutoCommit state not changed */
+				assert(oldval == newval);
+			}
 		}
-	}
-	else if (KEY_MATCH(kl, key, "ChopBlanks"))
-	{
-		if (on == False)
-			DBIc_ChopBlanks_off(imp_dbh);
-		else
-			DBIc_ChopBlanks_on(imp_dbh);
 	}
 	else if (KEY_MATCH(kl, key, "BlobLocation"))
 	{
@@ -177,7 +187,7 @@ int dbd_db_STORE_attrib(imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 	}
 	else if (KEY_MATCH(kl, key, "ix_AutoErrorReport"))
 	{
-		imp_dbh->autoreport = on;
+		DBIc_set(imp_dbh, DBIcf_PrintError, newval);
 	}
 	else if (KEY_MATCH(kl, key, "ix_Deprecated"))
 	{
@@ -199,6 +209,7 @@ static SV *newSqlerrd(const Sqlca *psqlca)
 	AV *av = newAV();
 	SV *retsv = newRV((SV *)av);
 	av_extend(av, (I32)6);
+	sv_2mortal((SV *)av);
 	for (i = 0; i < 6; i++)
 	{
 		av_store(av, i, newSViv((IV)psqlca->sqlerrd[i]));
@@ -215,6 +226,7 @@ static SV *newSqlwarn(const Sqlca *psqlca)
 	const char     *sqlwarn = &psqlca->sqlwarn.sqlwarn0;
 	SV *retsv = newRV((SV *)av);
 	av_extend(av, (I32)8);
+	sv_2mortal((SV *)av);
 	warning[1] = '\0';
 	for (i = 0; i < 8; i++)
 	{
@@ -285,11 +297,7 @@ SV *dbd_db_FETCH_attrib(imp_dbh_t *imp_dbh, SV *keysv)
 
 	if (KEY_MATCH(kl, key, "AutoCommit"))
 	{
-		retsv = newSViv((IV)imp_dbh->autocommit);
-	}
-	else if (KEY_MATCH(kl, key, "ChopBlanks"))
-	{
-		retsv = newSViv((IV)(DBIc_ChopBlanks(imp_dbh) != 0));
+		retsv = newSViv((IV)DBI_AutoCommit(imp_dbh));
 	}
 	else if (KEY_MATCH(kl, key, "ix_Deprecated"))
 	{
@@ -317,7 +325,7 @@ SV *dbd_db_FETCH_attrib(imp_dbh_t *imp_dbh, SV *keysv)
 	}
 	else if (KEY_MATCH(kl, key, "ix_AutoErrorReport"))
 	{
-		retsv = newSViv((IV)imp_dbh->autoreport);
+		retsv = newSViv((IV)(DBIc_is(imp_dbh, DBIcf_PrintError) != 0));
 	}
 	else if (KEY_MATCH(kl, key, "ix_ConnectionName"))
 	{
@@ -395,6 +403,7 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	SV             *retsv = NULL;
+	AV             *av = 0;
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_obind = sth->nm_obind;
 	long			coltype;
@@ -409,18 +418,19 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	/* Standard attributes */
 	if (KEY_MATCH(kl, key, "NAME"))
 	{
-		AV             *av = newAV();
+		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= sth->n_columns; i++)
 		{
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
 				:colname = NAME;
+			colname[byleng(colname, strlen(colname))] = '\0';
 			av_store(av, i - 1, newSVpv(colname, 0));
 		}
 	}
 	else if (KEY_MATCH(kl, key, "NULLABLE"))
 	{
-		AV             *av = newAV();
+		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= sth->n_columns; i++)
 		{
@@ -432,7 +442,7 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	else if (KEY_MATCH(kl, key, "TYPE"))
 	{
 		/* Returns ODBC (CLI) type numbers. */
-		AV             *av = newAV();
+		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= sth->n_columns; i++)
 		{
@@ -446,7 +456,7 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	else if (KEY_MATCH(kl, key, "PRECISION"))
 	{
 		/* Should return CLI precision numbers. */
-		AV             *av = newAV();
+		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= sth->n_columns; i++)
 		{
@@ -460,7 +470,7 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	else if (KEY_MATCH(kl, key, "SCALE"))
 	{
 		/* Should return CLI scale numbers. */
-		AV             *av = newAV();
+		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= sth->n_columns; i++)
 		{
@@ -487,9 +497,9 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	/* Informix specific attributes */
 	else if (KEY_MATCH(kl, key, "ix_NativeTypeNames"))
 	{
-		AV             *av = newAV();
 		char buffer[SQLTYPENAME_BUFSIZ];
 		SV		*sv;
+		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= sth->n_columns; i++)
 		{
@@ -523,7 +533,7 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	}
 	else if (KEY_MATCH(kl, key, "ix_ColType"))
 	{
-		AV             *av = newAV();
+		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= sth->n_columns; i++)
 		{
@@ -534,7 +544,7 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	}
 	else if (KEY_MATCH(kl, key, "ix_ColLength"))
 	{
-		AV             *av = newAV();
+		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= sth->n_columns; i++)
 		{
@@ -549,6 +559,9 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	}
 
 	dbd_ix_debug(1, "Exit %s::dbd_st_FETCH_attrib\n", dbd_ix_module());
+
+	if (av != 0)
+		sv_2mortal((SV *)av);
 
 	return sv_2mortal(retsv);
 }

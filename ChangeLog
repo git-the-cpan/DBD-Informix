@@ -3,6 +3,77 @@ Change Log for DBD::Informix for DBI
 - Written by Alligator Descartes <descarte@mcqueen.com>
 - Rewritten by Jonathan Leffler (johnl@informix.com)
 
+0.56 Release
+------------
+97-07-10: Final clean up and testing (and workaround for problem in DBI
+          0.85 when connections fail at connect time).
+          Version 0.56 released.
+97-07-09: Establish that DBI->connect(...,{AutoCommit=>0}) does not set the
+          AutoCommit attribute until after the basic connect operation is
+          complete.  DBD::Informix therefore cannot reject connections on
+          unlogged databases in the basic connect operation.  Modified
+          Informix.Licence after Raj Goel (frostbit@brainlink.com) needed
+          to ask questions.  The difficulty with 'newbies' is that they
+          quickly cease to be newbies so you need a continuous supply of
+          new newbies.  Fix documentation in Informix.pm for AutoCommit,
+          and behaviour of ix_InTransaction attribute.
+97-07-08: Make $dbh->{ix_AutoErrorReport} a synonym for $h->{PrintError}.
+97-07-07: Jason Bodnar (jcbodnar@mail.utexas.edu) pointed out that
+          $sth->execute() is not returning undef when an error occurs.
+97-06-25: Roderich Schupp (roderich@nodebonn.muc.bmw.de) found a similar
+          problem using $dbh->do($stmt, undef, $arg1, $arg2), core dumping
+          in the link code.  This could be reproduced with the as-released
+          0.55 DBD::Informix but appears to be fixed, presumably by the fix
+          for Fred's problem.  Also, ensure the t/dbase.t unsets both
+          $ENV{DBI_DSN} and $ENV{DBI_DBNAME} to allow the implicit connect
+          test to work (deduced from test output sent by Fred Arnold).
+          Move comments about Solaris compiler into new file hints/solaris.
+          Move README.M88K.SVR4 to hints/M88K.SVR4.
+97-06-24: Found problems in DBI 0.84 where PrintError, RaiseError, ChopBlanks
+          as handled by DBI cannot be unset -- Tim confirmed it is a bug in
+          DBI and will be fixed in the next release.
+97-06-23: Core dump problem found by Fred Arnold (ftarnol@uswest.com) in the
+          code in link.c and the way it is used.  One part of the problem
+          was that the IMPSET flag for a statement was not being set soon
+          enough, so that DBI was not releasing the statement from the
+          linked lists correctly.  The temporary fix includes a bodge that
+          converts the deleted link into a single item linked list, so that
+          when it is released again, it doesn't screw things up.  This
+          needs to be cleaned up.  A 0.56a1 release was sent to Fred to get
+          him over the immediate problem.
+97-06-17: Jason Bodnar (jcbodnar@mail.utexas.edu) pointed out that BEGIN
+          WORK is not being recognized via $dbh->do().  Testing showed a
+          problem during disconnect on 7.1x servers (related to the B42204
+          problem fixed on 97-05-30).  Fixing the disconnect was relatively
+          simple.  Fixing the BEGIN WORK issues required the removal of the
+          custom implementation of $dbh->do(), and some other changes.
+97-06-13: Where there's one bug, there are usually others.  The other array
+          attributes for statements (such as $sth->{NAME}) were not being
+          mortalized and could be made to eat up memory if used inside an
+          inner loop.  Upgrade non-distributed test bug001.t to catch these
+          leaks too.
+97-06-12: Fix trailing blanks on $sth->{NAME} attributes after problem
+          reported by Roderich Schupp (roderich@nodebonn.muc.bmw.de).  Also
+          fix t/chopblanks.t not to create VARCHAR columns in SE.
+97-05-30: Fix memory leak when using the $sth->{ix_sqlerrd} and
+          $sth->{ix_sqlwarn} attributes repeatedly, reported by Oyvind
+          Gjerstad (ogj@tglobe1.tollpost.no).  The arrays in newSqlerrd()
+          and newSqlwarn() were not being mortalized as they should be.
+97-05-30: Only set -Ae on HP-UX when using cc, as reported by Nathan
+          Neulinger (nneul@umr.edu) who was using gcc.  Also find and
+          implement the CLOSE DATABASE workaround for bugs B42204 and
+          B64926 which lead to -1800 errors when a 7.x ESQL/C application
+          is talking to a 5.0x engine, also reported by Nathan.
+97-05-29: Add support for $sth->rows and add simple test.
+97-05-26: Add support for DBI->DataSources from DBI v0.82.  Update required
+          software accordingly.
+97-05-23: Fix Makefile.PL to recognize $INFORMIXDIR/bin at end of PATH,
+          thanks to Paul Kulchenko (paul@mega.donetsk.ua).
+97-05-20: Change the handling of deprecated attributes per Informix.pm.
+          Fix esqltest.ec when the same MODE ANSI database is used for both
+          connections (thanks to Kent S Gordon (kgor@inetspace.com) for
+          reporting this).
+
 0.55 Bug-Fix Release
 --------------------
 97-05-20: ESQL/C Version 5.0x testing previously inadequate, and SQLSTATE
@@ -286,4 +357,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler (johnl@informix.com)
-@(#)ChangeLog	55.2 97/05/20 11:58:23
+@(#)$Id: ChangeLog,v 56.6 1997/07/11 05:08:12 johnl Exp $

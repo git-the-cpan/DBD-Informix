@@ -1,11 +1,11 @@
 /*
-@(#)File:            esqlc.h
-@(#)Version:         1.11
-@(#)Last changed:    97/04/24
+@(#)File:            $RCSfile: esqlc.h,v $
+@(#)Version:         $Revision: 1.13 $
+@(#)Last changed:    $Date: 1997/06/05 23:52:43 $
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         :PRODUCT:
+@(#)Product:         $Product: DBD::Informix Version 0.56 (1997-07-08) $
 */
 
 #ifndef ESQLC_H
@@ -13,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)esqlc.h	1.11 97/04/24";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 1.13 1997/06/05 23:52:43 johnl Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

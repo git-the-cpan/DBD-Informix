@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)original.t	51.1 97/02/25 19:43:04
+# @(#)$Id: original.t,v 51.1 1997/02/25 19:43:04 johnl Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #

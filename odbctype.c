@@ -1,7 +1,7 @@
 /*
-@(#)File:            odbctype.c
-@(#)Version:         55.1
-@(#)Last changed:    97/05/19
+@(#)File:            $RCSfile: odbctype.c,v $
+@(#)Version:         $Revision: 56.1 $
+@(#)Last changed:    $Date: 1997/07/08 21:56:43 $
 @(#)Purpose:         Map Informix SQL Types to ODBC Types
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
@@ -50,7 +50,7 @@ typedef enum IxSQLType
 } IxSQLType;
 
 #ifndef lint
-static const char sccs[] = "@(#)odbctype.c	55.1 97/05/19";
+static const char rcs[] = "@(#)$Id: odbctype.c,v 56.1 1997/07/08 21:56:43 johnl Exp $";
 #endif
 
 /* Map Informix DATETIME types to equivalent ODBC types */

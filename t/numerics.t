@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)numerics.t	53.1 97/03/06 20:37:38
+# @(#)$Id: numerics.t,v 53.1 1997/03/06 20:37:38 johnl Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #

@@ -1,11 +1,11 @@
 /*
-@(#)File:            odbctype.h
-@(#)Version:         54.3
-@(#)Last changed:    97/04/01
+@(#)File:            $RCSfile: odbctype.h,v $
+@(#)Version:         $Revision: 54.3 $
+@(#)Last changed:    $Date: 1997/04/01 16:22:30 $
 @(#)Purpose:         Surrogate ODBC header for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
-@(#)Product:         :PRODUCT:
+@(#)Product:         $Product: DBD::Informix Version 0.56 (1997-07-08) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char odbctype_h[] = "@(#)odbctype.h	54.3 97/04/01";
+static const char odbctype_h[] = "@(#)$Id: odbctype.h,v 54.3 1997/04/01 16:22:30 johnl Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

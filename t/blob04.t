@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)blob04.t	53.1 97/03/06 20:37:27
+#	@(#)$Id: blob04.t,v 53.1 1997/03/06 20:37:27 johnl Exp $ 
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)transact03.t	53.1 97/03/06 20:37:46
+#	@(#)$Id: transact03.t,v 53.1 1997/03/06 20:37:46 johnl Exp $ 
 #
 #	Test AutoCommit Off for DBD::Informix
 #

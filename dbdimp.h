@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.h	54.3 97/05/14 17:26:03
+ * @(#)$Id: dbdimp.h,v 56.5 1997/07/09 17:41:44 johnl Exp $ 
  *
  * $Derived-From: dbdimp.h,v 1.5 1995/06/22 00:37:04 timbo Archaic $
  *
@@ -15,17 +15,6 @@
 
 #define NAMESIZE 19				/* 18 character name plus '\0' */
 #define DEFAULT_DATABASE	".DEFAULT."
-
-/* The DBIc_ChopBlanks* macros should be in DBIXS.h but aren't in DBI 0.81 */
-#ifndef DBIc_ChopBlanks
-#define DBIc_ChopBlanks(imp)	DBIc_is(imp, DBIcf_ChopBlanks)
-#endif
-#ifndef DBIc_ChopBlanks_on
-#define DBIc_ChopBlanks_on(imp)	DBIc_on(imp, DBIcf_ChopBlanks)
-#endif
-#ifndef DBIc_ChopBlanks_off
-#define DBIc_ChopBlanks_off(imp)	DBIc_off(imp, DBIcf_ChopBlanks)
-#endif
 
 /* Different states for a statement */
 enum State
@@ -68,8 +57,6 @@ struct imp_dbh_st
 	Boolean         is_modeansi;	/* Is MODE ANSI Database */
 	Boolean         is_loggeddb;	/* Has transaction log */
 	Boolean         is_txactive;	/* Is inside transaction */
-	Boolean         autocommit; 	/* Treat each statement as a transaction? */
-	Boolean         autoreport; 	/* Report all errors when they happen? */
 	BlobLocn        blob_bind;	/* Blob binding */
 	Sqlca           sqlca;      /* Last SQLCA record for connection */
 	Link            chain;      /* Link in list of connections */
@@ -90,9 +77,12 @@ struct imp_sth_st
 	int             n_blobs;	/* Number of blobs for statement */
 	int             n_columns;	/* Number of output fields */
 	int             n_bound;	/* Number of input fields */
+	int             n_rows;		/* Number of rows processed */
 	imp_dbh_t	   *dbh;		/* Database handle for statement */
 	Link            chain;      /* Link in list of statements */
 };
+
+#define DBI_AutoCommit(dbh)	(DBIc_is(dbh, DBIcf_AutoCommit) ? True : False)
 
 extern void dbd_ix_seterror(ErrNum rc);
 
@@ -120,7 +110,6 @@ extern int dbd_st_blob_read(SV *sth, int field, long offset, long len, SV *dests
 extern int dbd_st_execute(imp_sth_t *sth);
 extern int dbd_st_finish(imp_sth_t *sth);
 extern int dbd_st_prepare(imp_sth_t *sth, char *statement, SV *attribs);
-extern int dbd_st_rows(SV *sth);
 extern void dbd_st_destroy(imp_sth_t *sth);
 
 extern int dbd_ix_setbindnum(imp_sth_t *sth, int items);

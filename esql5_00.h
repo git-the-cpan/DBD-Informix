@@ -1,11 +1,11 @@
 /*
-@(#)File:            esql5_00.h
-@(#)Version:         1.13
-@(#)Last changed:    97/05/20
+@(#)File:            $RCSfile: esql5_00.h,v $
+@(#)Version:         $Revision: 1.14 $
+@(#)Last changed:    $Date: 1997/06/02 16:24:26 $
 @(#)Purpose:         Function prototypes for ESQL/C Versions 5.00..5.07
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         :PRODUCT:
+@(#)Product:         $Product: DBD::Informix Version 0.56 (1997-07-08) $
 */
 
 /*
@@ -39,7 +39,7 @@ extern "C" {
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql5_00_h[] = "@(#)esql5_00.h	1.13 97/05/20";
+static const char esql5_00_h[] = "@(#)$Id: esql5_00.h,v 1.14 1997/06/02 16:24:26 johnl Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

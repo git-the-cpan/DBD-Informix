@@ -1,5 +1,5 @@
 /*
- * @(#)esqlc_v6.ec	53.2 97/03/06 17:17:55
+ * @(#)$Id: esqlc_v6.ec,v 56.4 1997/07/08 21:56:43 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char sccs[] = "@(#)esqlc_v6.ec	53.2 97/03/06";
+static const char rcs[] = "@(#)$Id: esqlc_v6.ec,v 56.4 1997/07/08 21:56:43 johnl Exp $";
 #endif
 
 /* ================================================================= */
@@ -79,7 +79,8 @@ Boolean dbd_ix_connect(char *connection, char *dbase, char *user, char *pass)
 	return(conn_ok);
 }
 
-void dbd_ix_disconnect(char *connection)
+/* Basic interface to DISCONNECT */
+static void do_disconnect(char *connection)
 {
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *dbconn = connection;
@@ -97,6 +98,59 @@ void dbd_ix_disconnect(char *connection)
 	}
 }
 
+/* External interface to disconnect which handles various oddities */
+void dbd_ix_disconnect(char *connection)
+{
+	do_disconnect(connection);
+	if (sqlca.sqlcode == -1800)
+	{
+		/*
+		** -1800: Invalid transaction state
+		** One problem was discovered by Nathan Neulinger (nneul@umr.edu).
+		** This can occur if the application is talking to a 5.0x engine.
+		** The solution seems to be to do CLOSE DATABASE, which also closes
+		** the connection (you get error -1803 if you try to DISCONNECT
+		** after doing CLOSE DATABASE).  Ensure that the correct connection
+		** is current before closing the database.  Bugs B64926 and B42204
+		** are the source of the trouble.
+		**
+		** A second version of the problem found with 7.x databases where a
+		** transaction has been started and not completed.  Trying CLOSE
+		** DATABASE fails with -759 (Cannot use database commands in an
+		** explicit database connection).  It requires a ROLLBACK WORK
+		** instead, followed by a DISCONNECT.  If you are connected to a
+		** 5.0x engine, then the ROLLBACK WORK succeeds, but the DISCONNECT
+		** fails a second time, but the CLOSE DATABASE ruse then works.
+		**
+		** If both these attempts fail, then the disconnect operation gives
+		** up, letting the database engine clean up.  The engine will do a
+		** rollback when it notes the absence of the application.
+		*/
+		dbd_ix_debug(1, "DISCONNECT **FAILED: -1800 ** <<%s>>\n", connection);
+		dbd_ix_setconnection(connection);
+		dbd_ix_debug(1, "Try ROLLBACK WORK <<%s>>\n", connection);
+		EXEC SQL ROLLBACK WORK;
+		if (sqlca.sqlcode == 0)
+		{
+			dbd_ix_debug(1, "ROLLBACK WORK worked <<%s>>\n", connection);
+			do_disconnect(connection);
+		}
+		if (sqlca.sqlcode < 0)
+		{
+			dbd_ix_debug_l(1, "DISCONNECT ** FAILED AGAIN (%ld) **\n",
+						   sqlca.sqlcode);
+			dbd_ix_debug(1, "Try CLOSE DATABASE <<%s>>\n", connection);
+			EXEC SQL CLOSE DATABASE;
+			if (*connection == '\0')
+			{
+				dbd_ix_debug(1, "Retry DISCONNECT DEFAULT%s\n", connection);
+				EXEC SQL DISCONNECT DEFAULT;
+			}
+		}
+	}
+	dbd_ix_debug_l(1, "DISCONNECT -- STATUS %ld\n", sqlca.sqlcode);
+}
+
 /* Ensure that the correct connection is current -- a no-op in version 5.0x */
 void dbd_ix_setconnection(char *conn)
 {
@@ -104,6 +158,14 @@ void dbd_ix_setconnection(char *conn)
 	char           *nm_connection = conn;
 	EXEC SQL END DECLARE SECTION;
 
-	dbd_ix_debug(1, "SET CONNECTION %s\n", nm_connection);
-	EXEC SQL SET CONNECTION :nm_connection;
+	if (nm_connection)
+	{
+		dbd_ix_debug(1, "SET CONNECTION %s\n", nm_connection);
+		EXEC SQL SET CONNECTION :nm_connection;
+	}
+	else
+	{
+		dbd_ix_debug(1, "SET CONNECTION DEFAULT%s\n", "");
+		EXEC SQL SET CONNECTION DEFAULT;
+	}
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)Makefile.PL	55.1 97/05/20 11:50:49
+# @(#)$Id: Makefile.PL,v 56.8 1997/07/11 05:51:29 johnl Exp $ 
 #
 # Portions Copyright (c) 1996,1997 Jonathan Leffler (johnl@informix.com)
 # Portions Copyright (c) 1996 Alligator Descartes (descarte@hermetica.com)
@@ -13,8 +13,8 @@
 use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose);
 use Config;
 # A sufficiently recent version of DBI must be installed before we can
-# build any DBD module.  The code uses ChopBlanks introduced in DBI 0.81.
-use DBI 0.81;
+# build any DBD module.  The code needs the bug fixes present in DBI 0.85.
+use DBI 0.85;
 
 $| = 1;     # Ensure that Perl output is interleaved with test output.
 
@@ -29,11 +29,12 @@ print "Remember to actually read the README file!\n\n";
 $ID = $ENV{INFORMIXDIR};
 
 die "\n*** You didn't read the README file!\n\n"
-	unless ($] >= 5.003 && $DBI::VERSION >= 0.81 && $ID);
+	unless ($] >= 5.003 && $DBI::VERSION >= 0.85 && $ID);
 
 # Compare installed version of DBI with version which DBD::Informix was
 # last tested with.
-$dbi_ref_version = "0.81";
+# The required and reference versions are the same for this release.
+$dbi_ref_version = "0.85";
 die "\n*** You must upgrade to DBI version $dbi_ref_version or later.\n\n"
 	unless ($DBI::VERSION >= $dbi_ref_version);
 
@@ -42,7 +43,7 @@ $IDB = "$ID/bin";
 die "\n*** You didn't read the README file!\n\n"
 	unless (($ENV{PATH} =~ m%:$IDB:% ||
 			 $ENV{PATH} =~ m%^$IDB:% ||
-			 $ENV{PATH} =~ m%:$IDB\$%) &&
+			 $ENV{PATH} =~ m%:$IDB$%) &&
 			-x "$IDB/esql");
 
 # --- Find out which version of Informix ESQL/C by running 'esql -V'
@@ -138,11 +139,18 @@ elsif ($version =~ /[1-4]\.[01][0-9]/)
 	Please report your requirement to the DBD::Informix maintenance team.
 	}
 }
-elsif ($vernum >= 900 && $vernum < 930)
+elsif ($vernum >= 900 && $vernum < 912)
 {
-	# 9.10 is released; 9.20 is in the pipeline
+	# 9.00 through 9.11 are released.
 	&chk_libs(qw{libixgen.a libixos.a libixsql.a libixcss.a libixglx.a
 				 libixgls.a libixasf.a});
+}
+elsif ($vernum >= 912 && $vernum < 1000)
+{
+	# 9.12 is released; 9.20 is in the pipeline
+	# The libraries got renamed extensively...
+	&chk_libs(qw{libifgen.a libifos.a libifsql.a libifcss.a libifglx.a
+				 libifgls.a libifasf.a});
 }
 else
 {
@@ -246,9 +254,12 @@ $opts{DEFINE} .= ' -Wall -pedantic -Wno-comment'
 $opts{DEFINE} .= ' -Xa'
 	if $Config{cc} eq 'clcc';
 
-# We need to add -Ae on HP-UX to ensure that prototypes are accepted.
+# We need to add -Ae on HP-UX to ensure that prototypes are accepted,
+# but only if using the native HP-UX compiler (GCC does not accept -Ae,
+# for example).
 $opts{DEFINE} .= " -Ae"
-	if $Config{osname} eq "hpux" and $Config{ccflags} !~ /-A[ea]/;
+	if $Config{osname} eq "hpux" and $Config{ccflags} !~ /-A[ea]/ and
+		$Config{cc} eq 'cc';
 
 # Extra definitions under Alpha cc to get __STDC__ defined
 $opts{DEFINE} .= ' -std1'
@@ -305,10 +316,16 @@ $INC2 = "-I\$(INSTALLSITEARCH)$inc_pad/DBI";
 $opts{INC} .= " $INC1 $INC2";
 $opts{OBJECT} = $objects;
 
+##############################
+# - Start of ESQLTEST code - #
+##############################
+
 ###########################################################################
 # Check that the ESQL/C program esqltest can be compiled and run OK.
 # NB: test does not need any Perl headers (but don't pollute esqlperl.h)
 #     with anything that needs a Perl header.
+# Remove this code if you run into irresolvable problems with shared memory
+# connections after you've read the README.olipcshm file.
 print "Testing whether your Informix test environment will work...\n";
 $sx = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? "set -x;" : "";
 $nr = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? "set -x; :" : "";
@@ -320,12 +337,19 @@ die "Failed to compile basic test program esqltest" unless
 	 (system "$nr rm -f esqltest.o esqltest.c") == 0);
 if ((system "./esqltest") != 0)
 {
-	die "You do not have enough permissions in your Informix environment.\n";
+	die "You do not have enough permissions in your Informix environment.\n" .
+		"Make sure you've read the whole README file before asking the\n" .
+		"DBI/DBD community for help!\n";
 }
 die "Failed to remove esqltest program" unless
 	(system "$nr rm -f esqltest") == 0;
 ###########################################################################
 
+##############################
+# -- End of ESQLTEST code -- #
+##############################
+
+###########################################################################
 # The best way to get the library linked reliably is to use the script that
 # comes with ESQL/C.  It knows which libraries are needed, etc.  The lists
 # change regularly from release to release.  Do not try second-guessing it;
@@ -382,12 +406,13 @@ if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 	}
 	else
 	{
-		print "Unfortunately, you are using a version of ESQL/C which does\n";
-		print "not have a mechanism to tell us which libraries it needs.\n";
+		print "Unfortunately, you are also using a version of ESQL/C which\n";
+		print "cannot tell us which libraries it needs.\n";
 		print "We'll assume that esqlld can sort things out for you.\n";
 		print "Contact the DBD::Informix maintenance team if it doesn't.\n";
 		# Do not override default version of $opts{LD}
 	}
+	print "\n";
 }
 
 # Ensure that esqlcc, esqlld, esqlsed are executable
@@ -421,7 +446,7 @@ sub which
 }
 
 # Assorted hints - these should be move to a hints subdirectory.
-print "\nSee README notes about SPARCompiler on Solaris\n"
+print "\nSee notes about SPARCompiler on Solaris in hints/solaris\n"
 	if ($Config{osname} eq 'solaris' and &which($Config{cc}) =~ m%/SUNWspro/%);
 print "\n";
 
@@ -446,7 +471,7 @@ ESQL = $esql
 " . 
 '
 .SUFFIXES:
-.SUFFIXES: .xs .ec .c .C .cpp .cxx .cc $(OBJ_EXT)
+.SUFFIXES: .xs .ec .c .C .cpp .cxx .cc $(OBJ_EXT) .sh
 
 # Cribbed from the definition of CCCMD (MakeMaker const_cccmd) and the
 # rules for compiling object files (MakeMakerc_o) in the Makefile.
@@ -457,6 +482,11 @@ ESQL_CC     = INFORMIXC="$(FULLPERL) esqlcc" ESQLCC="${CC}" $(ESQL)
 # ESQL_LD is not used (but ideally should be)
 ESQL_LD     = INFORMIXC="$(FULLPERL) esqlld" ESQLLD="${LD}" $(ESQL)
 MAP_LINKCMD = $(ESQL_CC)
+
+# Need to move the esql script created locally (in case the next build
+# uses a version of ESQL/C which does not need the custom esql script).
+clean::
+	-[ ! -f esql ] || mv esql esql.old
 
 .ec.o:
 	$(ESQL_CC) -c $(ESQLFLAGS) $*.ec

@@ -1,10 +1,10 @@
 /*
-@(#)File:           ixblob.ec
-@(#)Version:        50.3
-@(#)Last changed:   97/05/05
+@(#)File:           $RCSfile: ixblob.ec,v $
+@(#)Version:        $Revision: 50.4 $
+@(#)Last changed:   $Date: 1997/07/08 19:52:44 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) Jonathan Leffler 1996,1997
+@(#)Copyright:      (C) Jonathan Leffler 1996-97
 @(#)Product:        :PRODUCT:
 */
 
@@ -27,7 +27,7 @@
 static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
 
 #ifndef lint
-static const char sccs[] = "@(#)ixblob.ec	50.3 97/05/05";
+static const char rcs[] = "@(#)$Id: ixblob.ec,v 50.4 1997/07/08 19:52:44 johnl Exp $";
 #endif
 
 BlobLocn blob_getlocmode(void)

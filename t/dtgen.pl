@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#       @(#)dtgen.pl	54.1 97/03/27
+#       @(#)$Id: dtgen.pl,v 54.1 1997/03/27 17:28:59 johnl Exp $
 #
 #       Create exhaustive list of DATETIME & INTERVAL types for DBD::Informix
 #

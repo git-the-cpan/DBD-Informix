@@ -1,5 +1,5 @@
 /*
- * @(#)esqltest.ec	55.1 97/05/19 12:36:10
+ * @(#)$Id: esqltest.ec,v 56.4 1997/07/08 21:56:43 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -32,7 +32,7 @@ error "Please read the README file, and Makefile.PL, and get __STDC__ defined"
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char sccs[] = "@(#)esqltest.ec	55.1 97/05/19";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 56.4 1997/07/08 21:56:43 johnl Exp $";
 #endif
 
 /*
@@ -104,6 +104,14 @@ static void test_permissions(char *dbname)
 			ix_printerr(stderr, sqlca.sqlcode);
 		}
 	}
+	/*
+	** Ignore any errors on rollback.
+	** The ROLLBACK (or a COMMIT) is necessary if $DBD_INFORMIX_DATABASE is
+	** a MODE ANSI database and DBD_INFORMIX_DATABASE2 is either unset or
+	** set to the same database.
+	** Problem found by Kent S. Gordon (kgor@inetspace.com).
+	*/
+	EXEC SQL ROLLBACK WORK;
 }
 
 void dbd_ix_debug(int level, char *fmt, const char *arg)
@@ -112,9 +120,16 @@ void dbd_ix_debug(int level, char *fmt, const char *arg)
 	printf(fmt, arg);
 }
 
+void dbd_ix_debug_l(int level, char *fmt, long arg)
+{
+	putchar('\t');
+	printf(fmt, arg);
+}
+
 int main(int argc, char **argv)
 {
 	/* Command-line arguments are ignored at the moment */
+	char *dbidsn = getenv("DBI_DSN");
 	char *dbase0 = getenv("DBI_DBNAME");
 	char *dbase1 = getenv("DBD_INFORMIX_DATABASE");
 	char *dbase2 = getenv("DBD_INFORMIX_DATABASE2");
@@ -126,11 +141,23 @@ int main(int argc, char **argv)
 	static char  conn1[20] = "connection_1";
 	static char  conn2[20] = "connection_2";
 
+	/* Check whether the default connection variable is set */
+	if (dbidsn != 0 && *dbidsn != '\0')
+	{
+		printf("\tFYI: $DBI_DSN is set to '%s'.\n", dbidsn);
+		printf("\t\tIt is not used by any of the DBD::Informix tests.\n");
+		printf("\t\tIt is unset by the tests which would otherwise break.\n");
+	}
+
 	/* Set the basic default database name */
 	if (dbase0 == 0 || *dbase0 == '\0')
 	{
 		dbase0 = "stores";
 		printf("\t$DBI_DBNAME unset - defaulting to '%s'.\n", dbase0);
+	}
+	else
+	{
+		printf("\t$DBI_DBNAME set to '%s'.\n", dbase0);
 	}
 
 	/* Test for the explicit DBD::Informix database */

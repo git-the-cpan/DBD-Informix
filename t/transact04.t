@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)transact04.t	54.1 97/04/01 16:30:00
+#	@(#)$Id: transact04.t,v 54.1 1997/04/01 16:30:00 johnl Exp $ 
 #
 #	Test AutoCommit On for DBD::Informix
 #

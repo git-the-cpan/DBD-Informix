@@ -1,30 +1,29 @@
 #!/usr/bin/perl -w
 #
-# @(#)dblist.t	51.1 97/02/25 19:43:02
+# @(#)$Id: dblist.t,v 56.2 1997/06/25 23:03:39 johnl Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
 # Portions Copyright (C) 1996,1997 Jonathan Leffler
 #
 # List of available databases:
-#   @ary = $drh->func('_ListDBs');
+#   @ary = $DBI->data_sources('Informix');
 
 use DBD::InformixTest qw(stmt_ok stmt_fail stmt_note all_ok);
 
-$drh = DBI->install_driver('Informix');
+@ary = DBI->data_sources('Informix');
 
-@ary = $drh->func('_ListDBs');
 if (!defined @ary)
 {
 	print "1..1\n";
-	&stmt_note("# Test: \$drh->func('_ListDBs'):\n");
+	&stmt_note("# Test: DBI->data_sources('Informix'):\n");
 	&stmt_fail();
 }
 else
 {
 	$x = @ary;
 	print "1..$x\n";
-	&stmt_note("#Test: \$drh->func('_ListDBs'):\n");
+	&stmt_note("# Test: DBI->data_sources('Informix'):\n");
 	foreach $db (@ary)
 	{
 		&stmt_note("# Database: $db\n");

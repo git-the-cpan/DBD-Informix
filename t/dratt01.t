@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)dratt01.t	54.1 97/05/13 15:38:37
+#	@(#)$Id: dratt01.t,v 54.1 1997/05/13 15:38:37 johnl Exp $ 
 #
 #	Driver Attribute test script for DBD::Informix
 #

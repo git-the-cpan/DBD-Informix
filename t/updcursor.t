@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)updcursor.t	53.1 97/03/17 17:47:43
+#	@(#)$Id: updcursor.t,v 56.1 1997/07/11 04:51:24 johnl Exp $ 
 #
 #	Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
 #
@@ -74,8 +74,9 @@ print "# $delstmt\n";
 &stmt_ok();
 
 # In a logged database, must be in a transaction
-$dbh->do('BEGIN WORK')
-	unless (!$dbh->{ix_LoggedDatabase} || $dbh->{ix_InTransaction});
+# Given new AutoCommit behaviour, must set AutoCommit Off.
+$dbh->{AutoCommit} = 0
+	unless (!$dbh->{ix_LoggedDatabase});
 
 $n = 0;
 &stmt_fail() unless ($st1->execute());

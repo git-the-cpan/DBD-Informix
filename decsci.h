@@ -1,10 +1,10 @@
 /*
-@(#)File:            decsci.h
-@(#)Version:         1.1
-@(#)Last changed:    96/12/09
-@(#)Purpose:         Functions to format DECIMAL values properly
+@(#)File:            $RCSfile: decsci.h,v $
+@(#)Version:         $Revision: 1.4 $
+@(#)Last changed:    $Date: 1997/07/08 19:47:10 $
+@(#)Purpose:         JLSS Functions to manipulate DECIMAL values
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1996
+@(#)Copyright:       (C) JLSS 1996-97
 @(#)Product:         :PRODUCT:
 */
 
@@ -15,15 +15,20 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char decsci_h[] = "@(#)decsci.h	1.1 96/12/09";
+static const char decsci_h[] = "@(#)$Id: decsci.h,v 1.4 1997/07/08 19:47:10 johnl Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
 #include "decimal.h"
 
+extern int decabs(const dec_t *x, dec_t *r1);
+extern int decneg(const dec_t *x, dec_t *r1);
+extern int decpower(const dec_t *x, int n, dec_t *r1);
+extern int decsqrt(const dec_t *x, dec_t *r1);
+
 /* NB: these routines are not thread-safe and share common return storage */
-extern char *decfix(dec_t *d, int ndigit, int plus);
-extern char *decsci(dec_t *d, int ndigit, int plus);
-extern char *deceng(dec_t *d, int ndigit, int plus, int cw);
+extern char *decfix(const dec_t *d, int ndigit, int plus);
+extern char *decsci(const dec_t *d, int ndigit, int plus);
+extern char *deceng(const dec_t *d, int ndigit, int plus, int cw);
 
 #endif	/* DECSCI_H */

@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.ec	55.3 97/05/20 10:57:28
+ * @(#)$Id: dbdimp.ec,v 56.11 1997/07/13 01:09:22 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,13 +17,13 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)dbdimp.ec	55.3 97/05/20";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 56.11 1997/07/13 01:09:22 johnl Exp $";
 #endif
 
 #include <stdio.h>
 #include <string.h>
 
-#define MAIN_PROGRAM	/* Embed SCCS identification of JLSS headers */
+#define MAIN_PROGRAM	/* Embed version information for JLSS headers */
 #include "Informix.h"
 #include "decsci.h"
 
@@ -42,8 +42,9 @@ static SV *dbd_state = NULL;
 static const char SQLSTATE[] = "S1000";
 #endif /* ESQLC_VERSION */
 
-/* One day, this will go! */
+/* One day, these will go!  Maybe... */
 static void del_statement(imp_sth_t *imp_sth);
+static dbd_ix_begin(imp_dbh_t *dbh);
 
 /* ================================================================= */
 /* ==================== Driver Level Operations ==================== */
@@ -88,8 +89,9 @@ dbd_dr_driver(SV *drh)
 /* Destroys a statement when a database connection is destroyed */
 static void dbd_st_destroyer(void *data)
 {
-	dbd_ix_debug(1, "%s::dbd_st_destroyer()\n", dbd_ix_module());
+	dbd_ix_debug(1, "Enter %s::dbd_st_destroyer()\n", dbd_ix_module());
 	del_statement((imp_sth_t *)data);
+	dbd_ix_debug(1, "Exit %s::dbd_st_destroyer()\n", dbd_ix_module());
 }
 
 /* Delete all the statements (and other data) associated with a connection */
@@ -104,8 +106,9 @@ static void del_connection(imp_dbh_t *imp_dbh)
 /* Destroys a database connection when a driver is destroyed */
 static void dbd_db_destroyer(void *data)
 {
-	dbd_ix_debug(1, "%s::dbd_db_destroyer()\n", dbd_ix_module());
+	dbd_ix_debug(1, "Enter %s::dbd_db_destroyer()\n", dbd_ix_module());
 	del_connection((imp_dbh_t *)data);
+	dbd_ix_debug(1, "Exit %s::dbd_db_destroyer()\n", dbd_ix_module());
 }
 
 /* Disconnect all connections (cleanly) */
@@ -121,6 +124,16 @@ int dbd_dr_disconnectall(imp_drh_t *imp_drh)
 void
 dbd_ix_debug(int n, char *fmt, const char *arg)
 {
+	fflush(stdout);
+	if (DBIS->debug >= n)
+		warn(fmt, arg);
+}
+
+/* Format a Informix error message (both SQL and ISAM parts) */
+void
+dbd_ix_debug_l(int n, char *fmt, long arg)
+{
+	fflush(stdout);
 	if (DBIS->debug >= n)
 		warn(fmt, arg);
 }
@@ -179,11 +192,6 @@ static void dbd_ix_sqlcode(imp_dbh_t *imp_dbh)
 	{
 		dbd_ix_savesqlca(imp_dbh);
 		dbd_ix_seterror(sqlca.sqlcode);
-		if (imp_dbh->autoreport)
-		{
-			STRLEN len;
-			warn("%s", SvPV(dbd_errstr, len));
-		}
 	}
 }
 
@@ -201,7 +209,6 @@ imp_dbh_t      *imp_dbh;
 	imp_dbh->is_loggeddb  = False;
 	imp_dbh->is_modeansi  = False;
 	imp_dbh->is_txactive  = False;
-	imp_dbh->autocommit   = False;
 	imp_dbh->is_connected = False;
 	connection_num++;
 }
@@ -216,6 +223,7 @@ char           *pass;			/* Password */
 	D_imp_drh_from_dbh;
 	Boolean conn_ok;
 
+	dbd_ix_debug(1, "Enter %s::dbd_db_connect\n", dbd_ix_module());
 	new_connection(imp_dbh);
 	if (name != 0 && *name == '\0')
 		name = 0;
@@ -239,6 +247,7 @@ char           *pass;			/* Password */
 	{
 		/* Failure of some sort */
 		dbd_ix_seterror(sqlca.sqlcode);
+		dbd_ix_debug(1, "Exit %s::dbd_db_connect (**ERROR**)\n", dbd_ix_module());
 		return 0;
 	}
 
@@ -249,18 +258,25 @@ char           *pass;			/* Password */
 	imp_dbh->is_modeansi = (sqlca.sqlwarn.sqlwarn2 == 'W');
 	imp_dbh->is_loggeddb = (sqlca.sqlwarn.sqlwarn1 == 'W');
 	imp_dbh->is_connected = conn_ok;
-	if (imp_dbh->is_modeansi)
-		imp_dbh->is_txactive = True;
 
-	/* Unlogged databases are deemed to be in autocommit mode */
-	/* They cannot be switched out of autocommit mode */
-	/* MODE ANSI databases are not in AutoCommit by default */
-	/* Logged non-ANSI databases are in AutoCommit by default */
-	if (imp_dbh->is_modeansi)
-		imp_dbh->autocommit = False;
-	else
-		imp_dbh->autocommit = True;
-	imp_dbh->autoreport = True;
+#ifdef NO_BUGS_IN_DBI
+	/**
+	** Unlogged databases are deemed to be in AutoCommit mode.  They cannot
+	** be switched out of AutoCommit mode, so an attempt to connect to one
+	** with AutoCommit Off causes a failure with error -256 'Transaction
+	** not available'.  To comply with the DBI 0.85 standard, all
+	** databases, including MODE ANSI databases, run with AutoCommit On by
+	** default.  However, this can be overridden by the user as required.
+	*/
+	if (imp_dbh->is_loggeddb == False && DBI_AutoCommit(imp_dbh) == False)
+	{
+		/* Simulate connection failure */
+		sqlca.sqlcode = -256;
+		dbd_ix_seterror(sqlca.sqlcode);
+		dbd_ix_debug(1, "Exit %s::dbd_db_connect (**ERROR**)\n", dbd_ix_module());
+		return 0;
+	}
+#endif /* NO_BUGS_IN_DBI */
 
 	/* Record extra active connection and name of current connection */
 	imp_drh->n_connections++;
@@ -272,6 +288,22 @@ char           *pass;			/* Password */
 
 	DBIc_IMPSET_on(imp_dbh);	/* imp_dbh set up now                   */
 	DBIc_ACTIVE_on(imp_dbh);	/* call disconnect before freeing       */
+
+	/* Start a transaction if the database is Logged */
+	/* but not MODE ANSI and if AutoCommit is Off */
+	if (imp_dbh->is_loggeddb == True && imp_dbh->is_modeansi == False)
+	{
+		if (DBI_AutoCommit(imp_dbh) == False)
+		{
+			if (dbd_ix_begin(imp_dbh) == 0)
+			{
+				dbd_db_disconnect(imp_dbh);
+		dbd_ix_debug(1, "Exit %s::dbd_db_connect (**ERROR**)\n", dbd_ix_module());
+				return 0;
+			}
+		}
+	}
+
 	return 1;
 }
 
@@ -307,7 +339,10 @@ static int      dbd_ix_begin(imp_dbh_t *dbh)
 	if (sqlca.sqlcode < 0)
 		rc = 0;
 	else
+	{
+		dbd_ix_debug(3, "%s: BEGIN WORK\n", dbd_ix_module());
 		dbh->is_txactive = True;
+	}
 	return rc;
 }
 
@@ -321,8 +356,11 @@ static int      dbd_ix_commit(imp_dbh_t *dbh)
 	dbd_ix_sqlcode(dbh);
 	if (sqlca.sqlcode < 0)
 		rc = 0;
-	else if (dbh->is_modeansi == False)
+	else
+	{
+		dbd_ix_debug(3, "%s: COMMIT WORK\n", dbd_ix_module());
 		dbh->is_txactive = False;
+	}
 	return rc;
 }
 
@@ -336,8 +374,11 @@ static int      dbd_ix_rollback(imp_dbh_t *dbh)
 	dbd_ix_sqlcode(dbh);
 	if (sqlca.sqlcode < 0)
 		rc = 0;
-	else if (dbh->is_modeansi == False)
+	else
+	{
+		dbd_ix_debug(3, "%s: ROLLBACK WORK\n", dbd_ix_module());
 		dbh->is_txactive = False;
+	}
 	return rc;
 }
 
@@ -374,7 +415,8 @@ dbd_db_commit(imp_dbh_t *imp_dbh)
 		}
 		if ((rc = dbd_ix_commit(imp_dbh)) != 0)
 		{
-			if (imp_dbh->is_modeansi == False && imp_dbh->autocommit == False)
+			if (imp_dbh->is_modeansi == False &&
+				DBI_AutoCommit(imp_dbh) == False)
 				rc = dbd_ix_begin(imp_dbh);
 		}
 	}
@@ -396,11 +438,17 @@ dbd_db_rollback(imp_dbh_t *imp_dbh)
 		}
 		if ((rc = dbd_ix_rollback(imp_dbh)) != 0)
 		{
-			if (imp_dbh->is_modeansi == False && imp_dbh->autocommit == False)
+			if (imp_dbh->is_modeansi == False &&
+				DBI_AutoCommit(imp_dbh) == False)
 				rc = dbd_ix_begin(imp_dbh);
 		}
 	}
 	return rc;
+}
+
+/* Do nothing -- for use by cleanup code */
+static void noop(void *data)
+{
 }
 
 /* Close a connection, destroying any dependent statements */
@@ -430,8 +478,8 @@ dbd_db_disconnect(imp_dbh_t *imp_dbh)
 #if ESQLC_VERSION >= 600
 	dbd_ix_disconnect(imp_dbh->nm_connection);
 #else
-	if (imp_dbh->is_connected == True && imp_dbh->database != 0)
-		dbd_ix_closedatabase();
+	if (imp_dbh->is_connected == True)
+		dbd_ix_closedatabase(imp_dbh->database);
 #endif	/* ESQLC_VERSION >= 600 */
 
 	dbd_ix_sqlcode(imp_dbh);
@@ -445,6 +493,7 @@ dbd_db_disconnect(imp_dbh_t *imp_dbh)
 	imp_drh->n_connections--;
 	imp_drh->current_connection = 0;
 	assert(imp_drh->n_connections >= 0);
+	delete_link(&imp_dbh->chain, noop);
 
 	/* We don't free imp_dbh since a reference still exists	 */
 	/* The DESTROY method is the only one to 'free' memory.	 */
@@ -455,9 +504,9 @@ dbd_db_disconnect(imp_dbh_t *imp_dbh)
 void dbd_db_destroy(imp_dbh_t *imp_dbh)
 {
 	dbd_ix_debug(1, "%s::dbd_db_destroy()\n", dbd_ix_module());
-	if (DBIc_ACTIVE(imp_dbh))
+	if (DBIc_is(imp_dbh, DBIcf_ACTIVE))
 		dbd_db_disconnect(imp_dbh);
-	DBIc_IMPSET_off(imp_dbh);
+	DBIc_off(imp_dbh, DBIcf_IMPSET);
 }
 
 /* ================================================================== */
@@ -465,10 +514,8 @@ void dbd_db_destroy(imp_dbh_t *imp_dbh)
 /* ================================================================== */
 
 /* Initialize a statement structure, allocating names */
-static void     new_statement(imp_sth)
-imp_sth_t      *imp_sth;
+static void     new_statement(imp_dbh_t *imp_dbh, imp_sth_t *imp_sth)
 {
-	D_imp_dbh_from_sth;
 	static long     cursor_num = 0;
 
 	sprintf(imp_sth->nm_stmnt, "p_%09ld", cursor_num);
@@ -480,10 +527,13 @@ imp_sth_t      *imp_sth;
 	imp_sth->st_type = 0;
 	imp_sth->n_blobs = 0;
 	imp_sth->n_bound = 0;
+	imp_sth->n_rows = 0;
 	imp_sth->n_columns = 0;
 	add_link(&imp_dbh->head, &imp_sth->chain);
 	imp_sth->chain.data = (void *)imp_sth;
 	cursor_num++;
+	/* Cleanup required for statement chain in imp_dbh */
+	DBIc_on(imp_sth, DBIcf_IMPSET);
 }
 
 /* Close cursor */
@@ -509,11 +559,6 @@ dbd_ix_close(imp_sth_t *imp_sth)
 	return 1;
 }
 
-/* Do nothing -- for use by cleanup code */
-static void noop(void *data)
-{
-}
-
 /* Release all database and allocated resources for statement */
 static void del_statement(imp_sth_t *imp_sth)
 {
@@ -523,6 +568,8 @@ static void del_statement(imp_sth_t *imp_sth)
 	int coltype;
 	loc_t	blob;
 	EXEC SQL END DECLARE SECTION;
+
+	dbd_ix_debug_l(3, "Enter del_statement() 0x%08X\n", (long)imp_sth);
 
 	if (dbd_db_setconnection(imp_sth->dbh) == 0)
 	{
@@ -535,10 +582,12 @@ static void del_statement(imp_sth_t *imp_sth)
 	case Finished:
 		/*FALLTHROUGH*/
 	case Opened:
+		dbd_ix_debug(3, "del_statement() %s\n", "CLOSE cursor");
 		name = imp_sth->nm_cursor;
 		EXEC SQL CLOSE :name;
 		/*FALLTHROUGH*/
 	case Declared:
+		dbd_ix_debug(3, "del_statement() %s\n", "FREE cursor");
 		name = imp_sth->nm_cursor;
 		EXEC SQL FREE :name;
 		/*FALLTHROUGH*/
@@ -563,9 +612,11 @@ static void del_statement(imp_sth_t *imp_sth)
 				}
 			}
 		}
+		dbd_ix_debug(3, "del_statement() %s\n", "DEALLOCATE descriptor");
 		EXEC SQL DEALLOCATE DESCRIPTOR :name;
 		/*FALLTHROUGH*/
 	case Prepared:
+		dbd_ix_debug(3, "del_statement() %s\n", "FREE statement");
 		name = imp_sth->nm_stmnt;
 		EXEC SQL FREE :name;
 		/*FALLTHROUGH*/
@@ -574,7 +625,8 @@ static void del_statement(imp_sth_t *imp_sth)
 	}
 	imp_sth->st_state = Unused;
 	delete_link(&imp_sth->chain, noop);
-	DBIc_IMPSET_off(imp_sth);
+	DBIc_off(imp_sth, DBIcf_IMPSET);
+	dbd_ix_debug_l(3, "Exit del_statement() 0x%08X\n", (long)imp_sth);
 }
 
 /* Create the input descriptor for the specified number of items */
@@ -688,7 +740,7 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 		blob.loc_size = len;
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index DATA = :blob;
 	}
-	else if (SvIOK(val))
+	else if (SvIOKp(val))
 	{
 		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- integer\n", dbd_ix_module());
 		type = SQLINT;
@@ -696,7 +748,7 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
 						TYPE = :type, DATA = :integer;
 	}
-	else if (SvNOK(val))
+	else if (SvNOKp(val))
 	{
 		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- numeric\n", dbd_ix_module());
 		type = SQLFLOAT;
@@ -827,7 +879,8 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 	assert(imp_sth->st_state == Described);
 	dbd_ix_blobs(imp_sth);
 
-	if (imp_sth->dbh->is_modeansi == True && imp_sth->dbh->autocommit == True)
+	if (imp_sth->dbh->is_modeansi == True &&
+				DBI_AutoCommit(imp_sth->dbh) == True)
 	{
 		EXEC SQL DECLARE :nm_cursor CURSOR WITH HOLD FOR :nm_stmnt;
 	}
@@ -847,6 +900,7 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 int
 dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 {
+	D_imp_dbh_from_sth;
 	int  rc = 1;
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *statement = stmt;
@@ -857,21 +911,21 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	EXEC SQL END DECLARE SECTION;
 
 	dbd_ix_debug(1, "%s::dbd_st_prepare()\n", dbd_ix_module());
-	new_statement(imp_sth);
 
-	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
+	if ((rc = dbd_db_setconnection(imp_dbh)) == 0)
 	{
-		dbd_ix_savesqlca(imp_sth->dbh);
+		dbd_ix_savesqlca(imp_dbh);
 		return(rc);
 	}
 
+	new_statement(imp_dbh, imp_sth);
 	nm_stmnt = imp_sth->nm_stmnt;
 	nm_obind = imp_sth->nm_obind;
 	nm_cursor = imp_sth->nm_cursor;
 
 	EXEC SQL PREPARE :nm_stmnt FROM :statement;
-	dbd_ix_savesqlca(imp_sth->dbh);
-	dbd_ix_sqlcode(imp_sth->dbh);
+	dbd_ix_savesqlca(imp_dbh);
+	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
 	{
 		return 0;
@@ -879,7 +933,7 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	imp_sth->st_state = Prepared;
 
 	EXEC SQL ALLOCATE DESCRIPTOR :nm_obind WITH MAX 128;
-	dbd_ix_sqlcode(imp_sth->dbh);
+	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
 	{
 		del_statement(imp_sth);
@@ -888,7 +942,7 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	imp_sth->st_state = Allocated;
 
 	EXEC SQL DESCRIBE :nm_stmnt USING SQL DESCRIPTOR :nm_obind;
-	dbd_ix_sqlcode(imp_sth->dbh);
+	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
 	{
 		del_statement(imp_sth);
@@ -900,7 +954,7 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 		imp_sth->st_type = SQ_SELECT;
 
 	EXEC SQL GET DESCRIPTOR :nm_obind :desc_count = COUNT;
-	dbd_ix_sqlcode(imp_sth->dbh);
+	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
 	{
 		del_statement(imp_sth);
@@ -953,8 +1007,6 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 		printf("%s::dbd_st_prepare'imp_sth->n_columns: %d\n", dbd_ix_module(),
 		    imp_sth->n_columns);
 
-	if (rc != 0)
-		DBIc_IMPSET_on(imp_sth);
 	return rc;
 }
 
@@ -1098,6 +1150,7 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 		}
 		return Nullav;
 	}
+	imp_sth->n_rows++;
 
 	av = DBIS->get_fbav(imp_sth);
 
@@ -1207,7 +1260,7 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 #endif /* ESQLC_VERSION in {500, 501} */
 				/* Conditionally chop trailing blanks */
 				length = strlen(result);
-				if (DBIc_ChopBlanks(imp_sth))
+				if (DBIc_is(imp_sth, DBIcf_ChopBlanks))
 					length = byleng(result, length);
 				result[length] = '\0';
 				/*warn("Character Data: %d <<%s>>\n", length, result);*/
@@ -1253,24 +1306,6 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 	return(av);
 }
 
-int dbd_st_rows (SV *sth)
-{
-	dbd_ix_debug(0, "** NOT IMPLEMENTED ** %s::dbd_st_rows()\n", dbd_ix_module());
-	return 0;
-}
-
-int dbd_st_bind_ph (SV *sth, SV *param, SV *value, SV *attribs, int boolean, int len)
-{
-	dbd_ix_debug(0, "** NOT IMPLEMENTED ** %s::dbd_st_bind_ph()\n", dbd_ix_module());
-	return 0;
-}
-
-int dbd_st_blob_read (SV *sth, int field, long offset, long len, SV *destsv, int destoffset)
-{
-	dbd_ix_debug(0, "** NOT IMPLEMENTED ** %s::dbd_st_blob_read()\n", dbd_ix_module());
-	return 0;
-}
-
 static int dbd_ix_open(imp_sth_t *imp_sth)
 {
 	EXEC SQL BEGIN DECLARE SECTION;
@@ -1293,6 +1328,9 @@ static int dbd_ix_open(imp_sth_t *imp_sth)
 		return 0;
 	}
 	imp_sth->st_state = Opened;
+	if (imp_sth->dbh->is_modeansi == True)
+		imp_sth->dbh->is_txactive = True;
+	imp_sth->n_rows = 0;
 	return 1;
 }
 
@@ -1320,6 +1358,7 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 	{
 		return 0;
 	}
+
 	/**
 	** Here we need to analyse what was done...
 	** BEGIN WORK, COMMIT WORK, ROLLBACK WORK are important.
@@ -1332,44 +1371,63 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 	** On the other hand, if it is not in nm_ibind, it has to be extracted
 	** from the statement string itself.
 	*/
+	imp_sth->n_rows = sqlca.sqlerrd[2];
 	switch (imp_sth->st_type)
 	{
 	case SQ_BEGWORK:
+		dbd_ix_debug(3, "%s: BEGIN WORK\n", dbd_ix_module());
 		dbh->is_txactive = True;
+		assert(dbh->is_loggeddb == True);
+		/* Even BEGIN WORK has to be committed if AutoCommit is On */
+		if (DBI_AutoCommit(dbh) == True)
+			rc = dbd_ix_commit(dbh);
 		break;
 	case SQ_COMMIT:
+		dbd_ix_debug(3, "%s: COMMIT WORK\n", dbd_ix_module());
+		dbh->is_txactive = False;
+		assert(dbh->is_loggeddb == True);
 		/* In a logged database with AutoCommit Off, do BEGIN WORK */
-		if (dbh->is_modeansi == False && dbh->autocommit == False)
+		if (dbh->is_modeansi == False && DBI_AutoCommit(dbh) == False)
 			rc = dbd_ix_begin(dbh);
 		break;
 	case SQ_ROLLBACK:
+		dbd_ix_debug(3, "%s: ROLLBACK WORK\n", dbd_ix_module());
+		dbh->is_txactive = False;
+		assert(dbh->is_loggeddb == True);
 		/* In a logged database with AutoCommit Off, do BEGIN WORK */
-		if (dbh->is_modeansi == False && dbh->autocommit == False)
+		if (dbh->is_modeansi == False && DBI_AutoCommit(dbh) == False)
 			rc = dbd_ix_begin(dbh);
 		break;
 	case SQ_DATABASE:
+		dbh->is_txactive = False;
 		/* Analyse new database name and record it */
 		break;
 	case SQ_CREADB:
+		dbh->is_txactive = False;
 		/* Analyse new database name and record it */
 		break;
 	case SQ_STARTDB:
+		dbh->is_txactive = False;
 		/* Analyse new database name and record it */
 		break;
 	case SQ_RFORWARD:
+		dbh->is_txactive = False;
 		/* Analyse new database name and record it */
 		break;
 	case SQ_CLSDB:
+		dbh->is_txactive = False;
 		/* Record that no database is open */
 		break;
 	default:
+		if (dbh->is_modeansi)
+			dbh->is_txactive = True;
 		/* COMMIT WORK for MODE ANSI databases when AutoCommit is On */
-		if (dbh->is_modeansi == True && dbh->autocommit == True)
+		if (dbh->is_modeansi == True && DBI_AutoCommit(dbh) == True)
 			rc = dbd_ix_commit(dbh);
 		break;
 	}
 
-	DBIc_IMPSET_on(imp_sth);	/* Qu'est que c'est? */
+	DBIc_on(imp_sth, DBIcf_IMPSET);	/* Qu'est que c'est? */
 	return rc;
 }
 
@@ -1377,17 +1435,26 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 ** Execute the statement.
 ** - OPEN the cursor for a SELECT or cursory EXECUTE PROCEDURE.
 ** - EXECUTE the statement for anything else.
+** Remember that dbd_st_execute() must return:
+**      -2 or smaller   => error
+**      -1              => unknown number of rows affected
+**       0 or greater   => known number of rows affected
+** DBD::Informix will not return -1, though there's at least half an
+** argument for returning -1 after dbd_ix_open() is called.
 */
 int
 dbd_st_execute(imp_sth_t *imp_sth)
 {
+	int rv;
 	int rc;
 
 	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
-		return(rc);
+		assert(sqlca.sqlcode < 0);
+		return(sqlca.sqlcode);
 	}
+
 	if (imp_sth->st_type == SQ_SELECT)
 		rc = dbd_ix_open(imp_sth);
 #ifdef SQ_EXECPROC
@@ -1396,9 +1463,23 @@ dbd_st_execute(imp_sth_t *imp_sth)
 #endif /* SQ_EXECPROC */
 	else
 		rc = dbd_ix_exec(imp_sth);
-	return(rc);
+
+	/* Map returned values from dbd_ix_exec and dbd_ix_open */
+	if (rc == 0)
+	{
+		assert(sqlca.sqlcode < 0);
+		rv = sqlca.sqlcode;
+	}
+	else
+	{
+		rv = sqlca.sqlerrd[2];
+		assert(sqlca.sqlcode == 0 && rv >= 0);
+	}
+
+	return(rv);
 }
 
+#if ONLY
 int dbd_db_immediate(imp_dbh_t *imp_dbh, char *stmt)
 {
 	EXEC SQL BEGIN DECLARE SECTION;
@@ -1416,12 +1497,14 @@ int dbd_db_immediate(imp_dbh_t *imp_dbh, char *stmt)
 	dbd_ix_savesqlca(imp_dbh);
 	if (sqlca.sqlcode < 0)
 		return(0);
-	if (imp_dbh->autocommit == True && imp_dbh->is_modeansi == True)
+	if (DBI_AutoCommit(imp_dbh) == True && imp_dbh->is_modeansi == True)
 		dbd_ix_commit(imp_dbh);
 	dbd_ix_debug(1, "%s::dbd_db_immediate() exiting\n", dbd_ix_module());
 	return(sqlca.sqlcode == 0);
 }
+#endif /* ONLY */
 
+#if ONLY
 int dbd_db_createprocfrom(imp_dbh_t *imp_dbh, char *file)
 {
 	EXEC SQL BEGIN DECLARE SECTION;
@@ -1439,11 +1522,12 @@ int dbd_db_createprocfrom(imp_dbh_t *imp_dbh, char *file)
 	dbd_ix_savesqlca(imp_dbh);
 	if (sqlca.sqlcode < 0)
 		return(0);
-	if (imp_dbh->autocommit == True && imp_dbh->is_modeansi == True)
+	if (DBI_AutoCommit(imp_dbh) == True && imp_dbh->is_modeansi == True)
 		dbd_ix_commit(imp_dbh);
 	dbd_ix_debug(1, "%s::dbd_createprocfrom() exiting\n", dbd_ix_module());
 	return(sqlca.sqlcode == 0);
 }
+#endif /* ONLY */
 
 
-/* -------------- End of dbdimp.ec -------------- */
+/* -------------- End of $RCSfile: dbdimp.ec,v $ -------------- */

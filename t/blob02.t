@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)blob02.t	53.1 97/03/06 20:37:24
+#	@(#)$Id: blob02.t,v 53.1 1997/03/06 20:37:24 johnl Exp $ 
 #
 #	Test Basic Blobs (INSERT) for DBD::Informix
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)chopblanks.t	54.2 97/05/15 16:20:37
+#	@(#)$Id: chopblanks.t,v 56.1 1997/06/12 18:55:57 johnl Exp $ 
 #
 #	ChopBLanks attribute test script for DBD::Informix
 #
@@ -8,13 +8,17 @@
 
 use DBD::InformixTest;
 
-$tabname = "dbd_ix_trbl_01";
+$tabname = "dbd_ix_chbl_01";
 
 $dbh = &connect_to_test_database();
+print "# OnLine - will test VARCHAR data types\n"
+	if ($dbh->{ix_InformixOnLine});
+print "# SE - no testing for VARCHAR data types\n"
+	unless ($dbh->{ix_InformixOnLine});
 $subtests = 5;
 $comtests = 2;
 $multiplier = 2;
-$multiplier = 4 if (defined $dbh->{ix_InformixOnLine});
+$multiplier = 4 if ($dbh->{ix_InformixOnLine});
 $ntests = $subtests * $multiplier + $comtests;
 &stmt_note("1..$ntests\n");
 &stmt_ok(0);
@@ -34,8 +38,16 @@ sub test_trailing_blanks
 	my ($ref, @row, $sth);
 
 	&stmt_note("# Testing $type - ChopBlanks set to $dbh->{ChopBlanks}\n");
-	&stmt_fail() unless $dbh->do("CREATE TEMP TABLE $tabname (Col01 INTEGER NOT NULL, Col02 $type(10) NOT NULL)");
-	&stmt_fail() unless $ins = $dbh->prepare("INSERT INTO $tabname VALUES(?, ?)");
+	&stmt_fail() unless $dbh->do(qq%
+		CREATE TEMP TABLE $tabname
+		(
+			Col01 INTEGER NOT NULL,
+			Col02 $type(10) NOT NULL
+		)
+		%);
+	&stmt_fail() unless $ins = $dbh->prepare(qq%
+		INSERT INTO $tabname VALUES(?, ?)
+		%);
 	for ($i = 0; $i < @expect_vc; $i++)
 	{
 		&stmt_fail() unless $ins->execute($i+1, $expect_vc[$i]);
@@ -43,7 +55,9 @@ sub test_trailing_blanks
 	&stmt_fail() unless $ins->finish();
 	&stmt_ok();
 
-	&stmt_fail() unless $sth = $dbh->prepare("SELECT Col01, Col02 FROM $tabname ORDER BY Col01");
+	&stmt_fail() unless $sth = $dbh->prepare(qq%
+		SELECT Col01, Col02 FROM $tabname ORDER BY Col01
+		%);
 	&stmt_fail() unless $sth->execute();;
 	$i = 0;
 	while ($ref = $sth->fetch())
@@ -66,11 +80,11 @@ sub test_trailing_blanks
 
 $dbh->{ChopBlanks} = 0;		# Preserve trailing blanks!
 &test_trailing_blanks("CHAR   ", @expect_ct);
-&test_trailing_blanks("VARCHAR", @expect_vc) if (defined $dbh->{ix_InformixOnLine});
+&test_trailing_blanks("VARCHAR", @expect_vc) if ($dbh->{ix_InformixOnLine});
 
 $dbh->{ChopBlanks} = 1;		# Chop trailing blanks!
 &test_trailing_blanks("CHAR   ", @expect_cn);
-&test_trailing_blanks("VARCHAR", @expect_vc) if (defined $dbh->{ix_InformixOnLine});
+&test_trailing_blanks("VARCHAR", @expect_vc) if ($dbh->{ix_InformixOnLine});
 
 &stmt_fail() unless ($dbh->disconnect);
 &stmt_ok();

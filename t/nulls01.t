@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)nulls01.t	55.1 97/05/20 11:05:15
+#	@(#)$Id: nulls01.t,v 55.1 1997/05/20 11:05:15 johnl Exp $ 
 #
 #	Test Null Handling for DBD::Informix
 #

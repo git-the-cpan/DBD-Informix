@@ -1,5 +1,5 @@
 /*
- * @(#)esqlc_v5.ec	53.2 97/03/06 17:17:54
+ * @(#)$Id: esqlc_v5.ec,v 56.2 1997/07/13 01:09:22 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char sccs[] = "@(#)esqlc_v5.ec	53.2 97/03/06";
+static const char rcs[] = "@(#)$Id: esqlc_v5.ec,v 56.2 1997/07/13 01:09:22 johnl Exp $";
 #endif
 
 /* ================================================================= */
@@ -49,10 +49,16 @@ dbd_ix_opendatabase(char *dbase)
 }
 
 void
-dbd_ix_closedatabase(void)
+dbd_ix_closedatabase(char *dbname)
 {
-	dbd_ix_debug(1, "CLOSE DATABASE%s\n", "");
+	dbd_ix_debug(1, "CLOSE DATABASE%s\n", (dbname ? dbname : ""));
 	EXEC SQL CLOSE DATABASE;
+	if ((dbname == 0 || *dbname == '\0') && sqlca.sqlcode == -349)
+	{
+		/* -349: Database not selected yet. */
+		/* Fib about failure to close database */
+		sqlca.sqlcode = 0;
+	}
 }
 
 /* Ensure that the correct connection is current -- a no-op in version 5.0x */

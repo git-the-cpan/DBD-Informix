@@ -1,10 +1,10 @@
 /*
-@(#)File:            decsci.c
-@(#)Version:         1.9
-@(#)Last changed:    96/12/20
+@(#)File:            $RCSfile: decsci.c,v $
+@(#)Version:         $Revision: 1.11 $
+@(#)Last changed:    $Date: 1997/07/08 19:47:10 $
 @(#)Purpose:         Fixed, Exponential and Engineering formatting of DECIMALs
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1991,1992,1993,1996
+@(#)Copyright:       (C) JLSS 1991-93,1996-97
 @(#)Product:         :PRODUCT:
 */
 
@@ -15,19 +15,21 @@
 #define VALID(n)	(((n) <= 0) ? 6 : (((n) > 32) ? 32 : (n)))
 #define VALID2(n)	(((n) <= 0) ? 0 : (((n) > 151) ? 151 : (n)))
 
+#define CONST_CAST(t, v)	((t)v)
+
 /* For 32 digits, 3-digit exponent, leading blanks, etc, 42 is enough */
 /* With fixed format, could have -0.(130*0)(32 digits) + null for length 166 */
 static char     buffer[166];
 
 #ifndef lint
-static const char sccs[] = "@(#)decsci.c	1.9 96/12/20";
+static const char rcs[] = "@(#)$Id: decsci.c,v 1.11 1997/07/08 19:47:10 johnl Exp $";
 #endif
 
 /*
 **	Format a fixed-point number.  Unreliable for ndigit > 58 because of the
 **	implementation of decfcvt in ${SOURCE}/infx/decconv.c
 */
-char           *decfix(dec_t *d, int ndigit, int plus)
+char           *decfix(const dec_t *d, int ndigit, int plus)
 {
 	register char  *dst = buffer;
 	register char  *src;
@@ -43,7 +45,7 @@ char           *decfix(dec_t *d, int ndigit, int plus)
 
 	ndigit = VALID2(ndigit);
 
-	src = decfcvt(d, ndigit, &dp, &sn);
+	src = decfcvt(CONST_CAST(dec_t *, d), ndigit, &dp, &sn);
 
 	*dst++ = SIGN(sn, plus);	/* Sign */
 	if (dp >= 1)
@@ -99,7 +101,7 @@ static char    *decexp(register char  *dst, register int dp)
 }
 
 /*	Format a scientific notation number */
-char           *decsci(dec_t *d, int ndigit, int plus)
+char           *decsci(const dec_t *d, int ndigit, int plus)
 {
 	register char  *dst = buffer;
 	register char  *src;
@@ -114,14 +116,14 @@ char           *decsci(dec_t *d, int ndigit, int plus)
 	}
 
 	ndigit = VALID(ndigit);
-	src = dececvt(d, ndigit, &dp, &sn);
+	src = dececvt(CONST_CAST(dec_t *, d), ndigit, &dp, &sn);
 	*dst++ = SIGN(sn, plus);	/* Sign */
 	*dst++ = *src++;			/* Digit before decimal point */
 	*dst++ = '.';				/* Decimal point */
 	while (*src)				/* Digits after decimal point */
 		*dst++ = *src++;
 	deccvdbl(0.0, &z);
-	dst = decexp(dst, dp - (deccmp(d, &z) != 0));	/* Exponent */
+	dst = decexp(dst, dp - (deccmp(CONST_CAST(dec_t *, d), &z) != 0));	/* Exponent */
 	return(buffer);
 }
 
@@ -136,7 +138,7 @@ char           *decsci(dec_t *d, int ndigit, int plus)
 **	including the leading zero!
 **	The field can be made constant width by specifying a non-zero cw.
 */
-char           *deceng(dec_t *d, int ndigit, int plus, int cw)
+char           *deceng(const dec_t *d, int ndigit, int plus, int cw)
 {
 	register char  *dst = buffer;
 	register char  *src;
@@ -152,7 +154,7 @@ char           *deceng(dec_t *d, int ndigit, int plus, int cw)
 	}
 
 	ndigit = VALID(ndigit);
-	src = dececvt(d, ndigit, &dp, &sn);
+	src = dececvt(CONST_CAST(dec_t *, d), ndigit, &dp, &sn);
 	exp = dp - 1;
 	/* Calculate leading blanks */
 	lb = 2 - (exp % 3);

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)multiconn03.t	54.4 97/05/13 15:38:08
+#	@(#)$Id: multiconn03.t,v 54.4 1997/05/13 15:38:08 johnl Exp $ 
 #
 #	Test abuse of statements after DISCONNECT ALL for DBD::Informix
 #

@@ -1,7 +1,7 @@
 /*
-@(#)File:            ixblob.h
-@(#)Version:         50.2
-@(#)Last changed:    97/05/05
+@(#)File:            $RCSfile: ixblob.h,v $
+@(#)Version:         $Revision: 50.2 $
+@(#)Last changed:    $Date: 1997/05/05 16:52:06 $
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1997
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char ixblob_h[] = "@(#)ixblob.h	50.2 97/05/05";
+static const char ixblob_h[] = "@(#)$Id: ixblob.h,v 50.2 1997/05/05 16:52:06 johnl Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)sqlcmd.sh	54.2 97/04/08
+#	@(#)$Id: sqlcmd.sh,v 54.2 1997/04/08 18:59:42 johnl Exp $
 #
 #	SQL Command Reader & Executor
 
@@ -56,7 +56,7 @@ getopts('d:e:xV');
 # Print version information
 if ($opt_V)
 {
-	print "$0: SQLCMD Version 54.2 (97/04/08)\n";
+	print "$0: SQLCMD Version $Revision: 54.2 $ ($Date: 1997/04/08 18:59:42 $)\n";
 	$drh = DBI->install_driver('Informix');
 	print "DBI Version $DBI::VERSION\n";
 	print "DBD::$drh->{Name} Version $drh->{Version}\n";
