@@ -5,7 +5,7 @@
 @(#)Purpose:         Map Informix SQL Types to ODBC Types
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997-98
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -49,7 +49,7 @@ typedef enum IxSQLType
 } IxSQLType;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: odbctype.c,v 61.3 1998/10/27 20:58:37 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: odbctype.c version /main/9 1998-10-27 20:58:37 $";
 #endif
 
 /* Map Informix DATETIME types to equivalent ODBC types */

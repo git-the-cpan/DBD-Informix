@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t99clean.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t99clean.t version /main/6 1999-09-19 21:18:32 $ 
 #
 #	Clean up DBD::Informix testing debris from the test database
 #   NB: Running with AutoCommit on.

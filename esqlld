@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: esqlld,v 95.1 1999/09/23 21:20:57 jleffler Exp $ 
+# @(#)$Id: esqlld version /main/9 1999-09-23 21:20:57 $ 
 #
 # DBD::Informix for Perl Version 5
 #

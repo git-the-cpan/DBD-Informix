@@ -5,7 +5,7 @@
 @(#)Purpose:         Verify that library is built with correct version of ESQL/C
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1998
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +13,7 @@
 #include "esqlutil.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlcver.ec,v 1.1 1998/11/05 17:49:05 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqlcver.ec version /main/1 1998-11-05 17:49:05 $";
 #endif
 
 int ESQLC_VERSION_CHECKER(void)

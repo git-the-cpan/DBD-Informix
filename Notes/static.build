@@ -46,5 +46,5 @@ recent versions of Informix, it (probably) won't work either because you
 will need the GLS locale information.  And not having the message files
 reduces the friendliness of the error messages produced by DBD::Informix.
 
-$Id: static.build,v 57.1 1997/08/13 18:16:26 johnl Exp $
+$Id: Notes/static.build version /main/1 1997-08-13 18:16:26 $
 

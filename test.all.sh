@@ -1,4 +1,4 @@
-:	"@(#)$Id: test.all.sh,v 1.9 1998/08/06 01:52:48 jleffler Exp $"
+:	"@(#)$Id: test.all.sh version /main/9 1998-08-06 01:52:48 $"
 #
 #	Run tests against logged, unlogged and mode_ansi databases
 

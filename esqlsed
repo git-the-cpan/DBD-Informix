@@ -1,6 +1,6 @@
 #!/usr/bin/perl -pi
 #
-# @(#)$Id: esqlsed,v 60.2 1998/06/15 22:04:08 jleffler Exp $ 
+# @(#)$Id: esqlsed version /main/8 1998-06-15 22:04:08 $ 
 #
 # DBD::Informix for Perl Version 5
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t73blob.t,v 95.3 1999/12/04 23:45:10 jleffler Exp $ 
+#	@(#)$Id: t/t73blob.t version /main/17 1999-12-04 23:45:10 $ 
 #
 #	Test Basic Blobs (INSERT & UPDATE) for DBD::Informix
 #

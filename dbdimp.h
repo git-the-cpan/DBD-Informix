@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 95.2 1999/11/19 03:37:39 jleffler Exp $ 
+ * @(#)$Id: dbdimp.h version /main/56 1999-11-19 03:37:39 $ 
  *
  * Copyright (c) 1994-95 Tim Bunce
  *           (c) 1996-99 Jonathan Leffler

@@ -5,7 +5,7 @@
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1996-98
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 61.2 1998/11/17 17:08:25 jleffler Exp $";
+static const char esqlperl_h[] = "@(#)$Id: esqlperl.h version /main/15 1998-11-17 17:08:25 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

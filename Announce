@@ -1,8 +1,8 @@
 To: dbi-announce@isc.org, dbi-dev@isc.org, dbi-users@isc.org,
         informix-list@iiug.org, descarte@symbolstone.org
-Subject: ANNOUNCE: DBD::Informix Version 0.97001 released
+Subject: ANNOUNCE: DBD::Informix Version 0.97002 released
 
-The next release of DBD::Informix, version 0.97001, was uploaded to
+The next release of DBD::Informix, version 0.97002, was uploaded to
 CPAN on 2000-01-19.  It will be available worldwide in a day or three.
 
 **** This version is not intended for general use.  The differences between
@@ -33,7 +33,7 @@ http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces/DBD
 http://www.symbolstone.org/technology/perl/DBI
 
    *******************************************************************
-   **    When you successfully build DBD::Informix v0.97001, please    **
+   **   When you successfully build DBD::Informix v0.97002, please  **
    **      use the ItWorks script to report your configuration      **
    *******************************************************************
 

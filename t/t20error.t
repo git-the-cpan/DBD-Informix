@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t20error.t,v 62.2 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t20error.t version /main/8 1999-09-19 21:18:32 $ 
 #
 #	Test error on EXECUTE for DBD::Informix
 #

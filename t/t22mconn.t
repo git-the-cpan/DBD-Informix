@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t22mconn.t,v 97.1 2000/01/19 17:43:08 jleffler Exp $ 
+#	@(#)$Id: t/t22mconn.t version /main/20 2000-01-20 11:44:00 $ 
 #
 #	Test DISCONNECT ALL for DBD::Informix
 #
-#	Copyright (C) 1996-99 Jonathan Leffler
+#	Portions Copyright (C) 1996-99 Jonathan Leffler
+#	Portions Copyright (C) 2000    Informix Software Inc
 
 BEGIN { require "perlsubs/InformixTest.pl"; require "perlsubs/shmconn.pl"; }
 
@@ -49,7 +50,6 @@ if ($dbh1->{ix_MultipleConnections} == 0)
 {
 	&stmt_note("1..0\n");
 	&stmt_note("# Multiple connections are not supported\n");
-	&stmt_ok(0);
 	&all_ok();
 }
 

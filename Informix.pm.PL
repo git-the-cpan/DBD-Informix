@@ -7,31 +7,63 @@ use Config;
 my $filename = $0;
 $filename =~ s/\.PL$//;
 
+my $dir = '/usr/informix';
+my $server;
+my $deflic = 'ACN#J334912';
+my $licence = $deflic;
+while (@ARGV and $ARGV[0] =~ /^-d(\w+)=(.*)/)
+{
+	my ($tag, $value) = ($1, $2);
+	$tag eq 'INFORMIXDIR' and $dir = $value;
+	$tag eq 'INFORMIXSERVER' and $server = $value;
+	$tag eq 'INFORMIX_LICENCE' and $licence = $value;
+	shift;
+}
+
+$licence =~ s/([A-Z][A-Z][A-Z])[@#]([A-Z]\d\d\d\d\d\d)/$1#$2/;
+if ($licence !~ /[A-Z][A-Z][A-Z]#[A-Z]\d\d\d\d\d\d/)
+{
+	print STDERR "$0: invalid Informix licence number '$licence'\n";
+	exit 1;
+}
+$licence .= " (default - no Tech Support available)"
+	if ($licence eq $deflic);
+
 open OUT,">$filename" or die "Can't create $filename: $!";
 chmod(0755, $filename);
+
 print "Extracting $filename from $0\n";
-print " -- default \$INFORMIXDIR    = $ENV{INFORMIXDIR}\n";
-print " -- default \$INFORMIXSERVER = $ENV{INFORMIXSERVER})\n" if $ENV{INFORMIXSERVER};
+print " -- default INFORMIXDIR          = $ENV{INFORMIXDIR}\n";
+print " -- default INFORMIXSERVER       = $ENV{INFORMIXSERVER})\n" if $server;
+print " -- DBD::Informix Licence Number = $licence\n";
 
 select(OUT);	# Set the default output file handle!
 
-print "# Default value of INFORMIXDIR set when DBD::Informix was configured.\n";
-print "\nBEGIN {\n";
-print "\t\$ENV{'INFORMIXDIR'} = qq[$ENV{'INFORMIXDIR'}]\n";
-print "\t\tunless exists \$ENV{'INFORMIXDIR'}\n";
-if ($ENV{INFORMIXSERVER}) {
-	print "# Default value of INFORMIXSERVER set when DBD::Informix was configured.\n";
-	print "\t\$ENV{'INFORMIXSERVER'} = qq[$ENV{'INFORMIXSERVER'}]\n";
-	print "\t\tunless exists \$ENV{'INFORMIXSERVER'};\n";
+print qq%# Default value of INFORMIXDIR set when DBD::Informix was built.
+# \$ENV{'INFORMIXDIR'} = qq[$dir]
+%;
+print qq%# Default value of INFORMIXSERVER set when DBD::Informix was built.
+# \$ENV{'INFORMIXSERVER'} = qq[$server]
+% if ($server);
+
+while (<DATA>)
+{
+	s/:INFORMIX_LICENCE:/$licence/o if (m/:INFORMIX_LICENCE:/o);
+	s/:INFORMIXDIR:/$dir/o          if (m/:INFORMIXDIR:/o);
+	s/:INFORMIXSERVER:/$server/o    if (m/:INFORMIXSERVER:/o && $server);
+	next if (m/:INFORMIXSERVER:/o && !$server);
+	print "$_";
 }
-print "};\n\n";
 
-print <<'EOF';
+exit 0;
 
-#	@(#)$Id: Informix.pm.PL,v 97.5 2000/01/19 21:45:52 jleffler Exp $
+__END__
+
+#	@(#)$Id: Informix.pm.PL version /main/2 2000-01-24 14:07:13 $
 #
 #   Portions Copyright (c) 1994-95   Tim Bunce
-#   Portions Copyright (c) 1996-2000 Jonathan Leffler
+#   Portions Copyright (c) 1996-1999 Jonathan Leffler
+#   Portions Copyright     2000      Informix Software Inc
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -43,10 +75,10 @@ print <<'EOF';
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.97001";
-	$ATTRIBUTION = 'Jonathan Leffler <j.leffler@acm.org>';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm.PL,v $ $Revision: 97.5 $ ($Date: 2000/01/19 21:45:52 $)@, 3);
-	$Revision    =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
+	$VERSION          = "0.97002";
+	$ATTRIBUTION      = 'Jonathan Leffler <j.leffler@acm.org>';
+	$Revision         = '$Id: Informix.pm.PL version /main/2 2000-01-24 14:07:13 $';
+	$INFORMIX_LICENCE = ":INFORMIX_LICENCE:";
 
 	require_version DBI 1.02;	# Requires features from DBI 1.02 release
 
@@ -70,19 +102,20 @@ print <<'EOF';
 
 		unless ($ENV{INFORMIXDIR})
 		{
-			foreach (qw(/usr/informix /opt/informix))
+			foreach (qw(:INFORMIXDIR: /usr/informix /opt/informix))
 			{
 				# If Informix-Connect or Informix-ESQL/C is installed,
 				# $INFORMIXDIR must have lib and msg sub-directories.
 				if (-d "$_/lib" && -d "$_/msg")
 				{
 					$ENV{INFORMIXDIR} = $_;
-					warn "DBD::Informix - INFORMIXDIR set to $_\n";
+					# warn "DBD::Informix - INFORMIXDIR set to $_\n";
 					last;
 				}
 			}
 			warn "INFORMIXDIR not set!\n" unless $ENV{INFORMIXDIR};
 		}
+		$ENV{INFORMIXSERVER} = ":INFORMIXSERVER:" unless ($ENV{INFORMIXSERVER});
 
 		$class .= "::dr";
 
@@ -96,7 +129,8 @@ print <<'EOF';
 			'Err'                    => \$DBD::Informix::err,
 			'Errstr'                 => \$DBD::Informix::errstr,
 			'State'                  => \$DBD::Informix::state,
-			'Attribution'            => $ATTRIBUTION,
+			'Attribution'            => "$ATTRIBUTION",
+			'ix_InformixLicence'     => "$INFORMIX_LICENCE",
 			%{$attr}
 		});
 
@@ -442,7 +476,7 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes DBD::Informix version 0.97001.
+This document describes DBD::Informix version 0.97002.
 
 You should also read the documentation for DBI as this document
 qualifies what is stated there.
@@ -1406,5 +1440,3 @@ ChangeLog file.
 perl(1), perldoc for DBI.
 
 =cut
-
-EOF

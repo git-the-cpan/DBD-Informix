@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t83oconn.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t83oconn.t version /main/4 1999-09-19 21:18:32 $ 
 #
 #	Check old connection method for DBD::Informix
 #

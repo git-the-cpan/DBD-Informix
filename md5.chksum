@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: md5.chksum,v 95.1 1999/11/11 01:24:04 jleffler Exp $
+# @(#)$Id: md5.chksum version /main/3 1999-11-11 01:24:04 $
 #
 # For each file on the command line, print the MD5 digest of the file followed by its name
 # Uses:

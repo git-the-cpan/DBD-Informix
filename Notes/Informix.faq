@@ -71,4 +71,4 @@ FAQs for DBD::Informix
     to ignore INFORMIXC, you make it ignore a lot of hard work -- and
     cause the build to fail.
 
-@(#)$Id: Informix.faq,v 95.1 1999/12/16 01:59:49 jleffler Exp $
+@(#)$Id: Notes/Informix.faq version /main/3 1999-12-16 01:59:49 $

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t57tables.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t57tables.t version /main/4 1999-09-19 21:18:32 $ 
 #
 #	Test tables
 #

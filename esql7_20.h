@@ -5,7 +5,7 @@
 @(#)Purpose:         Function prototypes for ESQL/C Versions 7.20..7.22
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql7_20_h[] = "@(#)$Id: esql7_20.h,v 1.3 1999/08/31 12:43:43 jleffler Exp $";
+static const char esql7_20_h[] = "@(#)$Id: esql7_20.h version /main/3 1999-08-31 12:43:43 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

@@ -1,6 +1,6 @@
 #! /usr/bin/perl
 #
-#	@(#)$Id: ItWorks,v 95.5 1999/12/31 00:12:52 jleffler Exp $
+#	@(#)$Id: ItWorks version /main/5 1999-12-31 00:12:52 $
 #
 #	Generate a report that DBD::Informix works
 

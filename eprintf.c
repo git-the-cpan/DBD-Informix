@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: eprintf.c,v 60.1 1998/06/16 16:03:30 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: eprintf.c version /main/1 1998-06-16 16:03:30 $";
 #endif
 
 /* This is used by the `assert' macro.  */

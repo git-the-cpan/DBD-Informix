@@ -2,7 +2,7 @@
 #
 # DBD::Informix Example 3 - fetchrow_arrayref
 #
-# @(#)$Id: x03fetchrow_arrayref.pl,v 61.1 1998/10/27 19:14:59 jleffler Exp $
+# @(#)$Id: examples/x03fetchrow_arrayref.pl version /main/2 1998-10-27 19:14:59 $
 #
 # Jonathan Leffler (j.leffler@acm.org)
 

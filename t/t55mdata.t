@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t55mdata.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t55mdata.t version /main/7 1999-09-19 21:18:32 $ 
 #
 #	Test MetaData functions _tables, _columns for DBD::Informix
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t75blob.t,v 95.3 1999/12/04 23:45:10 jleffler Exp $ 
+#	@(#)$Id: t/t75blob.t version /main/9 1999-12-04 23:45:10 $ 
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #

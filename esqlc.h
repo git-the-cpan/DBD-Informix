@@ -5,7 +5,7 @@
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-99
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 #ifndef ESQLC_H
@@ -13,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 3.10 1999/12/06 18:32:54 jleffler Exp $";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h version /main/31 1999-12-06 18:32:54 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

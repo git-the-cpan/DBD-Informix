@@ -1,8 +1,8 @@
-# @(#)$Id: Informix.pm,v 97.1 2000/01/19 00:07:08 jleffler Exp $
+# @(#)$Id: lib/Bundle/DBD/Informix.pm version /main/3 1999-11-18 22:10:59 $
 
 package Bundle::DBD::Informix;
 
-$VERSION = '0.97.PC1';
+$VERSION = '0.95';
 
 1;
 

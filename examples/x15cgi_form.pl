@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: x15cgi_form.pl,v 61.2 1999/05/14 00:33:09 jleffler Exp $
+# @(#)$Id: examples/x15cgi_form.pl version /main/3 1999-05-14 00:33:09 $
 #
 # Slightly more sophisticated post-processing example CGI script
 

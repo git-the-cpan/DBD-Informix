@@ -1,6 +1,7 @@
-# @(#)$Id: shmconn.pl,v 97.1 2000/01/19 17:44:46 jleffler Exp $
+# @(#)$Id: perlsubs/shmconn.pl version /main/2 2000-01-19 10:06:21 $
 #
-# Copyright (c) 1999 Jonathan Leffler
+# Portions Copyright (C) 1999 Jonathan Leffler
+# Portions Copyright (C) 2000 Informix Software Inc
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.

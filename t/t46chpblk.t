@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t46chpblk.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t46chpblk.t version /main/7 1999-09-19 21:18:32 $ 
 #
 #	ChopBLanks attribute test script for DBD::Informix
 #

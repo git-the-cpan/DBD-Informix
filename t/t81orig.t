@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t81orig.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+# @(#)$Id: t/t81orig.t version /main/10 1999-09-19 21:18:32 $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #

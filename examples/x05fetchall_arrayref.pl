@@ -2,7 +2,7 @@
 #
 # DBD::Informix Example 5 - fetchall_arrayref
 #
-# @(#)$Id: x05fetchall_arrayref.pl,v 61.1 1998/10/27 19:14:59 jleffler Exp $
+# @(#)$Id: examples/x05fetchall_arrayref.pl version /main/2 1998-10-27 19:14:59 $
 #
 # Jonathan Leffler (j.leffler@acm.org)
 

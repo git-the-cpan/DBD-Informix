@@ -5,7 +5,7 @@
 @(#)Purpose:         Provide support for KLUDGE macro
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1995,1997-99
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.6 1999/11/24 22:07:44 jleffler Exp $";
+static const char kludge_h[] = "@(#)$Id: kludge.h version /main/6 1999-11-24 22:07:44 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

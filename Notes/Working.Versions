@@ -1,7 +1,7 @@
 Working Versions of DBD::Informix
 =================================
 
-@(#)$Id: Working.Versions,v 95.2 1999/12/31 02:09:17 jleffler Exp $
+@(#)$Id: Notes/Working.Versions version /main/12 1999-12-31 02:09:17 $
 
 This file documents combinations of machine, operating system, Perl, DBI,
 DBD::Informix and Informix-ESQL/C which have been reported as working,

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t01stproc.t,v 95.3 1999/12/04 23:46:08 jleffler Exp $ 
+#	@(#)$Id: t/t01stproc.t version /main/5 1999-12-04 23:46:08 $ 
 #
 #	Test stored procedure handling for DBD::Informix
 #

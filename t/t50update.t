@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t50update.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $
+# @(#)$Id: t/t50update.t version /main/5 1999-09-19 21:18:32 $
 #
 #	Copyright (C) 1998-99 Jonathan Leffler
 #

@@ -5,14 +5,14 @@
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1988-1993,1995-98
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
 /*LINTLIBRARY*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltype.ec,v 2.2 1998/11/17 21:30:43 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: sqltype.ec version /main/16 1998-11-17 21:30:43 $";
 #endif
 
 #include <string.h>

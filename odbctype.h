@@ -5,7 +5,7 @@
 @(#)Purpose:         Surrogate ODBC header for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char odbctype_h[] = "@(#)$Id: odbctype.h,v 54.3 1997/04/01 16:22:30 johnl Exp $";
+static const char odbctype_h[] = "@(#)$Id: odbctype.h version /main/4 1997-04-01 16:22:30 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

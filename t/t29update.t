@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t29update.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t29update.t version /main/5 1999-09-19 21:18:32 $ 
 #
 #	Simple test for UPDATE with attributes listed in execute call
 #

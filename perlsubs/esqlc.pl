@@ -1,6 +1,9 @@
-# @(#)$Id: esqlc.pl,v 97.1 2000/01/19 00:22:27 jleffler Exp $ 
+# @(#)$Id: perlsubs/esqlc.pl version /main/5 2000-01-24 13:56:40 $ 
 #
-# Copyright (c) 1999 Jonathan Leffler
+# Informix ESQL/C Support Routines
+#
+# Portions Copyright (c) 1999 Jonathan Leffler
+# Portions Copyright (c) 2000 Informix Software Inc
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.

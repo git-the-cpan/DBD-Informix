@@ -2,7 +2,7 @@
 #
 # DBD::Informix Example 2 - fetchrow_array
 #
-# @(#)$Id: x02fetchrow_array.pl,v 61.1 1998/10/27 19:14:59 jleffler Exp $
+# @(#)$Id: examples/x02fetchrow_array.pl version /main/2 1998-10-27 19:14:59 $
 #
 # Jonathan Leffler (j.leffler@acm.org)
 

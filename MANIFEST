@@ -4,6 +4,7 @@ ChangeLog
 Informix.h
 Informix.pm.PL
 Informix.xs
+InformixTechSupport
 ItWorks
 MANIFEST
 MD5-DIGEST
@@ -80,7 +81,6 @@ md5.verify
 odbctype.c
 odbctype.h
 pause_hack/Informix.pm
-pause_hack/Informix.pm.src
 perlsubs/InformixTest.pl
 perlsubs/esqlc.pl
 perlsubs/shmconn.pl

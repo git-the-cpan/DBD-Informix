@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: Informix.xs,v 95.1 1999/12/23 18:44:27 jleffler Exp $ 
+ * @(#)$Id: Informix.xs version /main/29 1999-12-23 18:44:27 $ 
  *
  * Portions Copyright (c) 1994-95 Tim Bunce
  * Portions Copyright (c) 1995-96 Alligator Descartes
@@ -24,7 +24,7 @@ DBISTATE_DECLARE;
 /* Assume string concatenation is available */
 #ifndef lint
 static const char rcs[] =
-	"@(#)$Id: Informix.xs,v 95.1 1999/12/23 18:44:27 jleffler Exp $";
+	"@(#)$Id: Informix.xs version /main/29 1999-12-23 18:44:27 $";
 static const char esqlc_ver[] =
 	"@(#)" ESQLC_VERSION_STRING;
 #endif

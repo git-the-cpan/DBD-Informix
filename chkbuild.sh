@@ -1,6 +1,6 @@
 #!/bin/ksh
 #
-#	@(#)$Id: chkbuild.sh,v 1.8 1997/11/18 03:42:39 johnl Exp $
+#	@(#)$Id: chkbuild.sh version /main/8 1997-11-18 03:42:39 $
 #
 #	Test DBD::Informix for compatability with different ESQL/C versions
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t00basic.t,v 95.1 1999/11/19 02:28:14 jleffler Exp $ 
+#	@(#)$Id: t/t00basic.t version /main/27 1999-11-19 02:28:14 $ 
 #
 #	Initial test script for DBD::Informix
 #

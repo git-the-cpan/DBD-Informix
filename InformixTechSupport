@@ -1,0 +1,40 @@
+#! /usr/bin/perl -w
+#
+#	Surrogate branding tool for DBD::Informix
+
+use Config;
+
+print STDERR "Usage: $0 licence-number\n" and exit 1
+	unless $ARGV[0];
+
+print STDERR "$0: invalid licence number $ARGV[0]\n" and exit 1
+	unless $ARGV[0] =~ m%^([A-Z][A-Z][A-Z])[@#]([A-Z]\d\d\d\d\d\d)$%;
+
+# Map @ to # for convenience of make, and vi.
+$ARGV[0] =~ s%%$1#$2%;
+
+my $PM_IFILE = qq[$Config{installsitearch}/DBD/Informix.pm];
+
+print STDERR "$0: file $PM_IFILE missing ($@)\n" and exit 1
+	unless (-f $PM_IFILE);
+
+my $PM_NFILE = "$PM_IFILE.tmp";
+
+open(PM_OLD, "<$PM_IFILE") or die "$0: $@\n";
+open(PM_NEW, ">$PM_NFILE") or die "$0: $@\n";
+
+while (<PM_OLD>)
+{
+	s/\$INFORMIX_LICENCE\s*=\s*".*";/\$INFORMIX_LICENCE = "$ARGV[0]";/;
+	print PM_NEW $_;
+}
+
+close PM_OLD;
+close PM_NEW;
+
+my $PM_OFILE = "$PM_IFILE.old";
+
+unlink $PM_OFILE or die "$0: $@\n"
+	if -f $PM_OFILE;
+rename $PM_IFILE, $PM_OFILE or die "$0: $@\n";
+rename $PM_NFILE, $PM_IFILE or die "$0: $@\n";

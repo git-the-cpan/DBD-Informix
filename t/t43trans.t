@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t43trans.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t43trans.t version /main/13 1999-09-19 21:18:32 $ 
 #
 #	Test AutoCommit Off for DBD::Informix
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t25dratt.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t25dratt.t version /main/6 1999-09-19 21:18:32 $ 
 #
 #	Driver Attribute test script for DBD::Informix
 #

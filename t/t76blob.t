@@ -6,7 +6,7 @@
 #
 # Reproduce 451 errors with Perl.
 #
-# @(#)$Id: t76blob.t,v 95.3 1999/12/04 23:45:10 jleffler Exp $
+# @(#)$Id: t/t76blob.t version /main/7 1999-12-04 23:45:10 $
 
 BEGIN { require "perlsubs/InformixTest.pl"; }
 

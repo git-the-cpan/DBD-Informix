@@ -2,7 +2,7 @@
 #
 # DBD::Informix Example 4 - fetchrow_hashref
 #
-# @(#)$Id: x04fetchrow_hashref.pl,v 61.1 1998/10/27 19:14:59 jleffler Exp $
+# @(#)$Id: examples/x04fetchrow_hashref.pl version /main/2 1998-10-27 19:14:59 $
 #
 # Jonathan Leffler (j.leffler@acm.org)
 

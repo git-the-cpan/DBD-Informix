@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t56tabinfo.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t56tabinfo.t version /main/4 1999-09-19 21:18:32 $ 
 #
 #	Test table_info
 #

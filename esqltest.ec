@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqltest.ec,v 95.2 1999/12/30 23:08:49 jleffler Exp $ 
+ * @(#)$Id: esqltest.ec version /main/19 1999-12-30 23:08:49 $ 
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -30,7 +30,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 95.2 1999/12/30 23:08:49 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqltest.ec version /main/19 1999-12-30 23:08:49 $";
 #endif
 
 /*

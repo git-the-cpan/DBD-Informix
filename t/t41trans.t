@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t41trans.t,v 95.1 1999/12/04 23:50:27 jleffler Exp $ 
+#	@(#)$Id: t/t41trans.t version /main/15 1999-12-04 23:50:27 $ 
 #
 #	Test Transactions with AutoCommit Off for DBD::Informix
 #

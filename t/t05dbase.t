@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t05dbase.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+# @(#)$Id: t/t05dbase.t version /main/11 1999-09-19 21:18:32 $ 
 #
 #	Copyright (C) 1997,1999 Jonathan Leffler
 #

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t30update.t,v 62.2 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t30update.t version /main/5 1999-09-19 21:18:32 $ 
 #
 #	Test script for DBD::Informix
 #

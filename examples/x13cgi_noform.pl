@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: x13cgi_noform.pl,v 61.2 1999/05/14 00:33:09 jleffler Exp $
+# @(#)$Id: examples/x13cgi_noform.pl version /main/4 1999-05-14 00:33:09 $
 #
 # Slightly more sophisticated post-processing example CGI script
 

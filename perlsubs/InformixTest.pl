@@ -1,11 +1,11 @@
-#	@(#)$Id: InformixTest.pl,v 95.1 1999/12/04 23:53:22 jleffler Exp $ 
+# @(#)$Id: perlsubs/InformixTest.pl version /main/34 2000-01-24 13:56:36 $ 
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
-#   Copyright (c) 1996-98 Jonathan Leffler
+# Copyright (c) 1996-99 Jonathan Leffler
 #
-#   You may distribute under the terms of either the GNU General Public
-#   License or the Artistic License, as specified in the Perl README file.
+# You may distribute under the terms of either the GNU General Public
+# License or the Artistic License, as specified in the Perl README file.
 
 # Exploit this by saying:
 # require "perlsubs/InformixTest.pl";

@@ -1,4 +1,4 @@
-# @(#)$Id: md5.verify,v 95.1 1999/11/11 01:22:41 jleffler Exp $
+# @(#)$Id: md5.verify version /main/2 1999-11-11 01:22:41 $
 #
 # Validate files listed in MANIFEST against MD5-DIGEST
 

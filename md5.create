@@ -1,4 +1,4 @@
-# @(#)$Id: md5.create,v 95.1 1999/11/11 01:22:41 jleffler Exp $
+# @(#)$Id: md5.create version /main/2 1999-11-11 01:22:41 $
 #
 # Generate MD5-DIGEST for files listed in MANIFEST
 

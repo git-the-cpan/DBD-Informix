@@ -1,4 +1,4 @@
-:	"@(#)$Id: test.run.sh,v 1.1 1998/01/15 19:01:43 johnl Exp $"
+:	"@(#)$Id: test.run.sh version /main/1 1998-01-15 19:01:43 $"
 #
 #	Run specified test(s)
 

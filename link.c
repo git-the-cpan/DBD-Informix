@@ -5,7 +5,7 @@
 @(#)Purpose:         Specialized doubly-linked list management routines
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1996-98
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -24,7 +24,7 @@
 #endif /* DBD_IX_DEBUG_LINK */
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: link.c,v 61.1 1998/10/29 19:30:58 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: link.c version /main/9 1998-10-29 19:30:58 $";
 #endif
 
 #ifdef DBD_IX_DEBUG_LINK

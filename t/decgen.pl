@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#       @(#)$Id: decgen.pl,v 54.1 1997/03/27 17:28:59 johnl Exp $
+#       @(#)$Id: t/decgen.pl version /main/2 1997-03-27 17:28:59 $
 #
 #       Create exhaustive list of DECIMAL & MONEY types for DBD::Informix
 #

@@ -2,10 +2,10 @@
 @(#)File:            $RCSfile: esql5_00.h,v $
 @(#)Version:         $Revision: 1.14 $
 @(#)Last changed:    $Date: 1997/06/02 16:24:26 $
-@(#)Purpose:         Function prototypes for ESQL/C Versions 5.00..5.07
+@(#)Purpose:         Function prototypes for ESQL/C Versions 5.00..5.10
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Copyright:       (C) JLSS 1992-93,1995-97,2000
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*
@@ -39,7 +39,7 @@ extern "C" {
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql5_00_h[] = "@(#)$Id: esql5_00.h,v 1.14 1997/06/02 16:24:26 johnl Exp $";
+static const char esql5_00_h[] = "@(#)$Id: esql5_00.h version /main/15 2000-01-20 12:30:22 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -74,7 +74,7 @@ extern _SQCURSOR *_iqlocate_cursor(const char *name, int type, int cs);
 extern int      _iqalloc(char *descname, int occurrence);
 extern int      _iqbeginwork(void);
 extern int      _iqcdcl(_SQCURSOR *cursor,
-                        char *curname,
+                        const char *curname,
                         CCPCCPC cmdtxt,
                         struct sqlda *idesc,
                         struct sqlda *odesc,

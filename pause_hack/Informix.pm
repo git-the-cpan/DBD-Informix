@@ -1,12 +1,12 @@
-# @(#)$Id: Informix.pm.src,v 97.1 2000/01/19 21:42:18 jleffler Exp $
+# @(#)$Id: pause_hack/Informix.pm version /main/2 2000-01-24 15:13:54 $
 #
-# Dummy DBD::Informix file only to satisfy CPAN
+# Dummy DBD::Informix file -- to satisfy CPAN
 #
 # Copyright 2000 Honza Pazdziora
 
 package DBD::Informix;
 
-$VERSION = 0.97001;
+$VERSION = "0.97002";
 
 # Zero so that require fails.
 

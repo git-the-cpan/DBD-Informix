@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t60unlog.t,v 62.2 1999/09/19 21:18:32 jleffler Exp $ 
+# @(#)$Id: t/t60unlog.t version /main/8 1999-09-19 21:18:32 $ 
 #
 #	Copyright (C) 1997,1999 Jonathan Leffler
 #

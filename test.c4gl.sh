@@ -1,6 +1,6 @@
 #!/bin/ksh
 #
-# @(#)$Id: test.c4gl.sh,v 1.1 1998/01/15 19:10:03 johnl Exp $
+# @(#)$Id: test.c4gl.sh version /main/1 1998-01-15 19:10:03 $
 #
 # Test whether DBD::Informix can be built with I4GL
 

@@ -85,4 +85,4 @@ $dbh->disconnect;
 
 --
 
-@(#)$Id: hpux-10.20,v 60.1 1998/06/16 16:08:44 jleffler Exp $
+@(#)$Id: Notes/hpux-10.20 version /main/2 1998-06-16 16:08:44 $

@@ -1,5 +1,5 @@
 /*
- *	@(#)$Id: Informix.h,v 95.1 1999/12/23 18:42:00 jleffler Exp $ 
+ *	@(#)$Id: Informix.h version /main/9 1999-12-23 18:42:00 $ 
  *
  * Portions Copyright (c) 1994,1995 Tim Bunce
  * Portions Copyright (c) 1995,1996 Alligator Descartes

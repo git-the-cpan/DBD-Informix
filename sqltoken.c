@@ -5,7 +5,7 @@
 @(#)Purpose:         Identify SQL token in string
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1998
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -20,7 +20,7 @@
 #define RCURLY '}'
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltoken.c,v 1.9 1999/03/12 18:53:55 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: sqltoken.c version /main/9 1999-03-12 18:53:55 $";
 #endif
 
 /*

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t90ius.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t90ius.t version /main/4 1999-09-19 21:18:32 $ 
 #
 #	Test basic handling of IUS data types
 #

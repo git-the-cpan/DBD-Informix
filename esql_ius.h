@@ -5,7 +5,7 @@
 @(#)Purpose:         Supply key macros from IUS version of sqltypes.h
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1998
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql_ius_h[] = "@(#)$Id: esql_ius.h,v 3.1 1998/11/05 21:03:26 jleffler Exp $";
+static const char esql_ius_h[] = "@(#)$Id: esql_ius.h version /main/1 1998-11-05 21:03:26 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t32nulls.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t32nulls.t version /main/6 1999-09-19 21:18:32 $ 
 #
 #	Test Null Handling for DBD::Informix
 #

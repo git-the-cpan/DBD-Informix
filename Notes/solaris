@@ -24,4 +24,4 @@ is used on the command line.  I have not managed to figure out why.  This
 leads to unwanted warnings about loop termination code not being reached.
 JL 96-11-19
 
-@(#)$Id: solaris,v 56.2 1997/06/25 22:59:59 johnl Exp $
+@(#)$Id: Notes/solaris version /main/2 1997-06-25 22:59:59 $

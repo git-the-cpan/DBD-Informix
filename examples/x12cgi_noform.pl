@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: x12cgi_noform.pl,v 61.2 1999/05/14 00:33:09 jleffler Exp $
+# @(#)$Id: examples/x12cgi_noform.pl version /main/6 1999-05-14 00:33:09 $
 #
 # Simple example CGI script using DBI and DBD::Informix
 

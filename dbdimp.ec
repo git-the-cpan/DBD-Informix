@@ -1,7 +1,10 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil -*-
- * @(#)$Id: dbdimp.ec,v 97.1 2000/01/19 17:34:24 jleffler Exp $
+ *
+ * @(#)$Id: dbdimp.ec version /main/129 2000-01-21 15:05:01 $
  *
  * DBD::Informix for Perl Version 5 -- implementation details
+ *
+ * @(#)$Product: DBD::Informix Version 0.97002 (2000-01-24) $
  *
  * Portions Copyright
  *           (c) 1994-95 Tim Bunce
@@ -9,6 +12,7 @@
  *           (c) 1994    Bill Hailes
  *           (c) 1996    Terry Nightingale
  *           (c) 1996-99 Jonathan Leffler
+ *           (c) 2000    Informix Software Inc
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -17,7 +21,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 97.1 2000/01/19 17:34:24 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec version /main/129 2000-01-21 15:05:01 $";
 #endif
 
 #include <stdio.h>
@@ -33,6 +37,15 @@ $include "esqlinfo.h";
 
 #define L_CURLY	'{'
 #define R_CURLY	'}'
+
+/**
+ ** JL 2000-01-20: ESQL/C versions 9.2x and later use 32 characters for
+ ** usernames.  Earlier versions use 8 characters.  This is safe for the
+ ** immediately foreseeable future, but it would be better if B69092 were
+ ** fixed so this was not necessary and the #define from esqlc.h could be
+ ** used instead of this $define -- DRY (Don't Repeat Yourself)!
+ */
+$define SQL_USERLEN1     33;
 
 DBISTATE_DECLARE;
 
@@ -294,7 +307,7 @@ new_connection(imp_dbh_t *imp_dbh)
 static int dbd_ix_serverversion(void)
 {
 	EXEC SQL BEGIN DECLARE SECTION;
-	string verstr[SQL_USERLEN + 1];
+	string verstr[SQL_USERLEN1];
 	EXEC SQL END DECLARE SECTION;
 	int vernum = 0;
 	Sqlca local = sqlca;
@@ -936,6 +949,7 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
+		dbd_ix_exit(function);
 		return(rc);
 	}
 
@@ -1072,6 +1086,7 @@ count_blobs(char *descname, int ncols)
 	for (colno = 1; colno <= ncols; colno++)
 	{
 		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno :coltype = TYPE;
+
 		/* dbd_ix_sqlcode(imp_sth->dbh); */
 		if (coltype == SQLBYTES || coltype == SQLTEXT)
 		{
@@ -1124,6 +1139,45 @@ dbd_ix_blobs(imp_sth_t *imp_sth)
 	dbd_ix_exit(function);
 }
 
+/* set the cast types for udts. returns number of udt columns */
+static int
+dbd_ix_udts(imp_sth_t *imp_sth)
+{
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_udts";
+	int nudts = 0;
+    EXEC SQL BEGIN DECLARE SECTION;
+    char *nm_obind = imp_sth->nm_obind;
+    int coltype;
+	int colno;
+    EXEC SQL END DECLARE SECTION;
+
+    dbd_ix_enter(function);
+#if ESQLC_VERSION > 900
+    for (colno = 1; colno <= imp_sth->n_columns; colno++)
+	{ 
+		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno :coltype = TYPE;
+        dbd_ix_sqlcode(imp_sth->dbh);
+        if (ISCOMPLEXTYPE(coltype) || ISUDTTYPE(coltype) 
+            || ISDISTINCTTYPE(coltype))
+		{
+            /**
+			** MYK 2000-01-19 (ESQL/C 9.30).
+			** For the reasons unknown SQLCHAR is the only one that
+			** works.  Also, the manuals say LENGTH=0 sets to the actual
+			** value length.  In fact it just causes FETCH to fail.
+			*/
+            coltype = SQLCHAR;
+            EXEC SQL SET DESCRIPTOR :nm_obind VALUE :colno TYPE = :coltype, 
+                LENGTH = 256;
+            dbd_ix_sqlcode(imp_sth->dbh);
+            nudts++;
+        }
+    } 
+#endif /* ESQLC_VERSION > 900 */
+    dbd_ix_exit(function);
+    return nudts;
+}
+
 /* Declare cursor for SELECT or EXECUTE PROCEDURE */
 static int
 dbd_ix_declare(imp_sth_t *imp_sth)
@@ -1142,6 +1196,7 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 #endif /* SQ_EXECPROC */
 	assert(imp_sth->st_state == Described);
 	dbd_ix_blobs(imp_sth);
+    dbd_ix_udts( imp_sth );
 
 	/* Bill R.  Hold Cursor -- Not necessarly correct... */
 	if (imp_sth->dbh->is_modeansi == True &&
@@ -1185,8 +1240,8 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 	dbd_ix_sqlcode(imp_sth->dbh);
 	if (sqlca.sqlcode < 0)
 	{
-		return 0;
 	    dbd_ix_exit(function);
+		return 0;
 	}
 	imp_sth->st_state = Declared;
 	dbd_ix_exit(function);
@@ -1424,8 +1479,10 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 #endif	/* SQ_EXECPROC */
 	else if (imp_sth->st_type == SQ_INSERT && desc_count > 0)
 	{
+        int nudts = dbd_ix_udts( imp_sth );
+
 		dbd_ix_blobs(imp_sth);
-		if (imp_sth->n_blobs > 0)
+		if (imp_sth->n_blobs > 0 || nudts > 0)
 		{
 			/**
 			** Switch the nm_obind and nm_ibind names so that when
@@ -1611,7 +1668,7 @@ dbd_ix_st_fetch(SV *sth, imp_sth_t *imp_sth)
 $ifdef IUS_DATA_TYPES;
 	long            extypeid;
 #ifdef SQLLVARCHAR
-	lvarchar       *lvar;
+	lvarchar       *lvar = 0;
 #endif
 $endif; -- IUS_DATA_TYPES
 	EXEC SQL END DECLARE SECTION;
@@ -1646,7 +1703,7 @@ $endif; -- IUS_DATA_TYPES
 		return Nullav;
 	}
 
-	dbd_ix_blobs(imp_sth);	/* Fix -451 errors; Rich Jones <rich@annexia.org> */
+	dbd_ix_blobs(imp_sth); /* Fix -451 errors; Rich Jones <rich@annexia.org> */
 
 	EXEC SQL FETCH :nm_cursor USING SQL DESCRIPTOR :nm_obind;
 	dbd_ix_savesqlca(imp_sth->dbh);
@@ -1680,7 +1737,8 @@ $endif; -- IUS_DATA_TYPES
 				:colind = INDICATOR, :colname = NAME;
 		dbd_ix_sqlcode(imp_sth->dbh);
 
-		if (colind != 0)
+		/* JL:2000-01-19: What was wrong with 'if (colind != 0)'? */
+		if (-1 == colind)
 		{
 			/* Data is null */
 			result = coldata;
@@ -1800,7 +1858,7 @@ $ifdef IUS_DATA_TYPES;
 				if (ifx_var_flag(&lvar, 1) < 0)
 				{
 					warn("Cannot set automatic memory for lvarchar");
-				break;
+                    break;
 				}
 				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
 									:lvar = DATA;
@@ -1831,7 +1889,7 @@ $ifdef IUS_DATA_TYPES;
 #endif	/* SQLLVARCHAR */
 
 $endif; -- IUS_DATATYPES
-
+               
 			case SQLVCHAR:
 #ifdef SQLNVCHAR
 			case SQLNVCHAR:
@@ -2037,7 +2095,7 @@ dbd_ix_setdbname(const char *kw1, const char *kw2, imp_sth_t *sth)
 		SvREFCNT_dec(sth->dbh->database);
 	sth->dbh->database = newSVpv(tok, end - tok);
 	if (DBIS->debug >= 4)
-		warn("new database name <<%s>>\n", function, SvPV(sth->dbh->database, na));
+		warn("new database name <<%s>>\n", SvPV(sth->dbh->database, na));
 	dbd_ix_exit(function);
 }
 

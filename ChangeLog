@@ -8,6 +8,12 @@ these versions will *all* be removed when the official 1.00 release is
 ready, or very shortly thereafter, if they are not removed beforehand.
 Do not rely on them.  Do not report problems with them.
 
+0.97002 Release
+---------------
+2000-01-24: Another dummy release, doing more testing of whether we can
+            reinstate the code which records INFORMIXDIR and INFORMIXSERVER
+            during the build.  We are making progress.
+
 0.97001 Release
 ---------------
 2000-01-19: Another dummy release, doing more testing of whether we can

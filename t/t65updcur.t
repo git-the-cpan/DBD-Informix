@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t65updcur.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t/t65updcur.t version /main/9 1999-09-19 21:18:32 $ 
 #
 #	Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
 #

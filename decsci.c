@@ -5,7 +5,7 @@
 @(#)Purpose:         Fixed, Exponential and Engineering formatting of DECIMALs
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1991-93,1996-97,1999
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 #include "esqlc.h"
@@ -45,7 +45,7 @@ extern char *decfcvt(dec_t *np, int ndigit, int *decpt, int *sign);
 static char     buffer[166];
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: decsci.c,v 1.13 1999/12/06 19:31:05 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: decsci.c version /main/13 1999-12-06 19:31:05 $";
 #endif
 
 /*

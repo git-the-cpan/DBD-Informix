@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: link.h,v 61.2 1998/10/29 19:30:58 jleffler Exp $ 
+ * @(#)$Id: link.h version /main/2 1998-10-29 19:30:58 $ 
  *
  * Copyright (c) 1998 Jonathan Leffler
  *

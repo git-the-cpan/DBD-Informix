@@ -5,7 +5,7 @@
 @(#)Purpose:         ESQL/C Utility Functions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1995-99
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2.4 1999/10/04 04:51:22 jleffler Exp $";
+static const char esqlutil_h[] = "@(#)$Id: esqlutil.h version /main/16 1999-10-04 04:51:22 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

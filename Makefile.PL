@@ -1,9 +1,10 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 97.6 2000/01/19 21:45:52 jleffler Exp $ 
+# @(#)$Id: Makefile.PL version /main/114 2000-01-24 15:19:14 $ 
 #
 # Portions Copyright (c) 1996-99 Jonathan Leffler
 # Portions Copyright (c) 1996    Alligator Descartes
+# Portions Copyright (c) 2000    Informix Software Inc
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
@@ -44,12 +45,16 @@ if ($NTConfiguration)
 	});
 }
 
+my $dbd_ix = "0.97002";
+$dbd_ix = "0.97002" unless $dbd_ix =~ /^\d+\.\d+/;
+
 my %opts = (
 	NAME         => 'DBD::Informix',
-	VERSION_FROM => 'Informix.pm.PL',
+	VERSION      => "$dbd_ix",
+	EXE_FILES    => [ 'InformixTechSupport' ],
 	clean        => { FILES        => 'Informix.pm Informix.xsi esqlinfo.h esqlvrsn.h t/decgen.sql t/dtgen.sql' },
 	realclean    => { FILES        => 'esql' },
-	dist         => { DIST_DEFAULT => 'clean pause_hack/Informix.pm distcheck disttest tardist',
+	dist         => { DIST_DEFAULT => 'clean distcheck disttest tardist',
 					  PREOP        => '$(MAKE) -f Makefile.old distdir',
 					  COMPRESS     => 'gzip -v9',
 					  SUFFIX       => 'gz'
@@ -60,7 +65,7 @@ my %opts = (
 					}
 		   );
 
-my $dbd_ix = &dbd_informix_version_info($opts{VERSION_FROM});
+#my $dbd_ix = &dbd_informix_version_info($opts{VERSION_FROM});
 print qq%
 Configuring $opts{NAME} version $dbd_ix...
 		You are using DBI version $DBI::VERSION and Perl version $]
@@ -697,7 +702,7 @@ sub which
 
 sub MY::postamble
 {
-my ($p1, $p2, $p3, $p4, $p5, $p6);
+my ($p1, $p2, $p3, $p4, $p5);
 
 $p1 = 
 "
@@ -710,16 +715,25 @@ ESQLCFLAGS = $esqlc_flags
 
 .ec$objext:";
 
-$p2 = '
+$p2 = q%
 	$(ESQL_CC) -c $(ESQLCFLAGS) $(ESQLFLAGS) $*.ec
 	$(RM_F) $*.c
+
+# The default Informix Licence Number (with no support entitlement) is
+# ACN#J334912.
+# If you have support, run "make INFORMIX_LICENCE='DBD#I000000'", where
+# DBD#I000000 is the serial number you were given when you registered
+# for support.  Note: you must do this each time you build the product.
+# Use an @ in place of # because of make comment conventions!
+INFORMIX_LICENCE = 'ACN@J334912'
 
 # Cribbed from the definition of CCCMD (MakeMaker const_cccmd) and the
 # rules for compiling object files (MakeMakerc_o) in the Makefile.
 # May need fixing if the corresponding rules change.
 ESQLFLAGS = $(INC) $(ESQL_NT) $(CCFLAGS) $(OPTIMIZE) \
 		$(PERLTYPE) $(LARGE) $(SPLIT) $(DEFINE_VERSION) \
-		$(XS_DEFINE_VERSION) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE)';
+		$(XS_DEFINE_VERSION) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE)
+%;
 
 if ($NTConfiguration)
 {
@@ -748,16 +762,7 @@ clean::
 # template from DBI (Driver.xst).  dbd_postamble() is defined by DBI::DBD.
 $p5 = dbd_postamble();
 
-# Code to update the version in the file that we give to PAUSE.
-my $version_src = MM->catfile('pause_hack', 'Informix.pm.src');
-my $version_dst = MM->catfile('pause_hack', 'Informix.pm');
-$p6 = qq!
-$version_dst : Makefile
-	\$\(PERL\) -pe 's/^\\\$\$VERSION = .*/\\\$\$VERSION = \$(VERSION);/' $version_src > $version_dst
-
-!;
-
-return $p1 . $p2 . $p3 . $p4 . $p5 . $p6;
+return $p1 . $p2 . $p3 . $p4 . $p5;
 }
 
 # nlt - no leading tabs.
@@ -786,7 +791,8 @@ sub MY::processPL
 	my $inherited = shift->SUPER::processPL(@_);
 	my $server = '';
 	$server = "-dINFORMIXSERVER=$ENV{INFORMIXSERVER}" if defined $ENV{INFORMIXSERVER};
-	$inherited =~ s/(\$\(PERL\) .* Informix.pm.PL)/$1 -dINFORMIXDIR=$ID $server/;
+	my $licence = "-dINFORMIX_LICENCE=\${INFORMIX_LICENCE}";
+	$inherited =~ s/(\$\(PERL\) .* Informix.pm.PL)/$1 -dINFORMIXDIR=$ID $server $licence/;
 	$inherited;
 }
 

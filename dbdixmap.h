@@ -1,5 +1,5 @@
 /*
- *	@(#)$Id: dbdixmap.h,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
+ *	@(#)$Id: dbdixmap.h version /main/3 1998-01-06 02:53:23 $ 
  *
  * Copyright (c) 1997-98 Jonathan Leffler
  *

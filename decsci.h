@@ -5,7 +5,7 @@
 @(#)Purpose:         JLSS Functions to manipulate DECIMAL values
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1996-99
-@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
+@(#)Product:         DBD::Informix Version 0.97002 (2000-01-24)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char decsci_h[] = "@(#)$Id: decsci.h,v 1.6 1999/05/16 04:53:33 jleffler Exp $";
+static const char decsci_h[] = "@(#)$Id: decsci.h version /main/6 1999-05-16 04:53:33 $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
