@@ -1,0 +1,14 @@
+
+ToDO for DBD::Informix -- A DBI driver for Informix databases.
+
+(c)1995 Alligator Descartes <descarte@hermetica.com>
+
+v.0.20pl0 Disney
+-----
+
+	o Code needs tremendous cleaning up.
+	o Multiple database/cursor connections needs tested.
+	o Makefile.PL needs tidied up and written properly.
+	o Error checking needs tightened.
+	o test program needs updated.
+	o Any primitives other than SELECT need tested!

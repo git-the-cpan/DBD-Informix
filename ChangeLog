@@ -1,0 +1,13 @@
+DBD::Informix for DBI - Written by Alligator Descartes <descarte@mcqueen.com>
+
+18/08/95:	Started. 
+
+		Version 0.0.0 ( Totally pre-alpha! )
+
+17/10/95:15:39	After a good break of about a month and a half, back in the
+		saddle.
+
+		We have data from SELECTs coming back from the database!
+
+		Released 0.20pl0 Disney on ftp.mcqueen.com. Limited hacker
+		release.

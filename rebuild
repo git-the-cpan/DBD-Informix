@@ -1,0 +1,4 @@
+rm -f dbdimp.c
+rm -f dbdimp.ec
+perl pec2ec 256 dbdimp.pec > dbdimp.ec
+make install
