@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t93lvarchar.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t93lvarchar.t,v 2005.1 2005/03/14 23:24:12 jleffler Exp $
 #
 #   Test basic handling of LVARCHAR data
 #
 #   Copyright 2002-03 IBM
+#   Copyright 2005    Jonathan Leffler
 
 use strict;
 use DBD::Informix::TestHarness;
@@ -15,7 +16,8 @@ $dbh->{ChopBlanks} = 1;
 
 &stmt_note("1..7\n");
 
-my ($table) = "dbd_ix_lvarchar";
+my ($table) = "dbd_ix_t93lvarchar";
+my ($disttype) = "dbd_ix_t93distoflvc";
 
 sub do_stmt
 {
@@ -70,13 +72,12 @@ sub verify_fetched_data
 # Drop any pre-existing versions of the test table and test types
 $dbh->{PrintError} = 0;
 do_stmt $dbh, "drop table $table";
-do_stmt $dbh, "drop type dbd_ix_distoflvc restrict";
+do_stmt $dbh, "drop type $disttype restrict";
 $dbh->{PrintError} = 1;
 
-stmt_test $dbh, "create distinct type dbd_ix_distoflvc as lvarchar";
+stmt_test $dbh, "create distinct type $disttype as lvarchar";
 
-my ($stmt) = qq%
-     create table $table (s serial, lvc lvarchar, dlvc dbd_ix_distoflvc)%;
+my ($stmt) = qq% create table $table (s serial, lvc lvarchar, dlvc $disttype)%;
 stmt_test $dbh, $stmt;
 
 my $inserted = 0;
@@ -116,7 +117,7 @@ stmt_fail "# $rc data validation failures\n" if $rc > 0;
 
 # Drop new versions of any of these test types
 $dbh->do("drop table $table");
-$dbh->do("drop type dbd_ix_distoflvc restrict");
+$dbh->do("drop type $disttype restrict");
 stmt_ok;
 
 $dbh->disconnect or die;

@@ -1,9 +1,11 @@
 /*
-@(#)Purpose:         ESQL/C Utility Functions
-@(#)Author:          J Leffler
-@(#)Copyright:       1995-99 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002    IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: esqlutil.h,v $
+@(#)Version:        $Revision: 2004.2 $
+@(#)Last changed:   $Date: 2004/12/24 18:33:37 $
+@(#)Purpose:        ESQL/C Utility Functions
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1995-2003
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 100.1 2002/02/08 22:49:25 jleffler Exp $";
+static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2004.2 2004/12/24 18:33:37 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -49,9 +51,9 @@ extern int ESQLC_VERSION_CHECKER(void);
 */
 
 #define SQLTYPENAME_BUFSIZ sizeof("DISTINCT INTERVAL MINUTE(2) TO FRACTION(5)")
-extern char *sqltypename(int coltype, int collen, char *buffer);
-extern char *iustypename(int coltype, int collen, int xtd_id, char *buffer, size_t buflen);
-extern const char *sqltype(int coltype, int collen);	/* Deprecated! */
+extern char *sqltypename(ixInt2 coltype, ixInt4 collen, char *buffer, size_t buflen);
+extern char *iustypename(ixInt2 coltype, ixInt4 collen, ixInt4 xtd_id, char *buffer, size_t buflen);
+extern const char *sqltype(ixInt2 coltype, ixInt4 collen);	/* Deprecated! */
 extern int sqltypemode(int mode);
 
 /*
@@ -64,9 +66,10 @@ extern void dump_datetime(FILE *fp, const char *tag, const dtime_t *dp);
 extern void dump_decimal(FILE *fp, const char *tag, const dec_t *dp);
 extern void dump_interval(FILE *fp, const char *tag, const intrvl_t *ip);
 extern void dump_sqlca(FILE *fp, const char *tag, const Sqlca *psqlca);
-extern void dump_sqlda(FILE *fp, const char *tag, const Sqlda *sqlda);
-extern void dump_sqlva(FILE *fp, int item, const Sqlva *sqlva);
+extern void dump_sqlda(FILE *fp, const char *tag, const Sqlda *desc);
+extern void dump_sqlva(FILE *fp, int item, const Sqlva *sqlvar);
 extern void dump_value(FILE *fp, const char *tag, const value_t *vp);
+extern void dump_sqldescriptor(FILE *fp, char *tag, char *name);
 
 /* Simple interface for dumping the global sqlca structure */
 extern void dumpsqlca(FILE *fp, const char *tag);
@@ -78,15 +81,7 @@ extern void dumpsqlca(FILE *fp, const char *tag);
 extern int jtypmsize(int type, int len);
 extern int jtypalign(int offset, int type);
 
-/*
-** sqltoken() -- Extract an SQL token from the given string
-** Return value points to start of token; *end points one beyond end
-** If *end == return value, there are no more tokens in the string
-** Understands and ignores {...}, # and -- comments.  Understands
-** character strings, and unsigned numbers with optional fractions and
-** exponents -- any leading sign is treated as a separate token.
-*/
-extern char *sqltoken(char *string, char **end);
+/* sqltoken(), iustoken() -- #include "sqltoken.h" */
 
 /* sql_printerror() -- print error in global sqlca on specified file */
 extern void sql_printerror(FILE *fp);
@@ -101,15 +96,22 @@ extern void sql_formaterror(char *buffer, size_t buflen);
 ** depending on whether the owner is quoted or not.  It does not matter
 ** whether the quotes are single or double.  If the first character is a
 ** quote, the last character is assumed to be the matching quote.  The
-** table name must be a valid string; the other parts can be empty
-** strings or null pointers.  This code does not handle delimited
-** identifiers as table names.  It uses statement IDs p_sql_tabid_q001,
-** p_sql_tabid_q002 and c_sql_tabid_q002.
-** The function used functions vstrcpy(), strlower(), strupper() from jlss.h.
+** table name must be a valid string; the other parts can be empty strings or
+** null pointers.  This code does now handle delimited identifiers for table
+** names, requiring strictly double quotes around delimited names.  It uses
+** statement IDs p_sql_tabid_q001 and c_sql_tabid_q001.
+** The function uses functions vstrcpy(), strlower(), strupper() from jlss.h.
 **
-** sql_procid -- return procid of procedure, regardless of database
-** type, etc.  This is analogous to sql_tabid() and uses statement IDs
-** p_sql_procid_q002 and c_sql_procid_q002.
+** sql_procid -- return procid of procedure, regardless of database type, etc.
+** This code handles delimited identifiers for procedure names (and, to be bug
+** compatible with IDS.2000, accepts both single and double quotes around the
+** procedure names).  This is analogous to sql_tabid() and uses statement IDs
+** p_sql_procid_q001 and c_sql_procid_q001.
+**
+** sql_trigid -- return trigid of trigger, regardless of database type, etc.
+** This code does handle delimited identifiers for trigger names, requiring
+** strictly double quotes around delimited names.  This is analogous to
+** sql_procid() and uses statement IDs p_sql_trigid_q001 and c_sql_trigid_q001.
 **
 ** The sql_mktablename() and sqlmkdbasename() functions format the
 ** components of a table and database name into a string.  If the owner,
@@ -120,12 +122,34 @@ extern void sql_formaterror(char *buffer, size_t buflen);
 */
 
 extern long     sql_tabid(const char *table, const char *owner,
-						  const char *dbase, const char *server);
+						  const char *dbase, const char *server, int mode_ansi);
+extern long     sql_procid(const char *proc, const char *owner,
+						  const char *dbase, const char *server, int mode_ansi);
+extern long     sql_trigid(const char *trigger, const char *owner,
+						  const char *dbase, const char *server, int mode_ansi);
 extern char    *sql_mktablename(const char *table, const char *owner,
 								const char *dbase, char *output, size_t outlen);
 extern char    *sql_mkdbasename(const char *dbase, const char *server,
 								char *output, size_t outlen);
-extern long     sql_procid(const char *proc, const char *owner,
-						  const char *dbase, const char *server);
+
+
+#ifndef SQLQUOTE_H
+#include "sqlquote.h"
+#endif /* SQLQUOTE_H */
+
+#if 0
+/*
+** sql_unquote_string() - convert SQL quote enclosed string to unquoted value.
+** Used to deal with delimited identifiers.
+** It is simply assumed that DELIMIDENT is set; it is not verified.
+*/
+extern int sql_unquote_string(char *dst, size_t dstlen, const char *src);
+
+/*
+** sql_quote_string() - convert string value to SQL quoted string value
+** Worst case scenario requires 2*strlen(src)+3 characters for output
+*/
+extern int sql_quote_string(char *dst, size_t dstlen, const char *src, char quote);
+#endif /* 0 */
 
 #endif	/* ESQLUTIL_H */

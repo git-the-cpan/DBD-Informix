@@ -23,7 +23,9 @@ Checklist for Releasing a New Version of DBD::Informix
     - Correct cross-references
 7.  lib/DBD/Informix/TechSupport.pm
     - Up to date email addresses
-8.  QA Tests
+8.  Notes/FAQ
+    - Up to date versions, etc.
+9.  QA Tests
     - Run some tests specifying username and password via
       DBD_INFORMIX_USERNAME and DBD_INFORMIX_PASSWORD environment
       variables.
@@ -49,4 +51,4 @@ can be automated by the NewRelease script.
 
 --
 
-@(#)$Id: Release.Checklist,v 100.5 2002/12/15 00:31:33 jleffler Exp $
+@(#)$Id: Release.Checklist,v 2004.1 2004/12/02 22:26:13 jleffler Exp $

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t55mdata.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t55mdata.t,v 2003.3 2003/03/11 00:27:12 jleffler Exp $
 #
 #   Test MetaData functions _tables, _columns for DBD::Informix
 #
@@ -116,6 +116,14 @@ stmt_ok();
 # @(#)KLUDGE: should verify that columns are as expected!
 print_columns($dbh, $view, $private1, $public1);
 stmt_ok();
+
+# Drop views and synonyms (unchecked)
+$dbh->{PrintError} = 0;
+$dbh->do("DROP VIEW $view");
+$dbh->do("DROP SYNONYM $public1");
+$dbh->do("DROP SYNONYM $private1");
+$dbh->do("DROP SYNONYM $private2");
+$dbh->{PrintError} = 1;
 
 $dbh->disconnect or die "DBI::errstr";
 

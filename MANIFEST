@@ -1,5 +1,5 @@
-# @(#)$Id: MANIFEST,v 2003.4 2003/03/04 19:39:57 jleffler Exp $
-# MANIFEST for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+# @(#)$Id: MANIFEST,v 2005.1 2005/03/14 23:44:30 jleffler Exp $
+# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 Announce
 BugReport
 ChangeLog
@@ -9,12 +9,11 @@ Informix.xs
 InformixTechSupport
 ItWorks
 MANIFEST
+META.yml
 Makefile.PL
 Notes/FAQ
-Notes/M88K.SVR4
 Notes/Working.Versions
 Notes/bug.reports
-Notes/dec
 Notes/environment.variables
 Notes/eprintf
 Notes/hpux
@@ -24,23 +23,22 @@ Notes/load.unload
 Notes/nonroot.install
 Notes/nt
 Notes/olipcshm
-Notes/sco
-Notes/solaris
 Notes/static.build
 Notes/web.servers
 README
 Release.Checklist
 TODO
-chkbuild.sh
 dbdattr.ec
 dbdimp.ec
 dbdimp.h
 dbdixmap.h
+debug.h
 decsci.c
 decsci.h
+describe.ec
+describe.h
+emalloc.h
 eprintf.c
-esql4_00.h
-esql4_10.h
 esql5_00.h
 esql7_20.h
 esql_ius.h
@@ -58,6 +56,8 @@ esqltest.ec
 esqltype.h
 esqlutil.h
 examples/README
+examples/fetchscroll.pl
+examples/fixin.pl
 examples/x01fetchall.pl
 examples/x02fetchrow_array.pl
 examples/x03fetchrow_arrayref.pl
@@ -73,6 +73,7 @@ examples/x14cgi_form.pl
 examples/x15cgi_form.pl
 ixblob.ec
 ixblob.h
+kludge.c
 kludge.h
 lib/Bundle/DBD/Informix.pm
 lib/DBD/Informix/Configure.pm
@@ -86,7 +87,10 @@ link.c
 link.h
 odbctype.c
 odbctype.h
+rmautoinst.pl
+sqlquote.h
 sqltoken.c
+sqltoken.h
 sqltype.ec
 t/decgen.pl
 t/dtgen.pl
@@ -95,6 +99,7 @@ t/t01stproc.t
 t/t02ixtype.t
 t/t05dbase.t
 t/t07dblist.t
+t/t08fork.t
 t/t09exec.t
 t/t10sqlca.t
 t/t12bindval.t
@@ -112,6 +117,7 @@ t/t29update.t
 t/t30update.t
 t/t31nulls.t
 t/t32nulls.t
+t/t33holdcurs.t
 t/t35cursor.t
 t/t40rows.t
 t/t41txacoff.t
@@ -140,6 +146,7 @@ t/t91udts.t
 t/t92rows.t
 t/t93lvarchar.t
 t/t94bool.t
+t/t95int8.t
 t/t99clean.t
 test.all.sh
 test.c4gl.sh

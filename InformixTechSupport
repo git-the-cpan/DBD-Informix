@@ -2,7 +2,7 @@
 #
 #   @(#)$Id: InformixTechSupport,v 100.9 2002/11/20 01:24:42 jleffler Exp $
 #
-#   Tech Support Tool for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+#   Tech Support Tool for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 #
 #   Copyright 1999 Jonathan Leffler
 #   Copyright 2000 Informix Software Inc
@@ -54,7 +54,7 @@ __END__
 
 =head1 NAME
 
-InformixTechSupport - Technical Support tool for IBM Informix Database Driver for Perl
+InformixTechSupport - Technical Support tool for IBM Informix Database Driver for Perl DBI
 
 =head1 SYNOPSIS
 
@@ -69,7 +69,7 @@ C<InformixTechSupport -w>
 =head1 DESCRIPTION
 
 The InformixTechSupport script is used for a variety of purposes
-related to technical support of IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05).
+related to technical support of IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14).
 
 =head2 CHECKING SOFTWARE VERSIONS
 
@@ -122,7 +122,7 @@ with your bug report.
 
 =head2 CREATING A REPORT THAT IT WORKS
 
-Use C<InformixTechSupport -w> to create a report that IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) works.
+Use C<InformixTechSupport -w> to create a report that IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) works.
 You may need to edit the output; you may certainly add comments in the
 'Optional comments' section.
 The output is written to standard output only.

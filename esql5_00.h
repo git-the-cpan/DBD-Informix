@@ -1,9 +1,11 @@
 /*
-@(#)Purpose:         Function prototypes for ESQL/C Versions 5.00..5.10
-@(#)Author:          J Leffler
-@(#)Copyright:       1992-93,1995-97,2000 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002                 IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: esql5_00.h,v $
+@(#)Version:        $Revision: 2004.1 $
+@(#)Last changed:   $Date: 2004/11/04 18:27:10 $
+@(#)Purpose:        Function prototypes for ESQL/C Versions 5.00..5.10
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1992-93,1995-97,2000,2002-03
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*
@@ -22,10 +24,6 @@
 #ifndef ESQL5_00_H
 #define ESQL5_00_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 /* There is an unprototyped declaration of _iqlocate_cursor() in <sqlhdr.h> */
 #undef _iqlocate_cursor
 #define _iqlocate_cursor _iq_non_existent
@@ -37,7 +35,7 @@ extern "C" {
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql5_00_h[] = "@(#)$Id: esql5_00.h,v 100.2 2002/02/08 22:49:11 jleffler Exp $";
+static const char esql5_00_h[] = "@(#)$Id: esql5_00.h,v 2004.1 2004/11/04 18:27:10 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -47,7 +45,7 @@ static const char esql5_00_h[] = "@(#)$Id: esql5_00.h,v 100.2 2002/02/08 22:49:1
 
 #ifdef ESQLC_STRICT_PROTOTYPES
 /* A non-prototyped declaration for _iqnprep() is emitted by the compiler */
-extern _SQCURSOR *_iqnprep(const char *name, char *stmt, short cs_sens);
+extern _SQCURSOR *_iqnprep(const char *name, const char *stmt, short cs_sens);
 #else
 extern _SQCURSOR *_iqnprep();
 #endif /* ESQLC_STRICT_PROTOTYPES */
@@ -69,7 +67,7 @@ extern _SQCURSOR *_iqlocate_cursor(const char *name, int type, int cs, int xx);
 extern _SQCURSOR *_iqlocate_cursor(const char *name, int type, int cs);
 #endif /* ESQLC_VERSION in {500, 501} */
 
-extern int      _iqalloc(char *descname, int occurrence);
+extern int      _iqalloc(const char *descname, int occurrence);
 extern int      _iqbeginwork(void);
 extern int      _iqcdcl(_SQCURSOR *cursor,
                         const char *curname,
@@ -84,7 +82,7 @@ extern int      _iqcddcl(_SQCURSOR *cursor,
 extern int      _iqcftch(_SQCURSOR *cursor,
                          struct sqlda *idesc,
                          struct sqlda *odesc,
-                         char *odesc_name,
+                         const char *odesc_name,
                          _FetchSpec *fetchspec);
 extern int      _iqclose(_SQCURSOR *cursor);
 extern int      _iqcommit(void);
@@ -96,24 +94,24 @@ extern int      _iqcopen(_SQCURSOR *cursor,
                          int useflag);
 extern int      _iqcput(_SQCURSOR *cursor,
                         struct sqlda *idesc,
-                        char *desc_name);
-extern int      _iqcrproc(char *fname);
-extern int      _iqdbase(char *db_name, int exclusive);
+                        const char *desc_name);
+extern int      _iqcrproc(const char *fname);
+extern int      _iqdbase(const char *db_name, int exclusive);
 extern int      _iqdbclose(void);
 extern int      _iqdcopen(_SQCURSOR *cursor,
                           struct sqlda *idesc,
-                          char *desc_name,
+                          const char *desc_name,
                           char *ivalues,
                           int useflag);
-extern int      _iqdealloc(char *desc_name);
+extern int      _iqdealloc(const char *desc_name);
 extern int      _iqdescribe(_SQCURSOR *cursor,
                             struct sqlda **descp,
-                            char *desc_name);
+                            const char *desc_name);
 extern int      _iqexecute(_SQCURSOR *cursor,
                            struct sqlda *idesc,
-                           char *desc_name,
+                           const char *desc_name,
                            struct value *ivalues);
-extern int      _iqeximm(char *stmt);
+extern int      _iqeximm(const char *stmt);
 extern int      _iqexproc(_SQCURSOR *cursor,
                           CCPCCPC cmdtxt,
                           int icnt,
@@ -123,13 +121,13 @@ extern int      _iqexproc(_SQCURSOR *cursor,
                           int chkind);
 extern int      _iqflush(_SQCURSOR *cursor);
 extern int      _iqfree(_SQCURSOR *cursor);
-extern int      _iqgetdesc(char *desc_name,
+extern int      _iqgetdesc(const char *desc_name,
                            int sqlvar_num,
                            struct hostvar_struct *hosttab,
                            int xopen_flg);
-extern int      _iqprepare(_SQCURSOR *cursor, char *stmt);
+extern int      _iqprepare(_SQCURSOR *cursor, const char *stmt);
 extern int      _iqrollback(void);
-extern int      _iqsetdesc(char *desc_name,
+extern int      _iqsetdesc(const char *desc_name,
                            int sqlvar_num,
                            struct hostvar_struct *hosttab,
                            int xopen_flg);
@@ -155,9 +153,5 @@ extern int      sqlbreak(void);
 extern void     sqldetach(void);
 extern void     sqlexit(void);
 extern int      sqlstart(void);
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
 #endif	/* ESQL5_00_H */

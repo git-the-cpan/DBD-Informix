@@ -1,23 +1,29 @@
 /*
-@(#)Purpose:         Convert type and length from Syscolumns to string
-@(#)Author:          J Leffler
-@(#)Copyright:       1988-1993,1995-98 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002              IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: sqltype.ec,v $
+@(#)Version:        $Revision: 2004.2 $
+@(#)Last changed:   $Date: 2004/12/01 16:57:20 $
+@(#)Purpose:        Convert type and length from Syscolumns to string
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1988-93,1995-98,2001,2003-04
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
 /*LINTLIBRARY*/
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltype.ec,v 100.2 2002/12/06 22:18:25 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: sqltype.ec,v 2004.2 2004/12/01 16:57:20 jleffler Exp $";
 #endif
 
 #include <string.h>
 #include "esqlc.h"
 #include "esqlutil.h"
 
-static const char * const sqltypes[] =
+static const char * const sqltypes[] = 
 {
 	"CHAR",
 	"SMALLINT",
@@ -83,7 +89,7 @@ static const char dt_second[] = "SECOND";
 static const char dt_unknown[] = "{unknown}";
 static const char dt_year[] = "YEAR";
 
-static const char * const dt_fr_ext[] =
+static const char * const dt_fr_ext[] = 
 {
 	dt_year,
 	dt_unknown,
@@ -103,7 +109,7 @@ static const char * const dt_fr_ext[] =
 	dt_unknown
 };
 
-static const char * const dt_to_ext[] =
+static const char * const dt_to_ext[] = 
 {
 	dt_year,
 	dt_unknown,
@@ -139,7 +145,7 @@ int sqltypemode(int mode)
 	return(oldmode);
 }
 
-char	*sqltypename(int coltype, int collen, char *buffer)
+char	*sqltypename(ixInt2 coltype, ixInt4 collen, char *buffer, size_t buflen)
 {
 	int		precision;
 	int		dt_fr;
@@ -161,7 +167,7 @@ char	*sqltypename(int coltype, int collen, char *buffer)
 	{
 	case SQLCHAR:
 	case SQLNCHAR:
-		sprintf(start, "%s(%d)", sqltypes[type], collen);
+		sprintf(start, "%s(%" PRId_ixInt4 ")", sqltypes[type], collen);
 		break;
 
 	case SQLSMINT:
@@ -244,7 +250,7 @@ char	*sqltypename(int coltype, int collen, char *buffer)
 		break;
 
 	default:
-		sprintf(start, "Unknown (type %d, len %d)", coltype, collen);
+		sprintf(start, "Unknown (type %" PRId_ixInt2 ", len %" PRId_ixInt4 ")", coltype, collen);
 		ESQLC_VERSION_CHECKER();
 		break;
 	}
@@ -253,9 +259,9 @@ char	*sqltypename(int coltype, int collen, char *buffer)
 
 /* For backwards compatability only */
 /* Not thread-safe because it uses static return data */
-const char	*sqltype(int coltype, int collen)
+const char	*sqltype(ixInt2 coltype, ixInt4 collen)
 {
-	return(sqltypename(coltype, collen, typestr));
+	return(sqltypename(coltype, collen, typestr, sizeof(typestr)));
 }
 
 #ifdef TEST

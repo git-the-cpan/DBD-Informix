@@ -142,7 +142,7 @@ Please include:
     use the following command to get a lot more debug information, but
     don't send this unless asked to do so:
 
-    PERL_DBI_DEBUG=9 test.one t/t00basic.t
+    DBI_TRACE=9 test.one t/t00basic.t
 
     Use this to verify that the problems you are reporting as different for
     failure type D really are different, but still don't send the output
@@ -189,4 +189,4 @@ Copyright 2002 IBM
 
 Jonathan Leffler (jleffler@us.ibm.com)
 
-@(#)$Id: bug.reports,v 100.5 2002/02/08 22:49:52 jleffler Exp $
+@(#)$Id: bug.reports,v 100.6 2002/12/09 17:21:58 jleffler Exp $

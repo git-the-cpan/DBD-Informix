@@ -1,17 +1,23 @@
 /*
-@(#)Purpose:         Verify that library is built with correct version of ESQL/C
-@(#)Author:          J Leffler
-@(#)Copyright:       1998 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002 IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: esqlcver.ec,v $
+@(#)Version:        $Revision: 2003.1 $
+@(#)Last changed:   $Date: 2003/04/22 18:02:48 $
+@(#)Purpose:        Verify that library is built with correct version of ESQL/C
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1998,2003
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
 #include "esqlutil.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlcver.ec,v 100.1 2002/02/08 22:49:18 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqlcver.ec,v 2003.1 2003/04/22 18:02:48 jleffler Exp $";
 #endif
 
 int ESQLC_VERSION_CHECKER(void)

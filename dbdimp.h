@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 100.13 2002/12/13 21:44:01 jleffler Exp $
+ * @(#)$Id: dbdimp.h,v 2004.10 2004/10/21 22:27:46 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1996-99 Jonathan Leffler
@@ -40,6 +40,7 @@
 #include "esqlperl.h"	/* Declarations for code used in esqltest.ec */
 #include "esqlvrsn.h"	/* Defines ESQLC_VERSION_STRING */
 #include "link.h"		/* Declares Link data type and functions */
+#include "kludge.h"		/* Support for documenting kludges in code */
 
 /*
 ** Note that although 9.2 servers (IDS.2000 and Foundation.2000)
@@ -98,6 +99,7 @@ struct imp_dbh_st
 	Sqlca           ix_sqlca;       /* Last SQLCA record for connection */
 	Link            chain;          /* Link in list of connections */
 	Link            head;           /* Head of list of statements */
+	long			dbh_pid;		/* PID of Perl process creating handle */
 };
 
 /* Define sth implementor data structure */

@@ -1,7 +1,8 @@
 /*
- * @(#)$Id: dbdimp.ec,v 100.36.1.1 2003/03/01 01:29:36 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2004.13 2004/12/01 20:37:10 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) $ -- implementation details
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) $
+ * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1995-96 Alligator Descartes
@@ -11,8 +12,9 @@
  * Copyright 1999    Bill Rothanburg <brothanb@fll-ro.dhl.com>
  * Copyright 2000-01 Informix Software Inc
  * Copyright 2000    Paul Palacios, C-Group Inc
- * Copyright 2001-02 IBM
+ * Copyright 2001-03 IBM
  * Copyright 2002    Bryan Castillo <Bryan_Castillo@eFunds.com>
+ * Copyright 2003-04 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -21,15 +23,18 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 100.36.1.1 2003/03/01 01:29:36 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 2004.13 2004/12/01 20:37:10 jleffler Exp $";
 #endif
 
+#include <float.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #define MAIN_PROGRAM	/* Embed version information for JLSS headers */
 #include "Informix.h"
 #include "decsci.h"
+#include "sqltoken.h"
 #include "esqlutil.h"
 
 /* Beware omitting the semi-colon! */
@@ -66,13 +71,14 @@ static const Link zero_link = { 0, 0, 0 };
 	(fflush(stdout), (DBIS->debug >= (n)) ? (void)warn(fmt, arg1, arg2) : (void)0)
 
 /*
-** SQLSTATE is only supported in version 6.00 and later.
+** SQLSTATE is only supported in ESQL/C version 6.00 and later, which
+** includes ESQL/C version 2.90 (part of CSDK 2.90) and later.
 ** The DBI 0.81 spec says that the value S1000 should be returned
 ** when the implementation does not support SQLSTATE.
 */
-#if ESQLC_VERSION < 600
+$ifndef ESQLC_SQLSTATE;
 static const char SQLSTATE[] = "S1000";
-#endif /* ESQLC_VERSION */
+$endif /* ESQLC_SQLSTATE */;
 
 /* One day, these will go!  Maybe... */
 static void del_statement(imp_sth_t *imp_sth);
@@ -178,7 +184,11 @@ dbd_ix_dr_driver(SV *drh)
 
 	imp_drh->n_connections = 0;			/* No active connections */
 	imp_drh->current_connection = 0;	/* No name */
-	imp_drh->multipleconnections = (ESQLC_VERSION >= 600) ? True : False;
+$ifdef ESQLC_CONNECT;
+	imp_drh->multipleconnections = True;
+$else;
+	imp_drh->multipleconnections = False;
+$endif; /* ESQLC_CONNECT */
 	dbd_ix_link_newhead(&imp_drh->head);	/* Linked list of connections */
 
 	return 1;
@@ -314,6 +324,14 @@ dbd_ix_db_seterror(imp_dbh_t *imp_dbh, ErrNum rc)
 	}
 }
 
+static void
+dbd_ix_db_seterror746(imp_dbh_t *imp_dbh, const char *msg)
+{
+	strncpy(sqlca.sqlerrm, msg, sizeof(sqlca.sqlerrm)-1);
+	sqlca.sqlerrm[sizeof(sqlca.sqlerrm)-1] = '\0';
+	dbd_ix_db_seterror(imp_dbh, -746);
+}
+
 /* Save the current sqlca record */
 static void
 dbd_ix_savesqlca(imp_dbh_t *imp_dbh)
@@ -357,6 +375,7 @@ new_connection(imp_dbh_t *imp_dbh)
 	imp_dbh->ix_sqlca = zero_sqlca;
 	imp_dbh->chain = zero_link;
 	imp_dbh->head = zero_link;
+	imp_dbh->dbh_pid = getpid();
 	connection_num++;
 }
 
@@ -377,7 +396,7 @@ static int dbd_ix_serverversion(void)
 		EXEC SQL OPEN c_serverversion;
 		if (sqlca.sqlcode == 0)
 		{
-			EXEC SQL FETCH c_serverversion INTO $verstr;
+			EXEC SQL FETCH c_serverversion INTO :verstr;
 			if (sqlca.sqlcode == 0)
 			{
 				/* Convert 7.30UC1 to 730, allowing for version 10.30, etc */
@@ -466,18 +485,18 @@ dbd_ix_db_connect(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pas
 	dbd_ix_printenv("pre-connect", function);
 #endif /* DBD_IX_DEBUG_ENVIRONMENT */
 
-#if ESQLC_VERSION >= 600
+$ifdef ESQLC_CONNECT;
 	if (user != 0 && *user == '\0')
 		user = 0;
 	if (pass != 0 && *pass == '\0')
 		pass = 0;
 	/* 6.00 and later versions of Informix-ESQL/C support CONNECT */
 	conn_ok = dbd_ix_connect(imp_dbh->nm_connection, name, user, pass);
-#else
+$else;
 	/* Pre-6.00 versions of Informix-ESQL/C do not support CONNECT */
 	/* Use DATABASE statement */
 	conn_ok = dbd_ix_opendatabase(name);
-#endif	/* ESQLC_VERSION >= 600 */
+$endif;	/* ESQLC_CONNECT */
 
 #ifdef DBD_IX_DEBUG_ENVIRONMENT
 	dbd_ix_printenv("post-connect", function);
@@ -620,6 +639,13 @@ dbd_db_setconnection(imp_dbh_t *imp_dbh)
 	if (imp_dbh->is_connected == False)
 		return(0);
 
+	/* Unreliable if this process is not the one that created the connection */
+	if (imp_dbh->dbh_pid != getpid())
+	{
+		dbd_ix_db_seterror746(imp_dbh, "Child process cannot use database handle created in parent");
+		return(0);
+	}
+
 	if (imp_drh->current_connection != imp_dbh->nm_connection)
 	{
 		dbd_ix_setconnection(imp_dbh->nm_connection);
@@ -638,11 +664,11 @@ dbd_ix_begin(imp_dbh_t *dbh)
 	int rc = 1;
 
 	/* Bryan Castillo: allow work to be done w/o replication */
-$ifdef BEGIN_WORK_WITHOUT_REPLICATION;
+$ifdef ESQLC_BEGIN_WORK_WITHOUT_REPLICATION;
 	if (dbh->no_replication)
 		EXEC SQL BEGIN WORK WITHOUT REPLICATION;
 	else
-$endif; -- BEGIN_WORK_WITHOUT_REPLICATION
+$endif; -- ESQLC_BEGIN_WORK_WITHOUT_REPLICATION
 		EXEC SQL BEGIN WORK;
 
 	dbd_ix_sqlcode(dbh);
@@ -800,15 +826,15 @@ dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
 	if (imp_dbh->is_loggeddb == True && imp_dbh->is_txactive == True)
 		junk = dbd_ix_rollback(imp_dbh);
 
-#if ESQLC_VERSION >= 600
+$ifdef ESQLC_CONNECT;
 	dbd_ix_disconnect(imp_dbh->nm_connection);
-#else
+$else;
 	if (imp_dbh->is_connected == True)
 	{
 		char *dbname = (imp_dbh->database) ? SvPV(imp_dbh->database, na) : "";
 		dbd_ix_closedatabase(dbname);
 	}
-#endif	/* ESQLC_VERSION >= 600 */
+$endif; /* ESQLC_CONNECT */
 	SvREFCNT_dec(imp_dbh->database);
 
 	dbd_ix_sqlcode(imp_dbh);
@@ -948,9 +974,9 @@ static void dbd_ix_st_deallocate(char *p_name, int nblobs, int ncols)
 	/* Verified unfixed for ESQL/C 7.23.UC1 on Solaris 2.4 */
 	/* Verified *fixed* in 7.24.UC1 on Solaris 2.5.1 (bad frees reported) */
 	/* Verified as a bad fix on Windows 95/NT by Harald Ums (no version) */
-#if ESQLC_VERSION < 724
+#if ESQLC_VERSION < 724 && !(ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
 #define DBD_IX_RELEASE_BLOBS
-#endif
+#endif /* ESQLC_VERSION */
 #ifdef WIN32
 #undef DBD_IX_RELEASE_BLOBS
 #endif /* WIN32 */
@@ -1118,17 +1144,6 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 	loc_t blob;
 	int type = p_type;
 	EXEC SQL END DECLARE SECTION;
-#if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
-	/**
-	** The hostvar struct uses 'short' for the size, so we can't get
-	** maximum size character columns.  This isn't a major problem.
-	** Note that the independent DECLARE SECTIONs are necessary.
-	*/
-	EXEC SQL BEGIN DECLARE SECTION;
-	char longchar[32767];
-	char shortchar[256];
-	EXEC SQL END DECLARE SECTION;
-#endif /* ESQLC_VERSION in {500, 501} */
 
 	dbd_ix_enter(function);
 
@@ -1185,12 +1200,27 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		}
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index TYPE = :type, DATA = :blob;
 	}
+	else if (type == SQLINT8 || type == SQLSERIAL8)
+	{
+		/**
+		** JL 2003-07-01: partial fix for handling big INT8 fields for
+		** Steve Vornbrock <stevev@wamnet.com>.  Need to treat this as a
+		** string - in case it is out of range of INTEGER.
+		*/
+		dbd_ix_debug(2, "%s -- INT8 or SERIAL8\n", function);
+		type = SQLCHAR;
+		string = SvPV(val, len);
+		length = len + 1;
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, LENGTH = :length,
+						DATA = :string;
+	}
 	else if (!SvOK(val))
 	{
 		/* It's a null! */
 		dbd_ix_debug(2, "%s -- null\n", function);
 		type = SQLCHAR;
-#if ESQLC_VERSION >= 600
+#if ESQLC_VERSION >= 600 || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
 						TYPE = :type, LENGTH = 0, INDICATOR = -1;
 #else
@@ -1212,9 +1242,14 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
 						TYPE = :type, DATA = :ival;
 		}
-#endif
+#endif /* ESQLC_VERSION */
 	}
-	else if (SvIOKp(val))
+	/**
+	** JL 2003-07-15: SvIOK() and SvNOK() fix problem with float to integer
+	** conversion for Darryl Priest <darryl.priest@piperrudnick.com>, a
+	** change in behaviour between Perl 5.005_03 and 5.8.0.
+	*/
+	else if (SvIOK(val) && SvIOKp(val))
 	{
 		dbd_ix_debug(2, "%s -- integer\n", function);
 		type = SQLINT;
@@ -1222,7 +1257,7 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
 						TYPE = :type, DATA = :intvar;
 	}
-	else if (SvNOKp(val))
+	else if (SvNOK(val) && SvNOKp(val))
 	{
 		dbd_ix_debug(2, "%s -- numeric\n", function);
 		type = SQLFLOAT;
@@ -1236,26 +1271,6 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		type = SQLCHAR;
 		string = SvPV(val, len);
 		length = len + 1;
-#if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
-		if (length < sizeof(shortchar))
-		{
-			strncpy(shortchar, string, length);
-			shortchar[length] = '\0';
-			EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
-							TYPE = :type, LENGTH = :length,
-							DATA = :shortchar;
-		}
-		else
-		{
-			if (length >= sizeof(longchar))
-				length = sizeof(longchar) - 1;
-			strncpy(longchar, string, length);
-			longchar[length] = '\0';
-			EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
-							TYPE = :type, LENGTH = :length,
-							DATA = :longchar;
-		}
-#else
 		if (length == 1)
 		{
 			/**
@@ -1270,7 +1285,6 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
 						TYPE = :type, LENGTH = :length,
 						DATA = :string;
-#endif /* ESQLC_VERSION in {500, 501} */
 	}
 	dbd_ix_sqlcode(imp_sth->dbh);
 	if (sqlca.sqlcode < 0)
@@ -1360,7 +1374,7 @@ dbd_ix_udts(imp_sth_t *imp_sth)
 	EXEC SQL END DECLARE SECTION;
 
 	dbd_ix_enter(function);
-#if ESQLC_VERSION > 900
+$ifdef ESQLC_IUSTYPES;
 	for (colno = 1; colno <= imp_sth->n_ocols; colno++)
 	{
 		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno :coltype = TYPE;
@@ -1381,7 +1395,7 @@ dbd_ix_udts(imp_sth_t *imp_sth)
 			nudts++;
 		}
 	}
-#endif /* ESQLC_VERSION > 900 */
+$endif; /* ESQLC_IUSTYPES */
 	dbd_ix_exit(function);
 	return nudts;
 }
@@ -1614,7 +1628,8 @@ count_descriptors(char *stmt)
 	if (sqlca.sqlcode >= 0)
 	{
 		n = u->sqld;
-#if defined(PERL_OBJECT) && (ESQLC_VERSION >= 720 || (ESQLC_VERSION >= 501 && ESQLC_VERSION < 600))
+#if defined(PERL_OBJECT) && (ESQLC_VERSION >= 720 || (ESQLC_VERSION >= 501 && ESQLC_VERSION < 600) || \
+							(ESQLC_VERSION >= 290 && ESQLC_VERSION < 300))
 		/**
 		** JL 2000-02-29:
 		** Using SqlFreeMem() is the recommended fix for PTS Bug B83831
@@ -1636,7 +1651,7 @@ count_descriptors(char *stmt)
 		SqlFreeMem(u, SQLDA_FREE);
 #else
 		free(u);
-#endif
+#endif /* PERL_OBJECT && ESQLC_VERSION */
 	}
 	dbd_ix_debug_l(1, "number of described fields %ld\n", (long)n);
 	return(n);
@@ -1883,7 +1898,7 @@ dbd_ix_st_destroy(SV *sth, imp_sth_t *imp_sth)
 /* Convert DECIMAL to convenient string */
 /* Patches problems with Informix conversion routines in pre-7.10 versions */
 /* Don't forget that decimals are stored in a base-100 notation */
-#if ESQLC_VERSION < 710
+#if ESQLC_VERSION < 710 && !(ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
 static char *
 decgen(dec_t *val, int collen)
 {
@@ -1928,7 +1943,7 @@ decgen(dec_t *val, int collen)
 	return str;
 }
 
-#endif /* ESQLC_VERSION < 710 */
+#endif /* ESQLC_VERSION */
 
 /*
 ** Fetch a single row of data.
@@ -1983,23 +1998,15 @@ dbd_ix_st_fetch(SV *sth, imp_sth_t *imp_sth)
 	long            length;
 	loc_t			blob;
 	dec_t			decval;
-$ifdef IUS_DATA_TYPES;
+	double          dblval;
+	float           fltval;
+$ifdef ESQLC_IUSTYPES;
 	long            extypeid;
 #ifdef SQLLVARCHAR
 	lvarchar       *lvar = 0;
 #endif
-$endif; -- IUS_DATA_TYPES
+$endif; -- ESQLC_IUSTYPES
 	EXEC SQL END DECLARE SECTION;
-#if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
-	EXEC SQL BEGIN DECLARE SECTION;
-	/**
-	** The hostvar struct uses 'short' for the size, so we can't get
-	** maximum size character columns.  This isn't a major problem.
-	** Note that the independent DECLARE SECTIONs are necessary.
-	*/
-	varchar         longchar[32767];
-	EXEC SQL END DECLARE SECTION;
-#endif /* ESQLC_VERSION in {500, 501} */
 
 	dbd_ix_enter(function);
 
@@ -2061,7 +2068,7 @@ $endif; -- IUS_DATA_TYPES
 			result = coldata;
 			length = 0;
 			result[length] = '\0';
-			(void)SvOK_off(sv);
+			sv_setsv(sv, &PL_sv_undef);
 			/* warn("NULL Data: %d <<%s>>\n", length, result); */
 		}
 		else
@@ -2093,14 +2100,30 @@ $endif; -- IUS_DATA_TYPES
 				break;
 
 			case SQLFLOAT:
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+						:dblval = DATA;
+				sprintf(coldata, "%.*g", DBL_DIG, dblval);
+				result = coldata;
+				length = strlen(result);
+				/* warn("FLOAT Data: %d <<%s>>\n", length, result); */
+				break;
+
 			case SQLSMFLOAT:
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+						:fltval = DATA;
+				sprintf(coldata, "%.*g", FLT_DIG, fltval);
+				result = coldata;
+				length = strlen(result);
+				/* warn("SMALLFLOAT Data: %d <<%s>>\n", length, result); */
+				break;
+
 			case SQLDECIMAL:
 			case SQLMONEY:
 				/*
 				** Default formatting (in some versions of ESQL/C)
 				** assumes 2 decimal places -- wrong!
 				*/
-				EXEC SQL GET DESCRIPTOR: nm_obind VALUE:index
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
 						:decval = DATA;
 				strcpy(coldata, decgen(&decval, collength));
 				result = coldata;
@@ -2108,7 +2131,7 @@ $endif; -- IUS_DATA_TYPES
 				/* warn("Decimal Data: %d <<%s>>\n", length, result); */
 				break;
 
-$ifdef IUS_DATA_TYPES;
+$ifdef ESQLC_IUSTYPES;
 #ifdef SQLUDTFIXED
 			case SQLUDTFIXED:
 				{
@@ -2212,7 +2235,7 @@ $ifdef IUS_DATA_TYPES;
 				break;
 #endif	/* SQLLVARCHAR */
 
-$endif; -- IUS_DATATYPES
+$endif; -- ESQLC_IUSTYPES
 
 			case SQLVCHAR:
 #ifdef SQLNVCHAR
@@ -2235,29 +2258,6 @@ $endif; -- IUS_DATATYPES
 				** NB: CHAR strings have trailing blanks (which are added
 				** automatically by the database) removed by byleng() etc.
 				*/
-#if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
-				/**
-				** There's a bug in 5.00 and 5.01 which means that GET
-				** DESCRIPTOR does not work with 'char *' as the receiving
-				** column.  This is fixed in 5.02.  This code works around
-				** that bug by using character arrays instead of 'char *'
-				** to receive the data.  This works because sizeof(array)
-				** is not the same as sizeof(&array[0]), even though in
-				** every other context, array decays to &array[0].
-				*/
-				if (collength < 256)
-				{
-					EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
-							:coldata = DATA;
-					result = coldata;
-				}
-				else
-				{
-					EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
-										:coldata = DATA;
-					result = longchar;
-				}
-#else
 				if (collength < 256)
 					result = coldata;
 				else
@@ -2269,7 +2269,6 @@ $endif; -- IUS_DATATYPES
 				}
 				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
 						:result = DATA;
-#endif /* ESQLC_VERSION in {500, 501} */
 				/* Conditionally chop trailing blanks */
 				length = strlen(result);
 				if (DBIc_is(imp_sth, DBIcf_ChopBlanks))
@@ -2315,28 +2314,23 @@ $endif; -- IUS_DATATYPES
 			sv_setpvn(sv, result, length);
 			if (result != coldata)
 			{
-#if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
-				if (result != longchar)
-#endif /* ESQLC_VERSION in {500, 501} */
-					switch (coltype)
-					{
-$ifdef IUS_DATA_TYPES;
+				switch (coltype)
+				{
+$ifdef ESQLC_IUSTYPES;
 #ifdef SQLLVARCHAR
-					case SQLLVARCHAR:
-						if (ifx_var_dealloc(&lvar) < 0)
-						{
-							warn("Having problems freeing lvarchar");
-						}
-						break;
+				case SQLLVARCHAR:
+					if (ifx_var_dealloc(&lvar) < 0)
+						warn("Having problems freeing lvarchar");
+					break;
 #endif	/* defined... */
-$endif; -- IUS_DATATYPES
-					case SQLBYTES:
-					case SQLTEXT:
-						break;
-					default:
-					free(result);
-						break;
-					}
+$endif; -- ESQLC_IUSTYPES
+				case SQLBYTES:
+				case SQLTEXT:
+					break;
+				default:
+				free(result);
+					break;
+				}
 			}
 		}
 	}
@@ -2405,7 +2399,7 @@ dbd_ix_setdbname(const char *kw1, const char *kw2, imp_sth_t *sth)
 	*/
 	/* Where's the statement text? */
 	char *tok = SvPV(sth->st_text, na);
-	char *end = tok;
+	const char *end = tok;
 
 	dbd_ix_enter(function);
 	tok = sqltoken(end, &end);

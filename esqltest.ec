@@ -1,17 +1,26 @@
 /*
- * @(#)$Id: esqltest.ec,v 100.3 2002/02/08 22:49:23 jleffler Exp $
+ * @(#)$Id: esqltest.ec,v 2004.1 2004/11/16 22:29:43 jleffler Exp $
  *
- * IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+ * IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
  *
  * Test Informix-ESQL/C environment
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
  * Copyright 2002    IBM
+ * Copyright 2004    Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
  */
+
+/*
+** Expects -DESQLC_VERSION=290 or similar on command line.
+**
+** Note that CSDK 2.90 includes ESQL/C 2.90, but ESQL/C 2.81 includes
+** ESQL/C 9.53.  (Assume 2.90 - 2.99 are capable of using CONNECT;
+** sometime, this will break, again!)
+*/
 
 /*TABSTOP=4*/
 
@@ -31,10 +40,16 @@
 #define EXIT_SUCCESS 0
 #endif
 
+#if ESQLC_VERSION >= 600 || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#define USE_CONNECT 1
+#else
+#define USE_CONNECT 0
+#endif /* ESQLC_VERSION */
+
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 100.3 2002/02/08 22:49:23 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 2004.1 2004/11/16 22:29:43 jleffler Exp $";
 #endif
 
 /*
@@ -255,7 +270,7 @@ int main(void)
 		printf("\t$DBD_INFORMIX_PASSWORD2 is set.\n");
 
 	printf("Testing connection to %s\n", dbase1);
-#if ESQLC_VERSION >= 600
+#if USE_CONNECT == 1
 	/* Test whether $INFORMIXSERVER is set. */
 	srvr1 = getenv("INFORMIXSERVER");
 	if (srvr1 == 0 || *srvr1 == '\0')
@@ -274,7 +289,7 @@ int main(void)
     /* Use DATABASE statement */
 	printf("\tDBD_INFORMIX_USERNAME & DBD_INFORMIX_PASSWORD are ignored.\n");
     conn_ok = dbd_ix_opendatabase(dbase1);
-#endif  /* ESQLC_VERSION >= 600 */
+#endif  /* USE_CONNECT == 1 */
 
 	if (sqlca.sqlcode != 0)
 	{
@@ -283,7 +298,7 @@ int main(void)
 	else
 		test_permissions(dbase1);
 
-#if ESQLC_VERSION >= 600
+#if USE_CONNECT == 1
 	if ((user2 == 0 && pass2 != 0) || (user2 != 0 && pass2 == 0))
 	{
 		printf("!!!\tDBD_INFORMIX_USERNAME2 & DBD_INFORMIX_PASSWORD2 are ignored\n");
@@ -297,7 +312,7 @@ int main(void)
     /* Use DATABASE statement */
 	printf("Testing connection to %s\n", dbase2);
     conn_ok = dbd_ix_opendatabase(dbase2);
-#endif  /* ESQLC_VERSION >= 600 */
+#endif  /* USE_CONNECT == 1 */
 
 	if (sqlca.sqlcode != 0)
 	{

@@ -1,18 +1,27 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: esqlcc,v 100.3 2002/11/20 19:05:09 jleffler Exp $ 
+# @(#)$Id: esqlcc,v 2004.1 2004/09/11 00:33:23 jleffler Exp $ 
 #
 # DBD::Informix for Perl Version 5
 #
 # Surrogate C Compiler for Informix ESQL/C versions 4.10.UC1 upwards
 #
 # Copyright 1996-98 Jonathan Leffler
-# Copyright 2002    IBM
+# Copyright 2002-03 IBM
+# Copyright 2004    Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
 
 # NB: Uses esqlsed script
+BEGIN
+{
+	my $x = $ENV{DBD_INFORMIX_DEBUG_ESQLCC};
+	use constant debug => ($x ? $x : 0);
+}
+
+{ printf STDERR "esqlcc: Num args = %d\n", scalar(@ARGV) if debug; }
+
 
 @ARGS = ();
 $libs = 1;
@@ -75,9 +84,9 @@ if ($ENV{DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX})
 	my($env) = $ENV{DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX};
 	print STDERR "# DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX set.\n";
 	print STDERR "# Removing options that match regex m%$env%\n";
-	print STDERR "# Before: @ARGS\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLCC};
+	print STDERR "# Before: @ARGS\n" if debug;
 	@ARGS = grep { !m%$env%o } @ARGS;
-	print STDERR "# After: @ARGS\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLCC};
+	print STDERR "# After: @ARGS\n" if debug;
 }
 
 # Sort out the real compiler.
@@ -87,5 +96,12 @@ $cmd = $ENV{ESQLCC};
 $cmd = 'cc' unless ($cmd);
 @cmd = split /\s+/, $cmd;
 
-print STDERR "@cmd @ARGS\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLCC};
+print STDERR "@cmd @ARGS\n" if debug;
+if (debug > 1)
+{
+	print "esqlcc: command\n";
+	foreach my $c (@cmd) { print "<<$c>>\n"; }
+	print "esqlcc: arguments\n";
+	foreach my $c (@ARGS) { print "<<$c>>\n"; }
+}
 exec @cmd, @ARGS;

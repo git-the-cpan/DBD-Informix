@@ -1,16 +1,21 @@
 /*
-@(#)File:           $Id: ixblob.ec,v 100.2 2002/02/08 22:49:27 jleffler Exp $
-@(#)Based on:       ixblob.ec 50.9 1998-10-28 18:42:12
+@(#)File:           $RCSfile: ixblob.ec,v $
+@(#)Version:        $Revision: 2003.1 $
+@(#)Last changed:   $Date: 2003/04/22 18:02:48 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
-@(#)Copyright:      1996-98 Jonathan Leffler
-@(#)Copyright:      2000    Informix Software Inc
-@(#)Copyright:      2002    IBM
-@(#)Product:        IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)Copyright:      (C) JLSS 1996-98,2000-01,2003
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
 /*LINTLIBRARY*/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
+
+#define _XOPEN_SOURCE	500
 
 #include <assert.h>
 #include <fcntl.h>
@@ -35,9 +40,11 @@
 #endif
 
 static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
+static Blob zero_blob = { 0 };
+static char *blob_dir = 0;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec,v 100.2 2002/02/08 22:49:27 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: ixblob.ec,v 2003.1 2003/04/22 18:02:48 jleffler Exp $";
 #endif
 
 BlobLocn blob_getlocmode(void)
@@ -50,9 +57,26 @@ void blob_setlocmode(BlobLocn locn)
 	def_blob_locn = locn;
 }
 
+void blob_setdirectory(const char *dir)
+{
+	if (blob_dir != 0)
+		free(blob_dir);
+	blob_dir = (char *)malloc(strlen(dir)+1);
+	if (blob_dir != 0)
+		strcpy(blob_dir, dir);
+}
+
+const char *blob_getdirectory(void)
+{
+	const char *rv = blob_dir;
+	if (rv == 0)
+		rv = sql_dbtemp();
+	return rv;
+}
+
 const char *sql_dbtemp(void)
 {
-	static char    *db_temp;
+	static char    *db_temp = 0;
 
 	if (db_temp == (char *)0)
 	{
@@ -63,18 +87,53 @@ const char *sql_dbtemp(void)
 	return(db_temp);
 }
 
-static int blob_locinnamefile(Blob *blob)
+/*
+** Return a dynamically allocated string containing a unique file name.
+**
+** Note that there is a window of vulnerability between the time when
+** the absence of the file is established in this function and when the
+** file is actually created by the current process during which another
+** program (or part of this program) could create the file.
+**
+** Using mktemp() is not recommended by the Linux/GNU headers (the man
+** pages claim it is BSD 4.3 only, but it was in Version 7 Unix too),
+** and it is not defined by POSIX.  The standard alternatives are:
+**      tmpnam()    ISO C 1990  -- no control over directory
+**      tmpfile()   ISO C 1990  -- no access to name
+**      tempnam()   SVID/BDS4.3 -- not very standard; otherwise OK
+**      mkstemp()   BSD4.3      -- even less standard; otherwise OK
+** By design, we need control over the directory, so if mktemp() was
+** always available, using mktemp() is the least of many evils.
+** However, at least one machine did not provide a header declaring
+** mktemp(), which leads to compilation problems, so we are, in fact,
+** better off writing our own.  It does not have to be all that complex,
+** as long as we assume flexible names in the file system.  That is
+** pretty safe these days!
+*/
+char *blob_newfilename(void)
 {
 	char            tmp[FILENAMESIZE];
+	char *rv;
+	static int counter = 0;
 
-	strcpy(tmp, sql_dbtemp());
-	strcat(tmp, "/blob.XXXXXX");
-	mktemp(tmp);
+	do
+	{
+		sprintf(tmp, "%s/blob.%05d.%06d", blob_getdirectory(), (int)getpid(), ++counter);
+	}
+	while (access(tmp, F_OK) == 0);
+
 	/* Cast result of malloc() to placate C++ compilers (eg MSVC) */
-	blob->loc_fname = (char *)malloc(strlen(tmp) + 1);
+	rv = (char *)malloc(strlen(tmp) + 1);
+	if (rv != (char *)0)
+		strcpy(rv, tmp);
+	return(rv);
+}
+
+static int blob_locinnamefile(Blob *blob)
+{
+	blob->loc_fname = blob_newfilename();
 	if (blob->loc_fname == (char *)0)
 		return(-1);
-	strcpy(blob->loc_fname, tmp);
 	blob->loc_loctype = LOCFNAME;
 	blob->loc_mode = 0666;
 	blob->loc_oflags = LOC_WONLY | LOC_RONLY;
@@ -133,18 +192,11 @@ static int blob_locinmem(Blob *blob)
 ** Initialise a Blob data structure ready for use.
 ** Returns: 0 => OK, non-zero => fail
 */
-int blob_locate(Blob *blob, BlobLocn locn)
+int blob_locate(Blob * blob, BlobLocn locn)
 {
 	int rc;
 
-	/**
-	** JL 2000-03-03: Using memset is a hack; it is not really
-	** understood why it is necessary, but it seems to avoid some
-	** problems on NT and with Purify.  An alternative to memset would
-	** create a static variable "static Blob zero_blob = { 0 };" and use
-	** "*blob = zero_blob;" to initialize the data.
-	*/
-	memset(blob, 0, sizeof(Blob));
+	*blob = zero_blob;
 	blob->loc_status = 0;
 	blob->loc_type = SQLTEXT;
 	blob->loc_xfercount = 0;

@@ -3,7 +3,7 @@
 @(#)Author:          J Leffler
 @(#)Copyright:       1996-98 Jonathan Leffler
 @(#)Copyright:       2002    IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 100.1 2002/02/08 22:49:21 jleffler Exp $";
+static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 2004.1 2004/11/25 01:13:53 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -39,7 +39,6 @@ typedef enum Boolean Boolean;
 ** The return address is the start of the buffer.
 */
 #define SQLTYPENAME_BUFSIZ sizeof("DISTINCT INTERVAL MINUTE(2) TO FRACTION(5)")
-extern char *sqltypename(int coltype, int collen, char *buffer);
 
 extern void dbd_ix_debug(int n, char *fmt, const char *arg);
 extern void dbd_ix_debug_l(int n, char *fmt, long arg);

@@ -1,11 +1,12 @@
-#   @(#)$Id: Informix.pm,v 2003.3 2003/01/14 23:54:12 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2005.1 2005/03/14 23:15:07 jleffler Exp $
 #
-#   @(#)IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2001-03 IBM
+#   Copyright 2004    Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -18,9 +19,12 @@
 {
 	package DBD::Informix;
 
-	use DBI 1.33;	# Requires features from DBI 1.33 release
+	use vars qw($drh);
+
+	use DBI 1.38;	# Requires features from DBI 1.38 release
 	use DynaLoader;
 	use Exporter;
+	use POSIX qw(strftime);
 	@ISA = qw(DynaLoader Exporter);
 
 	# Make the ix_types values available on request
@@ -42,17 +46,16 @@
 				) ] );
 	Exporter::export_ok_tags('ix_types');
 
-	$VERSION          = "2003.04";
-	$ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-	$Revision         = '$Id: Informix.pm,v 2003.3 2003/01/14 23:54:12 jleffler Exp $';
+	$VERSION          = "2005.01";
 
-	$VERSION = "2003.00.0000" if ($VERSION =~ m%[:]VERSION[:]%);
+	my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
+	my $Revision         = '$Id: Informix.pm,v 2005.1 2005/03/14 23:15:07 jleffler Exp $';
+
+	# This is for development only - the code must be recompiled each day!
+	$VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
 
 	bootstrap DBD::Informix $VERSION;
 
-	$err = 0;		# holds error code   for DBI::err
-	$errstr = "";	# holds error string for DBI::errstr
-	$state = "";    # holds error string for DBI::state
 	$drh = undef;	# holds driver handle once initialized
 
 	sub driver
@@ -93,9 +96,6 @@
 		$drh = DBI::_new_drh($class, {
 				'Name'                   => 'Informix',
 				'Version'                => $VERSION,
-				'Err'                    => \$DBD::Informix::err,
-				'Errstr'                 => \$DBD::Informix::errstr,
-				'State'                  => \$DBD::Informix::state,
 				'Attribution'            => "$ATTRIBUTION",
 				%{$attr}
 			})
@@ -137,9 +137,6 @@
 		# Create new database connection handle for driver
 		my $dbh = DBI::_new_dbh($drh, {
 				'Name'        => $dbname,
-				'Err'         => \my $err,
-				'Errstr'      => \my $errstr,
-				'State'       => \my $state, 
 				'ix_Username' => $dbuser,
 				'ix_Password' => $dbpass,
 			})
@@ -286,7 +283,7 @@ __END__
 
 =head1 NAME
 
-DBD::Informix - IBM Informix Database Driver for Perl
+DBD::Informix - IBM Informix Database Driver for Perl DBI
 
 =head1 SYNOPSIS
 
@@ -294,7 +291,7 @@ DBD::Informix - IBM Informix Database Driver for Perl
 
 =head1 DESCRIPTION
 
-This document describes IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05).
+This document describes IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.
@@ -343,15 +340,15 @@ strings for cursor names and statement names, and these features were
 not available before Version 5.00.
 
 For information about Informix software, you should also read the
-Notes/FAQ file that is distributed with IBM Informix Database Driver for Perl.
+Notes/FAQ file that is distributed with IBM Informix Database Driver for Perl DBI.
 
 =head2 TECHNICAL SUPPORT
 
-For information on technical support for IBM Informix Database Driver for Perl, please run:
+For information on technical support for IBM Informix Database Driver for Perl DBI, please run:
 
         perldoc DBD::Informix::TechSupport
 
-For information on reporting bugs in IBM Informix Database Driver for Perl, please review the
+For information on reporting bugs in IBM Informix Database Driver for Perl DBI, please review the
 Notes/bug.reports file as well.
 
 =head2 JAPANESE DOCUMENTATION
@@ -902,13 +899,24 @@ Starting with version 1.03.PC1, the following attributes are recognized:
 
 The ix_ScrollCursor is a placeholder that may become unnecessary with a
 future revision of DBI.
-The ix_CursorWithHold attribute is also a placeholder because AutoCommit
-interferes with any ordinary use of hold cursors.
+
+The ix_CursorWithHold attribute is only of relevance if AutoCommit is
+disabled.
+When AutoCommit is enabled, all cursors have to be WITH HOLD (just one
+more reason to hate AutoCommit).
+
+	$sth = $dbh->prepare("SELECT id, name FROM tablename", {'ix_CursorWithHold' => 1});
+
+After the cursor is opened ($sth->execute), it is not closed by
+$dbh->commit().
+Either fetch all the rows or use $sth->finish() to close it.
+
 The ix_InsertCursor attribute can be applied to an INSERT statement (but
 generates an error -481 for other types of statement).
 Subsequent uses of $sth->execute() will use the ESQL/C PUT statement to
 insert the data, and $sth->finish() will close the INSERT cursor.
 There is at present no mechanism to invoke the FLUSH statement.
+
 It would be reasonable to add {ix_BlobLocation => 'InFile'} to support
 per-statement blob location.
 

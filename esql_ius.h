@@ -1,9 +1,11 @@
 /*
-@(#)Purpose:         Supply key macros from IUS version of sqltypes.h
-@(#)Author:          J Leffler
-@(#)Copyright:       1998 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002 IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: esql_ius.h,v $
+@(#)Version:        $Revision: 2004.1 $
+@(#)Last changed:   $Date: 2004/11/04 18:27:10 $
+@(#)Purpose:        Supply key macros from IUS version of sqltypes.h
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1998,2003
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql_ius_h[] = "@(#)$Id: esql_ius.h,v 100.2 2002/12/06 22:18:26 jleffler Exp $";
+static const char esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2004.1 2004/11/04 18:27:10 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -22,7 +24,7 @@ static const char esql_ius_h[] = "@(#)$Id: esql_ius.h,v 100.2 2002/12/06 22:18:2
 #define CINT8TYPE	117
 #endif
 #ifndef CCOLLTYPE
-#define CCOLLTYPE       118
+#define CCOLLTYPE       118   
 #endif
 #ifndef CLVCHARTYPE
 #define CLVCHARTYPE     119

@@ -1,9 +1,11 @@
 /*
-@(#)Purpose:         Provide support for KLUDGE macro
-@(#)Author:          J Leffler
-@(#)Copyright:       1995,1997-99 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002         IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: kludge.h,v $
+@(#)Version:        $Revision: 1.9 $
+@(#)Last changed:   $Date: 2003/09/08 18:29:12 $
+@(#)Purpose:        Provide support for KLUDGE macro
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1995,1997-2000,2003
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char kludge_h[] = "@(#)$Id: kludge.h,v 100.1 2002/02/08 22:49:29 jleffler Exp $";
+static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.9 2003/09/08 18:29:12 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -62,7 +64,7 @@ static const char kludge_h[] = "@(#)$Id: kludge.h,v 100.1 2002/02/08 22:49:29 jl
 
 extern void kludge_use(const char *str);
 #define KLUDGE(x)	{ KLUDGE_DEC = "@(#)KLUDGE: " x; KLUDGE_USE(kludge); }
-#define FEATURE(x)	{ FEATURE_DEC = "@(#)Feature: " x; KLUDGE_USE(kludge); }
+#define FEATURE(x)	{ FEATURE_DEC = "@(#)Feature: " x; KLUDGE_USE(feature); }
 
 #ifdef KLUDGE_FORCE
 #define KLUDGE_USE(x)	kludge_use(x)

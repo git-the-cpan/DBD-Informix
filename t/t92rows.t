@@ -1,11 +1,12 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t92rows.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t92rows.t,v 2005.1 2005/03/14 23:16:45 jleffler Exp $
 #
 #   Test basic handling of ROW types
 #
 #   Copyright 2001    Informix Software Inc
 #   Copyright 2002-03 IBM
+#   Copyright 2004-05 Jonathan Leffler
 #
 # Extracted from t91udts.t
 
@@ -15,8 +16,8 @@ use DBD::Informix::TestHarness;
 my ($dbh) = &test_for_ius;
 
 $dbh->{ChopBlanks} = 1;
-my($table) = "dbd_ix_rows";
-my($rowtype) = "dbd_ix_udts_named";
+my($table) = "dbd_ix_t92rows";
+my($rowtype) = "dbd_ix_t92rowtype";
 
 &stmt_note("1..11\n");
 

@@ -1,9 +1,11 @@
 /*
-@(#)Purpose:         Function prototypes for ESQL/C Versions 7.20..7.24
-@(#)Author:          J Leffler
-@(#)Copyright:       1997,1999-2000 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002           IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: esql7_20.h,v $
+@(#)Version:        $Revision: 2004.1 $
+@(#)Last changed:   $Date: 2004/11/04 18:27:10 $
+@(#)Purpose:        Function prototypes for ESQL/C Versions 7.20..7.24
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1997,1999-2000,2003
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql7_20_h[] = "@(#)$Id: esql7_20.h,v 100.2 2002/02/08 22:49:12 jleffler Exp $";
+static const char esql7_20_h[] = "@(#)$Id: esql7_20.h,v 2004.1 2004/11/04 18:27:10 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 

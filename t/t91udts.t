@@ -1,11 +1,12 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t91udts.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t91udts.t,v 2004.1 2004/12/03 20:31:14 jleffler Exp $
 #
 #   Test basic handling of user-defined data types
 #
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
+#   Copyright 2004    Jonathan Leffler
 
 use strict;
 use DBD::Informix::TestHarness;
@@ -89,23 +90,14 @@ my ($sth) = $dbh->prepare($ins)
 stmt_ok;
 
 # Check inserting nulls...
-my ($null);
-undef $null;
-# This is lazy - there has to be a better way!
-if ($noslobs)
+my(@vals) = (2, undef, undef, undef, undef, undef, undef,
+		        undef, undef, undef, undef, undef, undef);
+if (!$noslobs)
 {
-	$sth->execute
-		(2, $null, $null, $null, $null, $null, $null,
-		  $null, $null, $null, $null, $null, $null)
-		or stmt_fail;
+	push @vals, undef;
 }
-else
-{
-	$sth->execute
-		(2, $null, $null, $null, $null, $null, $null,
-		  $null, $null, $null, $null, $null, $null, $null)
-		or stmt_fail;
-}
+$sth->execute(@vals) or stmt_fail;
+
 stmt_ok;
 stmt_note "# inserted nulls OK\n";
 

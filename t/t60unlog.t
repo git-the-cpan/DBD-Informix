@@ -1,12 +1,13 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t60unlog.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
+#   @(#)$Id: t60unlog.t,v 2004.2 2004/12/03 18:19:28 jleffler Exp $
 #
 #   Test that unlogged databases refuse to connect with AutoCommit => 0
 #
 #   Copyright 1997,1999 Jonathan Leffler
 #   Copyright 2000      Informix Software Inc
 #   Copyright 2002-03   IBM
+#   Copyright 2004      Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
@@ -19,10 +20,10 @@ my ($pass) = $ENV{DBD_INFORMIX_PASSWORD};
 my $dbh;
 stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.', $user, $pass));
 
-stmt_note("1..9\n");
+stmt_note("1..10\n");
 stmt_ok;
 
-# Don't care about non-existent database
+# Do not care about non-existent database
 $dbh->{PrintError} = 0;
 $dbh->do("drop database $dbname");
 $dbh->{PrintError} = 1;
@@ -41,10 +42,9 @@ if ($dbh->{ix_ServerVersion} >= 800 && $dbh->{ix_ServerVersion} < 900)
 	$dbh->do("close database");
 	$dbh->do("drop database $dbname");
 	$dbh->disconnect;
-	&stmt_note("# XPS database - no unlogged databases!\n");
-	my($i);
-	# Already printed 2 ok's (one in stmt_test); 6 more needed.
-	for ($i = 0; $i < 6; $i++) { &stmt_ok; }
+	&stmt_skip("XPS server - no unlogged databases!");
+	# Already printed ok thrice (one in stmt_test, one in stmt_skip); 5 more needed.
+	for (my $i = 0; $i < 5; $i++) { &stmt_ok; }
 	&all_ok;
 	exit 0;
 }
@@ -70,7 +70,23 @@ $SIG{__WARN__} = 'DEFAULT';
 # Under DBI 0.90, this connection fails, as it is supposed to!
 &stmt_note("# Connection failed - which is the correct response\n") if (!defined $dbh);
 &stmt_ok if (!defined $dbh);
-&stmt_fail unless ($msg && $msg =~ /-256:/);
+# JL 2004-12-03: Starting at DBI v1.43, under Perl 5.6.1 (but not
+# 5.8.[56]), the variable $msg is not assigned to for reasons which are
+# unclear.  Consequently, skip this next test on those platforms where
+# that is a problem.  Found in the pre-release testing for DBD::Informix
+# 2004.02, but also found with DBD::Informix 2003.04.
+if ($] < 5.008 && $DBI::VERSION >= 1.43 && !($msg && $msg =~ /-256:/))
+{
+	&stmt_skip("Perl $] plus DBI $DBI::VERSION known to fail.\n# Upgrade Perl to 5.8.x or downgrade DBI to 1.42.");
+}
+elsif ($msg && $msg =~ /-256:/)
+{
+	&stmt_ok;
+}
+else
+{
+	&stmt_fail;
+}
 $msg =~ s/\n/ /mg;
 &stmt_note("# $msg\n");
 

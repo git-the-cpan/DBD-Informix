@@ -1,4 +1,4 @@
-README file for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+README file for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the Perl README file.
@@ -15,10 +15,10 @@ README file for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-0
 
 PREREQUISITES
 
-    You need the following five items to build IBM Informix Database Driver for Perl:
+    You need the following five items to build IBM Informix Database Driver for Perl DBI:
 
-    1.  Perl 5.005_03 or later.
-    2.  DBI 1.33 or later.
+    1.  Perl 5.6.1 or later.
+    2.  DBI 1.38 or later.
     3.  A C compiler that accepts function prototypes (such as GCC 2.95.2).
     4.  Informix ESQL/C 5.00 or later, or Client SDK 2.00 or later.
     5.  A 'stores' database to which you can connect without specifying
@@ -38,13 +38,14 @@ PREREQUISITES
     below.  Read the BUILD AND TEST ENVIRONMENT section when you set your
     environment variables.  If you run into problems during the build or
     test phases, read the section IF YOU HAVE PROBLEMS BUILDING
-    DBD::INFORMIX.
+    DBD::INFORMIX.  Also check the Announce file to see whether there is
+    any extra information in there.
 
     When you have DBD::Informix working *and* installed, use the ItWorks
     Perl script (previously a shell script) to report your successful
     installation.  Be sure to review the output (especially the email
     address it deduces), and send it in an email with the subject
-    "DBD::Informix - It Works" to dbd-informix@us.ibm.com.
+    "DBD::Informix - It Works" to dbd.informix@gmail.com.
 
 TECHNICAL SUPPORT
 
@@ -67,20 +68,20 @@ MAILING LIST SUPPORT FOR DBI AND DBD::INFORMIX
 
 PERL
 
-    If you do not have Perl Version 5.005_03 or later installed, you must
+    If you do not have Perl Version 5.6.1 or later installed, you must
     build, test, and install it before you do anything else.  You should
-    really use Perl 5.8.0 (though Perl 5.6.1 is OK too).  If at all
+    really use Perl 5.8.x (ideally, 5.8.6 or later).  If at all
     possible, use the C compiler to create shared libraries even if the
     Perl configuration script suggests that you use the 'ld' program
     directly.  People who do not use the C compiler to create the shared
     libraries have often had many problems, and those who use it have
-    generally had very few.  Note, there are some platforms, including AIX,
-    where you cannot use the C compiler to create shared libraries, but
-    that doesn't automatically stop the build from working.  However, in
-    our experience, you are more likely to run into problems on such
-    platforms than on platforms where you can use the C compiler to build
-    the shared libraries.  Note that DBD::Informix will witter if you do
-    not use the C compiler to link shared libraries.
+    generally had very few.  Note, there are some platforms, including
+    AIX, where you cannot use the C compiler to create shared libraries,
+    but that doesn't automatically stop the build from working.
+    However, in our experience, you are more likely to run into problems
+    on such platforms than on platforms where you can use the C compiler
+    to build the shared libraries.  Note that DBD::Informix will witter
+    if you do not use the C compiler to link shared libraries.
 
     Note also that to install DBD::Informix, you must be able to put files
     under the Perl lib directory.  For alternative options, see the
@@ -93,7 +94,7 @@ PERL
 
 DBI
 
-    If you do not have DBI version 1.33 or later installed, you should
+    If you do not have DBI version 1.38 or later installed, you should
     build, test, and install it.  Some older versions of DBD::Informix
     allowed you to use older versions of DBI than the version it was
     developed with, but the current versions of DBD::Informix do not.
@@ -116,17 +117,16 @@ C COMPILER
 
 ESQL/C OR CLIENT SDK
 
-    You must have a version of IBM Informix Client SDK (or IBM Informix ESQL/C)
-    installed on the computer where you wish to compile DBD::Informix.
-    IBM Informix Connect is not sufficient for compiling DBD::Informix.
-    The Notes/FAQ file contains more information about what you need.
-    ESQL/C Versions 4.1x and earlier are not (and will not be) supported
-    by DBD::Informix.  ESQL/C Versions 5.00 and up should be OK.  If you
-    do not have ESQL/C, DBD::Informix will not work.  You can download
-    IBM Informix Client SDK for free from the Informix evaluation web
-    site (yes, it still works 2002-11-06):
+    You must have a version of IBM Informix Client SDK installed on the
+    computer where you wish to compile DBD::Informix.  IBM Informix Connect
+    is not sufficient for compiling DBD::Informix.  The Notes/FAQ file
+    contains more information about what you need.  ESQL/C Versions 4.1x
+    and earlier are not (and will not be) supported by DBD::Informix.
+    ESQL/C Versions 5.00 and up should be OK.  If you do not have ESQL/C,
+    DBD::Informix will not work.  You can download IBM Informix Client SDK
+    for free from the Informix evaluation web site:
 
-                     http://www.informix.com/evaluate
+         http://www.ibm.com/software/data/informix/downloads.html
 
     If you have IBM Informix ODBC drivers available to you, you can
     consider using DBD::ODBC instead.  If you are on Linux, you should
@@ -161,12 +161,6 @@ ESQL/C OR CLIENT SDK
     and will use the default value 'sbspace' if you do not specify an
     alternative.  If you do not have any smart blob spaces, the tests will
     fail unless you set DBD_INFORMIX_NO_SBSPACE.
-
-    Although you can compile DBD::Informix under Client SDK 2.01.UC1
-    (ESQL/C 9.14.UC1), some tests will fail because of a bug in this
-    version of Client SDK.  If you use the same code under a later version
-    of Client SDK, the failures in t/t31nulls.t and t/t32nulls.t now will
-    pass.
 
     Most versions of ESQL/C that support shared libraries have shared
     linking as the default, which is correct.  Other versions reportedly
@@ -289,8 +283,15 @@ BUILD AND TEST ENVIRONMENT
     and drops some tables, and exits.  If the test fails, you do you do not
     get a Makefile so you cannot build DBD::Informix.
 
-    Note that if you set the DELIMIDENT environment variable, some
-    tests will fail, notably t/t56tabinfo.t and t57tables.t.
+    Note that if you set the DELIMIDENT environment variable, some tests
+    will fail, notably t/t56tabinfo.t and t57tables.t.
+
+    If your database is IDS 9.x, then you need:
+    - either a smart blob space called sbspace,
+    - or set the environment variable DBD_INFORMIX_SBSPACE to the name of a
+      smart blob space,
+    - or set the environment variable DBD_INFORMIX_NO_SBSPACE to 1 to
+      indicate that smart blob testing should be omitted.
 
 BUILDING DBD::INFORMIX WITH BUNDLES
 
@@ -361,10 +362,10 @@ BUILDING DBD::Informix
     leave the odd table or stored procedure (or user-defined data types and
     so on) in the database.
 
-    On the reference system (Sun Ultra-10 running Solaris 7, compiling with
-    GCC 3.1 or SUNWspro C Compiler v6 update 2 C 5.3, using Perl 5.8.0),
+    On the reference system (Sun Ultra-10 running Solaris 8, compiling with
+    GCC 3.4.3 or SUNWspro C Compiler v6 update 2 C 5.3, using Perl 5.8.6),
     all tests succeed when DBD::Informix is built with ESQL/C Versions
-    5.10.UC7, 7.24.UC1, and 9.30.UC1.
+    5.10.UC7, 7.24.UC1, and 9.53.UC1 and 2.90.UC1B4 (beta build of 2.90.UC1).
 
     Additionally, for a really thorough scrutiny of DBD::Informix, you need
     to test it with at least three different databases: one created with
@@ -507,15 +508,22 @@ KNOWN PROBLEMS:
       DBD_INFORMIX_DEBUG_ESQLLD or DBD_INFORMIX_DEBUG_ESQLCC (or both) to a
       non-zero, non-empty value such as 'yes' and rerun the build.
 
-    * 1996-12-31: Do not use the GNU assembler or loader with GCC on Sun
+    * JL 1996-12-31: Do not use the GNU assembler or loader with GCC on Sun
       Solaris for Sparc; neither works properly with shared libraries.
       Remove them, and rebuild and reinstall GCC immediately.
+      JL 2004-12-02: It is not known whether this ancient advice is still
+      relevant.
 
 IF YOU HAVE PROBLEMS BUILDING DBD::INFORMIX
 
-    Read the Notes/bug.reports file, which describes what to do and where
-    to send the failure report.  Please ensure that any email message has
+    Read all this README file (there is a lot of information in here), and
+    the Notes/bug.reports file, which describes what to do and where to
+    send the failure report.  Please ensure that any email message has
     DBD::Informix in the subject line -- thanks!
+
+    If your problem is related to ExtUtils::AutoInstall, read the material
+    at the top of Makefile.PL and remove the ExtUtils::AutoInstall code as
+    suggested.  Use the rmautoinst.pl script to automate the process.
 
 IF YOU HAVE PROBLEMS USING DBD::INFORMIX
 
@@ -561,7 +569,7 @@ REMEMBER IT IS SUPPOSED TO BE FUN!
 
 Jonathan Leffler (jleffler@us.ibm.com)
 
-@(#)$Id: README,v 100.16 2002/12/14 01:48:46 jleffler Exp $
+@(#)$Id: README,v 2004.1 2004/12/02 22:35:22 jleffler Exp $
 
 ---------------------------------------------------------------------------
 
@@ -572,3 +580,4 @@ Copyright 1998    Jonathan Leffler <j.leffler@acm.org>
 Copyright 1998-99 Jonathan Leffler <jleffler@informix.com>
 Copyright 2000-01 Informix Software Inc
 Copyright 2002    IBM
+Copyright 2003-04 Jonathan Leffler <jleffler@us.ibm.com>

@@ -1,10 +1,11 @@
-#   @(#)$Id: TestHarness.pm,v 2003.6 2003/03/04 22:55:05 jleffler Exp $
+#   @(#)$Id: TestHarness.pm,v 2004.3 2004/12/03 18:06:43 jleffler Exp $
 #
-#   Pure Perl Test Harness for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+#   Pure Perl Test Harness for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 #
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
+#   Copyright 2004    Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -22,7 +23,7 @@
 		connect_to_primary
 		connect_to_secondary
 		connect_to_tertiary
-		date_as_string
+		get_date_as_string
 		is_shared_memory_connection
 		memory_leak_test
 		primary_connection
@@ -40,6 +41,7 @@
 		stmt_counter
 		stmt_retest
 		stmt_test
+		stmt_skip
 		test_for_ius
 		tertiary_connection
 		validate_unordered_unique_data
@@ -53,8 +55,8 @@
 	require_version DBI 1.02;
 
 	my
-	$VERSION = "2003.04";
-	# our $VERSION = "2003.04"; # But 'our' not acceptable to Perl 5.005_03!
+	$VERSION = "2005.01";
+	# our $VERSION = "2005.01"; # But 'our' not acceptable to Perl 5.005_03!
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
@@ -188,7 +190,9 @@
 		$dbh;
 	}
 
-	sub date_as_string
+	# Get both client-side and server-side
+	# result of evaluating a date as a string.
+	sub get_date_as_string
 	{
 		my ($dbh, $mm, $dd, $yyyy) = @_;
 		my ($sth, $sel1, @row);
@@ -206,13 +210,13 @@
 		# but this fix introduced in response to questions from Arlene
 		# Gelbolingo <Gelbolingo.Arlene@menlolog.com>.  Note that the
 		# string returned by default is unambiguous.
-		$sel1 = qq% SELECT MDY($mm,$dd,$yyyy) || '' FROM "informix".SysTables WHERE Tabid = 1%;
+		$sel1 = qq% SELECT MDY($mm,$dd,$yyyy) || '', MDY($mm,$dd,$yyyy) FROM "informix".SysTables WHERE Tabid = 1%;
 		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth = $dbh->prepare($sel1);
 		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth->execute;
 		(&stmt_nok(), return "$yyyy-$mm-$dd") unless @row = $sth->fetchrow_array;
 		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth->finish;
 		&stmt_ok(0);
-		return $row[0];
+		return @row;
 	}
 
 	sub print_dbinfo
@@ -267,6 +271,13 @@
 		$str .= ":\n${err}\nSQLSTATE = ${state}\n";
 		$str =~ s/^/# /gm;
 		&stmt_note($str);
+	}
+
+	sub stmt_skip
+	{
+		my ($reason) = @_;
+		$test_counter++;
+		&stmt_note("ok $test_counter # $reason\n");
 	}
 
 	sub stmt_ok
@@ -362,6 +373,7 @@
 	}
 
 	# Check that both the ESQL/C and the database server are IUS-aware
+	# Handles ESQL/C 2.90 .. 2.99 - which are IUS-aware.
 	# Return database handle if all is OK.
 	sub test_for_ius
 	{
@@ -373,7 +385,8 @@
 		print "#     Version:               $drh->{Version}\n";
 		print "#     Product:               $drh->{ix_ProductName}\n";
 		print "#     Product Version:       $drh->{ix_ProductVersion}\n";
-		if ($drh->{ix_ProductVersion} < 900)
+		my ($ev) = $drh->{ix_ProductVersion};
+		if ($ev < 900 && !($ev >= 290 && $ev < 300))
 		{
 			&stmt_note("1..0 # Skip: IUS data types are not supported by $drh->{ix_ProductName}\n");
 			exit(0);
@@ -404,29 +417,66 @@
 		my ($old_p) = $dbh->{PrintError};
 		my ($old_r) = $dbh->{RaiseError};
 		my ($type);
+		my ($sth);
 
 		# Do not report any errors.
 		$dbh->{PrintError} = 0;
 		$dbh->{RaiseError} = 0;
 
-		# Clean up from any previous runs.
-		foreach $type ('view', 'synonym', 'base')
+		# Clean up synonyms (private and public), views, and base tables.
+		my(%map) = ('P' => 'SYNONYM', 'S' => 'SYNONYM', 'V' => 'VIEW', 'T' => 'TABLE');
+		foreach $type ('P', 'S', 'V', 'T')	# Private synonyms, public synonyms, views, tables.
 		{
-			my $kw = $type;
-			$kw =~ s/base/table/;
-			my @names = grep /\.dbd_ix_/i, $dbh->func($type, '_tables');
-			foreach (@names)
+			my $kw = $map{$type};
+			$sth = $dbh->prepare(qq%SELECT owner, tabname FROM "informix".systables WHERE tabname MATCHES  'dbd_ix_*' AND tabtype = '$type'%);
+			$sth->execute;
+			my($owner, $name);
+			$sth->bind_col(1, \$owner);
+			$sth->bind_col(2, \$name);
+			while ($sth->fetchrow_array)
 			{
-				&stmt_note("# drop $kw $_\n");
-				$dbh->do(qq% drop $kw $_ %);
+				my($sql) = qq%DROP $kw "$owner".$name%;
+				&stmt_note("# $sql\n");
+				$dbh->do($sql);
 			}
 		}
 
-		# IUS test debris!  This will need to be upgraded.
-		$dbh->do(q% DROP TABLE dbd_ix_maker %);
-		$dbh->do(q% DROP TABLE dbd_ix_location %);
-		$dbh->do(q% DROP ROW TYPE dbd_ix_location RESTRICT %);
-		$dbh->do(q% DROP TYPE dbd_ix_percent RESTRICT %);
+		# Clean up stored procedures.
+		$sth = $dbh->prepare(q%SELECT owner, procname FROM "informix".sysprocedures WHERE name MATCHES 'dbd_ix_*'%);
+		if ($sth)
+		{
+			$sth->execute;
+			my($owner, $name);
+			$sth->bind_col(1, \$owner);
+			$sth->bind_col(2, \$name);
+			while ($sth->fetchrow_array)
+			{
+				my($sql) = qq%DROP PROCEDURE "$owner".$name%;
+				&stmt_note("# $sql\n");
+				$dbh->do($sql);
+			}
+		}
+
+		# Clean up IUS types debris!
+		$sth = $dbh->prepare(q%SELECT mode, owner, name FROM "informix".sysxtdtypes WHERE name MATCHES 'dbd_ix_*'%);
+		if ($sth)
+		{
+			$sth->execute;
+			my($mode, $owner, $name);
+			$sth->bind_col(1, \$mode);
+			$sth->bind_col(2, \$owner);
+			$sth->bind_col(3, \$name);
+			while ($sth->fetchrow_array)
+			{
+				my($sql);
+				$sql = qq%DROP ROW TYPE "$owner".$name RESTRICT%
+					if ($mode eq "R");	# ROW types (to point out the obvious)
+				$sql = qq%DROP     TYPE "$owner".$name RESTRICT%
+					if ($mode eq "D");	# DISTINCT types
+				&stmt_note("# $sql\n");
+				$dbh->do($sql);
+			}
+		}
 
 		# Reinstate original error handling
 		$dbh->{PrintError} = $old_p;
@@ -681,7 +731,7 @@ DBD::Informix::TestHarness - Test Harness for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes DBD::Informix::TestHarness distributed with
-IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05).
+IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14).
 This is pure Perl code which exploits DBI and DBD::Informix to make it
 easier to write tests.
 Most notably, it provides a simple mechanism to connect to the user's
@@ -888,6 +938,15 @@ also available for your use.
 
 	&stmt_err('Warning Message');
 
+=head2 Using stmt_skip
+
+This routine writes an 'ok' test result followed by a '#' and the text
+supplied as its argument.
+Note that it appends a newline to the given string.
+It is used to indicate that a test was skipped.
+
+    &stmt_skip("reason why test was skipped");
+
 =head2 Using stmt_note
 
 This routine writes a string (without any newline unless you include it).
@@ -905,11 +964,11 @@ for your use.
 
     &stmt_comment("Some string or other");
 
-=head2 Using date_as_string
+=head2 Using get_date_as_string
 
 This routine takes one to four arguments:
 
-    my($date) = &date_as_string($dbh [, $mm [, $dd [, $yyyy]]]);
+    my($ssdt, $csdt) = &get_date_as_string($dbh [, $mm [, $dd [, $yyyy]]]);
 
 The first argument is the database handle.
 The optional second argument is the month number (1..12).
@@ -921,13 +980,23 @@ No direct validation is done; if the conversion operations fail,
 stmt_fail is called.
 The date value is converted to a string by the database server, and the
 result returned to the calling function.
-The string can be enclosed in quotes and will be accepted by the server
-as a valid date.
+
+Each invocation of C<get_date_as_string> generates one test to be counted.
+
+This function returns an array containing two elements.
+The server-side string is returned as element 0, and the client-side
+string as element 1.
+
+The server-side string can be enclosed in quotes and will then be
+accepted by the server as a valid date in an SQL statement.
+
+The client-side string can be used to define expected values when the
+database returns the given date as a DATE value.
 
 Note: the code assumes that the database server supports the '||' string
-concatenation operator; this is believed to be valid for OnLine 5.00 and
-above, and DBD::Informix does not support earlier server versions so it
-is immaterial that it won't work with them.
+concatenation operator; this is valid for OnLine 5.00 and above, and
+DBD::Informix does not support earlier server versions, so it should
+work everywhere that DBD::Informix works.
 
 =head2 Using select_zero_data
 

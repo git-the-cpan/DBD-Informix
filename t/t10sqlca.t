@@ -1,24 +1,25 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t10sqlca.t,v 2003.4 2003/03/03 19:18:47 jleffler Exp $
+#   @(#)$Id: t10sqlca.t,v 2004.1 2004/12/01 17:53:46 jleffler Exp $
 #
 #   Test SQLCA Record Handling for DBD::Informix
 #
 #   Copyright 1997,1999 Jonathan Leffler
 #   Copyright 2000      Informix Software Inc
 #   Copyright 2002-03   IBM
+#   Copyright 2004      Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
 
-# Set date format to ISO 8601.
+# Explicitly set date format to ISO 8601 to avoid date format problems.
 $ENV{DBDATE} = "Y4MD-";
 
 # Test install...
 my $dbh = &connect_to_test_database();
 print_sqlca($dbh);
 
-&stmt_note("1..9\n");
+&stmt_note("1..8\n");
 &stmt_ok();
 my $table = "dbd_ix_sqlca";
 
@@ -35,7 +36,6 @@ CREATE TEMP TABLE $table
 };
 print_sqlca($dbh);
 
-#my $date = date_as_string($dbh);
 my $date = '2002-12-31';
 my $pi = '3.141592654';
 my $time = "$date 00:00:00.00000";
@@ -64,7 +64,7 @@ my $sth2 = $dbh->prepare("INSERT INTO $table VALUES(0, ?, ?, ?, ?)");
 &stmt_fail() unless $sth2;
 &stmt_ok;
 print_sqlca $sth2;
-my $date2 = date_as_string($dbh, 12, 31, 9999);
+my $date2 = '9999-12-31';
 my $e = '2.718281828';
 my $time2 = '1997-02-28 00:11:22.55555';
 &stmt_fail() unless $sth2->execute('Another value', $date2, $time2, $e);

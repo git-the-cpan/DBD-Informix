@@ -1,11 +1,12 @@
 /*
- * @(#)$Id: dbdattr.ec,v 100.10 2002/12/12 01:31:42 jleffler Exp $
+ * @(#)$Id: dbdattr.ec,v 2004.2 2004/12/01 20:36:30 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) $ -- attribute handling
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) $ -- attribute handling
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
- * Copyright 2002    IBM
+ * Copyright 2002-03 IBM
+ * Copyright 2004    Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -14,13 +15,14 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec,v 100.10 2002/12/12 01:31:42 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 2004.2 2004/12/01 20:36:30 jleffler Exp $";
 #endif
 
 #include <stdio.h>
 #include <string.h>
 
 #include "Informix.h"
+#include "esqlutil.h"
 
 /*
 ** Check whether key defined by key length (kl) and key value (kv)
@@ -108,7 +110,7 @@ static char *blob_bindname(BlobLocn locn)
 
 SV *dbd_ix_dr_FETCH_attrib(imp_drh_t *imp_drh, SV *keysv)
 {
-	static const char function[] = DBD_IX_MODULE "::dbd_ix_dr_FETCH_attrib";
+	static const char function[] = "dbd_ix_dr_FETCH_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	SV             *retsv = Nullsv;
@@ -153,7 +155,7 @@ SV *dbd_ix_dr_FETCH_attrib(imp_drh_t *imp_drh, SV *keysv)
 /* Set database connection attributes */
 int dbd_ix_db_STORE_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 {
-	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_STORE_attrib";
+	static const char function[] = "dbd_ix_db_STORE_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	int             newval = SvTRUE(valuesv);
@@ -279,7 +281,7 @@ static SV *dbd_ix_getsqlca(imp_dbh_t *imp_dbh, STRLEN kl, char *key)
 
 SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 {
-	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_FETCH_attrib";
+	static const char function[] = "dbd_ix_db_FETCH_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	SV             *retsv = Nullsv;
@@ -358,7 +360,7 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 /* Store statement attributes */
 int dbd_ix_st_STORE_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv, SV *valuesv)
 {
-	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_STORE_attrib";
+	static const char function[] = "dbd_ix_st_STORE_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	int             rc = TRUE;
@@ -377,9 +379,16 @@ int dbd_ix_st_STORE_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv, SV *valuesv)
 	return rc;
 }
 
+static SV *dbd_ix_st_bound_parameters(imp_sth_t *imp_sth)
+{
+	SV *retsv = NULL;
+	KLUDGE("dbd_ix_st_bound_parameters not implemented yet");
+	return retsv;
+}
+
 SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 {
-	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_FETCH_attrib";
+	static const char function[] = "dbd_ix_st_FETCH_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	SV             *retsv = NULL;
@@ -474,6 +483,10 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	{
 		retsv = newSVpv(imp_sth->nm_cursor, 0);
 	}
+	else if (KEY_MATCH(kl, key, "ParamValues"))
+	{
+		retsv = dbd_ix_st_bound_parameters(imp_sth);
+	}
 
 	/* Informix specific attributes */
 	else if (KEY_MATCH(kl, key, ix_typenam))
@@ -486,7 +499,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 		{
 			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
 				:coltype = TYPE, :collength = LENGTH;
-			sv = newSVpv(sqltypename(coltype, collength, buffer), 0);
+			sv = newSVpv(sqltypename(coltype, collength, buffer, sizeof(buffer)), 0);
 			av_store(av, i - 1, sv);
 		}
 	}

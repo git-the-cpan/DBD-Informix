@@ -1,9 +1,10 @@
-#   @(#)$Id: TechSupport.pm,v 100.15 2002/12/15 00:32:17 jleffler Exp $
+#   @(#)$Id: TechSupport.pm,v 2003.4 2004/12/02 19:06:01 jleffler Exp $
 #
-#	Technical Support Tools for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+#	Technical Support Tools for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 #
 #   Copyright 2000-01 Informix Software Inc
-#   Copyright 2002    IBM
+#   Copyright 2002-03 IBM
+#   Copyright 2004    Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -15,13 +16,13 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(print_versions bug_report it_works);
 
-	$VERSION = "2003.04";
+	$VERSION = "2005.01";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
 	use Config;
 	use DBI;
-	use DBD::Informix::Configuration;
+	use DBD::Informix::Configure;
 	use DBD::Informix::TestHarness;
 
 	# Print version numbers for Perl, DBI, DBD::Informix or ESQL/C
@@ -53,20 +54,40 @@
 
 		$| = 1;
 
-		my $id = "id";
-		if ($Config{osname} eq 'solaris')
+		# Simulate (Solaris dialect of) 'id' program in Perl.
+		my ($id, $name, $gid, @rgrps, $egid, @egrps, $pad);
+		$name = getpwuid($<);
+		$id = "uid=$<($name)";
+		@rgrps = split / /, $(;
+		$gid = $rgrps[0];
+		shift @rgrps;
+		$name = getgrgid($gid);
+		$id .= " gid=$gid($name)";
+		if ($< != $>)
 		{
-			# On Solaris, /usr/bin/id only reports on auxilliary groups with
-			# the non-standard, non-POSIX -a option.  Usually, there's a
-			# /usr/xpg4/bin/id which does follow the standards.
-			$id = (-x "/usr/xpg4/bin/id") ? "/usr/xpg4/bin/id" : "/usr/bin/id -a";
+			$name = getpwuid($>);
+			$id .= " euid=$>($name)";
+		}
+		@egrps = split / /, $);
+		$egid = $egrps[0];
+		if ($egid != $gid)
+		{
+			$name = getgrgid($egid);
+			$id .= " egid=$egid($name)";
+		}
+		$pad = " groups=";
+		foreach $gid (@rgrps)
+		{
+			$name = getgrgid($gid);
+			$id .= "$pad$gid($name)";
+			$pad = ",";
 		}
 
 		system qq{
 			echo "Command:   $0 $opt @tests"
 			echo "Date:      `date`"
 			echo "Machine:   `uname -n` (`uname -s -r`)"
-			echo "User:      `$id`"
+			echo "User:      $id"
 			echo "Directory: `pwd`"
 			echo "Umask:     `umask`"
 			echo "Terminal:  `tty 2>/dev/null`"
@@ -94,7 +115,6 @@
 		$dbmsversion =~ s/Software Serial Number.*//m;
 		print "DBMS Version = $dbmsversion\n";
 
-		print "Informix Server Entries in sqlhosts file\n";
 		use vars qw($db1 $db2 $server1 $server2 $hosts);
 		$db1 = $ENV{DBD_INFORMIX_DATABASE};
 		$db2 = $ENV{DBD_INFORMIX_DATABASE2};
@@ -102,9 +122,19 @@
 		if (defined $db2) { $server2 = ($db2 =~ s/.*@//); } else { $server2 = $ENV{INFORMIXSERVER}; }
 		$hosts = $ENV{INFORMIXSQLHOSTS};
 		$hosts = "$ENV{INFORMIXDIR}/etc/sqlhosts" unless defined $hosts;
-		system qq {
-		egrep "^($server1|$server2)[ 	]" $hosts
-		};
+		if (open(HOSTS, "<$hosts"))
+		{
+			print "Informix Server Entries in sqlhosts file ($hosts)\n";
+			while (<HOSTS>)
+			{
+				print if m /^($server1|$server2)\s/;
+			}
+			close HOSTS;
+		}
+		else
+		{
+			print "**** Unable to read sqlhosts file $hosts\n";
+		}
 
 		# Print environment, not compromising passwords.
 		use vars qw($var $val);
@@ -216,7 +246,7 @@
 			$who = "$gcos <$who>";
 		}
 
-		my ($dbh) = &connect_quietly();
+		my ($dbh) = &connect_to_primary(0);
 
 		my (%tags);
 
@@ -275,20 +305,26 @@ use DBD::Informix::TechSupport;
 =head1 DESCRIPTION
 
 This document describes how to obtain technical support for
-IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 (which is also known as DBD::Informix).
 It also describes how to use the Perl module to report information to
 any of technical support channels.
 
 =head1 IBM INFORMIX TECHNICAL SUPPORT
 
-IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 is not officially supported by IBM Informix Technical Support.
 If you are using a supported configuration, they will route problem
 reports to the maintenance team listed below.
 
-You can send your problem reports to Jonathan Leffler
-<jleffler@us.ibm.com> and optionally to dbdinfmx@us.ibm.com.
+This release is supported by Jonathan Leffler <dbd.informix@gmail.com>.
+You may also report your bugs via the CPAN resolution tracking system:
+
+    http://rt.cpan.org/
+
+Such bug reports can be sent by email to <bug-DBD-Informix@rt.cpan.org>
+they also get sent to dbd.informix@gmail.com, etc.
+
 Under normal circumstances, you will receive a response (but not
 necessarily a solution) by the end of the next working day (California
 time, California holiday schedule).
@@ -303,32 +339,24 @@ Perl and DBI) and comp.databases.informix (for DBD::Informix).
 These channels may provide quicker support, especially over holiday
 weekends.
 
-=head1 CONFIGURATIONS SUPPORTED BY INFORMIX
+=head1 CONFIGURATIONS SUPPORTED
 
-Informix Technical Support will only support IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+We normally only support IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 if you are using certain supported versions of ESQL/C or Client SDK:
 
 =over 2
 
 =item *
 
-ESQL/C Version 5.1x or later
-
-=item *
-
-ESQL/C Version 7.24
-
-=item *
-
-Client SDK Version 2.30 (ESQL/C 9.21) or later
+Client SDK Version 2.70 (ESQL/C 9.51) or later
 
 =back
 
-You may use Perl Version 5.005_03 as long as your version of DBI is
-1.33 or earlier, but you should ideally be using Perl
-Version 5.8.0 or a later, stable version of Perl (for example, Version 5.8.0).
+You may use Perl Version 5.6.1, but you should ideally be using Perl
+Version 5.8.0 or a later, stable version of Perl (for example, Version
+5.8.6).
 
-You must be using DBI Version 1.33 or later.
+You must be using DBI Version 1.38 or later.
 
 If you are using some other version of ESQL/C, or some other version
 of Perl or DBI, you must use the other support channels documented
@@ -336,7 +364,7 @@ above.
 
 =head1 OTHER CONFIGURATIONS WHICH PROBABLY WORK
 
-IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) is believed to work with all versions of ESQL/C and ClientSDK
+IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) is believed to work with all versions of ESQL/C and ClientSDK
 from ESQL/C 5.00.UC1 upwards.
 However, you may run into problems with shared libraries if you use
 versions of ESQL/C which are not explicitly supported.
@@ -355,10 +383,11 @@ At various times, DBD::Informix has been tested with both OnLine and
 SE at most versions from 5.00 upwards.
 
 DBD::Informix will probably work with most versions of Perl from
-5.005_03 upwards, but you should aim to use 5.8.0 until there is a later
-stable version (such as 5.10) available.
+5.005_03 upwards (subject to using an appropriate version of DBI), but
+you should aim to use 5.8.x until there is a later stable version (such
+as 5.10) available.
 
-DBD::Informix currently required DBI v1.33; it will not accept earlier
+DBD::Informix currently requires DBI v1.38; it will not accept earlier
 versions.
 
 =head1 USING THE DBD::Informix::TechSupport Module
@@ -391,7 +420,7 @@ builds it (classes B, C, D) and tests it (classes C, D).
 =head2 Using it_works
 
 This generates the information needed for a report that you have managed
-to get IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) working.
+to get IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) working.
 
 	it_works;
 

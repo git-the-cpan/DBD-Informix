@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t09exec.t,v 2003.4 2003/03/04 00:01:39 jleffler Exp $
+#   @(#)$Id: t09exec.t,v 2003.5 2003/10/17 19:52:56 jleffler Exp $
 #
 #   Test for DATE data in SELECT
 #
@@ -13,9 +13,13 @@ use strict;
 $ENV{DBDATE} = "Y4MD-";
 
 set_verbosity(0);  # 0 is default; 1 and 2 are significant.
-stmt_note "1..6\n";
+stmt_note "1..11\n";
 
 my $dbh = connect_to_test_database({PrintError => 1});
+
+my($ssdt1, $csdt1) = &get_date_as_string($dbh, 12, 31, 2002);
+my($ssdt2, $csdt2) = &get_date_as_string($dbh,  1,  1, 1970);
+my($ssdt3, $csdt3) = &get_date_as_string($dbh, 12, 31, 1899);
 
 my $table = "dbd_ix_table1";
 $dbh->do(qq"CREATE TEMP TABLE $table(c1 DATE, c2 DATE, c3 DATE)") or &stmt_fail;
@@ -32,7 +36,7 @@ my $sth1 = $dbh->prepare($sql1) or stmt_fail "Cannot prepare $sql1";
 $sth1->execute or stmt_fail "Cannot execute $sql1";
 &validate_unordered_unique_data($sth1, 'c3',
 	{
-		'1899-12-31' => { 'c1' => '2002-12-31', 'c2' => '1970-01-01', 'c3' => '1899-12-31' },
+		$csdt3 => { 'c1' => $csdt1, 'c2' => $csdt2, 'c3' => $csdt3 },
 	});
 
 #T# # Testing operation of validate_unordered_unique_data itself
@@ -71,10 +75,13 @@ $sth1->execute or stmt_fail "Cannot execute $sql1";
 my @vals = (55, 66, 0);
 $uph->execute(@vals);
 
+my($ssdt4, $csdt4) = &get_date_as_string($dbh,  2, 24, 1900);
+my($ssdt5, $csdt5) = &get_date_as_string($dbh,  3,  7, 1900);
+
 $sth1->execute or stmt_fail "Cannot execute $sql1";
 &validate_unordered_unique_data($sth1, 'c3',
 	{
-		'1899-12-31' => { 'c1' => '1900-02-24', 'c2' => '1900-03-07', 'c3' => '1899-12-31' },
+		$csdt3 => { 'c1' => $csdt4, 'c2' => $csdt5, 'c3' => $csdt3 },
 	});
 
 # At 2002-12-31, TODAY - 46000 yields 1877-01-20.  Expect problems from 2025-12-11 onwards.
@@ -84,14 +91,14 @@ my $sth2 = $dbh->prepare($sql2) or &stmt_fail;
 $sth2->execute(@vals) or &stmt_fail;
 &validate_unordered_unique_data($sth2, 'c3', 
 	{
-		'1899-12-31' => { 'c1' => '1900-02-24', 'c2' => '1900-03-07', 'c3' => '1899-12-31' },
+		$csdt3 => { 'c1' => $csdt4, 'c2' => $csdt5, 'c3' => $csdt3 },
 	});
 
 my $sth3 = $dbh->prepare($sql2) or &stmt_fail;
 $sth3->execute(46000, 23) or &stmt_fail;
 &validate_unordered_unique_data($sth3, 'c3', 
 	{
-		'1899-12-31' => { 'c1' => '1900-02-24', 'c2' => '1900-03-07', 'c3' => '1899-12-31' },
+		$csdt3 => { 'c1' => $csdt4, 'c2' => $csdt5, 'c3' => $csdt3 },
 	});
 
 my $sth4 = $dbh->prepare($sql2) or &stmt_fail;
@@ -99,7 +106,7 @@ my ($v1, $v2) = (46000, 23);
 $sth4->execute($v1, $v2) or &stmt_fail;
 &validate_unordered_unique_data($sth4, 'c3', 
 	{
-		'1899-12-31' => { 'c1' => '1900-02-24', 'c2' => '1900-03-07', 'c3' => '1899-12-31' },
+		$csdt3 => { 'c1' => $csdt4, 'c2' => $csdt5, 'c3' => $csdt3 },
 	});
 
 my $sth5 = $dbh->prepare("SELECT * FROM $table WHERE c3 BETWEEN TODAY - ? AND TODAY - ?") or &stmt_fail;

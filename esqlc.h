@@ -1,24 +1,72 @@
 /*
-@(#)Purpose:         Include all relevant ESQL/C type definitions
-@(#)Author:          J Leffler
-@(#)Copyright:       1992-93,1995-2001 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002              IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: esqlc.h,v $
+@(#)Version:        $Revision: 2004.1 $
+@(#)Last changed:   $Date: 2004/11/04 18:27:10 $
+@(#)Purpose:        Include all relevant ESQL/C type definitions
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1992-93,1995-2004
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*
 ** Include all ESQL/C Headers with prototypes where possible.
-** Support for ESQL/C Versions 4.x, 5.x, 6.x, 7.1x, 7.2x, 9.x is
+** Support for ESQL/C Versions 5.x, 6.x, 7.1x, 7.2x, 9.x is
 ** believed to be sound.
 ** Support for ESQL/C Versions 7.0x, 8.0x or 8.1x is unproven; support
 ** for 8.2x is dubious.
 **
-** Support for ESQL/C 4.x will dropped at the end of 2001.
-** Versions of ESQL/C prior to 4.00 are not supported.
+** Support for ESQL/C 4.x was dropped at the end of 2001.
+** Versions of ESQL/C prior to 4.00 never were supported.
 **
-** Note that the ESQL/C 4.x and earlier versions place the headers
+** Note that CSDK 2.90 (Nov2004) renumbered the ESQL/C version to 2.90
+** too.  This is later than ESQL 9.53.  For the time being, assume that
+** these versions will run 2.90, 2.91, ... but not reach 3.00.
+**
+** Note that the ESQL/C 4.x and earlier versions placed the headers
 ** directly in $INFORMIXDIR/incl, but ESQL/C versions 5.00 and later
 ** place the headers in $INFORMIXDIR/incl.
+**
+** Remembered or known ESQL/C Versions:
+** 1.10         1985
+** 2.00         1986
+** 2.10         (Oct 1986)
+** 4.00         (c1987)
+** 4.10 - 4.12  (c1988-1994)
+** 5.00         (Dec 1990)
+** 5.01 - 5.06  (1991-1995)
+** 5.07         (Feb 1996)
+** 5.08         (UD1 = Jan 1997)
+** 5.10         (UC7 = May 1999) Earliest Y2K-compliant version for 5.x
+** 5.11         (Dec 2001)
+** 5.20         (Sep 2002)
+** 6.00         (1994)
+** 7.00         (c1995 - Sequent only)
+** 7.10 - 7.14  (c1995-1996)
+** 7.20 - 7.23  (1996-1997)
+** 7.24         (Sep 1997)  Y2K-compliant version for 7.2x
+** 8.00         (c1995)
+** 8.10         (c1996)
+** 9.00         (c1996)
+** 9.10         (c1996)
+** 9.11         (c1997)
+** 9.12         DevSDK 9.12     (Jul 1997)
+** 9.13         Client SDK 2.00 (Nov 1997)
+** 9.14         Client SDK 2.01 (Feb 1998)
+** 9.15         Client SDK 2.02 (UC4 = Oct 1998)
+** 9.16         Client SDK 2.10 (Oct 1998)
+** 9.20         Client SDK 2.20 (Dec 1998) ?Y2K-compliant version for 9.x?
+** 9.21         Client SDK 2.30 (May 1999)
+** 9.30         Client SDK 2.40 (Oct 1999)
+** 9.40         Client SDK 2.50 (UC2 = Jun 2000)
+** 9.50         Client SDK 2.60 (Nov 2000)
+** 9.51         Client SDK 2.70 (Apr 2001)
+** 9.52         Client SDK 2.80 (Jun 2002)
+** 9.53         Client SDK 2.81 (UC2 = May 2003)
+** 2.90         Client SDK 2.90 (Nov 2004)
+**
+** All versions of ESQL/C prior to 5.10, plus versions 6.x, 7.x
+** (with the possible, marginal, exception of 7.24), 8.x, 9.0x,
+** 9.1x are truly obsolete.
 */
 
 #ifndef ESQLC_H
@@ -26,7 +74,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 100.2 2002/02/08 22:49:14 jleffler Exp $";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 2004.1 2004/11/04 18:27:10 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -67,6 +115,15 @@ extern "C" {
 ** JLSS_DO_NOT_FORCE_PROTOTYPES is set.  Consistency is wonderful; in
 ** some versions of ESQL/C (CSDK 2.10, CSDK 2.30, etc), sqlhdr.h uses a
 ** macro STDC_ENABLE instead of STDC_FLAG.
+**
+** To complete our happiness, in some versions of ESQL/C (CSDK 2.10,
+** CSDK 2.30) sqliapi.h uses neither STDC_FLAG nor STDC_ENABLE, but
+** tests directly on __STDC__ and __cplusplus.  So, for sqliapi.h, we
+** have to set __STDC__ if it is not already set.  Not all C compilers
+** will allow you to do this (and, specifically, the AIX compiler does
+** not allow this).  So, we have to live without prototypes from
+** sqliapi.h on AIX, and #undef const at the end.  This was reported as
+** PTS Bug B118413, but won't be fixed before CSDK 2.50 at the earliest.
 */
 #ifndef JLSS_DO_NOT_FORCE_PROTOTYPES
 #ifndef STDC_FLAG
@@ -105,15 +162,11 @@ extern "C" {
 
 /* _WIN32 (Windows 95/NT code from Harald Ums <Harald.Ums@sevensys.de> */
 
-#if ESQLC_VERSION < 400
+#if (ESQLC_VERSION < 290) || (ESQLC_VERSION >= 300 && ESQLC_VERSION < 500)
 /* No prototypes available -- for earlier versions, you are on your own! */
-#elif ESQLC_VERSION < 410
-#include "esql4_00.h"
-#include "esqllib.h"
-#elif ESQLC_VERSION < 500
-#include "esql4_10.h"
-#include "esqllib.h"
-#elif ESQLC_VERSION < 600
+/* NB: Contact the author for 4.x prototypes */
+#elif (ESQLC_VERSION < 600) && !(ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+
 #ifdef _WIN32
 #include <windows.h>
 #include <sqlhdr.h>
@@ -122,6 +175,7 @@ extern "C" {
 #include "esql5_00.h"
 #include "esqllib.h"
 #endif /* _WIN32 */
+
 #else
 /* For later versions, sqlhdr.h contains the requisite declarations. */
 /* However, these declarations are protected by __STDC__ so you need */
@@ -130,31 +184,18 @@ extern "C" {
 #include <sqlhdr.h>
 
 /*
-** ClientSDK 2.01 or later needs sqliapi.h; it is unknown whether
-** ClientSDK 2.00 does too.  It is also unknown which version is
-** reported by the ESQL/C compiler in ClientSDK 2.00 (with 2.01,
-** the ESQL/C compiler reports 9.14).
+** ClientSDK 2.00 or later needs sqliapi.h.  The ESQL/C compiler for
+** ClientSDK 2.00 reports version 9.13; the ESQL/C compiler for
+** ClientSDK 2.01 reports version 9.14.
 */
-#if ESQLC_VERSION >= 730 && ESQLC_VERSION < 800
-/* Probably an inaccurate value for ESQLC_VERSION -- should be 914 or greater */
-#include <sqliapi.h>
-#elif ESQLC_VERSION >= 914
+#if (ESQLC_VERSION >= 913) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#define HAVE_SQLIAPI_H
+#endif
 
-/*
-** To complete our happiness, in some versions of ESQL/C (CSDK 2.10,
-** CSDK 2.30) sqliapi.h uses neither STDC_FLAG nor STDC_ENABLE, but
-** tests directly on __STDC__ and __cplusplus.  So, for sqliapi.h, we
-** have to set __STDC__ if it is not already set.  Not all C compilers
-** will allow you to do this (and, specifically, the AIX compiler does
-** not allow this).  So, we have to live without prototypes from
-** sqliapi.h on AIX, and #undef const at the end.  This was reported as
-** PTS Bug B118413, but won't be fixed before CSDK 2.50 at the earliest.
-*/
-
+#ifdef HAVE_SQLIAPI_H
 #include <sqliapi.h>
 #undef const
-
-#endif
+#endif /* HAVE_SQLIAPI_H */
 
 #ifdef _WIN32
 #include <sqlproto.h>
@@ -200,7 +241,7 @@ extern int      sqgetdbs(int *ret_fcnt,
 ** your code whether to build with IUS data types or not.
 ** Should be keyed off ESQLC_VERSION, rather than features...
 */
-#if ESQLC_VERSION < 900
+#if (ESQLC_VERSION < 900) && !(ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
 #include "esql_ius.h"
 #endif
 
@@ -227,16 +268,21 @@ extern int      sqgetdbs(int *ret_fcnt,
 ** Prior versions only allowed 18 characters for table, column,
 ** database and server names, and only 8 characters for user
 ** identifiers.
+** JL 2004-08-24: Simplify - assume longer names.
 */
-#if (ESQLC_VERSION >= 730 && ESQLC_VERSION < 800) || \
-	(ESQLC_VERSION >= 820 && ESQLC_VERSION < 900) || \
-	(ESQLC_VERSION >= 920)
 #define SQL_NAMELEN	128
 #define SQL_USERLEN	32
-#else
-#define SQL_NAMELEN	18
-#define SQL_USERLEN	8
-#endif
+
+/*
+** Note that a fully specified table name in an SQL statement could be:
+** 128       characters database name +
+** 128       characters server name +
+** (2*128+2) characters table name (all double quotes) +
+** (2*32+2)  characters owner name (all double quotes) +
+** 4         characters for punctuation and terminal null
+** = 584     characters in total.
+** Database name and server name cannot contain non-alphanumerics.
+*/
 #define SQL_TABNAMELEN	(3 * SQL_NAMELEN + SQL_USERLEN + sizeof("@:''."))
 #define SQL_COLNAMELEN	(SQL_NAMELEN + 1)
 
@@ -245,12 +291,7 @@ extern int      sqgetdbs(int *ret_fcnt,
 
 /* -- Type Definitions */
 
-#if ESQLC_VERSION >= 900
-typedef struct tag_loc_t Blob;
-#else
-typedef loc_t		Blob;
-#endif
-
+typedef loc_t		    Blob;
 typedef struct decimal	Decimal;
 typedef struct dtime	Datetime;
 typedef struct intrvl	Interval;
@@ -258,30 +299,35 @@ typedef struct sqlca_s	Sqlca;
 typedef struct sqlda	Sqlda;
 typedef struct sqlva	Sqlva;
 
-#if ESQLC_VERSION >= 900
+#if (ESQLC_VERSION >= 900) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
 
 /* Type for casting dynamic SQL types to LVARCHAR */
 typedef void *Lvarchar;
 
-#endif /* ESQLC_VERSION >= 900 */
+#endif
 
 /* ESQL/C Features */
 /* The ESQL/C compiler versions are defined in esqlinfo.h by autoconf */
-#if ESQLC_VERSION >= 500
-#define ESQLC_STORED_PROCEDURES
-#define ESQLC_VARIABLE_CURSORS
+/* Variable cursors and stored procedures were introduced in 5.00 */
+/* They are essentially always available in ESQL/C.  */
+/* Some (old) versions of XPS did not support stored procedures. */
+/* Some (old) versions of XPS did not support BYTE and TEXT blobs. */
+#define ESQLC_STORED_PROCEDURES		1
+#define ESQLC_VARIABLE_CURSORS		1
+
+#if (ESQLC_VERSION >= 600) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#define ESQLC_CONNECT		1
+#define ESQLC_SQLSTATE      1
+#define ESQLC_RGETLMSG		1
 #endif
 
-#if ESQLC_VERSION >= 600
-#define ESQLC_CONNECT
+#if (ESQLC_VERSION >= 720) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#define ESQLC_CONNECT_DORMANT		1
 #endif
 
-#if ESQLC_VERSION >= 720
-#define ESQLC_CONNECT_DORMANT
-#endif
-
-#if ESQLC_VERSION >= 900
-#define ESQLC_IUS_TYPES
+#if (ESQLC_VERSION >= 900) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#define ESQLC_IUSTYPES		1
+#define ESQLC_IUS_TYPES		/* Deprecated - use ESQL_IUSTYPES */
 #endif
 
 #ifdef __cplusplus

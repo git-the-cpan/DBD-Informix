@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t41txacoff.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
+#   @(#)$Id: t41txacoff.t,v 2003.4 2003/04/25 18:31:15 jleffler Exp $
 #
 #   Test Transactions with AutoCommit Off for DBD::Informix
 #
@@ -74,7 +74,7 @@ CREATE TEMP TABLE $trans01
 stmt_note "# InTransaction = $dbh->{ix_InTransaction}\n";
 stmt_fail unless $dbh->{ix_InTransaction};
 
-my $date = &date_as_string($dbh, 12, 25, 1996);
+my($ssdt, $csdt) = &get_date_as_string($dbh, 12, 25, 1996);
 my $time = '2004-02-29 23:59:54.32109';
 
 stmt_fail unless ($dbh->commit());
@@ -82,7 +82,7 @@ test_conn_tx($dbh);
 
 # This transaction will be rolled back.
 my $tag1  = 'Elfdom';
-my $insert01 = qq{INSERT INTO $trans01 VALUES(0, '$tag1', '$date', '$time')};
+my $insert01 = qq{INSERT INTO $trans01 VALUES(0, '$tag1', '$ssdt', '$time')};
 
 stmt_test $dbh, $insert01;
 print "# InTransaction = $dbh->{ix_InTransaction}\n";
@@ -107,11 +107,11 @@ $insert01 =~ s/$tag1/$tag2/;
 stmt_test $dbh, $insert01;
 
 # Row number 1 is inserted but rolled back...
-my $row1 = { 'col01' => 2, 'col02' => 'Elfdom', 'col03' => $date, 'col04' => $time };
-my $row2 = { 'col01' => 3, 'col02' => 'Santa Claus Home', 'col03' => $date, 'col04' => $time };
+my $row1 = { 'col01' => 2, 'col02' => 'Elfdom', 'col03' => $csdt, 'col04' => $time };
+my $row2 = { 'col01' => 3, 'col02' => 'Santa Claus Home', 'col03' => $csdt, 'col04' => $time };
 my $res1 = { 2 => $row1, 3 => $row2 };
-my $row3 = { 'col01' => 4, 'col02' => 'Santa Claus Home', 'col03' => $date, 'col04' => $time };
-my $row4 = { 'col01' => 5, 'col02' => 'Elfdom', 'col03' => $date, 'col04' => $time };
+my $row3 = { 'col01' => 4, 'col02' => 'Santa Claus Home', 'col03' => $csdt, 'col04' => $time };
+my $row4 = { 'col01' => 5, 'col02' => 'Elfdom', 'col03' => $csdt, 'col04' => $time };
 my $res2 = { 4 => $row3, 5 => $row4 };
 
 my $sel = $dbh->prepare($select) or &stmt_fail;

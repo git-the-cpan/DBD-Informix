@@ -1,13 +1,11 @@
 /*
-@(#)File:            $RCSfile: esqltype.h,v $
-@(#)Version:         $Revision: 100.3 $
-@(#)Last changed:    $Date: 2002/02/08 22:49:24 $
-@(#)Purpose:         Platform and Version Independent Types for ESQL/C
-@(#)Author:          J Leffler
-@(#)Copyright:       2001 Jonathan Leffler (JLSS)
-@(#)Copyright:       2001 Informix Software Inc
-@(#)Copyright:       2002 IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+@(#)File:           $RCSfile: esqltype.h,v $
+@(#)Version:        $Revision: 2004.1 $
+@(#)Last changed:   $Date: 2004/02/07 01:02:48 $
+@(#)Purpose:        Platform and Version Independent Types for ESQL/C
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 2001-03
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 */
 
 /*TABSTOP=4*/
@@ -17,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqltype_h[] = "@(#)$Id: esqltype.h,v 100.3 2002/02/08 22:49:24 jleffler Exp $";
+static const char esqltype_h[] = "@(#)$Id: esqltype.h,v 2004.1 2004/02/07 01:02:48 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -46,54 +44,47 @@ static const char esqltype_h[] = "@(#)$Id: esqltype.h,v 100.3 2002/02/08 22:49:2
 
 #if ESQLC_VERSION < 921
 
+#include <limits.h>
+
+#if LONG_MAX > 2147483647L
+
+/*
+** In early CSDK version on 64-bit platforms, was the '4-byte integer'
+** modelled by a long or an int?  The manual said 'long'.
+*/
+
+#define MI_LONG_SIZE 64
+#define MI_PTR_SIZE 64
+
 typedef signed char	ixInt1;
 typedef short	ixInt2;
 typedef long	ixInt4;
-
-#define PRId_ixInt1	"d"
-#define PRId_ixInt2	"d"
-#define PRId_ixInt4	"ld"
-
 typedef int		ixMint;
-typedef long	ixMlong;
-
-#define PRId_ixMint		"d"
-#define PRId_ixMlong	"ld"
-
+typedef long	ixMlong; 
 typedef unsigned char	ixUint1;
 typedef unsigned short	ixUint2;
-typedef unsigned long	ixUint4;
-
-#define PRIo_ixInt1	"o"
-#define PRIo_ixInt2	"o"
-#define PRIo_ixInt4	"lo"
-
-#define PRIu_ixInt1	"u"
-#define PRIu_ixInt2	"u"
-#define PRIu_ixInt4	"lu"
-
-#define PRIx_ixInt1	"x"
-#define PRIx_ixInt2	"x"
-#define PRIx_ixInt4	"lx"
-
-#define PRIX_ixInt1	"X"
-#define PRIX_ixInt2	"X"
-#define PRIX_ixInt4	"lX"
-
+typedef unsigned long	ixUint4; 
 typedef unsigned int	ixMuint;
 typedef unsigned long	ixMulong;
 
-#define PRIo_ixMuint	"o"
-#define PRIo_ixMulong	"lo"
+#else
 
-#define PRIu_ixMuint	"u"
-#define PRIu_ixMulong	"lu"
+/* Regular 32-bit platform */
+#define MI_LONG_SIZE 32
+#define MI_PTR_SIZE 32
 
-#define PRIx_ixMuint	"x"
-#define PRIx_ixMulong	"lx"
+typedef signed char	ixInt1;
+typedef short	ixInt2;
+typedef long	ixInt4;
+typedef int		ixMint;
+typedef long	ixMlong; 
+typedef unsigned char	ixUint1;
+typedef unsigned short	ixUint2;
+typedef unsigned long	ixUint4; 
+typedef unsigned int	ixMuint;
+typedef unsigned long	ixMulong;
 
-#define PRIX_ixMuint	"X"
-#define PRIX_ixMulong	"lX"
+#endif /* LONG_MAX > 2147483647L */
 
 /* Omitted typedefs for MCHAR and MSHORT present in ifxtypes.h */
 /* typedef char MCHAR; typedef short MSHORT; */
@@ -115,5 +106,124 @@ typedef muint	ixMuint;
 typedef mulong	ixMulong;
 
 #endif	/* ESQLC_VERSION < 921 */
+
+#if MI_LONG_SIZE == 32
+
+#define PRIX_ixInt1	"X"
+#define PRIX_ixInt2	"X"
+#define PRIX_ixInt4	"lX" 
+#define PRIX_ixMint	"X"
+#define PRIX_ixMlong	"lX"
+#define PRIX_ixMuint	"X"
+#define PRIX_ixMulong	"lX"
+#define PRIX_ixUint1	"X"
+#define PRIX_ixUint2	"X"
+#define PRIX_ixUint4	"lX" 
+
+#define PRId_ixInt1	"d"
+#define PRId_ixInt2	"d"
+#define PRId_ixInt4	"ld" 
+#define PRId_ixMint	"d"
+#define PRId_ixMlong	"ld" 
+#define PRId_ixMuint	"d"
+#define PRId_ixMulong	"ld" 
+#define PRId_ixUint1	"d"
+#define PRId_ixUint2	"d"
+#define PRId_ixUint4	"ld" 
+
+#define PRIo_ixInt1	"o"
+#define PRIo_ixInt2	"o"
+#define PRIo_ixInt4	"lo" 
+#define PRIo_ixMint	"o"
+#define PRIo_ixMlong	"lo" 
+#define PRIo_ixMuint	"o"
+#define PRIo_ixMulong	"lo" 
+#define PRIo_ixUint1	"o"
+#define PRIo_ixUint2	"o"
+#define PRIo_ixUint4	"lo" 
+
+#define PRIu_ixInt1	"u"
+#define PRIu_ixInt2	"u"
+#define PRIu_ixInt4	"lu" 
+#define PRIu_ixMint	"u"
+#define PRIu_ixMlong	"lu" 
+#define PRIu_ixMuint	"u"
+#define PRIu_ixMulong	"lu" 
+#define PRIu_ixUint1	"u"
+#define PRIu_ixUint2	"u"
+#define PRIu_ixUint4	"lu" 
+
+#define PRIx_ixInt1	"x"
+#define PRIx_ixInt2	"x"
+#define PRIx_ixInt4	"lx" 
+#define PRIx_ixMint	"x"
+#define PRIx_ixMlong	"lx" 
+#define PRIx_ixMuint	"x"
+#define PRIx_ixMulong	"lx" 
+#define PRIx_ixUint1	"x"
+#define PRIx_ixUint2	"x"
+#define PRIx_ixUint4	"lx" 
+
+#else
+
+/* Assume MI_LONG_SIZE == 64 */
+/* Hence, int is a 4-byte quantity */
+
+#define PRIX_ixInt1	"X"
+#define PRIX_ixInt2	"X"
+#define PRIX_ixInt4	"X" 
+#define PRIX_ixMint	"X"
+#define PRIX_ixMlong	"X"
+#define PRIX_ixMuint	"X"
+#define PRIX_ixMulong	"X"
+#define PRIX_ixUint1	"X"
+#define PRIX_ixUint2	"X"
+#define PRIX_ixUint4	"X" 
+
+#define PRId_ixInt1	"d"
+#define PRId_ixInt2	"d"
+#define PRId_ixInt4	"d" 
+#define PRId_ixMint	"d"
+#define PRId_ixMlong	"d" 
+#define PRId_ixMuint	"d"
+#define PRId_ixMulong	"d" 
+#define PRId_ixUint1	"d"
+#define PRId_ixUint2	"d"
+#define PRId_ixUint4	"d" 
+
+#define PRIo_ixInt1	"o"
+#define PRIo_ixInt2	"o"
+#define PRIo_ixInt4	"o" 
+#define PRIo_ixMint	"o"
+#define PRIo_ixMlong	"o" 
+#define PRIo_ixMuint	"o"
+#define PRIo_ixMulong	"o" 
+#define PRIo_ixUint1	"o"
+#define PRIo_ixUint2	"o"
+#define PRIo_ixUint4	"o" 
+
+#define PRIu_ixInt1	"u"
+#define PRIu_ixInt2	"u"
+#define PRIu_ixInt4	"u" 
+#define PRIu_ixMint	"u"
+#define PRIu_ixMlong	"u" 
+#define PRIu_ixMuint	"u"
+#define PRIu_ixMulong	"u" 
+#define PRIu_ixUint1	"u"
+#define PRIu_ixUint2	"u"
+#define PRIu_ixUint4	"u" 
+
+#define PRIx_ixInt1	"x"
+#define PRIx_ixInt2	"x"
+#define PRIx_ixInt4	"x" 
+#define PRIx_ixMint	"x"
+#define PRIx_ixMlong	"x" 
+#define PRIx_ixMuint	"x"
+#define PRIx_ixMulong	"x" 
+#define PRIx_ixUint1	"x"
+#define PRIx_ixUint2	"x"
+#define PRIx_ixUint4	"x" 
+
+#endif /* MI_LONG_SIZE */
 
 #endif	/* ESQLTYPE_H */

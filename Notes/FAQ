@@ -1,12 +1,12 @@
-Frequently Asked Questions about IBM Informix Database Driver for Perl
-======================================================================
+Frequently Asked Questions about IBM Informix Database Driver for Perl DBI
+==========================================================================
 
-IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 
 --------------------------------------------------------------------------
 
-WHAT IS THE DIFFERENCE BETWEEN IBM INFORMIX DATABASE DRIVER FOR PERL AND
-DBD::INFORMIX?
+WHAT IS THE DIFFERENCE BETWEEN IBM INFORMIX DATABASE DRIVER FOR PERL DBI
+AND DBD::INFORMIX?
 
 Spelling.
 
@@ -14,10 +14,12 @@ The official product name had to be changed from DBD::Informix to IBM
 Informix Database Driver for Perl because the acronym DBD is a contested
 trademark of two other companies in the USA, so Informix could not release
 the product as DBD::Informix without potentially infringing on this
-trademark.  Internally, Perl and DBI still uses the name DBD::Informix to
-access the driver, and much of the documentation still references
-DBD::Informix because that is how Perl references it, and because it is
-less of a mouthful than IBM Informix Database Driver for Perl.
+trademark, and when IBM bought Informix (2001-07-01), the IBM name was
+prefixed to Informix products.  Internally, Perl and DBI still uses the
+name DBD::Informix to access the driver, and much of the documentation
+still references DBD::Informix because that is how Perl references it, and
+because it is less of a mouthful than IBM Informix Database Driver for
+Perl DBI.
 
 --------------------------------------------------------------------------
 
@@ -37,11 +39,14 @@ However, to compile or use DBD::Informix, you need some IBM Informix
 software on your computer -- specifically, you need either IBM Informix
 ESQL/C or IBM Informix Client SDK.  This provides a compiler and the
 supporting libraries necessary to connect to Informix databases.  This
-software must be licenced from Informix Software Inc.
+software must be licenced from IBM.
 
 To purchase any IBM Informix software, look in the the IBM Informix Web
 site (http://www.ibm.com/software/data/informix), or contact your local
 IBM Sales Office.
+
+IBM Informix ClientSDK may be downloaded for some platforms from:
+	http://www.ibm.com/software/data/informix/downloads.html
 
 --------------------------------------------------------------------------
 
@@ -51,7 +56,6 @@ You can download PDF files for most IBM Informix product manuals at the
 IBM Informix web-site:
 
 	http://www.ibm.com/software/data/informix/pubs
-    http://www.informix.com/answers
 
 Electronic manuals are not available for some of the older product
 versions.
@@ -90,6 +94,8 @@ obsolete, and the other available versions are mostly part of Client SDK.
     ESQL/C 9.50     - Client SDK 2.60
     ESQL/C 9.51     - Client SDK 2.70
     ESQL/C 9.52     - Client SDK 2.80
+    ESQL/C 9.53     - Client SDK 2.81
+    ESQL/C 2.90     - Client SDK 2.90 (Nov 2004)
 
 With the 7.3x servers, you would normally use Client SDK 2.40 or later.
 With the 8.2x or later servers, you would normally use Client SDK 2.40
@@ -110,6 +116,10 @@ version, and many of these versions are obsolete.  For example, all the
 5.0x versions are obsolete because they are not officially Y2K-compliant;
 ditto for the 6.0x, 7.0x and 7.1x versions.  It has also not been tested on
 every platform.
+
+Note that there is some code in Makefile.PL which enforces 'this version is
+obsolete' rules on ESQL/C.  You may need to remove that code - but it would
+be better to upgrade.
 
 ---------------------------------------------------------------------------
 
@@ -164,6 +174,8 @@ released and included:
     Informix Internet Foundation.2000 (IIF.2000) 9.2x
 
 In 2001, the 2000 appellation was dropped.
+
+In 2004, the current version of IDS was 9.40.
 
 Version 9.2x merges the 7.x and 9.x code streams.  Basically, Informix
 Dynamic Server.2000 is the direct upgrade path if you use Informix Dynamic
@@ -319,6 +331,9 @@ WHEN THE VALUE OF $LONGCHARSTRING CONTAINS MORE THAN 256 CHARACTERS.  THIS
 IS ODD BECAUSE LONGCHARCOL IS DEFINED TO CONTAIN MANY MORE THAN 256
 CHARACTERS (EG CHAR(2500)).
 
+Please note that IDS version 9.30 and later and corresponding versions
+of ESQL/C do not impose this limitation.  It could be time to upgrade.
+
 	$sql = "INSERT INTO SomeTable(LongCharCol) VALUES('$longcharstring')";
 	my $sth = $dbh->prepare($sql) or die($DBI::errstr);
 	$sth->execute() or dir($DBI::errstr)
@@ -471,4 +486,4 @@ what 'uname -n' gives is what you need for the local machine.
 Jonathan Leffler
 Informix Database Engineering, IBM Data Management Solutions
 
-@(#)$Id: FAQ,v 100.10 2002/11/20 01:41:16 jleffler Exp $
+@(#)$Id: FAQ,v 2004.1 2004/12/02 22:46:27 jleffler Exp $

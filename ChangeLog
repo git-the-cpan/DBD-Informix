@@ -1,4 +1,67 @@
-Change Log for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) (aka DBD::Informix)
+
+2005.01 Release
+---------------
+2005-03-14: Upload to PAUSE and CPAN.
+2005-03-14: Final cleanups before release.
+2004-12-01: Revert to SQL DESCRIPTORS.  Cleanup version detection.
+2004-11-24: Conversion to MSD/NMD distribution mechanism.
+2004-10-21: Pre-emptive fix for version detection problems in ClientSDK
+            2.90 (which will have ESQL/C 2.90, instead of 9.x).
+2004-09-13: Fix problem in dbdimp.ec v100.36.1.x related to formatting
+            SQLFLOAT and SQLSMFLOAT; bug reported by Will Rutherford
+            <will.rutherford@sciatl.com>
+2004-08-04: Perl 5.5.x requires prototypes - Makefile.PL should not fuss
+            about setting __STDC__ etc on any platforms.  Fixes problem
+            reported by Václav Ovsík <vaclav.ovsik@i.cz>.
+2004-04-01: Enable hold cursors test (t/t33holdcurs.t).  Update documentation.
+2004-01-16: Import updated sqltoken.c which handles C-style comments, just
+            like the servers do.
+2003-10-17: Fix version detection problem with ESQL/C on RedHat 9, reported
+            by Jay Hannah <jhannah@omnihotels.com>.  Fix problems with
+            dates in t/t09exec.t - I don't know whom to credit for this
+            (let me know if it was you).
+2003-09-30: Add t/t98pod.t, but do not distribute as it requires Test::Pod,
+            which is far from being universally installed.
+2003-09-09: Detect and object when a $dbh is used by a child process.
+            (Response to an old bug report, but name/email missing.)
+2003-09-08: Upgrade esqlld to do substitutions on arguments via
+            DBD_INFORMIX_ESQLLD_REPLACE_OPTIONS_REGEX, and to delete
+            multiple arguments at a time (-z ignore, for Solaris 8, for
+            example) via DBD_INFORMIX_ESQLLD_REMOVE_OPTION_PAIRS.  The
+            result is baroque in its complexity, and yet probably still not
+            adequate (if you need to do two distinct substitutions, for
+            example: -xarch=v9 to -m64 and -KPIC to -fPIC).
+2003-07-15: Merge the partial fix for INT8/SERIAL8 values sent to Steve
+            Vornbrock <stevev@wamnet.com> on 2003-07-01 and the fix for the
+            DECIMAL/INTEGER conversion problem sent to Darryl Priest
+            <darryl.priest@piperrudnick.com> into both the 100.36.1.2 and
+            2003.6 versions of dbdimp.ec.
+2003-05-02: DBD::Informix::TechSupport needs Configure, not Configuration.
+2003-05-02: Jay Hannah <jhanna@omnihotels.com> noted problems when
+            $INFORMIXSERVER is not set, so ensure it is set when needed.
+            Jay also noted that Configure.pm is confused by the warning
+            from RedHat 9 about "Incorrectly built binary which accesses
+            errno, h_errno or _res directly.  Needs to be fixed."
+2003-04-25: Fix problems with non-default DBDATE value in server and no
+            value for DBDATE in client (reported by Margit Schubert-While).
+            Use new get_date_as_string() function in TestHarness.pm which
+            returns the server-side and client-side strings representing
+            the given date.  Never was a problem if the client sets DBDATE.
+2003-04-18: Improve t92rows.t so it works even if t91udts.t fails, spotted
+            by Margit Schubert-While <margitsw@t-online.de>.  Also improved
+            README file after comments from Margit.
+2003-03-11: Improve TestHarness.pm; cleanup_database now does a name-based
+            search on data types, private synonyms, and stored procedures.
+2003-03-10: Fix up TechSupport.pm; implement 'id' command and 'egrep' on
+            $INFORMIXSQLHOSTS in Perl, not shell, to improve reliability.
+            Also fix code to use connect_to_primary() instead of obsolete
+            connect_quietly() - Andy Bach <andy_bach@wiwb.uscourts.gov>.
+2003-03-06: Problem with data_sources reported by Boban Acimovic again, and
+            by Jonathan I Kamens <jonathank@worldwinner.com> and Stefan
+            Meyer <st-meyer@foni.net> (http://rt.cpan.org/ bug #2183).  The
+            problem is on Linux with both Perl 5.6.0 and 5.6.1, using
+            vendor supplied versions of Perl.
 
 2003.04 Release
 ---------------
@@ -1021,4 +1084,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2003.6 2003/03/05 19:15:28 jleffler Exp $
+@(#)$Id: ChangeLog,v 2005.1 2005/03/14 23:24:48 jleffler Exp $

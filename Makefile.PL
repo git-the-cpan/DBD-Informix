@@ -1,19 +1,28 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2003.6 2003/03/04 18:51:14 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2005.1 2005/03/14 23:21:59 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05))
+# (IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
 # Copyright 2000    Informix Software Inc
-# Copyright 2002-03 IBM
+# Copyright 2002-04 IBM
+# Copyright 2004-05 Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
 
 #TABSTOP=4
+
+BEGIN
+{
+$main::min_DBI_ver = "1.38";		# Minimum (mandatory) version of DBI
+$main::ref_DBI_ver = "1.48";		# Reference (recommended) version of DBI
+$main::min_Perl_ver = "5.006";		# Minimum (mandatory) version of Perl
+$main::ref_Perl_ver = "5.008006";	# Reference (recommended) version of Perl
+}
 
 ########################
 ### AUTOINSTALL CODE ###
@@ -23,6 +32,8 @@
 # markers at the start of the lines between each pair of lines marked
 # with #-HERE-# and #-AND-HERE-#
 # In vi:  :g/^#-HERE-#$/.+1,/#-AND-HERE#$/-1s/^/#-EU-AI-#/
+#
+# Alternatively: perl rmautoinst.pl Makefile.PL | perl -
 
 #-HERE-#
 # ExtUtils::AutoInstall Bootstrap Code, version 5.
@@ -56,9 +67,8 @@ BEGIN
 {
 	require ExtUtils::AutoInstall;
 	# Pre-install the DBI module.
-	ExtUtils::AutoInstall->install([], 'DBI' => '1.33');
+	ExtUtils::AutoInstall->install([], 'DBI' => "$main::min_DBI_ver");
 }
-use DBI 1.33;
 
 ExtUtils::AutoInstall->import(
 	-version        => '0.43',
@@ -66,12 +76,17 @@ ExtUtils::AutoInstall->import(
 		make_args   => '--hello',   # Suppress hello message from CPAN
 	},
 	-core           => [
-		'DBI'         => '1.33',    # DBI version 1.30 or later would do
+		'DBI'         => "$main::min_DBI_ver",
 	],
 	'High Resolution Timing' => [
 		-default      => 1,         # Install Time::HiRes by default
 		-tests        => [ "t/t66insert.t" ],	# Disable this test if no Time::HiRes
 		'Time::HiRes' => '',
+	],
+	'POD Format Testing' => [
+		-default      => 1,         # Install Test::Pod by default
+		-tests        => [ "t/t98pod.t" ],	# Disable this test if no Test::Pod
+		'Test::Pod' => '',
 	],
 );
 #-AND-HERE-#
@@ -80,17 +95,22 @@ ExtUtils::AutoInstall->import(
 ### END OF AUTOINSTALL CODE ###
 ###############################
 
-# A sufficiently recent version of Perl and DBI must be installed before we
-# can build the DBD module.  The code in DBD::Informix needs the features
-# present in Perl 5.005 and DBI 1.33.
-use 5.005;
+# A sufficiently recent version of Perl and DBI must be installed before
+# we can build the DBD module.  The code in DBI, and hence the code in
+# DBD::Informix, needs the features present in Perl 5.6.0.  Note that
+# the Perl version cannot be tested with 'use' or 'require' and the
+# variable $main::min_Perl_ver; 'use' fails with a syntax error and
+# 'require' cannot find the module the with version number as its name.
+use 5.006;
 use strict;
 use Config;
 use lib 'lib';
 use ExtUtils::MakeMaker;    # Only needed if ExtUtils::AutoInstall is disabled
-use DBI 1.33;               # Only needed if ExtUtils::AutoInstall is disabled
+use DBI $main::min_DBI_ver; # Only needed if ExtUtils::AutoInstall is disabled
 use DBI::DBD;               # dbd_postamble()
 use DBD::Informix::Configure;
+use POSIX qw(strftime);
+sub dbd_ix_die;
 
 $| = 1;     # Ensure that Perl output is interleaved with test output.
 
@@ -109,14 +129,18 @@ if ($NTConfiguration)
 	to debug the NT code and reporting the results back to the DBI
 	Users mailing list.
 
+	Note: Some of the code here or in ESQL/C may work properly if
+	%INFORMIXDIR% contains spaces.
+
 	Thanks!
 
 	});
 }
 
-my $dbd_ix = "2003.04";
-# Hack for handling builds directly in Atria Clearcase view.
-$dbd_ix = "2003.00.0000" unless $dbd_ix =~ /^\d+\.\d+/;
+my $dbd_ix = "2005.01";
+
+# This is for development only - the code must be recompiled each day!
+$dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
 
 my $dbd_ix_pm_dir = "lib/DBD/Informix";
 
@@ -131,7 +155,7 @@ my %opts = (
 					  COMPRESS     => 'gzip -v9',
 					  SUFFIX       => 'gz'
 					},
-	'PREREQ_PM'  =>	{ 'DBI' => 1.33,
+	'PREREQ_PM'  =>	{ 'DBI' => "$main::min_DBI_ver",
 					  'Time::HiRes' => 0
 					},
 	'PM'         =>	{
@@ -149,36 +173,28 @@ my %opts = (
 		   );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
 %;
 
 # log key platform information to help me help you quickly
-print "Perl:     perl$] @Config{qw(archname dlsrc)}\n";
+print "Perl:     perl v$] @Config{qw(archname dlsrc)}\n";
 print "System:   @Config{qw(myuname)}\n";
-my @compiler = map { defined $_ ? $_ : "" } @Config{qw(cc optimize ccflags)};
-print "Compiler: @compiler\n";
-print "Loader:   $Config{ld}\n"
-	if ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc});
 
 # Sometimes the 'use' commands above enforce the same restriction as
 # these two lines below.
-&did_not_read("Perl is out of date") unless ($] >= 5.005);
-&did_not_read("DBI is out of date") unless ($DBI::VERSION >= 1.33);
-
-# Assorted hints - these should be move to a hints subdirectory.
-print "\nSee notes about SPARCompiler on Solaris in Notes/solaris\n"
-	if ($Config{osname} eq 'solaris' and &which($Config{cc}) =~ m%/SUNWspro/%);
-print "\n";
+&did_not_read("Perl is out of date") unless ($] >= $main::min_Perl_ver);
+&did_not_read("DBI is out of date") unless ($DBI::VERSION >= $main::min_DBI_ver);
 
 # Compare installed version of DBI with version which DBD::Informix was
 # last tested with.
 # The required and reference versions are the same for this release.
-my $dbi_ref_ver = "1.13";
-warn "*** Ideally, you should upgrade to DBI version $dbi_ref_ver.\n\n"
-	unless ($DBI::VERSION >= $dbi_ref_ver);
+warn "*** Ideally, you should upgrade to Perl version $main::ref_Perl_ver.\n\n"
+	unless ($] >= $main::ref_Perl_ver);
+warn "*** Ideally, you should upgrade to DBI version $main::ref_DBI_ver.\n\n"
+	unless ($DBI::VERSION >= $main::ref_DBI_ver);
 
 my ($ID, $esqlprog) = &find_informixdir_and_esql($NTConfiguration);
 my ($epp) = "$ID/bin/$esqlprog";
@@ -188,6 +204,16 @@ $auxincl = " -I$ID/incl/tools" if ($esqlprog =~ /\bc4gl\b/);
 
 my ($infversion, $vernum) = &get_esqlc_version($esqlprog);
 print "Using $infversion from $ID\n";
+
+# Effective version number of ESQL/C.
+# ESQL/C 2.90 was released in ClientSDK 2.90 (Nov 2004)
+# Previous version was ESQL/C 9.53 released in ClientSDK 2.81.
+# To simplify swathes of code below, treat the 2.90..2.99 releases
+# as equivalent to 9.60 (a non-existent release).
+my ($effvernum) = ($vernum >= 290 && $vernum < 300) ? 960 : $vernum;
+
+dbd_ix_die "\n*** Environment variable \$INFORMIXSERVER is not set and should be!\n\n"
+	if ($effvernum >= 600 && !defined $ENV{INFORMIXSERVER});
 
 # --- Check whether Informix is installed OK for us.
 my $warning = qq{
@@ -204,17 +230,17 @@ my $esql = "$esqlprog";
 my $esqlc_flags = "";
 my $vercode = "esqlc_v6";
 my $multiconn = 1;
-if ($vernum < 100)
+if ($effvernum < 100)
 {
-	die &nlt(qq{
+	dbd_ix_die &nlt(qq{
 	The ESQL/C version information found was: <<$infversion>>
-	$opts{NAME} failed to find a version number ($vernum).
+	$opts{NAME} failed to find a version number ($effvernum).
 	Please report this to the $opts{NAME} maintenance team.
 	});
 }
-elsif ($vernum >= 100 && $vernum < 500)
+elsif ($effvernum < 500)
 {
-	die &nlt(qq{
+	dbd_ix_die &nlt(qq{
 	$infversion does not support string-named cursors.
 	This version of $opts{NAME} requires this facility.
 	There are no longer any plans to back-port $opts{NAME}
@@ -223,15 +249,15 @@ elsif ($vernum >= 100 && $vernum < 500)
 	If all else fails, try installing DBD::Informix4 instead.
 	});
 }
-elsif ($vernum >= 500 && $vernum < 510)
+elsif ($effvernum >= 500 && $effvernum < 510)
 {
-	die &nlt(qq%
+	dbd_ix_die &nlt(qq%
 			This version of ESQL/C ($infversion) is obsolete.
 			It is also not considered Y2K-safe by Informix.
 			Please upgrade to ESQL/C version 5.10 or later.
 			%);
 }
-elsif ($vernum >= 510 && $vernum < 600)
+elsif ($effvernum >= 510 && $effvernum < 600)
 {
 	$vercode = "esqlc_v5";
 	$multiconn = 0;
@@ -259,14 +285,14 @@ elsif ($vernum >= 510 && $vernum < 600)
 		instead.  Read the Notes/static.build file.\n
 		%);
 }
-elsif ($vernum >= 600 && $vernum < 724)
+elsif ($effvernum >= 600 && $effvernum < 724)
 {
-	die &nlt(qq%
+	dbd_ix_die &nlt(qq%
 			This version of ESQL/C ($infversion) is obsolete.
 			Please upgrade to ESQL/C version 7.24 or ClientSDK.
 			%);
 }
-elsif ($vernum >= 724 && $vernum < 800)
+elsif ($effvernum >= 724 && $effvernum < 800)
 {
 	# 7.2x is already released.  There should not be an ESQL/C version
 	# 7.3x.  The 7.3x server is Informix Dynamic Server, IDS.  You use
@@ -286,7 +312,7 @@ elsif ($vernum >= 724 && $vernum < 800)
 	{
 		warn &nlt(qq%
 				This version of Informix 4GL should be upgraded to version 7.32 or later.
-		%) if ($vernum < 730);
+		%) if ($effvernum < 730);
 		warn &nlt(qq%
 			$opts{NAME} will not support builds with Informix 4GL in the future.
 			%);
@@ -295,7 +321,7 @@ elsif ($vernum >= 724 && $vernum < 800)
 	&fix_b102265($epp, $esql, $opts{NAME})
 		if ($Config{osname} eq "hpux" && &grep_for_statopt_staticonly($epp));
 }
-elsif ($vernum >= 800 && $vernum < 900)
+elsif ($effvernum >= 800 && $effvernum < 900)
 {
 	# Informix XPS.  Versions 8.00 through 8.2x probably use ESQL/C 8.xy.
 	# Starting with XPS version 8.30, you are expected to use ClientSDK,
@@ -308,42 +334,46 @@ elsif ($vernum >= 800 && $vernum < 900)
 		%);
 	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 }
-elsif ($vernum >= 900 && $vernum < 916)
+elsif ($effvernum >= 900 && $effvernum < 916)
 {
 	# ESQL/C 9.0x and 9.10 or 9.11 were pre-releases of the ESQL/C for
 	# the Informix Universal Server (IUS) - since renamed several times.
 	# ESQL/C 9.12 was released as ESQL/C 9.12.
-	# ESQL/C 9.13 was released as DevSDK 2.00
-	# ESQL/C 9.14 was released as ClientSDK 2.01
-	# ESQL/C 9.15 was released as ClientSDK 2.02
+	# ESQL/C 9.13 was released in DevSDK 2.00
+	# ESQL/C 9.14 was released in ClientSDK 2.01
+	# ESQL/C 9.15 was released in ClientSDK 2.02
 	# All of these are long obsolete and are no longer supported.
-	die &nlt(qq%
+	dbd_ix_die &nlt(qq%
 			This version of ESQL/C ($infversion) is obsolete.
 			Please upgrade to ClientSDK version 2.70 or later.
 			%);
 }
-elsif ($vernum >= 916 && $vernum < 1000)
+elsif ($effvernum >= 916 && $effvernum < 1000)
 {
-	# ESQL/C 9.16 was released as ClientSDK 2.10
-	# ESQL/C 9.20 was released as ClientSDK 2.20
-	# ESQL/C 9.21 was released as ClientSDK 2.30
-	# ESQL/C 9.30 was released as ClientSDK 2.40
-	# ESQL/C 9.40 was released as ClientSDK 2.50
-	# ESQL/C 9.50 was released as ClientSDK 2.60
-	# ESQL/C 9.51 was released as ClientSDK 2.70
-	# ESQL/C 9.52 was released as ClientSDK 2.80
+	# ESQL/C 9.16 was released in ClientSDK 2.10
+	# ESQL/C 9.20 was released in ClientSDK 2.20
+	# ESQL/C 9.21 was released in ClientSDK 2.30
+	# ESQL/C 9.30 was released in ClientSDK 2.40
+	# ESQL/C 9.40 was released in ClientSDK 2.50
+	# ESQL/C 9.50 was released in ClientSDK 2.60
+	# ESQL/C 9.51 was released in ClientSDK 2.70
+	# ESQL/C 9.52 was released in ClientSDK 2.80
+	# ESQL/C 9.53 was released in ClientSDK 2.81
+	# ESQL/C 2.90 was released in ClientSDK 2.90 (Nov 2004)
+	# NB: 2.90 was handled earlier...
 	print &nlt(qq%
 			The tests in t/t31nulls.t and t/t32nulls.t will probably fail.
-		%) if ($vernum == 914);
+		%) if ($effvernum == 914);
 	print &nlt(qq%
 			Please upgrade to a more recent version of ClientSDK.
-		%) if ($vernum < 940);
+			$opts{NAME} will probably work, but that is not guaranteed.
+		%) if ($effvernum < 951);
 	print $warning;
 	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 }
 else
 {
-	die &nlt(qq{
+	dbd_ix_die &nlt(qq{
 	$opts{NAME} does not know anything about $infversion.
 	Please report this to the $opts{NAME} maintenance team.
 	However, there is a fair chance that $opts{NAME} will work if
@@ -364,6 +394,7 @@ else
 # -- Configure the make process
 
 # Define the version of ESQL/C for the object code.
+# Do not use $effvernum here (tempting though it is)!
 $opts{DEFINE} = " -DESQLC_VERSION=$vernum";
 
 # Disable assertions by default; override by setting DBD_INFORMIX_ENABLE_ASSERT.
@@ -380,6 +411,12 @@ else
 
 print "** Warning ** you will build $opts{NAME} for a relocatable INFORMIXDIR!\n\n"
 	if (defined($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR}));
+
+# JL 2004-12-02: Header emalloc.h is referenced in describe.ec.
+# Specifying -DUSE_REAL_MALLOC prevents emalloc.h from referencing
+# emalloc() et al, so there is no need for emalloc.c.  Hence, no need
+# for stderr.[ch] or debug.h either (only referenced in emalloc.c).
+$opts{DEFINE} .= " -DUSE_REAL_MALLOC";
 
 $opts{INC} = " ";
 
@@ -406,9 +443,17 @@ my $infofile = "esqlinfo.h";
 unlink $infofile;
 die "Unable to open $infofile for writing\n"
 	unless open(ESQLINFO, ">$infofile");
-print ESQLINFO "/* File $infofile generated by $opts{NAME} $dbd_ix for $infversion */\n";
-printf ESQLINFO "%s%s IUS_DATA_TYPES;\n", '$', (($vernum >= 900) ? "define" : "undef");
-printf ESQLINFO "%s%s BEGIN_WORK_WITHOUT_REPLICATION;\n", '$', (($vernum >= 914) ? "define" : "undef");
+print ESQLINFO "/*\n** File $infofile\n** Generated by $opts{NAME} $dbd_ix\n** For $infversion\n*/\n";
+printf ESQLINFO "%s%s ESQLC_BEGIN_WORK_WITHOUT_REPLICATION;\n", '$',
+	($effvernum >= 914 ? "define" : "undef");
+printf ESQLINFO "%s%s ESQLC_SQLSTATE;\n", '$',
+	($effvernum >= 600 ? "define" : "undef");
+printf ESQLINFO "%s%s ESQLC_CONNECT;\n", '$',
+	($effvernum >= 600 ? "define" : "undef");
+printf ESQLINFO "%s%s ESQLC_CONNECT_DORMANT;\n", '$',
+	($effvernum >= 700 ? "define" : "undef");
+printf ESQLINFO "%s%s ESQLC_IUSTYPES;\n", '$',
+	($effvernum >= 900 ? "define" : "undef");
 close ESQLINFO or die "Failed to write $infofile\n";
 print "$infofile written OK\n\n";
 }
@@ -417,33 +462,16 @@ print "$infofile written OK\n\n";
 # Perl configuration headers contain lots of /* inside comments (-Wno-comment)
 #$opts{DEFINE} .= ' -Wall -pedantic -Wno-comment -Wpointer-arith -Wcast-align'
 #	    . ' -Wconversion -Wtraditional -Wcast-qual'
+#       . ' -Wmissing-prototypes -Wstrict-prototypes -Wredundant-decl'
 $opts{DEFINE} .= ' -Wall -pedantic -Wno-comment'
 	if $Config{cc} eq 'gcc' and $ENV{DBD_INFORMIX_DEBUG_GCC};
 
-# Ensure that __STDC__ is defined under CenterLine CC
-$opts{DEFINE} .= ' -Xa'
-	if $Config{cc} eq 'clcc';
-
-# We need to add -Ae on HP-UX to ensure that prototypes are accepted,
-# but only if using the native HP-UX compiler (GCC does not accept -Ae,
-# for example).
-$opts{DEFINE} .= " -Ae"
-	if $Config{osname} eq "hpux" and $Config{ccflags} !~ /-A[ea]/ and
-		$Config{cc} eq 'cc';
-
-# Extra definitions under Alpha cc to get __STDC__ defined
-$opts{DEFINE} .= ' -std1'
-	if (($Config{cc} eq 'cc') && ($Config{osname} eq 'dec_osf'));
-
-# Ensure that __STDC__ is defined for SUNWspro compilers on Solaris.
-$opts{DEFINE} .= ' -Xa'
-	if ($Config{osname} eq 'solaris' and &which($Config{cc}) =~ m%/SUNWspro/%);
-
-# Ensure that __STDC__ is defined for cc on AIX (ie if Perl was not
-# compiled with xlc); reported by Joachim Schrod <jschrod@acm.org> in
-# January 1998.
-$opts{DEFINE} .= ' -qlanglvl=ansi'
-        if ($Config{osname} eq 'aix' and $Config{cc} eq 'cc');
+# 2004-08-04: Perl 5.5.x requires prototypes - we no longer need to fuss
+# about setting __STDC__ etc on any platforms, removing about 20 lines.
+# Fixes problem reported by Václav Ovsík <vaclav.ovsik@i.cz>.
+# 2004-10-21: Marco Awisano <m.awisano@mail.regione.toscana.it> reported
+# a related problem on RedHat Enterprise Linux 3 and the fix was to
+# remove another block of comment and code.
 
 # Workaround Informix bug B08223 (aka B14937, and other numbers too)
 # AIX localedef31.h defines a loc_t and is used by some system headers.
@@ -452,41 +480,11 @@ $opts{DEFINE} .= ' -qlanglvl=ansi'
 $opts{DEFINE} .= " -D__H_LOCALEDEF"
 	if ($Config{osname} eq 'aix');
 
-# Some versions of the Informix headers do not generate function
-# prototypes; the esqlc.h header is provided to remedy this problem.  Some
-# versions of the Informix headers only generate function prototypes if
-# __STDC__ is defined.  Without function prototypes, we are often passing
-# pointers to _iqxyz() functions that the compiler thinks are ints.  This
-# causes incorrect code to be generated on a 64-bit DEC Alpha with any
-# optimization level greater than -O1.  So, if the C compiler does not
-# cause Informix to use the prototypes, there could be problems.  Once upon
-# a time, this code added -DUSE_PROTOTYPES to the command line, but even
-# this was not reliable (some compilers refused to allow esqlc.h to set
-# __STDC__ when it was not set via the command line options, for example).
-# The code in esqlc.h (version 1.9 and later) handles this mess for us.
-# Additionally, you can run into problems with the code generated by the
-# ESQL/C compiler, which undefines const if __STDC__ is not defined (eg on
-# Solaris using the SUNWspro compiler).  These may show up as some function
-# prototypes being redefined with the first version having const pointers
-# and the second have non-const pointers.  However, Perl 5.005 requires
-# prototypes and ESQL/C is moving in that direction, and it is the correct
-# direction to go.  We'll assume it will all work.
-
-if ($Config{"prototype"} ne 'define')
-{
-	print &nlt(q{
-		Gosh!  Perl doesn't think your compiler handles prototypes.
-		Well, even though I don't believe it, we'll take Perl's word
-		for it and we won't try to force them into use.  Don't you
-		need to upgrade your compiler?  If you run into compilation
-		problems with the test program, you will need to revisit this
-		issue.
-		});
-}
-
-my $objects = "Informix.o dbdimp.o dbdattr.o sqltoken.o";
-$objects .= " sqltype.o ixblob.o decsci.o odbctype.o link.o esqlcver.o $vercode.o";
+my $objects = "Informix.o dbdimp.o dbdattr.o describe.o sqltoken.o";
+$objects .= " sqltype.o ixblob.o odbctype.o kludge.o link.o esqlcver.o $vercode.o";
 $objects .= " eprintf.o" if defined $ENV{DBD_INFORMIX_USE_EPRINTF_CODE};
+# decsci.o formatting only of relevance if effective ESQL/C Version less than 7.10.
+$objects .= " decsci.o" if ($effvernum < 710);
 if (defined $ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES})
 {
 	my ($list) = $ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES};
@@ -576,34 +574,45 @@ else
 	# There have also been problems on HP-UX 10.20 with environment setting
 	# on the command line which may affect this test and/or the main build.
 	print "Testing whether your Informix test environment will work...\n";
-	my ($EQ, $RM, $EX);
+	my ($EQ, $RM, $EX, $EV);
 	if ($NTConfiguration)
 	{
 		$EX = ".exe";
 		$EQ = $esql;
 		$RM = "del /q";
+		$EV = [ ];
 	}
 	else
 	{
 		$EX = "";
 		$RM = "rm -f";
-		$EQ = "INFORMIXC='$Config{perlpath} esqlcc' ESQLCC='$Config{cc}' $esql";
+		$EQ = "$esql";
+		$EV = [ "INFORMIXC=$Config{perlpath} esqlcc", "ESQLCC=$Config{cc}" ];
 	}
 
+	$opts{DEFINE} =~ s/^\s+//;
 	my $sx = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? 1 : 0;
+	my @ccflags = split / +/, $Config{ccflags};
+	my @cppflags = split / +/, $opts{DEFINE};
+	if ($sx)
+	{
+	my($v);
+	foreach $v (@ccflags)  { print "ccflag  = <<$v>>\n"; }
+	foreach $v (@cppflags) { print "cppflag = <<$v>>\n"; }
+	}
 
-	execute_command("$EQ -c $Config{ccflags} $opts{DEFINE} esqltest.ec", $sx,
-					"Failed to compile esqltest.ec to esqltest$objext\n");
-	execute_command("$EQ -c $Config{ccflags} $opts{DEFINE} $vercode.ec", $sx,
-					"Failed to compile $vercode.ec to $vercode$objext\n");
-	execute_command("$EQ -o esqltest esqltest$objext $vercode$objext", $sx,
-					"Failed to link test program esqltest\n");
-	execute_command("$RM esqltest$objext esqltest.c $vercode.c $vercode$objext", $sx,
-					"Failed to remove compilation debris\n")
+	execute_command($sx, "Failed to compile esqltest.ec to esqltest$objext\n",
+					[ "$EQ", "-c", @ccflags, @cppflags, "esqltest.ec" ], $EV);
+	execute_command($sx, "Failed to compile $vercode.ec to $vercode$objext\n",
+					[ "$EQ", "-c", @ccflags, @cppflags, "$vercode.ec" ], $EV);
+	execute_command($sx, "Failed to link test program esqltest\n",
+					[ "$EQ", "-o", "esqltest", "esqltest$objext", "$vercode$objext" ], $EV);
+	execute_command($sx, "Failed to remove compilation debris\n",
+					[ "$RM esqltest$objext esqltest.c $vercode.c $vercode$objext" ], $EV)
 		unless ($sx);
-	execute_command("./esqltest", $sx, $unsuccessful_test);
-	execute_command("$RM esqltest$EX", $sx,
-					"Failed to remove esqltest$EX program\n")
+	execute_command($sx, $unsuccessful_test, [ "./esqltest" ], $EV);
+	execute_command($sx, "Failed to remove esqltest$EX program\n",
+					[ "$RM esqltest$EX" ], $EV)
 		unless ($sx);
 }
 
@@ -647,16 +656,16 @@ if ($NTConfiguration)
 {
 	# NT configuration
 	$esql_nt = "-cc";	# Not sure what this does; ask Harold.
-	if ($vernum >= 500 && $vernum < 600)
+	if ($effvernum >= 500 && $effvernum < 600)
 	{
 		my $libs=" ISQLI501.LIB LMCSQLW.LIB ";
 		$opts{dynamic_lib} = { OTHERLDFLAGS => "/LIBPATH:$ID/lib $libs"};
 	}
-	elsif ($vernum >= 600)
+	elsif ($effvernum >= 600)
 	{
 		print "Fortunately, you are using a new version of ESQL/C and\n";
 		print "we can use 'esql -libs' to tell us which libraries to use.\n\n";
-		my $libs = `$esql -libs` || die "Couldn't execute 'esql -libs'";
+		my $libs = `$esql -libs` || die "Couldn't execute '$esql -libs'";
 		$libs =~ s/Libraries to be used://gm;
 		$libs =~ s/esql: error -55923: No source or object file\.//gm;
 		$libs =~ s/\n/ /gm;
@@ -683,7 +692,7 @@ elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 		the C compiler to create shared libraries; it makes life much
 		easier for everyone!
 		}) unless $Config{osname} eq "aix" or $Config{osname} eq "hpux";
-	if ($vernum >= 600)
+	if ($effvernum >= 600)
 	{
 		print &nlt(qq{
 			Fortunately, you are using a new version of ESQL/C.  We could
@@ -733,7 +742,7 @@ elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 			{ OTHERLDFLAGS => "-L$ID/lib -L$ID/lib/esql $libs"};
 		$opts{LD} = "$Config{ld}";
 		$opts{LD} .= " -exported_symbol ifx_checkAPI"
-			if ($vernum >= 722 && $Config{osname} eq 'dec_osf');
+			if ($effvernum >= 722 && $Config{osname} eq 'dec_osf');
 	}
 	else
 	{
@@ -778,11 +787,22 @@ exit 0;
 # Subroutines used in code above.
 #-------------------------------------------------------------------------
 
+sub dbd_ix_die
+{
+	my($msg) = @_;
+	warn $msg;
+	my($line) = "+" . "-" x 72 . "+";
+	print "\n$line\n";
+	system "$^X -V";	# Generate 'perl -V' output; it is forgotten too often.
+	print "$line\n\n";
+	die "Farewell!";
+}
+
 # Tell the user that they did not read the README file and why
 # we think they didn't read it.
 sub did_not_read
 {
-	die "\n*** You didn't read the README file!\n@_\n\n";
+	dbd_ix_die "\n*** You didn't read the README file!\n@_\n\n";
 }
 
 # which: report the name of an executable command.
@@ -882,9 +902,30 @@ sub nlt
 # if command fails.
 sub execute_command
 {
-	my ($cmd, $sx, $msg) = @_;
-	print "+ $cmd\n" if ($sx);
-	die $msg unless system($cmd) == 0;
+	my ($sx, $msg, $cmd, $env) = @_;
+	if ($sx)
+	{
+		foreach my $arg (@$cmd) { print "+ec+ <<$arg>>\n" }
+	}
+	if (my $pid = fork)
+	{
+		# Parent - wait for child to die
+		while (wait != $pid && wait != -1)
+			{}
+		die $msg if ($? != 0);
+	}
+	else
+	{
+		# Child - exec the command!
+		foreach my $var (@$env)
+		{
+			$var =~ m/^([^=]+)=(.*)/;
+			print "+ setenv $1 = $2\n" if ($sx);
+			$ENV{$1} = $2;
+		}
+		print "+ <<@$cmd>>\n" if ($sx);
+		exec @$cmd;
+	}
 }
 
 # Custom edit older versions of the ESQL/C compiler script to acknowledge
@@ -1047,9 +1088,10 @@ sub Write_DBD_Informix_Defaults
 	open DEFAULTS, ">$defaults"
 		or die "Cannot create $defaults ($!)";
 	print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
+#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
 #
 #   Copyright 2002-03 IBM
+#   Copyright 2004    JLSS
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -1061,7 +1103,7 @@ sub Write_DBD_Informix_Defaults
 	@ISA = qw(Exporter);
 	@EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
 
-	$VERSION = "2003.04";
+	$VERSION = "2005.01";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1085,7 +1127,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)).
+(IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to.

@@ -1,80 +1,45 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
-        informix-list@iiug.org
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) released
+        informix-list@iiug.org, dbd.informix@gmail.com
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) released
 
-IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
-the driver code that enables Perl 5.005 or later to access Informix
+the driver code that enables Perl 5.6.1 or later to access Informix
 databases via the DBI module (but if you are not already using Perl
-5.8.0, you should be planning to upgrade to it).  You will need the code
-for DBI version 1.33 or later as well.  The code for DBD::Informix is
-available for download via:
+5.8.5, you should be planning to upgrade to it).  You will need the code
+for DBI version 1.38 or later as well (v1.48 recommended).  The code for
+DBD::Informix is available for download via:
 
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
 http://dbi.perl.org/
 
 ** When you successfully build this module, use the ItWorks (Perl)
 ** script to report your configuration to the maintenance team (meaning
-** Jonathan Leffler) at jleffler@us.ibm.com.  Note that ItWorks does not
-** send email to anybody; you have to do that yourself.
+** Jonathan Leffler) at dbd.informix@gmail.com.
+** Note that ItWorks does not send email to anybody; you have to do that
+** yourself.
 
-New in release 2003.04:
-* This release is purely a re-packaging of previous functionality.
-* Unfortunately, neither CPAN nor CPANPLUS really handles 3-part version
-  numbers, so revert to 2-part numbers (year, release number within year).
-  It is difficult to find these things out without trying.
+New in release 2005.01:
+* Various minor bug fixes made as reported - see ChangeLog.
+* Release required to handle Informix ClientSDK 2.90, which includes
+  ESQL/C 2.90.  The previous release (CSDK 2.81, included ESQL/C 9.51),
+  and the older DBD::Informix compilation based decisions off the ESQL/C
+  version, rejecting 2.90 as obsolete and unusable.
+* Note that a number of obsolete versions of ESQL/C are no longer supported.
 
-New in release 2003.03.0401:
-* Minor bug fix release.
-* Installs Bundle::DBD::Informix to keep CPAN and CPANPLUS modules happy
-  that DBD::Informix is properly installed and up-to-date.
-* Remove data_sources from Informix.xs since it is defined by DBI.
-* Sort out version information in DBD::Informix::* sub-modules.
-* Minor amendments and additions to history in ChangeLog.
+Known problem:
+* t/t91udts.t warns about an uninitialized variable on subroutine entry.
 
-New in release 2003.03.0303:
-* Pre-requisite version of DBI is now 1.33.  There were a number of
-  changes made in the support code for DBI that this version of
-  DBD::Informix relies upon.
-* Fix various minor problems as noted in the ChangeLog.
-* Overhaul the infrastructure to align better with DBI specifications.
-* Revise infrastructure to exploit ExtUtils::AutoInstall.  If it causes you
-  problems (because you don't have Internet access, for example), read the
-  notes at the top of Makefile.PL on how to avoid the problems.
-* Provide support for $dbh->get_info() and $dbh->type_info_all().
-* No longer supporting obsolete versions of ESQL/C: 5.0x, 6.0x, 7.0x, 7.1x,
-  7.2x other than 7.24, 9.0x, and 9.1x prior to 9.16.  All of these are at
-  least 5 years out of date.  See also FUTURE DIRECTION in ChangeLog.
-* This release is supported by Jonathan Leffler <jleffler@us.ibm.com>.
-* Moving to version numbering scheme with 3-part major, minor, release
-  numbering as recommended in:
-    http://en.tldp.org/HOWTO/Software-Release-Practice-HOWTO/index.html
-  Just to be contrarian, the version number will be date-based.
-
-New in release 1.04.PC1:
-* This release is supported by Jonathan Leffler.  It isn't clear what
-  IBM's official stance on the product is.  However, they do support
-  DBD::DB2 so there is likely to be minimal objection to this work.
-* This release provides support for INSERT cursors.
-* This release provides support for UPDATE of blobs (BYTE and TEXT).
-* This release provides semi-tested support for BEGIN WORK WITHOUT
-  REPLICATION.
-* This release works with ClientSDK 2.80; the prior versions of
-  DBD::Informix do not because the version string changed radically.
-* Has better support for non-standard Perl installations.
-* You can tell DBD::Informix to avoid testing smart blobs if you have
-  IDS 9.x but no smart blob spaces.  You can also say which smart blob
-  space to use if you don't want to use 'sbspace'.
-* Fix up file locations so it works better with CPAN.
-
-Scheduled next version: 2003.xx.yy00.
-* Feature content still dependent on time available.
-* Expected to contain sqlda version of the code (WIP - Work In Progress
-  WIP - at last).
+Support email address:
+* This release is supported by Jonathan Leffler <dbd.informix@gmail.com>.
+* You may also report your bugs via the CPAN resolution tracking system:
+    http://rt.cpan.org/
+* Such bug reports can be sent by email to bug-DBD-Informix@rt.cpan.org;
+  they also get sent to dbd.informix@gmail.com, etc.
 
 As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce,v 2003.6 2003/03/05 19:15:28 jleffler Exp $
+@(#)$Id: Announce,v 2005.1 2005/03/14 23:23:15 jleffler Exp $

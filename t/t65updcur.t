@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t65updcur.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
+#   @(#)$Id: t65updcur.t,v 2003.4 2003/04/25 18:31:15 jleffler Exp $
 #
 #   Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
 #
@@ -30,14 +30,14 @@ CREATE TEMP TABLE $table
 )
 };
 
-my $date = &date_as_string($dbh, 12, 8, 1940);
+my($ssdt, $csdt) = &get_date_as_string($dbh, 12, 8, 1940);
 my $time = '1940-12-08 06:45:32.54321';
 my $raw1 = 'Mornington Crescent';
 my $tag1 = $dbh->quote($raw1);
 my $raw2 = "King's Cross / St Pancras";
 my $tag2 = $dbh->quote($raw2);
 my $raw3 = "ABC $raw1";
-my $insert01 = qq{INSERT INTO $table VALUES(0, $tag1, '$date', '$time')};
+my $insert01 = qq{INSERT INTO $table VALUES(0, $tag1, '$ssdt', '$time')};
 
 # Insert two rows of data
 stmt_test $dbh, $insert01;
@@ -47,9 +47,9 @@ stmt_test $dbh, $insert01;
 my $sel = $dbh->prepare($select) or &stmt_fail;
 &stmt_ok;
 
-my $row1 = { 'col01' => 1, 'col02' => $raw1, 'col03' => $date, 'col04' => $time };
-my $row2 = { 'col01' => 2, 'col02' => $raw2, 'col03' => $date, 'col04' => $time };
-my $row3 = { 'col01' => 1, 'col02' => $raw3, 'col03' => $date, 'col04' => $time };
+my $row1 = { 'col01' => 1, 'col02' => $raw1, 'col03' => $csdt, 'col04' => $time };
+my $row2 = { 'col01' => 2, 'col02' => $raw2, 'col03' => $csdt, 'col04' => $time };
+my $row3 = { 'col01' => 1, 'col02' => $raw3, 'col03' => $csdt, 'col04' => $time };
 my $res1 = { 1 => $row1, 2 => $row2 };
 my $res2 = { 1 => $row3 };
 

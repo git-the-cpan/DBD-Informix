@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t42txacon.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
+#   @(#)$Id: t42txacon.t,v 2003.4 2003/04/25 18:31:15 jleffler Exp $
 #
 #   Test AutoCommit On for DBD::Informix
 #
@@ -49,7 +49,7 @@ CREATE TEMP TABLE $trans01
 )
 };
 
-my $date = &date_as_string($dbh, 11, 25, 2031);
+my($ssdt, $csdt) = &get_date_as_string($dbh, 11, 25, 2031);
 my $time = '2004-02-29 23:59:54.32109';
 my $tag1 = 'Sandwich-maker';
 my $tag2 = 'Culinary Masterpiece';
@@ -60,15 +60,15 @@ select_zero_data $dbh, $select;
 my $sel = $dbh->prepare($select) or &stmt_fail;
 &stmt_ok;
 
-my $row1 = { 'col01' => 1, 'col02' => $tag1, 'col03' => $date, 'col04' => $time };
-my $row2 = { 'col01' => 2, 'col02' => $tag1, 'col03' => $date, 'col04' => $time };
-my $row3 = { 'col01' => 3, 'col02' => $tag2, 'col03' => $date, 'col04' => $time };
-my $row4 = { 'col01' => 4, 'col02' => $tag2, 'col03' => $date, 'col04' => $time };
-my $row5 = { 'col01' => 5, 'col02' => $tag1, 'col03' => $date, 'col04' => $time };
+my $row1 = { 'col01' => 1, 'col02' => $tag1, 'col03' => $csdt, 'col04' => $time };
+my $row2 = { 'col01' => 2, 'col02' => $tag1, 'col03' => $csdt, 'col04' => $time };
+my $row3 = { 'col01' => 3, 'col02' => $tag2, 'col03' => $csdt, 'col04' => $time };
+my $row4 = { 'col01' => 4, 'col02' => $tag2, 'col03' => $csdt, 'col04' => $time };
+my $row5 = { 'col01' => 5, 'col02' => $tag1, 'col03' => $csdt, 'col04' => $time };
 my $res1 = { 1 => $row1, 2 => $row2, 3 => $row3 };
 my $res2 = { 1 => $row1, 2 => $row2, 3 => $row3, 4 => $row4, 5 => $row5 };
 
-my $insert01 = qq{INSERT INTO $trans01 VALUES(0, '$tag1', '$date', '$time')};
+my $insert01 = qq{INSERT INTO $trans01 VALUES(0, '$tag1', '$ssdt', '$time')};
 
 stmt_test $dbh, $insert01;
 
