@@ -1,8 +1,8 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL version /main/122 2000-02-04 17:04:25 $ 
+# @(#)$Id: Makefile.PL version /main/125 2000-02-10 14:43:21 $
 #
-# Configuration script for Informix Database Driver for Perl Version 0.97003 (2000-02-07) (aka DBD::Informix)
+# Configuration script for Informix Database Driver for Perl Version 0.97004 (2000-02-10) (aka DBD::Informix)
 #
 # Portions Copyright 1996-99 Jonathan Leffler
 # Portions Copyright 1996    Alligator Descartes
@@ -46,7 +46,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "0.97003";
+my $dbd_ix = "0.97004";
 # Hack for handling builds directly in Atria Clearcase view.
 $dbd_ix = "0.97002" unless $dbd_ix =~ /^\d+\.\d+/;
 
@@ -64,6 +64,7 @@ my %opts = (
 	'PL_FILES'   =>	{ 'Informix.pm.PL' => 'Informix.pm' },
 	'PM'         =>	{ 'Informix.pm'                   => '$(INST_LIBDIR)/Informix.pm',
 					  'DBD/Informix/Configuration.pm' => '$(INST_LIBDIR)/Informix/Configuration.pm',
+					  'DBD/Informix/Summary.pm'       => '$(INST_LIBDIR)/Informix/Summary.pm',
 					  'DBD/Informix/TechSupport.pm'   => '$(INST_LIBDIR)/Informix/TechSupport.pm',
 					  'DBD/Informix/TestHarness.pm'   => '$(INST_LIBDIR)/Informix/TestHarness.pm',
 					  'lib/Bundle/DBD/Informix.pm'    => 'blib/lib/Bundle/DBD/Informix.pm'
@@ -71,7 +72,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring Informix Database Driver for Perl Version 0.97003 (2000-02-07) (aka $opts{NAME})
+Configuring Informix Database Driver for Perl Version 0.97004 (2000-02-10) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -100,6 +101,7 @@ warn "*** Ideally, you should upgrade to DBI version $dbi_ref_ver.\n\n"
 	unless ($DBI::VERSION >= $dbi_ref_ver);
 
 my ($ID, $esqlprog) = &find_informixdir_and_esql($NTConfiguration);
+my ($epp) = "$ID/bin/$esqlprog";
 
 my $auxincl = "";
 $auxincl = " -I$ID/incl/tools" if ($esqlprog =~ /\bc4gl\b/);
@@ -166,7 +168,7 @@ elsif ($vernum >= 500 && $vernum < 600)
 			I'll create a local version and ensure that we use it.\n
 			%);
 		$esql = "./esql";
-		&customize_esql("$ID/bin/$esqlprog", $esql, $opts{NAME});
+		&customize_esql($epp, $esql, $opts{NAME});
 	}
 	print &nlt(qq%
 		You may run into problems creating a shared object version of
@@ -195,6 +197,8 @@ elsif ($vernum >= 700 && $vernum < 720)
 			%);
 	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
 	$esqlc_flags .= &set_esqlc_linkage("");
+	&fix_b102265($epp, $esql, $opts{NAME})
+		if ($Config{osname} eq "hpux" && &grep_for_statopt_staticonly($epp));
 }elsif ($vernum >= 720 && $vernum < 800)
 {
 	# 7.2x is already released.  There should not be an ESQL/C version
@@ -215,6 +219,8 @@ elsif ($vernum >= 700 && $vernum < 720)
 			Please upgrade to version 7.24 or later.
 			%) if ($vernum < 724);
 	$esqlc_flags .= &set_esqlc_linkage("-shared");
+	&fix_b102265($epp, $esql, $opts{NAME})
+		if ($Config{osname} eq "hpux" && &grep_for_statopt_staticonly($epp));
 }
 elsif ($vernum >= 800 && $vernum < 900)
 {
@@ -765,6 +771,24 @@ sub which
 	return "";
 }
 
+# Microsoft NMAKE manages to evaluate INFORMIX_LICENCE too soon, so that
+# it is evaluated as empty if you place this definition in the
+# MY::postamble code.  The post_initialize section is empty by default
+# (on Solaris, at any rate) so overriding it with this should be OK.
+sub MY::post_initialize
+{
+q%
+# The default Informix Licence Number (with no support entitlement) is
+# ACN#J334912.
+# If you have support, run "make INFORMIX_LICENCE='DBD#I000000'", where
+# DBD#I000000 is the serial number you were given when you registered
+# for support.  Note: you must do this each time you build the product.
+# Use an @ in place of # because of make comment conventions!
+INFORMIX_LICENCE = 'ACN@J334912'
+
+%;
+}
+
 # Define a postamble for the makefile which briefs MAKE on how to compile
 # ESQL/C source code.  It gives .ec rules (and files) precedence over .c
 # files with the same name by zapping and reorganizing the entire suffix
@@ -777,7 +801,7 @@ sub MY::postamble
 {
 my ($p1, $p2, $p3, $p4, $p5);
 
-$p1 = 
+$p1 =
 "
 # ESQL/C compilation rules
 ESQL       = $esql
@@ -791,14 +815,6 @@ ESQLCFLAGS = $esqlc_flags
 $p2 = q%
 	$(ESQL_CC) -c $(ESQLCFLAGS) $(ESQLFLAGS) $*.ec
 	$(RM_F) $*.c
-
-# The default Informix Licence Number (with no support entitlement) is
-# ACN#J334912.
-# If you have support, run "make INFORMIX_LICENCE='DBD#I000000'", where
-# DBD#I000000 is the serial number you were given when you registered
-# for support.  Note: you must do this each time you build the product.
-# Use an @ in place of # because of make comment conventions!
-INFORMIX_LICENCE = 'ACN@J334912'
 
 # Cribbed from the definition of CCCMD (MakeMaker const_cccmd) and the
 # rules for compiling object files (MakeMakerc_o) in the Makefile.
@@ -897,6 +913,14 @@ sub customize_esql
 			print LOCAL "# Was: $_\n";
 			s/CC="cc -g"/CC="\${CC} -g"/o;
 		}
+		elsif (/STATOPT="STATICONLY"/o)
+		{
+			# HP-UX 10.20, ESQL/C 7.24 will not link with shared libries.
+			# This is probably a bug in ESQL/C release process.
+			print LOCAL "# Static libraries only removed by Makefile.PL\n";
+			print LOCAL "# Was: $_\n";
+			s/STATICONLY//o;
+		}
 		print LOCAL;
 	}
 	close(ESQL);
@@ -911,6 +935,40 @@ sub set_esqlc_linkage
 	print "** Using $env_link from DBD_INFORMIX_ESQLC_LINKAGE environment variable.\n\n"
 		if (defined $env_link);
 	return (defined $env_link) ? $env_link : $def_link;
+}
+
+sub grep_for_statopt_staticonly
+{
+	my ($src) = @_;
+	open(ESQL, "<$src") ||
+		die "Unable to open $src for reading";
+	while (<ESQL>)
+	{
+		if (/^STATOPT="[^"]+"/)
+		{
+			close ESQL;
+			return 1;
+		}
+	}
+	close ESQL;
+	return 0;
+}
+
+sub fix_b102265
+{
+	my ($epp, $esql, $name) = @_;
+	warn &nlt(qq%
+		Your version of ESQL/C is crippled and will not link with
+		shared libraries even if you tell the script to use them
+		(PTS Bug 102265).  We're going to make a hacked copy of the
+		script and we'll use it.  If this doesn't work, then you
+		will probably have to make a static version of Perl with
+		DBD::Informix and the ESQL/C, which is not pretty.
+
+		If you need to do this, read the Notes/static.build file.
+		Or (a much better idea) upgrade to Client SDK 2.40 or later!
+		%);
+	&customize_esql($epp, $esql, $name);
 }
 
 __END__

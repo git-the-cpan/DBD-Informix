@@ -5,7 +5,7 @@
 @(#)Purpose:         Map Informix SQL Types to ODBC Types
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997-98
-@(#)Product:         Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+@(#)Product:         Informix Database Driver for Perl Version 0.97004 (2000-02-10)
 */
 
 /*TABSTOP=4*/
@@ -49,7 +49,7 @@ typedef enum IxSQLType
 } IxSQLType;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: odbctype.c version /main/9 1998-10-27 20:58:37 $";
+static const char rcs[] = "@(#)$Id: odbctype.c version /main/10 2000-02-08 15:23:56 $";
 #endif
 
 /* Map Informix DATETIME types to equivalent ODBC types */
@@ -281,7 +281,7 @@ map_scale_ifmx_to_odbc(int coltype, int collen)
 
 	case ix_DECIMAL:
 	case ix_MONEY:
-		odbcscale = DECPREC(collen);
+		odbcscale = PRECDEC(collen);
 		if (odbcscale == 0xFF)
 			odbcscale = SQL_NO_TOTAL;	/* Floating-point */
 		break;

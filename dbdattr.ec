@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdattr.ec version /main/38 2000-02-01 13:46:06 $ 
+ * @(#)$Id: dbdattr.ec version /main/39 2000-02-07 17:40:09 $ 
  *
- * @(#)$Product: Informix Database Driver for Perl Version 0.97003 (2000-02-07) $ -- attribute handling
+ * @(#)$Product: Informix Database Driver for Perl Version 0.97004 (2000-02-10) $ -- attribute handling
  *
  * Portions Copyright 1997-99 Jonathan Leffler
  * Portions Copyright 2000    Informix Software Inc
@@ -13,7 +13,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec version /main/38 2000-02-01 13:46:06 $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec version /main/39 2000-02-07 17:40:09 $";
 #endif
 
 #include <stdio.h>
@@ -443,10 +443,13 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	}
 
 	/* Informix specific attributes */
-	else if (KEY_MATCH(kl, key, "ix_NativeTypeNames"))
+	else if (KEY_MATCH(kl, key, "ix_NativeTypeName") ||
+			 KEY_MATCH(kl, key, "ix_NativeTypeNames"))
 	{
 		char buffer[SQLTYPENAME_BUFSIZ];
 		SV		*sv;
+		if (KEY_MATCH(kl, key, "ix_NativeTypeNames"))
+			dbd_ix_deprecate("ix_NativeTypeNames", "ix_NativeTypeName");
 		av = newAV();
 		retsv = newRV((SV *)av);
 		for (i = 1; i <= imp_sth->n_columns; i++)

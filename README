@@ -1,4 +1,4 @@
-README for Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+README for Informix Database Driver for Perl Version 0.97004 (2000-02-10)
 
    Portions Copyright 1994-96 Alligator Descartes
    Portions Copyright 1996-99 Jonathan Leffler
@@ -113,7 +113,10 @@ ESQL/C OR CLIENT SDK
     and run free-standing ESQL/C programs, you certainly cannot link
     DBD::Informix into Perl.  For help with environment variable settings,
     consult the information below and also the Notes/environment.variables
-    file.
+    file.  (If you are not yet familiar with how to set environment
+    variables, be sure to get and read a UNIX primer such as "Learning the
+    Unix System, 4th Edition" from O'Reilly, http://www.oreilly.com/, and
+	be prepared for a major learning exercise).
 
     DBD::Informix, Version 1.00, provides limited support for user-defined
     data types (UDTs), treating them as CHAR(255).  To handle BLOBs and
@@ -203,27 +206,25 @@ BUILD AND TEST ENVIRONMENT
     libraries which are found in the directories $INFORMIXDIR/lib and
     $INFORMIXDIR/lib/esql.  With Version 0.95, the absolute pathnames of
     the Informix shared libraries will be built into your DBD::Informix
-    library by default.  This means that you do not need to worry about
+    library by default, which means that you do not need to worry about
     LD_LIBRARY_PATH, LD_RUN_PATH, SHLIB_PATH, or LIBPATH at runtime.  The
-    downside of this is that if you change the location of your Informix
-    software, you will need to rebuild and reinstall DBD::Informix (or
-    create symlinks to simulate the original INFORMIXDIR).
+    downside of using absolute pathnames is that if you move your Informix
+    software, you also need to rebuild and reinstall DBD::Informix.
 
-    If this is unacceptable, you need to set the environment variable
-    DBD_INFORMIX_RELOCATABLE_INFORMIXDIR to a value such as "yes".  This
-    will use relative names to identify the Informix shared libraries.
-    You will be warned that this is happening.  Both at test time and at
-    run time, you need to ensure that the Informix shared libraries will
-    be found when you run Perl with DBD::Informix.  On SVR4 and Linux
-    computers, this means adding these directories to LD_LIBRARY_PATH; on
-    HP-UX, the variable is SHLIB_PATH; other systems may have other
-    variable names.  You need to set INFORMIXSERVER correctly unless you
-    are using version 5.x ESQL/C.  You may need to set other Informix
-    environment variables too.  Consult the Informix documentation and the
-    Notes/environment.variables file.  (If you are not yet familiar with
-    how to set environment variables, be sure to get and read a UNIX
-    primer such as "Learning the Unix System, 4th Edition" from O'Reilly,
-    http://www.oreilly.com/).
+    If rebuilding DBD::Informix is unacceptable, you need to set the
+    environment variable DBD_INFORMIX_RELOCATABLE_INFORMIXDIR to a value
+    such as "yes".  The library will be built using relative names to
+    identify the Informix shared libraries.  You will be warned that this
+    is happening.  Both at test time and at run time, you need to ensure
+    that the Informix shared libraries will be found when you run Perl with
+    DBD::Informix.  On SVR4 and Linux computers, this means adding these
+    directories to LD_LIBRARY_PATH; on HP-UX, the variable is SHLIB_PATH;
+    other systems may have other variable names.  Note that web servers, in
+    particular, do not propagate most environment variables unless you tell
+    them to do so (use SetEnv or PassEnv in Apache).  You need to set
+    INFORMIXSERVER correctly unless you are using version 5.x ESQL/C.  You
+    may need to set other Informix environment variables too.  Consult the
+    Informix documentation and the Notes/environment.variables file.
 
     The documentation available from 'perldoc DBD::Informix::TestHarness'
     tells you how to set the DBD_INFORMIX_DATABASE, DBD_INFORMIX_USERNAME,
@@ -266,9 +267,8 @@ BUILDING DBD::INFORMIX WITH BUNDLES
     modules) and the latest version of DBD::Informix, and compiles, tests,
     and install them all completely automatically.  Before doing this, you
     need to be confident that things will work correctly (or that you've
-    got good backups of your Perl installation).  On the other hand, for
-    sheer convenience, it takes a lot of beating.  You could even do this
-    once a week via cron if you want to.
+    got good backups of your Perl installation).  On the other hand, it is
+    an extremely convenient method of updating your Perl software.
 
     When you first use the CPAN module, it will ask you many questions,
     including the name of the CPAN site from which to download the
@@ -308,15 +308,21 @@ BUILDING DBD::Informix
 
         make test
 
-    Note that testing DBD::Informix does create some tables and databases.
-    The database is called 'dbd_ix_db', and the table names start with
-    'dbd_ix_'.  Some of the tables are permanent; most are temporary.  The
-    tests are designed to work whether the tables and database are present
-    when the tests start or not; that means they get dropped.  Do not run
-    the tests if you have precious tables or databases that begin
-    'dbd_ix_'!  As of version 0.61, the cleanup script t/t99clean.t is run
-    at the end of the testing.  It removes the tables, views, synonyms, etc
-    and so on that DBD::Informix might have created.
+    Note that testing DBD::Informix does create some database objects
+    (tables, views, synonyms, types, etc).  The database is called
+    'dbd_ix_db', and the other object names start with 'dbd_ix_'.  Some of
+    the tables are permanent; most are temporary.  The tests are designed
+    to work whether the tables and database are present when the tests
+    start or not; that means they get dropped.  Do not run the tests if you
+    have precious tables or databases that begin 'dbd_ix_'!  Starting with
+    DBD::Informix Version 0.61, the cleanup script t/t99clean.t is run at
+    the end of the testing.  It removes the tables, views, synonyms, etc
+    and so on that DBD::Informix might have created.  Running it manually
+    ("test.one.sh t/t99clean.t") also cleans up the database objects
+    created by testing DBD::Informix.  The tests should be 100% clean if
+    you run the cleanup script, but if you don't run that, the tests can
+    leave the odd table or stored procedure (or user-defined data types and
+    so on) in the database.
 
     On the reference system (Sun Ultra-10 running Solaris 7, compiling with
     GCC 2.95.2 or SUNWspro SC4.0.1, using either Perl 5.00503), all tests
@@ -346,20 +352,13 @@ BUILDING DBD::Informix
     version of the database, and the logging modes of the databases you are
     connecting to.
 
-    If you are concerned about both OnLine and SE, then you need these
-    connection tests will use two different databases if you set the
-    environment variable DBD_INFORMIX_DATABASE2, but the tests assume that
-    you don't need to specify the user and password.  This could be fixed,
-    but hasn't happened yet.  You can use one SE and one OnLine database
-    for the multiple connection testing.  You can also test with different
-    server versions (eg using 7.2x ESQL/C to connect to a 5.0x OnLine) if
-    you have the software available.
-
-    Note that the tests should be 100% clean if you run t/t99clean.t, but
-    if you don't run that, the tests can leave the odd table or stored
-    procedure (or user-defined data types and so on) in the database. The 
-    objects created in any of the databases by any of the DBD::Informix
-    tests have names that begin with 'dbd_ix_'.
+    If you are concerned about both OnLine and SE, then the connection
+    tests will use two different databases if you set the environment
+    variable DBD_INFORMIX_DATABASE2 (and possibly DBD_INFORMIX_USERNAME2
+    and DBD_INFORMIX_PASSWORD2).  You can also use one SE database and one
+    OnLine database.  You can also test with different server versions (eg
+    using 7.2x ESQL/C to connect to a 5.0x OnLine) if you have the software
+    available.
 
     Once you are satisfied that DBD::Informix is working correctly, you
     should install it:
@@ -440,8 +439,9 @@ KNOWN PROBLEMS:
       (REED_WHITE@HP-Corvallis-om1.om.hp.com).  Note that the non-ANSI C
       compiler that is distributed with the HP-UX base package is not
       suitable for compiling DBD::Informix because it does not accept
-      prototypes.  However, the file also contains information on what it
-      takes to compile GCC on HP-UX.
+      prototypes.  However, the file also contains information on how to
+      compile GCC (and the other GNU software required) on HP-UX, using the
+      bundled C compiler to start the process.
 
     * Some problems have been encountered on SCO and seem to be related
       to the equivalent of LD_LIBRARY_PATH on System V Release 4 computers.
@@ -513,7 +513,7 @@ REMEMBER IT IS SUPPOSED TO BE FUN!
 Jonathan Leffler (j.leffler@acm.org)
 Michael Kopchenov (myk@informix.com)
 
-@(#)$Id: README version /main/59 2000-02-04 16:01:05 $
+@(#)$Id: README version /main/60 2000-02-08 17:46:35 $
 
 ---------------------------------------------------------------------------
 

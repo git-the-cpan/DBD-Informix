@@ -1,7 +1,27 @@
-Change Log for Informix Database Driver for Perl Version 0.97003 (2000-02-07) (aka DBD::Informix)
+Change Log for Informix Database Driver for Perl Version 0.97004 (2000-02-10) (aka DBD::Informix)
 
 1.00.PC1 Release
 ----------------
+2000-02-10: Since XPS does not support unlogged databases at all, skip the
+            unlogged database test.  Some versions of ESQL/C 7.2x (and
+            7.1x) will only link with static libraries regardless of
+            command line options (Bug 102265).  The shared libraries are
+            distributed, so Makefile.PL creates and uses a hacked version
+            of the ESQL/C compiler script.
+2000-02-08: Use inelegant but effective workaround to dynamically find the
+            number of elements to specify in ALLOCATE DESCRIPTOR.  Remove
+            recently added FAQ.  Kludge needed to test ix_NativeTypeNames
+            etc on tables with 400+ columns.
+2000-02-08: Add note to DBD/Informix/TechSupport.pm about Perl 5.005_03 bug
+            tickled by the original version of the detailed test case in
+            bug_report (previously BugReport).  Info from Doug Wilson
+            <dougw@safeguard.net>, who reported the bug and obtained the
+            patch for Perl.  This can be removed in some future incarnation
+            when the fix is generally available.
+2000-02-07: Deprecate ix_NativeTypeNames (plural) attribute and implement
+            ix_NativeTypeName as documented, fixing problem found by Dror
+            Matalon <dror@dnai.com>.  Annotate documentation; add tests.
+            Add notes to FAQs on avoiding -479 errors.
 2000-02-04: Fix licence number handling in Makefile.PL for NT as nmake does
             not like ${VAR}; found by Tom Kliethermes <tomk@informix.com>.
             Revise README file.
@@ -785,4 +805,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@informix.com>
-@(#)$Id: ChangeLog version /main/106 2000-02-04 16:11:29 $
+@(#)$Id: ChangeLog version /main/111 2000-02-10 15:34:33 $

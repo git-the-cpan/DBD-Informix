@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec version /main/131 2000-02-01 14:51:17 $
+ * @(#)$Id: dbdimp.ec version /main/133 2000-02-08 14:52:13 $
  *
- * @(#)$Product: Informix Database Driver for Perl Version 0.97003 (2000-02-07) $ -- implementation details
+ * @(#)$Product: Informix Database Driver for Perl Version 0.97004 (2000-02-10) $ -- implementation details
  *
  * Portions Copyright 1994-95 Tim Bunce
  * Portions Copyright 1995-96 Alligator Descartes
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec version /main/131 2000-02-01 14:51:17 $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec version /main/133 2000-02-08 14:52:13 $";
 #endif
 
 #include <stdio.h>
@@ -1361,6 +1361,42 @@ dbd_ix_st_attrib(SV *attribs, const char *attr)
 	return(rc);
 }
 
+/*
+** Count the number of described items in the given statement.
+**
+** JL 2000-02-08: This is a ridiculous way to have to do things, but it
+** works with ESQL/C 9.30.UC1, and there doesn't seem to be a way to
+** find out how big a descriptor to allocate without trying and failing!
+**
+** Note that there is a chance that the free(u) will cause the Sqlda
+** structure to be double-released in some early 5.0x versions of
+** ESQL/C.  However, precise information about which versions are
+** afflicted is not available, so we press ahead...
+**
+** NB: if we ever switch from SQL DESCRIPTORs to Sqlda structures, then
+** this kludge becomes unnecessary, of course.  The only reason for
+** retaining SQL DESCRIPTORs at the moment is the NULLABLE attribute --
+** the Sqlda structure does not give this information.
+*/
+static int
+count_descriptors(char *stmt)
+{
+	Sqlda	*u;
+	int		 n = 256;
+	EXEC SQL BEGIN DECLARE SECTION;
+	char *nm_stmt = stmt;
+	EXEC SQL END DECLARE SECTION;
+
+	EXEC SQL DESCRIBE :nm_stmt INTO u;
+	if (sqlca.sqlcode >= 0)
+	{
+		n = u->sqld;
+		free(u);
+	}
+	dbd_ix_debug_l(1, "number of described fields %ld\n", (long)n);
+	return(n);
+}
+
 int
 dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 {
@@ -1434,7 +1470,11 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	}
 	imp_sth->st_state = Prepared;
 
-	EXEC SQL ALLOCATE DESCRIPTOR :nm_obind WITH MAX 256;
+	desc_count = count_descriptors(nm_stmnt);
+	/* SQL DESCRIPTORS must have WITH MAX of at least one (-470) */
+	if (desc_count == 0)
+		desc_count = 1;
+	EXEC SQL ALLOCATE DESCRIPTOR :nm_obind WITH MAX :desc_count;
 	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
 	{

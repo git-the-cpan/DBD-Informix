@@ -1,9 +1,12 @@
 /*
- * @(#)$Id: esqltest.ec version /main/19 1999-12-30 23:08:49 $ 
+ * @(#)$Id: esqltest.ec version /main/20 2000-02-08 16:57:02 $
  *
- * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
+ * Informix Database Driver for Perl Version 0.97004 (2000-02-10)
  *
- * Copyright (c) 1997-99 Jonathan Leffler
+ * Test Informix-ESQL/C environment
+ *
+ * Portions Copyright 1997-99 Jonathan Leffler
+ * Portions Copyright 2000    Informix Software Inc
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -30,7 +33,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec version /main/19 1999-12-30 23:08:49 $";
+static const char rcs[] = "@(#)$Id: esqltest.ec version /main/20 2000-02-08 16:57:02 $";
 #endif
 
 /*
@@ -38,7 +41,7 @@ static const char rcs[] = "@(#)$Id: esqltest.ec version /main/19 1999-12-30 23:0
 ** basic Informix environment was not set up correctly.
 ** This code was written as a self-defense measure to try and ensure
 ** that DBD::Informix had some chance of being tested successfully
-** before the tests are run.
+** before the tests are run.  It has proven very successful.
 */
 
 /* Format and print an Informix error message (both SQL and ISAM parts) */
@@ -200,8 +203,16 @@ int main(int argc, char **argv)
 	/* Report whether username is set, and what it is */
 	if (user2 == 0 || *user2 == '\0')
 	{
-		user2 = 0;
-		printf("\t$DBD_INFORMIX_USERNAME2 is unset.\n");
+		if (user1)
+		{
+			user2 = user1;
+			printf("\t$DBD_INFORMIX_USERNAME2 is unset - defaulting to '%s'.\n", user2);
+		}
+		else
+		{
+			user2 = 0;
+			printf("\t$DBD_INFORMIX_USERNAME2 is unset.\n");
+		}
 	}
 	else
 		printf("\t$DBD_INFORMIX_USERNAME2 is set to '%s'.\n", user2);
@@ -218,8 +229,16 @@ int main(int argc, char **argv)
 	/* Report whether password is set, but not what it is */
 	if (pass2 == 0 || *pass2 == '\0')
 	{
-		pass2 = 0;
-		printf("\t$DBD_INFORMIX_PASSWORD2 is unset.\n");
+		if (pass1)
+		{
+			pass2 = pass1;
+			printf("\t$DBD_INFORMIX_PASSWORD2 is unset - defaulting to $DBD_INFORMIX_PASSWORD.\n");
+		}
+		else
+		{
+			pass2 = 0;
+			printf("\t$DBD_INFORMIX_PASSWORD2 is unset.\n");
+		}
 	}
 	else
 		printf("\t$DBD_INFORMIX_PASSWORD2 is set.\n");

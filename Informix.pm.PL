@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: Informix.pm.PL version /main/4 2000-02-01 13:45:44 $
+#   @(#)$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $
 #
-#   Generate configured Informix.pm file for Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+#   Generate configured Informix.pm file for Informix Database Driver for Perl Version 0.97004 (2000-02-10)
 #
 #   Script to create annotated version of Informix.pm recording
 #   default values of INFORMIXDIR and INFORMIXSERVER during build.
@@ -40,7 +40,7 @@ chmod(0755, $filename);
 
 print "Extracting $filename from $0\n";
 print " -- default INFORMIXDIR          = $ENV{INFORMIXDIR}\n";
-print " -- default INFORMIXSERVER       = $ENV{INFORMIXSERVER})\n" if $server;
+print " -- default INFORMIXSERVER       = $ENV{INFORMIXSERVER}\n" if $server;
 print " -- DBD::Informix Licence Number = $licence\n";
 
 select(OUT);	# Set the default output file handle!
@@ -65,9 +65,9 @@ exit 0;
 
 __END__
 
-#	@(#)$Id: Informix.pm.PL version /main/4 2000-02-01 13:45:44 $
+#	@(#)$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $
 #
-#   @(#)Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+#   @(#)Informix Database Driver for Perl Version 0.97004 (2000-02-10)
 #
 #   Portions Copyright 1994-95   Tim Bunce
 #   Portions Copyright 1996-1999 Jonathan Leffler
@@ -88,9 +88,9 @@ __END__
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION          = "0.97003";
+	$VERSION          = "0.97004";
 	$ATTRIBUTION      = 'Jonathan Leffler <j.leffler@acm.org>';
-	$Revision         = '$Id: Informix.pm.PL version /main/4 2000-02-01 13:45:44 $';
+	$Revision         = '$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $';
 	$INFORMIX_LICENCE = ":INFORMIX_LICENCE:";
 
 	require_version DBI 1.02;	# Requires features from DBI 1.02 release
@@ -504,7 +504,7 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes Informix Database Driver for Perl Version 0.97003 (2000-02-07).
+This document describes Informix Database Driver for Perl Version 0.97004 (2000-02-10).
 
 You should also read the documentation for DBI C<perldoc DBI> as this document
 qualifies what is stated there.
@@ -1110,6 +1110,11 @@ This could be usefully improved.
 There is also no guarantee that the names returned are unique.
 For example, in "SELECT A.Column, B.Column FROM Table1 A, Table1 B
 WHERE ...", both the return columns are described as 'column'.
+
+Note that in versions 0.95 and earlier, the implemented attribute name
+was ix_NativeTypeNames (plural), as pointed out by Dror Matalon
+<dror@dnai.com>.
+This is still supported but is deprecated.
 
 =back
 

@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w
 #
-#       @(#)$Id: t/dtgen.pl version /main/2 1997-03-27 17:28:59 $
+#       @(#)$Id: t/dtgen.pl version /main/5 2000-02-10 11:51:18 $
 #
 #       Create exhaustive list of DATETIME & INTERVAL types for DBD::Informix
 #
-#       Copyright (C) 1997 Jonathan Leffler
+# Portions Copyright 1997 Jonathan Leffler
+# Portions Copyright 2000 Informix Software Inc
 
 # Enumerate the DATETIME types
 $i = 0;
@@ -32,15 +33,15 @@ $dtqual2{$j++} = 'fraction(5)';
 $ndtqual2 = $j;
 
 printf ("\n-- DATETIME types.\n");
-print "CREATE TABLE DateTime_Test\n(\n";
-print "    Col000  SERIAL NOT NULL PRIMARY KEY CONSTRAINT PK_DateTime,\n";
+print "CREATE TEMP TABLE dbd_ix_datetime\n(\n";
+print "    Col000  SERIAL NOT NULL {PRIMARY KEY}{XPS 8.30 rejects PK},\n";
 $ndtime = 0;
 $colno = 1;
 for ($i = 0; $i < $ndtqual1; $i++)
 {
     for ($j = $i; $j < $ndtqual2; $j++)
 	{
-		printf "    Col%03d  datetime %s to %s,\n",
+		printf "    dt%03d  datetime %s to %s,\n",
 				$colno++, $dtqual1{$i}, $dtqual2{$j};
 		$ndtime++;
     }
@@ -68,17 +69,17 @@ for ($i = 0; $i < $ndtqual1; $i++)
 {
     for ($j = 0; $j < $ndtqual2; $j++)
 	{
-		printf "    Col%03d  datetime %s to %s,\n",
+		printf "    dt%03d  datetime %s to %s,\n",
 			$colno++, $dtqual1{$i}, $dtqual2{$j};
 		$ndtime++;
     }
 }
 printf "-- %d DATETIME synonyms.\n", $ndtime;
-print "    Dummy   CHAR(1)\n);\n\n";
+print "    Dummy   CHAR(1)\n) WITH NO LOG;\n\n";
 
 # Enumerate the INTERVAL types based on YEAR..MONTH
-print "CREATE TABLE Interval_Test\n(\n";
-print "    Col000  SERIAL NOT NULL PRIMARY KEY CONSTRAINT PK_Interval,\n";
+print "CREATE TEMP TABLE dbd_ix_interval\n(\n";
+print "    Col000  SERIAL NOT NULL {PRIMARY KEY}{XPS 8.30 rejects PK},\n";
 $colno = 1;
 $i = 0;
 $ivqual1{$i++} = 'year';
@@ -98,7 +99,7 @@ for ($i = 0; $i < $nivqual1; $i++)
 	{
 		for ($k = 9; $k > 0; $k--)
 		{
-			printf "    Col%03d  interval %s(%d) to %s,\n",
+			printf "    iv%03d  interval %s(%d) to %s,\n",
 				$colno++, $ivqual1{$i}, $k, $ivqual2{$j};
 			$nintvl1++;
 		}
@@ -113,7 +114,7 @@ for ($i = 0; $i < $nivqual1; $i++)
 {
     for ($j = $i; $j < $nivqual2; $j++)
 	{
-		printf "    Col%03d  interval %s to %s,\n",
+		printf "    iv%03d  interval %s to %s,\n",
 				$colno++, $ivqual1{$i}, $ivqual2{$j};
 		$nintvl1++;
     }
@@ -148,7 +149,7 @@ for ($i = 0; $i < $nivqual1; $i++)
 	{
 		for ($k = 9; $k > 0; $k--)
 		{
-			printf "    Col%03d  interval %s(%d) to %s,\n",
+			printf "    iv%03d  interval %s(%d) to %s,\n",
 					$colno++, $ivqual1{$i}, $k, $ivqual2{$j};
 			$nintvl1++;
 		}
@@ -170,7 +171,7 @@ for ($i = 0; $i < $nivqual1; $i++)
 {
     for ($j = $i; $j < $nivqual2; $j++)
 	{
-	printf "    Col%03d  interval %s to %s,\n",
+	printf "    iv%03d  interval %s to %s,\n",
 			$colno++, $ivqual1{$i}, $ivqual2{$j};
 	$nintvl1++;
     }
@@ -203,7 +204,7 @@ for ($i = 0; $i < $nivqual1; $i++)
 {
     for ($j = $i; $j < $nivqual2; $j++)
 	{
-	printf "    Col%03d  interval %s to %s,\n",
+	printf "    iv%03d  interval %s to %s,\n",
 			$colno++, $ivqual1{$i}, $ivqual2{$j};
 	$nintvl1++;
     }
@@ -224,10 +225,10 @@ for ($i = 0; $i < $nivqual1; $i++)
 {
     for ($j = 0; $j < $nivqual2; $j++)
 	{
-		printf "    Col%03d  interval %s to %s,\n",
+		printf "    iv%03d  interval %s to %s,\n",
 				$colno++, $ivqual1{$i}, $ivqual2{$j};
 		$nintvl1++;
     }
 }
 printf "-- %d INTERVAL synonyms based on DAY..FRACTION.\n", $nintvl1;
-print "    Dummy   CHAR(1)\n);\n\n";
+print "    Dummy   CHAR(1)\n) WITH NO LOG;\n\n";

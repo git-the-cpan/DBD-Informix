@@ -1,8 +1,7 @@
 /*
- * @(#)$Id: esqlc_v6.ec version /main/24 2000-02-03 15:49:07 $ 
+ * @(#)$Id: esqlc_v6.ec version /main/25 2000-02-09 15:31:03 $ 
  *
- * DBD::Informix for Perl Version 5 -- implementation details
- *
+ * Informix Database Driver for Perl (DBD::Informix)
  * Connection Management for ESQL/C Version 6.0x and later
  *
  * Portions Copyright 1996-98 Jonathan Leffler
@@ -19,7 +18,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v6.ec version /main/24 2000-02-03 15:49:07 $";
+static const char rcs[] = "@(#)$Id: esqlc_v6.ec version /main/25 2000-02-09 15:31:03 $";
 #endif
 
 /* ================================================================= */
@@ -31,7 +30,7 @@ static char *get_server_name(void)
 	char *srvr = 0;
 	char *ix_srvr = getenv("INFORMIXSERVER");
 
-	if (ix_srvr == 0 || *ix_srvr == '\0' || (srvr = malloc(strlen(ix_srvr) + 2)) == 0)
+	if (ix_srvr == 0 || *ix_srvr == '\0' || (srvr = (char *)malloc(strlen(ix_srvr) + 2)) == 0)
 	{
 		sqlca.sqlcode = -952;
 	}

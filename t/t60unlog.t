@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t/t60unlog.t version /main/10 2000-02-03 15:54:03 $ 
+# @(#)$Id: t/t60unlog.t version /main/11 2000-02-10 12:10:42 $ 
 #
 # Portions Copyright 1997,1999 Jonathan Leffler
 # Portions Copyright 2000      Informix Software Inc
@@ -13,10 +13,19 @@ my ($dbname) = "dbd_ix_db";
 my ($user) = $ENV{DBD_INFORMIX_USERNAME};
 my ($pass) = $ENV{DBD_INFORMIX_PASSWORD};
 
-stmt_note("1..8\n");
-
 &stmt_note("# Test DBI->connect('dbi:Informix:.DEFAULT.')\n");
 stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.', $user, $pass));
+
+if ($dbh->{ix_ServerVersion} >= 800 && $dbh->{ix_ServerVersion} < 900)
+{
+	# XPS 8.xx does not support unlogged databases, so this test is
+	# doomed to fail if it runs against XPS.
+	$dbh->disconnect or stmt_fail;
+	print "1..0\n";
+	exit 0;
+}
+
+stmt_note("1..8\n");
 stmt_ok;
 
 # Don't care about non-existent database

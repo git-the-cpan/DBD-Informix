@@ -2,6 +2,7 @@ Announce
 BugReport
 ChangeLog
 DBD/Informix/Configuration.pm
+DBD/Informix/Summary.pm
 DBD/Informix/TechSupport.pm
 DBD/Informix/TestHarness.pm
 Informix.h
@@ -112,6 +113,8 @@ t/t43trans.t
 t/t44trans.t
 t/t46chpblk.t
 t/t50update.t
+t/t53types.t
+t/t54native.t
 t/t55mdata.t
 t/t56tabinfo.t
 t/t57tables.t
@@ -127,6 +130,7 @@ t/t81orig.t
 t/t82number.t
 t/t83oconn.t
 t/t90ius.t
+t/t91udts.t
 t/t99clean.t
 test.all.sh
 test.c4gl.sh

@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD/Informix/TechSupport.pm version /main/3 2000-02-01 16:06:51 $
+#   @(#)$Id: DBD/Informix/TechSupport.pm version /main/4 2000-02-08 10:25:57 $
 #
-#	Technical Support Tools for Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+#	Technical Support Tools for Informix Database Driver for Perl Version 0.97004 (2000-02-10)
 #
 #   Copyright 2000 Informix Software Inc
 #
@@ -14,7 +14,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(print_versions set_licence_number bug_report it_works);
 
-	$VERSION = "0.97003";
+	$VERSION = "0.97004";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -183,6 +183,34 @@
 						if ($#tests == 0)
 						{
 							print "\n#\n# Rerunning single test with debug fully enabled\n";
+							# JL 2000-02-08: This should work:
+							#execute_command("PERL_DBI_DEBUG=9 sh test.one.sh @tests", "failed on selective tests");
+							# ...but there is a bug in Perl 5.005_03...
+							#
+							# From: Doug Wilson <dougw@safeguard.net>
+							# To: Jonathan Leffler <jleffler@informix.com>
+							# Subject: FW: [ID 20000121.005] System command starting with environment
+							#		[PATCH for tests] DBD::Informix BugReport bug
+							# Date: Tue, 8 Feb 2000 09:43:02 -0800 
+							# 
+							# Thought you might like to know, the bug in your BugReport script is
+							# really a bug in perl (I thought it was just my system), and happens
+							# whenever you do a system() call that starts with a 'VAR=VALUE' where
+							# the VAR contains a digit or underscore character. I submitted the
+							# bug and got this patch which appears to work:
+							# 
+							# From: Dominic Dunlop [mailto:domo@computer.org]
+							# Sent: Monday, January 24, 2000 1:15 AM
+							# To: perl5-porters@perl.org
+							# Cc: Ilya Zakharevich; dougw@safeguard.net
+							# Subject: Re: [ID 20000121.005] System command starting with
+							#		environment [PATCH for tests]
+							#
+							# [...a patch followed...]
+							#
+							# When enough time has elapsed and/or the Perl version requirements for
+							# DBD::Informix are sufficiently stringent for the fix to be universal,
+							# you can replace the workaround below with the code above.
 							execute_command("sh -c 'PERL_DBI_DEBUG=9 sh test.one.sh @tests'", "failed on selective tests");
 						}
 					}
@@ -289,14 +317,14 @@ use DBD::Informix::TechSupport;
 =head1 DESCRIPTION
 
 This document describes how to obtain technical support for
-Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+Informix Database Driver for Perl Version 0.97004 (2000-02-10)
 (which is also known as DBD::Informix).
 It also describes how to use the Perl module to report information to
 any of technical support channels.
 
 =head1 INFORMIX TECHNICAL SUPPORT
 
-Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+Informix Database Driver for Perl Version 0.97004 (2000-02-10)
 is a fully supported product of Informix Software, Inc.
 provided that you are using a supported configuration.
 
@@ -316,7 +344,7 @@ sign up), and email your questions to dbi-users@isc.org.
 
 =head1 CONFIGURATIONS SUPPORTED BY INFORMIX
 
-Informix Technical Support will only support Informix Database Driver for Perl Version 0.97003 (2000-02-07)
+Informix Technical Support will only support Informix Database Driver for Perl Version 0.97004 (2000-02-10)
 if you are using certain supported versions of ESQL/C or CSDK:
 
 =over 2
@@ -348,7 +376,7 @@ above.
 
 =head1 OTHER CONFIGURATIONS WHICH PROBABLY WORK
 
-Informix Database Driver for Perl Version 0.97003 (2000-02-07) is believed to work with all other versions of ESQL/C
+Informix Database Driver for Perl Version 0.97004 (2000-02-10) is believed to work with all other versions of ESQL/C
 and ClientSDK from ESQL/C 5.00.UC1 upwards.
 However, you may run into problems with the handling of shared
 libraries if you use other versions of ESQL/C.
@@ -398,7 +426,7 @@ builds it (classes B, C, D) and tests it (classes C, D).
 =head2 Using it_works
 
 This generates the information needed for a report that you have managed
-to get Informix Database Driver for Perl Version 0.97003 (2000-02-07) working.
+to get Informix Database Driver for Perl Version 0.97004 (2000-02-10) working.
 
 	it_works;
 
@@ -439,7 +467,7 @@ Licence
 
 By default, the licence number associated with the product will is
 ACN#J334912, and this does not have any support.
-If you buy support for Informix Database Driver for Perl Version 0.97003 (2000-02-07), then you will be given a new licence
+If you buy support for Informix Database Driver for Perl Version 0.97004 (2000-02-10), then you will be given a new licence
 number and you should install that number in the software so that bug
 reports will contain a valid licence number.
 Normally, you'd do this with the InformixTechSupport script, but that
