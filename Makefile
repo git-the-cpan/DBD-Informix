@@ -12,7 +12,7 @@
 #	LIBS => [q[-L/opt/informix/lib/esql -lsql -lgen -los -lm]]
 #	NAME => q[DBD::Informix]
 #	OBJECT => q[$(O_FILES) dbdimp.o]
-#	VERSION => q[0.23]
+#	VERSION => q[0.24]
 #	dynamic_lib => { OTHERLDFLAGS=>q[-L$(INFORMIXDIR)/lib -L/opt/informix/lib -R/opt/informix/lib -L/opt/informix/lib/esql -R/opt/informix/lib/esql] }
 #	macro => { ESQL_LIB=>q[$(INFORMIXDIR)/include] }
 
@@ -45,9 +45,9 @@ AR_STATIC_ARGS = cr
 NAME = DBD::Informix
 DISTNAME = DBD-Informix
 NAME_SYM = DBD_Informix
-VERSION = 0.23
-VERSION_SYM = 0_23
-XS_VERSION = 0.23
+VERSION = 0.24
+VERSION_SYM = 0_24
+XS_VERSION = 0.24
 INST_BIN = ./blib/bin
 INST_EXE = ./blib/script
 INST_LIB = ./blib/lib
@@ -450,12 +450,14 @@ manifypods :
 
 # --- MakeMaker clean section:
 
-# Delete temporary files but do not touch installed files. We don't delete
-# the Makefile here so a later make realclean still has a makefile to use.
-
-clean ::
-	-rm -rf Informix.c ./blib $(MAKE_APERL_FILE) $(INST_ARCHAUTODIR)/extralibs.all perlmain.c mon.out core so_locations pm_to_blib *~ */*~ */*/*~ *$(OBJ_EXT) *$(LIB_EXT) perl.exe $(BOOTSTRAP) $(BASEEXT).bso $(BASEEXT).def $(BASEEXT).exp
-	-mv Makefile Makefile.old 2>/dev/null
+clean::
+	rm -f dbdimp.c
+	rm -f *.o
+	rm -f *.so
+	rm -f Makefile.old
+	rm -f Informix.c
+	rm -f pm_to_blib
+	rm -rf blib
 
 
 # --- MakeMaker realclean section:
@@ -727,10 +729,12 @@ pm_to_blib: $(TO_INST_PM)
 
 # --- MakeMaker postamble section:
 
-
-# End.
 .SUFFIXES: .ec
 
 .ec.o:
-	esql -c  -I$(ESQL_LIB) -I$(PERL_LIB) -I$(PERL_ARCHLIB) -I$(PERL_ARCHLIB)/DBI -I$(PERL_ARCHLIB)/CORE dbdimp.ec
+	esql -e -I$(ESQL_LIB) -I$(PERL_LIB) -I$(PERL_ARCHLIB) -I$(SITEARCHEXP)/DBI -I$(PERL_ARCHLIB)/CORE dbdimp.ec
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) -I$(ESQL_LIB) $*.c
+	rm -f dbdimp.c
 
+
+# End.

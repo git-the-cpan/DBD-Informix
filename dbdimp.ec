@@ -3,6 +3,8 @@
  *
  * Copyright (c) 1994,1995  Tim Bunce
  *           (c)1995, 1996 Alligator Descartes
+ *           (c)1994 Bill Hailes
+ *           (c)1996 Terry Nightingale
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -20,14 +22,40 @@
 
 #include "Informix.h"
 $include sqlca.h;
+$include sqltypes.h;
 
-/* see oparse for usage */
-/*static sword oparse_defer = 0;*/  /* PARSE_NO_DEFER */
-/*static ub4   oparse_lng   = 1;*/  /* v6 or v7 */
-
+static cursor cursors[MAX_CURSORS + 1]; /* MAX_CURSORS arbitrary for now   */
+                                        /* If cursors[x].is_open != 0,     */
+                                        /* cursor is in use.  Necessary    */
+                                        /* for multiple cursors to be      */
+                                        /* active simultaneously.          */
 
 DBISTATE_DECLARE;
 
+/*---------------------------------------------------*
+ * Function:    new_cursor
+ *
+ * Purpose:     locates a free cursor from the array
+ *
+ * Arguments:   none
+ *
+ * Returns:     cursor id or -1 if not found
+ *---------------------------------------------------*/
+
+static int new_cursor()
+{
+    int i;
+
+    for (i = 0; i < MAX_CURSORS; ++i) {
+        if (!cursors[i].is_open) {
+            memset( &cursors[i], 0, sizeof( cursor ) );
+            return i;
+        }
+    }
+
+    sqlca.sqlcode = -276;    /* fake: `Cursor not found' */
+    return -1;
+}
 
 void
 dbd_init(dbistate)
@@ -259,7 +287,7 @@ dbd_st_prepare(sth, statement)
     D_imp_sth(sth);
     D_imp_dbh_from_sth;
 
-    int i, inside_quote;
+    int i, inside_quote, cursor_num;
     char func[64];
     $int desc_count;
 
@@ -334,24 +362,344 @@ dbd_st_prepare(sth, statement)
       }
 
     /** Bind values for the SELECT statement */
+    cursor_num = new_cursor ();
 
-    $prepare usqlobj from $statement;
-    $declare democursor cursor for usqlobj;
-    $allocate descriptor 'demodesc' with max 128;
-    $open democursor;
-    $describe usqlobj using sql descriptor 'demodesc';
-    $get descriptor 'demodesc' $desc_count = count;
+    switch (cursor_num) {
+        case 0:
+            $prepare usqlobj0 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor0 cursor for usqlobj0;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc0' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor0;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj0 using sql descriptor 'demodesc0';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc0' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 1:
+            $prepare usqlobj1 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor1 cursor for usqlobj1;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc1' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor1;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj1 using sql descriptor 'demodesc1';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc1' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 2:
+            $prepare usqlobj2 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor2 cursor for usqlobj2;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc2' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor2;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj2 using sql descriptor 'demodesc2';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc2' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 3:
+            $prepare usqlobj3 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor3 cursor for usqlobj3;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc3' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor3;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj3 using sql descriptor 'demodesc3';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc3' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 4:
+            $prepare usqlobj4 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor4 cursor for usqlobj3;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc4' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor4;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj4 using sql descriptor 'demodesc4';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc4' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 5:
+            $prepare usqlobj5 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor5 cursor for usqlobj5;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc5' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor5;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj5 using sql descriptor 'demodesc5';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc5' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 6:
+            $prepare usqlobj6 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor6 cursor for usqlobj6;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc6' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor6;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj6 using sql descriptor 'demodesc6';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc6' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 7:
+            $prepare usqlobj7 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor7 cursor for usqlobj7;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc7' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor7;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj7 using sql descriptor 'demodesc7';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc7' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 8:
+            $prepare usqlobj8 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor8 cursor for usqlobj8;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc8' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor8;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj8 using sql descriptor 'demodesc8';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc8' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+        case 9:
+            $prepare usqlobj9 from $statement;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $declare democursor9 cursor for usqlobj9;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $allocate descriptor 'demodesc9' with max 128;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $open democursor9;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $describe usqlobj9 using sql descriptor 'demodesc9';
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            $get descriptor 'demodesc9' $desc_count = count;
+            if ( sqlca.sqlcode < 0 ) {
+                do_error( sqlca.sqlcode );
+                return 0;
+              }
+            break;
+      }
 
-    /* Tell the sth how many fields we have in the cursor */
- 
+    /** Tell the sth how many fields we have in the cursor */
     imp_sth->fbh_num = desc_count;
 
-    /* Reset rown_num to 0 */
-
+    /** Reset row_num to 0 */
     imp_sth->row_num = 0;
 
-    /* Get number of fields and space needed for field names      */
+    /* Store index into cursor array in statement handle */
+    imp_sth->cursoridx = cursor_num;
 
+    /** Update cursor status in cursor array */
+    cursors[cursor_num].is_open = opened;
+
+    /* Get number of fields and space needed for field names      */
     if ( dbis->debug >= 2 )
         printf( "DBD::Informix::dbd_db_prepare'imp_sth->fbh_num: %d\n",
                 imp_sth->fbh_num );
@@ -518,50 +866,160 @@ dbd_describe(h, imp_sth)
 
   t_cbufl = 0;
 
-/*  $open democursor; */
-/*  $describe usqlobj using sql descriptor 'demodesc';
-  $get descriptor 'demodesc' $desc_count = count; */
-
     field_info_loop = 0;
     for ( i = 1 ; i <= imp_sth->fbh_num ; i++ ) {
-        $get descriptor 'demodesc' value $i $type = type, $len = length, $name = name;
+        switch ( imp_sth->cursoridx ) {
+            case 0:
+                $get descriptor 'demodesc0' value $i $type = type, $len = length, $name = name;
+                break;
+            case 1:
+                $get descriptor 'demodesc1' value $i $type = type, $len = length, $name = name;
+                break;
+            case 2:
+                $get descriptor 'demodesc2' value $i $type = type, $len = length, $name = name;
+                break;
+            case 3:
+                $get descriptor 'demodesc3' value $i $type = type, $len = length, $name = name;
+                break;
+            case 4:
+                $get descriptor 'demodesc4' value $i $type = type, $len = length, $name = name;
+                break;
+            case 5:
+                $get descriptor 'demodesc5' value $i $type = type, $len = length, $name = name;
+                break;
+            case 6:
+                $get descriptor 'demodesc6' value $i $type = type, $len = length, $name = name;
+                break;
+            case 7:
+                $get descriptor 'demodesc7' value $i $type = type, $len = length, $name = name;
+                break;
+            case 8:
+                $get descriptor 'demodesc8' value $i $type = type, $len = length, $name = name;
+                break;
+            case 9:
+                $get descriptor 'demodesc9' value $i $type = type, $len = length, $name = name;
+                break;
+          } 
+
         if ( dbis->debug >= 2 ) 
             warn( "Type: %d\tName: %s\tLength: %d\n", type, name, len );
+
+/*
+    This code does not give correct date for date values, pasted previous
+    patch back in.
+
         switch ( type ) {
-            case 2: /** INTEGER */
-            case 1: /** SMALLINT */
-            case 3: /** FLOAT */
-            case 5: { /** DECIMAL */
-             
-                    char tmpstring[1024]; 
-                sprintf( tmpstring, "%i", name );
-                f_cbufl[i] = strlen( tmpstring );
-                t_cbufl += f_cbufl[i];
-                if ( dbis->debug >= 2 ) {
-                    warn( "Type: %d\tName: %s\tLength: %d\n",
-                          type, name, f_cbufl[i] );
-                  }
-                break;
-              }
-            case 0: {
-                f_cbufl[i] = strlen( name );
-                t_cbufl += f_cbufl[i];
-                break;
-              }
-            default: {		/** Anything else. type 0 = CHAR */
+            case SQLCHAR: {
                 f_cbufl[i] = len;
                 t_cbufl += len;
                 break;
               }
+            case SQLINT:
+            case SQLSMINT:
+            case SQLDECIMAL:
+            case SQLSMFLOAT:
+            case SQLFLOAT: {
+                char tmpstring[1024]; 
+                sprintf( tmpstring, "%i", name );
+                f_cbufl[i] = strlen( tmpstring );
+                t_cbufl += f_cbufl[i];
+                if ( dbis->debug >= 2 ) {
+                    warn( "Type2: %d\tName: %s\tLength: %d\n",
+                          type, name, f_cbufl[i] );
+                  }
+                break;
+              }
+            case SQLINTERVAL:
+            case SQLDTIME:
+            case SQLMONEY:
+            case SQLDATE:
+            case SQLSERIAL:
+                f_cbufl[i] = len;
+                t_cbufl += len;
+                break;
           }
+*/
+/*
+    This code lifted from 0.20pl1t 
+*/
+        switch (type) {
+            case SQLCHAR:
+              /* leave len alone if char */
+              break;
+            case SQLINT:
+              len = MAXINTLEN;
+              break;
+            case SQLSMINT:
+              len = MAXSMINTLEN;
+              break;
+            case SQLINTERVAL:
+              len = MAXINTERVALLEN;
+              break;
+            case SQLDTIME:
+              len = MAXDTIMELEN;
+              break;
+            case SQLMONEY:
+              len = MAXMONEYLEN;
+              break;
+            case SQLDATE:
+              len = MAXDATELEN;
+              break;
+            case SQLSERIAL:
+              len = MAXSERIALLEN;
+              break;
+            case SQLDECIMAL:
+              len = MAXDECIMALLEN;
+              break;
+            case SQLSMFLOAT:
+              len = MAXSMFLOATLEN;
+              break;
+            case SQLFLOAT:
+              len = MAXFLOATLEN;
+              break;
+        }
+
+        f_cbufl[i] = len;
+        t_cbufl += len;
+/*
+    End of 0.20pl1t lift
+*/
       }
     imp_sth->row_num++;
 
   /* Assign the number of fields to fbh_num */
 
-/*  imp_sth->fbh_num = desc_count; */
-
-  $fetch democursor using sql descriptor 'demodesc';
+    switch ( imp_sth->cursoridx ) {
+        case 0:
+            $fetch democursor0 using sql descriptor 'demodesc0';
+            break;
+        case 1:
+            $fetch democursor1 using sql descriptor 'demodesc1';
+            break;
+        case 2:
+            $fetch democursor2 using sql descriptor 'demodesc2';
+            break;
+        case 3:
+            $fetch democursor3 using sql descriptor 'demodesc3';
+            break;
+        case 4:
+            $fetch democursor4 using sql descriptor 'demodesc4';
+            break;
+        case 5:
+            $fetch democursor5 using sql descriptor 'demodesc5';
+            break;
+        case 6:
+            $fetch democursor6 using sql descriptor 'demodesc6';
+            break;
+        case 7:
+            $fetch democursor7 using sql descriptor 'demodesc7';
+            break;
+        case 8:
+            $fetch democursor8 using sql descriptor 'demodesc8';
+            break;
+        case 9:
+            $fetch democursor9 using sql descriptor 'demodesc9';
+            break;
+      }
 
   if ( sqlca.sqlcode != 0 ) {
       return 1;
@@ -586,7 +1044,39 @@ dbd_describe(h, imp_sth)
       if ( dbis->debug >= 2 )
           warn( "In: DBD::Informix::dbd_describe'LinkRow: %d\n", i );
 
-      $get descriptor 'demodesc' value $i $result = data;
+      switch ( imp_sth->cursoridx ) {
+          case 0:
+              $get descriptor 'demodesc0' value $i $result = data, $type = type;
+              break;
+          case 1:
+              $get descriptor 'demodesc1' value $i $result = data, $type = type;
+              break;
+          case 2:
+              $get descriptor 'demodesc2' value $i $result = data, $type = type;
+              break;
+          case 3:
+              $get descriptor 'demodesc3' value $i $result = data, $type = type;
+              break;
+          case 4:
+              $get descriptor 'demodesc4' value $i $result = data, $type = type;
+              break;
+          case 5:
+              $get descriptor 'demodesc5' value $i $result = data, $type = type;
+              break;
+          case 6:
+              $get descriptor 'demodesc6' value $i $result = data, $type = type;
+              break;
+          case 7:
+              $get descriptor 'demodesc7' value $i $result = data, $type = type;
+              break;
+          case 8:
+              $get descriptor 'demodesc8' value $i $result = data, $type = type;
+              break;
+          case 9:
+              $get descriptor 'demodesc9' value $i $result = data, $type = type;
+              break;
+        }
+
       strcpy( cbuf_ptr, result );
       if ( result == '\0' ) { 
           if ( dbis->debug >= 2 )
@@ -596,7 +1086,11 @@ dbd_describe(h, imp_sth)
           fbh->rlen = fbh->cbufl;
         } else {
 /*          fbh->cbuf = result; */
-          fbh->rlen = fbh->cbufl;
+/*          fbh->rlen = fbh->cbufl; */
+/*
+    Don't get correct string lengths from cbufl, only from strlen as below.
+*/
+          fbh->rlen = strlen (result);
         } 
 
       if ( dbis->debug >= 2 )
@@ -652,7 +1146,7 @@ dbd_describe(h, imp_sth)
          }
     }
   if ( dbis->debug >= 2 )
-      printf( "Out: DBD::Informix::dbd_describe()\n" );
+      warn( "Out: DBD::Informix::dbd_describe()\n" );
   return 0;
 }
 
@@ -712,6 +1206,17 @@ dbd_st_destroy(sth)
     D_imp_dbh_from_sth;
     if (DBIc_ACTIVE(imp_dbh) /* && oclose(imp_sth->cda) */ ) {
       }
+
+    if ( dbis->debug >= 2 )
+        warn( "In: DBD::Informix::dbd_st_destroy, calling free_cursor(%d)\n",
+            imp_sth->cursoridx );
+/*
+    Need to free up resources so the cursor can be used again.
+*/
+    free_cursor (imp_sth->cursoridx);
+
+    if ( dbis->debug >= 2 )
+        warn( "In: DBD::Informix::dbd_st_destroy, back from free_cursor\n" );
 
     /* XXX free contents of imp_sth here */
     DBIc_IMPSET_off(imp_sth);
@@ -796,6 +1301,153 @@ dbd_st_FETCH(sth, keysv)
     return sv_2mortal(retsv);
 }
 
+/*---------------------------------------------------*
+ * Function:    free_cursor
+ *
+ * Purpose:     frees/closes/deallocates/removes/obliterates ...
+ *
+ * Arguments:   cursor index
+ *
+ * Returns:     status
+ *---------------------------------------------------*/
+
+static void free_cursor(sqc)
+int sqc;
+{
+    switch (cursors[sqc].is_open)    /* fallthrough case statement */
+    {
+    case opened:
+        iqclose(sqc);    /* $ close usqlcurs; */
+    case declared:
+    case allocated:
+    case described:
+        /* descriptor should be freed here. */
+    case prepared:
+        if ( dbis->debug >= 2 )
+            warn( "In: free_cursor, calling iqfree(%d)\n", sqc );
+        iqfree(sqc);    /* For now, descriptor is freed here. */
+    case closed:
+        break;
+    }
+
+    cursors[sqc].is_open = closed;
+}
+
+/*---------------------------------------------------
+ * Function:    iqclose
+ * 
+ * Purpose:    closes cursor
+ * 
+ * Arguments:    cursor index
+ * 
+ * Returns:    void
+ *---------------------------------------------------*/
+
+static void iqclose(sqc)
+int sqc;
+{
+    switch (sqc) {
+        case 0:
+            $ close democursor0;
+            break;
+        case 1:
+            $ close democursor1;
+            break;
+        case 2:
+            $ close democursor2;
+            break;
+        case 3:
+            $ close democursor3;
+            break;
+        case 4:
+            $ close democursor4;
+            break;
+        case 5:
+            $ close democursor5;
+            break;
+        case 6:
+            $ close democursor6;
+            break;
+        case 7:
+            $ close democursor7;
+            break;
+        case 8:
+            $ close democursor8;
+            break;
+        case 9:
+            $ close democursor9;
+            break;
+    }
+}
+
+/*---------------------------------------------------
+ * Function:    iqfree
+ * 
+ * Purpose:    frees closed cursor
+ * 
+ * Arguments:    cursor index
+ * 
+ * Returns:    void
+ * 
+ *---------------------------------------------------*/
+
+static void iqfree(sqc)
+int sqc;
+{
+    switch (sqc)
+    {
+        case 0:
+            $ free usqlobj0;
+            $ free demodesc0;
+            $ deallocate descriptor 'demodesc0';
+            break;
+        case 1:
+            $ free usqlobj1;
+            $ free demodesc1;
+            $ deallocate descriptor 'demodesc1';
+            break;
+        case 2:
+            $ free usqlobj2;
+            $ free demodesc2;
+            $ deallocate descriptor 'demodesc2';
+            break;
+        case 3:
+            $ free usqlobj3;
+            $ free demodesc3;
+            $ deallocate descriptor 'demodesc3';
+            break;
+        case 4:
+            $ free usqlobj4;
+            $ free demodesc4;
+            $ deallocate descriptor 'demodesc4';
+            break;
+        case 5:
+            $ free usqlobj5;
+            $ free demodesc5;
+            $ deallocate descriptor 'demodesc5';
+            break;
+        case 6:
+            $ free usqlobj6;
+            $ free demodesc6;
+            $ deallocate descriptor 'demodesc6';
+            break;
+        case 7:
+            $ free usqlobj7;
+            $ free demodesc7;
+            $ deallocate descriptor 'demodesc7';
+            break;
+        case 8:
+            $ free usqlobj8;
+            $ free demodesc8;
+            $ deallocate descriptor 'demodesc8';
+            break;
+        case 9:
+            $ free usqlobj9;
+            $ free demodesc9;
+            $ deallocate descriptor 'demodesc9';
+            break;
+    }
+    memset( &cursors[sqc], 0, sizeof( cursor ) );
+}
 
 /* --------------------------------------- */
-

@@ -19,7 +19,7 @@ use DBI;	# The DBI must be installed before we can build a DBD
 
 %opts = (
     'NAME'    => 'DBD::Informix',
-    'VERSION' => '0.23',
+    'VERSION' => '0.24',
 );
 
 print "\nConfiguring DBD::Informix version $opts{VERSION}...\n";
@@ -108,18 +108,32 @@ print "\n";
 
 WriteMakefile(%opts);
 
-# We need to add some fake targets to the Makefile to make dbdimp.ec
-# - build.....Horrible hack, and it doesn't make dbdimp.c dependent on
-# - dbdimp.ec
-
-system( "echo \".SUFFIXES: .ec\" >> Makefile" );
-system( "echo \"\" >> Makefile" );
-system( "echo \".ec.o:\" >> Makefile" );
-system( "echo \"	esql -c $ccflags -I\"\$\"(ESQL_LIB) -I\"\$\"(PERL_LIB) -I\"\$\"(PERL_ARCHLIB) -I\"\$\"(PERL_ARCHLIB)/DBI -I\"\$\"(PERL_ARCHLIB)/CORE dbdimp.ec\
-\" >> Makefile" );
-
 # Cleanly exit from the Makefile-build process
 
 exit 0;
+
+sub MY::postamble {
+      '
+.SUFFIXES: .ec
+
+.ec.o:
+	esql -e -I$(ESQL_LIB) -I$(PERL_LIB) -I$(PERL_ARCHLIB) -I$(SITEARCHEXP)/DBI -I$(PERL_ARCHLIB)/CORE dbdimp.ec
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) -I$(ESQL_LIB) $*.c
+	rm -f dbdimp.c
+';
+}
+
+sub MY::clean {
+    '
+clean::
+	rm -f dbdimp.c
+	rm -f *.o
+	rm -f *.so
+	rm -f Makefile.old
+	rm -f Informix.c
+	rm -f pm_to_blib
+	rm -rf blib
+';
+}
 
 __END__

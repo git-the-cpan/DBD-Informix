@@ -8,10 +8,26 @@
 
 */
 
-/* these are (almost) random values ! */
-
+/* these are (almost) random values ! NOTE: DBD::Oracle hangover */
 #define MAX_BIND_VARS 99
 #define MAX_COLS 128
+
+/** Maximum number of simltaneously open cursors */
+#define MAX_CURSORS 9
+
+/* various maiximum lengths for string representations */
+/* In cases of uncertainty, I've erred on the side of caution */
+#define MAXINTLEN       24
+#define MAXSMINTLEN     12
+#define MAXINTERVALLEN  26
+#define MAXDTIMELEN     26
+#define MAXMONEYLEN     34
+#define MAXDATELEN      11
+#define MAXSERIALLEN    MAXINTLEN
+#define MAXDECIMALLEN   34
+#define MAXSMFLOATLEN   MAXDECIMALLEN
+#define MAXFLOATLEN     MAXDECIMALLEN
+#define MAXNULLLEN      1
 
 /* */
 
@@ -104,7 +120,6 @@ struct imp_sth_st {
         is_update;
 
     /* Current index of statement in cursor index? */
-
     int cursoridx;
     int row_num;
 
