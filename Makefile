@@ -1,166 +1,150 @@
 # This Makefile is for the DBD::Informix extension to perl.
 #
-# It was generated automatically by MakeMaker version 4.16 from the contents
-# of Makefile.PL. Don't edit this file, edit Makefile.PL instead.
+# It was generated automatically by MakeMaker version
+# 5.34 (Revision: 1.202) from the contents of
+# Makefile.PL. Don't edit this file, edit Makefile.PL instead.
 #
-#	ANY CHANGES MADE HERE WILL BE LOST! 
+#	ANY CHANGES MADE HERE WILL BE LOST!
 #
-#   MakeMaker Parameters: 
-#	DEFINE => '-Wall -pedantic -Wno-comment -Wpointer-arith -Wcast-align -Wconversion -Wtraditional -Wpointer-arith -Wcast-qual'
-#	INC => '-I/opt/informix/incl/esql -I/opt/gnu/lib/perl5/sparc-solaris/DBI -I/DBI'
-#	LIBS => [ '-L/opt/informix/lib/esql -lsql -lgen -los -lm' ]
-#	NAME => 'DBD::Informix'
-#	OBJECT => '$(O_FILES) dbdimp.o'
-#	VERSION => '0.20pl1'
-#	dynamic_lib => { OTHERLDFLAGS=>'-L$(INFORMIXDIR)/lib -L/opt/informix/lib -R/opt/informix/lib -L/opt/informix/lib/esql -R/opt/informix/lib/esql' }
-#	macro => { ESQL_LIB=>'$(INFORMIXDIR)/include' }
+#   MakeMaker Parameters:
+
+#	INC => q[-I/opt/informix/incl/esql -I/opt/gnu/lib/perl5/sparc-solaris/5.003/DBI -I/opt/gnu/lib/perl5/site_perl/sparc-solaris/DBI]
+#	LIBS => [q[-L/opt/informix/lib/esql -lsql -lgen -los -lm]]
+#	NAME => q[DBD::Informix]
+#	OBJECT => q[$(O_FILES) dbdimp.o]
+#	VERSION => q[0.22]
+#	dynamic_lib => { OTHERLDFLAGS=>q[-L$(INFORMIXDIR)/lib -L/opt/informix/lib -R/opt/informix/lib -L/opt/informix/lib/esql -R/opt/informix/lib/esql] }
+#	macro => { ESQL_LIB=>q[$(INFORMIXDIR)/include] }
 
 # --- MakeMaker post_initialize section:
 
 
 # --- MakeMaker const_config section:
 
-# These definitions are from config.sh (via /opt/gnu/lib/perl5/sparc-solaris/Config.pm)
-CC = gcc
-LIBC = /usr/lib/libc.so
-LDFLAGS = 
-LDDLFLAGS = -G
-CCDLFLAGS =  
+# These definitions are from config.sh (via /opt/gnu/lib/perl5/sparc-solaris/5.003/Config.pm)
+
+# They may have been overridden via Makefile.PL or on the command line
+AR = ar
+CC = cc
 CCCDLFLAGS = -fpic
-RANLIB = :
-SO = so
+CCDLFLAGS =  
 DLEXT = so
 DLSRC = dl_dlopen.xs
+LD = cc
+LDDLFLAGS = -G -L/usr/local/lib -L/opt/gnu/lib
+LDFLAGS =  -L/usr/local/lib -L/opt/gnu/lib
+LIBC = /lib/libc.so
+LIB_EXT = .a
+OBJ_EXT = .o
+RANLIB = :
+SO = so
 
 
 # --- MakeMaker constants section:
-
+AR_STATIC_ARGS = cr
 NAME = DBD::Informix
 DISTNAME = DBD-Informix
-VERSION = 0.20pl1
-VERSION_SYM = 0_20pl1
-
-# In which directory should we put this extension during 'make'?
-# This is typically ./blib.
-# (also see INST_LIBDIR and relationship to ROOTEXT)
-INST_LIB = ./blib
-INST_ARCHLIB = ./blib
-INST_EXE = ./blib
-
-# AFS users will want to set the installation directories for
-# the final 'make install' early without setting INST_LIB,
-# INST_ARCHLIB, and INST_EXE for the testing phase
-INSTALLPRIVLIB = /opt/gnu/lib/perl5
-INSTALLARCHLIB = /opt/gnu/lib/perl5/sparc-solaris
-INSTALLBIN = /opt/gnu/bin
-
-# Perl library to use when building the extension
+NAME_SYM = DBD_Informix
+VERSION = 0.22
+VERSION_SYM = 0_22
+XS_VERSION = 0.22
+INST_BIN = ./blib/bin
+INST_EXE = ./blib/script
+INST_LIB = ./blib/lib
+INST_ARCHLIB = ./blib/arch
+INST_SCRIPT = ./blib/script
+PREFIX = /opt/gnu
+INSTALLDIRS = site
+INSTALLPRIVLIB = $(PREFIX)/lib/perl5
+INSTALLARCHLIB = $(PREFIX)/lib/perl5/sparc-solaris/5.003
+INSTALLSITELIB = $(PREFIX)/lib/perl5/site_perl
+INSTALLSITEARCH = $(PREFIX)/lib/perl5/site_perl/sparc-solaris
+INSTALLBIN = $(PREFIX)/bin
+INSTALLSCRIPT = $(PREFIX)/bin
 PERL_LIB = /opt/gnu/lib/perl5
-PERL_ARCHLIB = /opt/gnu/lib/perl5/sparc-solaris
+PERL_ARCHLIB = /opt/gnu/lib/perl5/sparc-solaris/5.003
+SITELIBEXP = /opt/gnu/lib/perl5/site_perl
+SITEARCHEXP = /opt/gnu/lib/perl5/site_perl/sparc-solaris
 LIBPERL_A = libperl.a
-
-MAKEMAKER = $(PERL_LIB)/ExtUtils/MakeMaker.pm
-MM_VERSION = 4.16
-I_PERL_LIBS = -I$(PERL_ARCHLIB) -I$(PERL_LIB)
-
-# Perl header files (will eventually be under PERL_LIB)
-PERL_INC = /opt/gnu/lib/perl5/sparc-solaris/CORE
-# Perl binaries
+FIRST_MAKEFILE = Makefile
+MAKE_APERL_FILE = Makefile.aperl
+PERLMAINCC = $(CC)
+PERL_INC = /opt/gnu/lib/perl5/sparc-solaris/5.003/CORE
 PERL = /opt/gnu/bin/perl
 FULLPERL = /opt/gnu/bin/perl
 
-# FULLEXT = Pathname for extension directory (eg DBD/Oracle).
-# BASEEXT = Basename part of FULLEXT. May be just equal FULLEXT.
-# ROOTEXT = Directory part of FULLEXT with leading slash (eg /DBD)
+VERSION_MACRO = VERSION
+DEFINE_VERSION = -D$(VERSION_MACRO)=\"$(VERSION)\"
+XS_VERSION_MACRO = XS_VERSION
+XS_DEFINE_VERSION = -D$(XS_VERSION_MACRO)=\"$(XS_VERSION)\"
+
+MAKEMAKER = /opt/gnu/lib/perl5/ExtUtils/MakeMaker.pm
+MM_VERSION = 5.34
+
+# FULLEXT = Pathname for extension directory (eg Foo/Bar/Oracle).
+# BASEEXT = Basename part of FULLEXT. May be just equal FULLEXT. (eg Oracle)
+# ROOTEXT = Directory part of FULLEXT with leading slash (eg /DBD)  !!! Deprecated from MM 5.32  !!!
+# PARENT_NAME = NAME without BASEEXT and no trailing :: (eg Foo::Bar)
+# DLBASE  = Basename part of dynamic library. May be just equal BASEEXT.
 FULLEXT = DBD/Informix
 BASEEXT = Informix
-ROOTEXT = /DBD
-
-INC = -I/opt/informix/incl/esql -I/opt/gnu/lib/perl5/sparc-solaris/DBI -I/DBI
-DEFINE = -Wall -pedantic -Wno-comment -Wpointer-arith -Wcast-align -Wconversion -Wtraditional -Wpointer-arith -Wcast-qual
-OBJECT = $(O_FILES) dbdimp.o
+PARENT_NAME = DBD::
+DLBASE = $(BASEEXT)
+INC = -I/opt/informix/incl/esql -I/opt/gnu/lib/perl5/sparc-solaris/5.003/DBI -I/opt/gnu/lib/perl5/site_perl/sparc-solaris/DBI
+OBJECT = $(O_FILES) dbdimp$(OBJ_EXT)
 LDFROM = $(OBJECT)
 LINKTYPE = dynamic
 
 # Handy lists of source code files:
 XS_FILES= Informix.xs
-C_FILES = Informix.c \
-	dbdimp.c
-O_FILES = Informix.o \
-	dbdimp.o
+C_FILES = Informix.c
+O_FILES = Informix.o
 H_FILES = Informix.h \
 	dbdimp.h
+MAN1PODS = 
+MAN3PODS = 
+INST_MAN1DIR = ./blib/man1
+INSTALLMAN1DIR = $(PREFIX)/man/man1
+MAN1EXT = 1
+INST_MAN3DIR = ./blib/man3
+INSTALLMAN3DIR = $(PREFIX)/lib/perl5/man/man3
+MAN3EXT = 3
 
-.SUFFIXES: .xs
+# work around a famous dec-osf make(1) feature(?):
+makemakerdflt: all
 
-.PRECIOUS: Makefile
+.SUFFIXES: .xs .c .C .cpp .cxx .cc $(OBJ_EXT)
 
-.NO_PARALLEL:
+# Nick wanted to get rid of .PRECIOUS. I don't remember why. I seem to recall, that
+# some make implementations will delete the Makefile when we rebuild it. Because
+# we call false(1) when we rebuild it. So make(1) is not completely wrong when it
+# does so. Our milage may vary.
+# .PRECIOUS: Makefile    # seems to be not necessary anymore
 
-.PHONY: all config static dynamic test linkext
-
-# This extension may link to it's own library (see SDBM_File)
-MYEXTLIB = 
+.PHONY: all config static dynamic test linkext manifest
 
 # Where is the Config information that we are using/depend on
 CONFIGDEP = $(PERL_ARCHLIB)/Config.pm $(PERL_INC)/config.h
 
 # Where to put things:
-INST_LIBDIR     = $(INST_LIB)$(ROOTEXT)
-INST_ARCHLIBDIR = $(INST_ARCHLIB)$(ROOTEXT)
+INST_LIBDIR      = $(INST_LIB)/DBD
+INST_ARCHLIBDIR  = $(INST_ARCHLIB)/DBD
 
-INST_AUTODIR      = $(INST_LIB)/auto/$(FULLEXT)
-INST_ARCHAUTODIR  = $(INST_ARCHLIB)/auto/$(FULLEXT)
+INST_AUTODIR     = $(INST_LIB)/auto/$(FULLEXT)
+INST_ARCHAUTODIR = $(INST_ARCHLIB)/auto/$(FULLEXT)
 
-INST_STATIC  = $(INST_ARCHAUTODIR)/$(BASEEXT).a
-INST_DYNAMIC = $(INST_ARCHAUTODIR)/$(BASEEXT).$(DLEXT)
+INST_STATIC  = $(INST_ARCHAUTODIR)/$(BASEEXT)$(LIB_EXT)
+INST_DYNAMIC = $(INST_ARCHAUTODIR)/$(DLBASE).$(DLEXT)
 INST_BOOT    = $(INST_ARCHAUTODIR)/$(BASEEXT).bs
 
-INST_PM = $(INST_LIBDIR)/Informix.pm
+EXPORT_LIST = 
 
+PERL_ARCHIVE = 
 
-# --- MakeMaker const_loadlibs section:
+TO_INST_PM = Informix.pm
 
-# DBD::Informix might depend on some other libraries:
-# (These comments may need revising:)
-#
-# Dependent libraries can be linked in one of three ways:
-#
-#  1.  (For static extensions) by the ld command when the perl binary
-#      is linked with the extension library. See EXTRALIBS below.
-#
-#  2.  (For dynamic extensions) by the ld command when the shared
-#      object is built/linked. See LDLOADLIBS below.
-#
-#  3.  (For dynamic extensions) by the DynaLoader when the shared
-#      object is loaded. See BSLOADLIBS below.
-#
-# EXTRALIBS =	List of libraries that need to be linked with when
-#		linking a perl binary which includes this extension
-#		Only those libraries that actually exist are included.
-#		These are written to a file and used when linking perl.
-#
-# LDLOADLIBS =	List of those libraries which can or must be linked into
-#		the shared library when created using ld. These may be
-#		static or dynamic libraries.
-#		LD_RUN_PATH is a colon separated list of the directories
-#		in LDLOADLIBS. It is passed as an environment variable to
-#		the process that links the shared library.
-#
-# BSLOADLIBS =	List of those libraries that are needed but can be
-#		linked in dynamically at run time on this platform.
-#		SunOS/Solaris does not need this because ld records
-#		the information (from LDLOADLIBS) into the object file.
-#		This list is used to create a .bs (bootstrap) file.
-#
-EXTRALIBS  = -L/opt/informix/lib/esql -lsql -lgen -los
-LDLOADLIBS = -L/opt/informix/lib/esql -lsql -lgen -los -lm
-BSLOADLIBS = 
-LD_RUN_PATH= /opt/informix/lib/esql
-
-
-# --- MakeMaker const_cccmd section:
-CCCMD = $(CC) -c -DDEBUGGING -O
+PM_TO_BLIB = Informix.pm \
+	$(INST_LIBDIR)/Informix.pm
 
 
 # --- MakeMaker tool_autosplit section:
@@ -171,8 +155,9 @@ AUTOSPLITFILE = $(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -e 'use AutoSplit;au
 
 # --- MakeMaker tool_xsubpp section:
 
-XSUBPPDIR = $(PERL_LIB)/ExtUtils
+XSUBPPDIR = /opt/gnu/lib/perl5/ExtUtils
 XSUBPP = $(XSUBPPDIR)/xsubpp
+XSPROTOARG = 
 XSUBPPDEPS = $(XSUBPPDIR)/typemap
 XSUBPPARGS = -typemap $(XSUBPPDIR)/typemap
 
@@ -180,95 +165,205 @@ XSUBPPARGS = -typemap $(XSUBPPDIR)/typemap
 # --- MakeMaker tools_other section:
 
 SHELL = /bin/sh
-LD = gcc
-TOUCH = touch
-CP = cp
-MV = mv
-RM_F  = rm -f
-RM_RF = rm -rf
 CHMOD = chmod
+CP = cp
+LD = cc
+MV = mv
+NOOP = sh -c true
+RM_F = rm -f
+RM_RF = rm -rf
+TOUCH = touch
+UMASK_NULL = umask 0
 
 # The following is a portable way to say mkdir -p
-MKPATH = $(PERL) -wle '$$"="/"; foreach $$p (@ARGV){ next if -d $$p; my(@p); foreach(split(/\//,$$p)){ push(@p,$$_); next if -d "@p/"; print "mkdir @p"; mkdir("@p",0777)||die $$! }} exit 0;'
+# To see which directories are created, change the if 0 to if 1
+MKPATH = $(PERL) -wle '$$"="/"; foreach $$p (@ARGV){' \
+-e 'next if -d $$p; my(@p); foreach(split(/\//,$$p)){' \
+-e 'push(@p,$$_); next if -d "@p/"; print "mkdir @p" if 0;' \
+-e 'mkdir("@p",0777)||die $$! } } exit 0;'
+
+# This helps us to minimize the effect of the .exists files A yet
+# better solution would be to have a stable file in the perl
+# distribution with a timestamp of zero. But this solution doesn't
+# need any changes to the core distribution and works with older perls
+EQUALIZE_TIMESTAMP = $(PERL) -we 'open F, ">$$ARGV[1]"; close F;' \
+-e 'utime ((stat("$$ARGV[0]"))[8,9], $$ARGV[1])'
+
+# Here we warn users that an old packlist file was found somewhere,
+# and that they should call some uninstall routine
+WARN_IF_OLD_PACKLIST = $(PERL) -we 'exit unless -f $$ARGV[0];' \
+-e 'print "WARNING: I have found an old package in\n";' \
+-e 'print "\t$$ARGV[0].\n";' \
+-e 'print "Please make sure the two installations are not conflicting\n";'
+
+UNINST=0
+VERBINST=1
+
+MOD_INSTALL = $(PERL) -I$(INST_LIB) -I$(PERL_LIB) -MExtUtils::Install \
+-e 'install({@ARGV},"$(VERBINST)",0,"$(UNINST)");'
+
+DOC_INSTALL = $(PERL) -e '$$\="\n\n";print "=head3 ", scalar(localtime), ": C<", shift, ">";' \
+-e 'print "=over 4";' \
+-e 'while (defined($$key = shift) and defined($$val = shift)){print "=item *";print "C<$$key: $$val>";}' \
+-e 'print "=back";'
+
+UNINSTALL =   $(PERL) -MExtUtils::Install \
+-e 'uninstall($$ARGV[0],1);'
+
+
+
+# --- MakeMaker dist section:
+
+DISTVNAME = $(DISTNAME)-$(VERSION)
+TAR  = tar
+TARFLAGS = cvf
+ZIP  = zip
+ZIPFLAGS = -r
+COMPRESS = compress
+SUFFIX = .Z
+SHAR = shar
+PREOP = @$(NOOP)
+POSTOP = @$(NOOP)
+TO_UNIX = @$(NOOP)
+CI = ci -u
+RCS_LABEL = rcs -Nv$(VERSION_SYM): -q
+DIST_CP = best
+DIST_DEFAULT = tardist
 
 
 # --- MakeMaker macro section:
 ESQL_LIB = $(INFORMIXDIR)/include
 
 
+# --- MakeMaker depend section:
+
+
+# --- MakeMaker cflags section:
+
+CCFLAGS = -I/usr/local/include -I/opt/gnu/include
+OPTIMIZE = -O
+PERLTYPE = 
+LARGE = 
+SPLIT = 
+
+
+# --- MakeMaker const_loadlibs section:
+
+# DBD::Informix might depend on some other libraries:
+# See ExtUtils::Liblist for details
+#
+EXTRALIBS = -L/opt/informix/lib/esql -lsql -lgen -los -lm
+LDLOADLIBS = -L/opt/informix/lib/esql -lsql -lgen -los -lm
+BSLOADLIBS = 
+LD_RUN_PATH = /opt/informix/lib/esql:/lib
+
+
+# --- MakeMaker const_cccmd section:
+CCCMD = $(CC) -c $(INC) $(CCFLAGS) $(OPTIMIZE) \
+	$(PERLTYPE) $(LARGE) $(SPLIT) $(DEFINE_VERSION) \
+	$(XS_DEFINE_VERSION)
+
 # --- MakeMaker post_constants section:
 
 
 # --- MakeMaker pasthru section:
 
-PASTHRU1 = INST_LIB="$(INST_LIB)"\
-	INST_ARCHLIB="$(INST_ARCHLIB)"\
-	INST_EXE="$(INST_EXE)"\
-	INSTALLPRIVLIB="$(INSTALLPRIVLIB)"\
-	INSTALLARCHLIB="$(INSTALLARCHLIB)"\
-	INSTALLBIN="$(INSTALLBIN)"\
-	LIBPERL_A="$(LIBPERL_A)"\
-	LINKTYPE="$(LINKTYPE)"
-
-PASTHRU2 = INSTALLPRIVLIB="$(INSTALLPRIVLIB)"\
-	INSTALLARCHLIB="$(INSTALLARCHLIB)"\
-	INSTALLBIN="$(INSTALLBIN)"\
-	LIBPERL_A="$(LIBPERL_A)"\
-	LINKTYPE="$(LINKTYPE)"
+PASTHRU = LIBPERL_A="$(LIBPERL_A)"\
+	LINKTYPE="$(LINKTYPE)"\
+	PREFIX="$(PREFIX)"\
+	OPTIMIZE="$(OPTIMIZE)"
 
 
 # --- MakeMaker c_o section:
 
-.c.o:
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $(INC) $*.c
+.c$(OBJ_EXT):
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
+
+.C$(OBJ_EXT):
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.C
+
+.cpp$(OBJ_EXT):
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cpp
+
+.cxx$(OBJ_EXT):
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cxx
+
+.cc$(OBJ_EXT):
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.cc
 
 
 # --- MakeMaker xs_c section:
 
 .xs.c:
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSUBPPARGS) $*.xs >$*.tc && mv $*.tc $@
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs >$*.tc && mv $*.tc $@
 
 
 # --- MakeMaker xs_o section:
 
-.xs.o:
-	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSUBPPARGS) $*.xs >xstmp.c && mv xstmp.c $*.c
-	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $(INC) $*.c
+.xs$(OBJ_EXT):
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(XSUBPP) $(XSPROTOARG) $(XSUBPPARGS) $*.xs >xstmp.c && mv xstmp.c $*.c
+	$(CCCMD) $(CCCDLFLAGS) -I$(PERL_INC) $(DEFINE) $*.c
 
 
 # --- MakeMaker top_targets section:
 
-all ::	config linkext $(INST_PM)
+#all ::	config $(INST_PM) subdirs linkext manifypods
+
+all :: pure_all manifypods
+	@$(NOOP)
+
+pure_all :: config pm_to_blib subdirs linkext
+	@$(NOOP)
+
+subdirs :: $(MYEXTLIB)
+	@$(NOOP)
+
+config :: Makefile $(INST_LIBDIR)/.exists
+	@$(NOOP)
+
+config :: $(INST_ARCHAUTODIR)/.exists
+	@$(NOOP)
+
+config :: $(INST_AUTODIR)/.exists
+	@$(NOOP)
+
+config :: Version_check
+	@$(NOOP)
 
 
-config :: Makefile $(INST_LIBDIR)/.exists $(INST_ARCHAUTODIR)/.exists Version_check
+$(INST_AUTODIR)/.exists :: /opt/gnu/lib/perl5/sparc-solaris/5.003/CORE/perl.h
+	@$(MKPATH) $(INST_AUTODIR)
+	@$(EQUALIZE_TIMESTAMP) /opt/gnu/lib/perl5/sparc-solaris/5.003/CORE/perl.h $(INST_AUTODIR)/.exists
 
-$(INST_LIBDIR)/.exists :: $(PERL)
-	@ $(MKPATH) $(INST_LIBDIR)
-	@ $(TOUCH) $(INST_LIBDIR)/.exists
+	-@$(CHMOD) 755 $(INST_AUTODIR)
 
-$(INST_ARCHAUTODIR)/.exists :: $(PERL)
-	@ $(MKPATH) $(INST_ARCHAUTODIR)
-	@ $(TOUCH) $(INST_ARCHAUTODIR)/.exists
+$(INST_LIBDIR)/.exists :: /opt/gnu/lib/perl5/sparc-solaris/5.003/CORE/perl.h
+	@$(MKPATH) $(INST_LIBDIR)
+	@$(EQUALIZE_TIMESTAMP) /opt/gnu/lib/perl5/sparc-solaris/5.003/CORE/perl.h $(INST_LIBDIR)/.exists
 
-$(INST_EXE)/.exists :: $(PERL)
-	@ $(MKPATH) $(INST_EXE)
-	@ $(TOUCH) $(INST_EXE)/.exists
+	-@$(CHMOD) 755 $(INST_LIBDIR)
+
+$(INST_ARCHAUTODIR)/.exists :: /opt/gnu/lib/perl5/sparc-solaris/5.003/CORE/perl.h
+	@$(MKPATH) $(INST_ARCHAUTODIR)
+	@$(EQUALIZE_TIMESTAMP) /opt/gnu/lib/perl5/sparc-solaris/5.003/CORE/perl.h $(INST_ARCHAUTODIR)/.exists
+
+	-@$(CHMOD) 755 $(INST_ARCHAUTODIR)
 
 $(O_FILES): $(H_FILES)
 
 help:
-	$(PERL) -I$(PERL_LIB) -e 'use ExtUtils::MakeMaker "&help"; &help;'
+	perldoc ExtUtils::MakeMaker
 
 Version_check:
-	@$(PERL) -I$(PERL_LIB) -e 'use ExtUtils::MakeMaker qw($$Version &Version_check);' \
-		-e '&Version_check($(MM_VERSION))'
+	@$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) \
+		-MExtUtils::MakeMaker=Version_check \
+		-e 'Version_check("$(MM_VERSION)")'
 
 
 # --- MakeMaker linkext section:
 
 linkext :: $(LINKTYPE)
-
+	@$(NOOP)
 
 
 # --- MakeMaker dlsyms section:
@@ -276,10 +371,11 @@ linkext :: $(LINKTYPE)
 
 # --- MakeMaker dynamic section:
 
-# $(INST_PM) has been moved to the all: target.
-# It remains here for awhile to allow for old usage: "make dynamic"
-dynamic :: Makefile $(INST_DYNAMIC) $(INST_BOOT) $(INST_PM)
-
+## $(INST_PM) has been moved to the all: target.
+## It remains here for awhile to allow for old usage: "make dynamic"
+#dynamic :: Makefile $(INST_DYNAMIC) $(INST_BOOT) $(INST_PM)
+dynamic :: Makefile $(INST_DYNAMIC) $(INST_BOOT)
+	@$(NOOP)
 
 
 # --- MakeMaker dynamic_bs section:
@@ -289,20 +385,18 @@ BOOTSTRAP = Informix.bs
 # As Mkbootstrap might not write a file (if none is required)
 # we use touch to prevent make continually trying to remake it.
 # The DynaLoader only reads a non-empty file.
-$(BOOTSTRAP): Makefile 
-	@ echo "Running Mkbootstrap for $(NAME) ($(BSLOADLIBS))"
-	@ $(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" \
+$(BOOTSTRAP): Makefile  $(INST_ARCHAUTODIR)/.exists
+	@echo "Running Mkbootstrap for $(NAME) ($(BSLOADLIBS))"
+	@$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" \
 		-e 'use ExtUtils::Mkbootstrap;' \
 		-e 'Mkbootstrap("$(BASEEXT)","$(BSLOADLIBS)");'
-	@ $(TOUCH) $(BOOTSTRAP)
+	@$(TOUCH) $(BOOTSTRAP)
 	$(CHMOD) 644 $@
-	@echo $@ >> $(INST_ARCHAUTODIR)/.packlist
 
-$(INST_BOOT): $(BOOTSTRAP)
-	@ rm -rf $(INST_BOOT)
+$(INST_BOOT): $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists
+	@rm -rf $(INST_BOOT)
 	-cp $(BOOTSTRAP) $(INST_BOOT)
 	$(CHMOD) 644 $@
-	@echo $@ >> $(INST_ARCHAUTODIR)/.packlist
 
 
 # --- MakeMaker dynamic_lib section:
@@ -311,41 +405,35 @@ $(INST_BOOT): $(BOOTSTRAP)
 # from $(OBJECT) and possibly $(MYEXTLIB).
 ARMAYBE = :
 OTHERLDFLAGS = -L$(INFORMIXDIR)/lib -L/opt/informix/lib -R/opt/informix/lib -L/opt/informix/lib/esql -R/opt/informix/lib/esql
+INST_DYNAMIC_DEP = 
 
-$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists
-	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ $(LDDLFLAGS) $(LDFROM) $(OTHERLDFLAGS) $(MYEXTLIB) $(LDLOADLIBS)
+$(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)/.exists $(EXPORT_LIST) $(PERL_ARCHIVE) $(INST_DYNAMIC_DEP)
+	LD_RUN_PATH="$(LD_RUN_PATH)" $(LD) -o $@ $(LDDLFLAGS) $(LDFROM) $(OTHERLDFLAGS) $(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) $(EXPORT_LIST)
 	$(CHMOD) 755 $@
-	@echo $@ >> $(INST_ARCHAUTODIR)/.packlist
 
 
 # --- MakeMaker static section:
 
-# $(INST_PM) has been moved to the all: target.
-# It remains here for awhile to allow for old usage: "make static"
-static :: Makefile $(INST_STATIC) $(INST_PM)
-
+## $(INST_PM) has been moved to the all: target.
+## It remains here for awhile to allow for old usage: "make static"
+#static :: Makefile $(INST_STATIC) $(INST_PM)
+static :: Makefile $(INST_STATIC)
+	@$(NOOP)
 
 
 # --- MakeMaker static_lib section:
 
 $(INST_STATIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)/.exists
-	ar cr $@ $(OBJECT) && $(RANLIB) $@
+	$(RM_RF) $@
+	$(AR) $(AR_STATIC_ARGS) $@ $(OBJECT) && $(RANLIB) $@
 	@echo "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)/extralibs.ld
 	$(CHMOD) 755 $@
-	@echo $@ >> $(INST_ARCHAUTODIR)/.packlist
 
 
-# --- MakeMaker installpm section:
+# --- MakeMaker manifypods section:
 
-# installpm: Informix.pm => $(INST_LIBDIR)/Informix.pm, splitlib=$(INST_LIB)
-
-$(INST_LIBDIR)/Informix.pm: Informix.pm Makefile $(INST_LIBDIR)/.exists
-	@ rm -f $@
-	cp Informix.pm $@
-	$(CHMOD) 644 $@
-	@echo $@ >> $(INST_ARCHAUTODIR)/.packlist
-	@$(AUTOSPLITFILE) $@ $(INST_LIB)/auto
-
+manifypods :
+	@$(NOOP)
 
 
 # --- MakeMaker processPL section:
@@ -364,7 +452,7 @@ $(INST_LIBDIR)/Informix.pm: Informix.pm Makefile $(INST_LIBDIR)/.exists
 # the Makefile here so a later make realclean still has a makefile to use.
 
 clean ::
-	-rm -rf *~ t/*~ *.o *.a mon.out core so_locations $(BOOTSTRAP) $(BASEEXT).bso $(BASEEXT).exp Informix.c ./blib
+	-rm -rf Informix.c ./blib $(MAKE_APERL_FILE) $(INST_ARCHAUTODIR)/extralibs.all perlmain.c mon.out core so_locations pm_to_blib *~ */*~ */*/*~ *$(OBJ_EXT) *$(LIB_EXT) perl.exe $(BOOTSTRAP) $(BASEEXT).bso $(BASEEXT).def $(BASEEXT).exp
 	-mv Makefile Makefile.old 2>/dev/null
 
 
@@ -374,91 +462,164 @@ clean ::
 realclean purge ::  clean
 	rm -rf $(INST_AUTODIR) $(INST_ARCHAUTODIR)
 	rm -f $(INST_DYNAMIC) $(INST_BOOT)
-	rm -f $(INST_STATIC) $(INST_PM)
+	rm -f $(INST_STATIC)
+	rm -f $(INST_LIBDIR)/Informix.pm
 	rm -rf Makefile Makefile.old
 
 
-# --- MakeMaker dist section:
-
-TAR  = tar
-TARFLAGS = cvf
-COMPRESS = compress
-SUFFIX = Z
-SHAR = shar
-PREOP = @ :
-POSTOP = @ :
-CI = ci -u
-RCS = rcs -Nv$(VERSION_SYM):
-DIST_DEFAULT = tardist
+# --- MakeMaker dist_basics section:
 
 distclean :: realclean distcheck
 
 distcheck :
-	$(PERL) -I$(PERL_LIB) -e 'use ExtUtils::Manifest "&fullcheck";' \
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use ExtUtils::Manifest "&fullcheck";' \
 		-e 'fullcheck();'
 
+skipcheck :
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use ExtUtils::Manifest "&skipcheck";' \
+		-e 'skipcheck();'
+
 manifest :
-	$(PERL) -I$(PERL_LIB) -e 'use ExtUtils::Manifest "&mkmanifest";' \
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use ExtUtils::Manifest "&mkmanifest";' \
 		-e 'mkmanifest();'
 
+
+# --- MakeMaker dist_core section:
+
 dist : $(DIST_DEFAULT)
+	@$(PERL) -le 'print "Warning: Makefile possibly out of date with $$vf" if ' \
+	    -e '-e ($$vf="$(VERSION_FROM)") and -M $$vf < -M "Makefile";'
 
-tardist : $(DISTNAME)-$(VERSION).tar.$(SUFFIX)
+tardist : $(DISTVNAME).tar$(SUFFIX)
 
-$(DISTNAME)-$(VERSION).tar.$(SUFFIX) : distdir
+zipdist : $(DISTVNAME).zip
+
+$(DISTVNAME).tar$(SUFFIX) : distdir
 	$(PREOP)
-	$(TAR) $(TARFLAGS) $(DISTNAME)-$(VERSION).tar $(DISTNAME)-$(VERSION)
-	$(COMPRESS) $(DISTNAME)-$(VERSION).tar
-	$(RM_RF) $(DISTNAME)-$(VERSION)
+	$(TO_UNIX)
+	$(TAR) $(TARFLAGS) $(DISTVNAME).tar $(DISTVNAME)
+	$(RM_RF) $(DISTVNAME)
+	$(COMPRESS) $(DISTVNAME).tar
 	$(POSTOP)
 
-uutardist : $(DISTNAME)-$(VERSION).tar.$(SUFFIX)
-	uuencode $(DISTNAME)-$(VERSION).tar.$(SUFFIX) \
-		$(DISTNAME)-$(VERSION).tar.$(SUFFIX) > \
-		$(DISTNAME)-$(VERSION).tar.$(SUFFIX).uu
+$(DISTVNAME).zip : distdir
+	$(PREOP)
+	$(ZIP) $(ZIPFLAGS) $(DISTVNAME).zip $(DISTVNAME)
+	$(RM_RF) $(DISTVNAME)
+	$(POSTOP)
+
+uutardist : $(DISTVNAME).tar$(SUFFIX)
+	uuencode $(DISTVNAME).tar$(SUFFIX) \
+		$(DISTVNAME).tar$(SUFFIX) > \
+		$(DISTVNAME).tar$(SUFFIX)_uu
 
 shdist : distdir
 	$(PREOP)
-	$(SHAR) $(DISTNAME)-$(VERSION) > $(DISTNAME)-$(VERSION).shar
-	$(RM_RF) $(DISTNAME)-$(VERSION)
+	$(SHAR) $(DISTVNAME) > $(DISTVNAME).shar
+	$(RM_RF) $(DISTVNAME)
 	$(POSTOP)
 
-distdir :
-	$(RM_RF) $(DISTNAME)-$(VERSION)
-	$(PERL) -I$(PERL_LIB) -e 'use ExtUtils::Manifest "/mani/";' \
-		-e 'manicopy(maniread(),"$(DISTNAME)-$(VERSION)");'
 
+# --- MakeMaker dist_dir section:
+
+distdir :
+	$(RM_RF) $(DISTVNAME)
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -MExtUtils::Manifest=manicopy,maniread \
+		-e 'manicopy(maniread(),"$(DISTVNAME)", "$(DIST_CP)");'
+
+
+# --- MakeMaker dist_test section:
+
+disttest : distdir
+	cd $(DISTVNAME) && $(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) Makefile.PL
+	cd $(DISTVNAME) && $(MAKE)
+	cd $(DISTVNAME) && $(MAKE) test
+
+
+# --- MakeMaker dist_ci section:
 
 ci :
-	$(PERL) -I$(PERL_LIB) -e 'use ExtUtils::Manifest "&maniread";' \
-		-e '@all = keys %{maniread()};' \
+	$(PERL) -I$(PERL_ARCHLIB) -I$(PERL_LIB) -e 'use ExtUtils::Manifest "&maniread";' \
+		-e '@all = keys %{ maniread() };' \
 		-e 'print("Executing $(CI) @all\n"); system("$(CI) @all");' \
-		-e 'print("Executing $(RCS) ...\n"); system("$(RCS) @all");'
-
+		-e 'print("Executing $(RCS_LABEL) ...\n"); system("$(RCS_LABEL) @all");'
 
 
 # --- MakeMaker install section:
 
-doc_install ::
-	@ echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
-	@ $(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB)  \
-		-e "use ExtUtils::MakeMaker; MM->writedoc('Module', '$(NAME)', \
-		'LINKTYPE=$(LINKTYPE)', 'VERSION=$(VERSION)', \
-		'EXE_FILES=$(EXE_FILES)')" >> $(INSTALLARCHLIB)/perllocal.pod
+install :: all pure_install doc_install
 
-install :: pure_install doc_install
+install_perl :: all pure_perl_install doc_perl_install
 
-pure_install ::
-	@$(PERL) -e 'foreach (@ARGV){die qq{You do not have permissions to install into $$_\n} unless -w $$_}' $(INSTALLPRIVLIB) $(INSTALLARCHLIB)
-	: perl5.000 and MM pre 3.8 autosplit into INST_ARCHLIB, we delete these old files here
-	rm -f $(INSTALLARCHLIB)/auto/$(FULLEXT)/*.al
-	rm -f $(INSTALLARCHLIB)/auto/$(FULLEXT)/*.ix
-	$(MAKE) INST_LIB=$(INSTALLPRIVLIB) INST_ARCHLIB=$(INSTALLARCHLIB) INST_EXE=$(INSTALLBIN)
-	@$(PERL) -i.bak -lne 'print unless $$seen{$$_}++' $(INSTALLARCHLIB)/auto/$(FULLEXT)/.packlist
+install_site :: all pure_site_install doc_site_install
 
-#### UNINSTALL IS STILL EXPERIMENTAL ####
-uninstall ::
-	$(RM_RF) `cat $(INSTALLARCHLIB)/auto/$(FULLEXT)/.packlist`
+install_ :: install_site
+	@echo INSTALLDIRS not defined, defaulting to INSTALLDIRS=site
+
+pure_install :: pure_$(INSTALLDIRS)_install
+
+doc_install :: doc_$(INSTALLDIRS)_install
+	@echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
+
+pure__install : pure_site_install
+	@echo INSTALLDIRS not defined, defaulting to INSTALLDIRS=site
+
+doc__install : doc_site_install
+	@echo INSTALLDIRS not defined, defaulting to INSTALLDIRS=site
+
+pure_perl_install ::
+	@$(MOD_INSTALL) \
+		read $(PERL_ARCHLIB)/auto/$(FULLEXT)/.packlist \
+		write $(INSTALLARCHLIB)/auto/$(FULLEXT)/.packlist \
+		$(INST_LIB) $(INSTALLPRIVLIB) \
+		$(INST_ARCHLIB) $(INSTALLARCHLIB) \
+		$(INST_BIN) $(INSTALLBIN) \
+		$(INST_SCRIPT) $(INSTALLSCRIPT) \
+		$(INST_MAN1DIR) $(INSTALLMAN1DIR) \
+		$(INST_MAN3DIR) $(INSTALLMAN3DIR)
+	@$(WARN_IF_OLD_PACKLIST) \
+		$(SITEARCHEXP)/auto/$(FULLEXT)
+
+
+pure_site_install ::
+	@$(MOD_INSTALL) \
+		read $(SITEARCHEXP)/auto/$(FULLEXT)/.packlist \
+		write $(INSTALLSITEARCH)/auto/$(FULLEXT)/.packlist \
+		$(INST_LIB) $(INSTALLSITELIB) \
+		$(INST_ARCHLIB) $(INSTALLSITEARCH) \
+		$(INST_BIN) $(INSTALLBIN) \
+		$(INST_SCRIPT) $(INSTALLSCRIPT) \
+		$(INST_MAN1DIR) $(INSTALLMAN1DIR) \
+		$(INST_MAN3DIR) $(INSTALLMAN3DIR)
+	@$(WARN_IF_OLD_PACKLIST) \
+		$(PERL_ARCHLIB)/auto/$(FULLEXT)
+
+doc_perl_install ::
+	@$(DOC_INSTALL) \
+		"$(NAME)" \
+		"installed into" "$(INSTALLPRIVLIB)" \
+		LINKTYPE "$(LINKTYPE)" \
+		VERSION "$(VERSION)" \
+		EXE_FILES "$(EXE_FILES)" \
+		>> $(INSTALLARCHLIB)/perllocal.pod
+
+doc_site_install ::
+	@$(DOC_INSTALL) \
+		"Module $(NAME)" \
+		"installed into" "$(INSTALLSITELIB)" \
+		LINKTYPE "$(LINKTYPE)" \
+		VERSION "$(VERSION)" \
+		EXE_FILES "$(EXE_FILES)" \
+		>> $(INSTALLARCHLIB)/perllocal.pod
+
+
+uninstall :: uninstall_from_$(INSTALLDIRS)dirs
+
+uninstall_from_perldirs ::
+	@$(UNINSTALL) $(PERL_ARCHLIB)/auto/$(FULLEXT)/.packlist
+
+uninstall_from_sitedirs ::
+	@$(UNINSTALL) $(SITEARCHEXP)/auto/$(FULLEXT)/.packlist
 
 
 # --- MakeMaker force section:
@@ -468,18 +629,17 @@ FORCE:
 
 # --- MakeMaker perldepend section:
 
-PERL_HDRS = $(PERL_INC)/EXTERN.h $(PERL_INC)/INTERN.h \
-    $(PERL_INC)/XSUB.h	$(PERL_INC)/av.h	$(PERL_INC)/cop.h \
-    $(PERL_INC)/cv.h	$(PERL_INC)/dosish.h	$(PERL_INC)/embed.h \
-    $(PERL_INC)/form.h	$(PERL_INC)/gv.h	$(PERL_INC)/handy.h \
-    $(PERL_INC)/hv.h	$(PERL_INC)/keywords.h	$(PERL_INC)/mg.h \
-    $(PERL_INC)/op.h	$(PERL_INC)/opcode.h	$(PERL_INC)/patchlevel.h \
-    $(PERL_INC)/perl.h	$(PERL_INC)/perly.h	$(PERL_INC)/pp.h \
-    $(PERL_INC)/proto.h	$(PERL_INC)/regcomp.h	$(PERL_INC)/regexp.h \
-    $(PERL_INC)/scope.h	$(PERL_INC)/sv.h	$(PERL_INC)/unixish.h \
-    $(PERL_INC)/util.h	$(PERL_INC)/config.h
-
-
+PERL_HDRS = \
+$(PERL_INC)/EXTERN.h       $(PERL_INC)/gv.h           $(PERL_INC)/pp.h       \
+$(PERL_INC)/INTERN.h       $(PERL_INC)/handy.h        $(PERL_INC)/proto.h    \
+$(PERL_INC)/XSUB.h         $(PERL_INC)/hv.h           $(PERL_INC)/regcomp.h  \
+$(PERL_INC)/av.h           $(PERL_INC)/keywords.h     $(PERL_INC)/regexp.h   \
+$(PERL_INC)/config.h       $(PERL_INC)/mg.h           $(PERL_INC)/scope.h    \
+$(PERL_INC)/cop.h          $(PERL_INC)/op.h           $(PERL_INC)/sv.h	     \
+$(PERL_INC)/cv.h           $(PERL_INC)/opcode.h       $(PERL_INC)/unixish.h  \
+$(PERL_INC)/dosish.h       $(PERL_INC)/patchlevel.h   $(PERL_INC)/util.h     \
+$(PERL_INC)/embed.h        $(PERL_INC)/perl.h				     \
+$(PERL_INC)/form.h         $(PERL_INC)/perly.h
 
 $(OBJECT) : $(PERL_HDRS)
 
@@ -488,17 +648,23 @@ Informix.c : $(XSUBPPDEPS)
 
 # --- MakeMaker makefile section:
 
-$(OBJECT) : Makefile
+$(OBJECT) : $(FIRST_MAKEFILE)
 
-# We take a very conservative approach here, but it's worth it.
+# We take a very conservative approach here, but it\'s worth it.
 # We move Makefile to Makefile.old here to avoid gnu make looping.
-Makefile :	Makefile.PL $(CONFIGDEP)
+Makefile : Makefile.PL $(CONFIGDEP)
 	@echo "Makefile out-of-date with respect to $?"
 	@echo "Cleaning current config before rebuilding Makefile..."
 	-@mv Makefile Makefile.old
 	-$(MAKE) -f Makefile.old clean >/dev/null 2>&1 || true
 	$(PERL) "-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" Makefile.PL 
-	@echo "Now you must rerun make."; false
+	@echo ">>> Your Makefile has been rebuilt. <<<"
+	@echo ">>> Please rerun the make command.  <<<"; false
+
+# To change behavior to :: would be nice, but would break Tk b9.02
+# so you find such a warning below the dist target.
+#Makefile :: $(VERSION_FROM)
+#	@echo "Warning: Makefile possibly out of date with $(VERSION_FROM)"
 
 
 # --- MakeMaker staticmake section:
@@ -506,88 +672,55 @@ Makefile :	Makefile.PL $(CONFIGDEP)
 # --- MakeMaker makeaperl section ---
 MAP_TARGET    = perl
 FULLPERL      = /opt/gnu/bin/perl
-MAP_LINKCMD   = $(CC) 
-MAP_PERLINC   = -I./blib -I./blib -I/opt/gnu/lib/perl5/sparc-solaris -I/opt/gnu/lib/perl5
-MAP_STATIC    = ./blib/auto/DBD/Informix/Informix.a /opt/gnu/lib/perl5/sparc-solaris/auto/DBD/Oracle/Oracle.a /opt/gnu/lib/perl5/sparc-solaris/auto/DBD/mSQL/mSQL.a /opt/gnu/lib/perl5/sparc-solaris/auto/DBI/DBI.a /opt/gnu/lib/perl5/sparc-solaris/auto/DynaLoader/DynaLoader.a /opt/gnu/lib/perl5/sparc-solaris/auto/Fcntl/Fcntl.a /opt/gnu/lib/perl5/sparc-solaris/auto/NDBM_File/NDBM_File.a /opt/gnu/lib/perl5/sparc-solaris/auto/POSIX/POSIX.a /opt/gnu/lib/perl5/sparc-solaris/auto/SDBM_File/SDBM_File.a /opt/gnu/lib/perl5/sparc-solaris/auto/Socket/Socket.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Bitmap/Bitmap.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Canvas/Canvas.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Entry/Entry.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/IO/IO.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Listbox/Listbox.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Menu/Menu.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Menubutton/Menubutton.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Photo/Photo.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Pixmap/Pixmap.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Scale/Scale.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Scrollbar/Scrollbar.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Text/Text.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Tk.a /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Xlib/Xlib.a
-MAP_PRELIBS   = -lsocket -lnsl -ldl -lm -lc -lcrypt 
 
-MAP_LIBPERL = /opt/gnu/lib/perl5/sparc-solaris/CORE/libperl.a
+$(MAP_TARGET) :: static $(MAKE_APERL_FILE)
+	$(MAKE) -f $(MAKE_APERL_FILE) $@
 
-extralibs.ld: ./blib/auto/DBD/Informix/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/DBD/Oracle/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/DBD/mSQL/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/DBI/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/DynaLoader/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Fcntl/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/NDBM_File/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/POSIX/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/SDBM_File/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Socket/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Bitmap/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Canvas/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Entry/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/IO/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Listbox/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Menu/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Menubutton/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Photo/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Pixmap/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Scale/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Scrollbar/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Text/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/extralibs.ld /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Xlib/extralibs.ld
-	@ rm -f $@
-	@ $(TOUCH) $@
-	cat ./blib/auto/DBD/Informix/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/DBD/Oracle/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/DBD/mSQL/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/DBI/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/DynaLoader/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Fcntl/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/NDBM_File/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/POSIX/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/SDBM_File/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Socket/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Bitmap/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Canvas/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Entry/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/IO/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Listbox/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Menu/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Menubutton/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Photo/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Pixmap/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Scale/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Scrollbar/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Text/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/extralibs.ld >> $@
-	cat /opt/gnu/lib/perl5/sparc-solaris/auto/Tk/Xlib/extralibs.ld >> $@
-
-$(MAP_TARGET): ./perlmain.o $(MAP_LIBPERL) $(MAP_STATIC) extralibs.ld
-	$(MAP_LINKCMD) -o $@ ./perlmain.o $(MAP_LIBPERL) $(MAP_STATIC) `cat extralibs.ld` $(MAP_PRELIBS)
-	@ echo 'To install the new "$(MAP_TARGET)" binary, call'
-	@ echo '    make -f Makefile inst_perl MAP_TARGET=$(MAP_TARGET)'
-	@ echo 'To remove the intermediate files say'
-	@ echo '    make -f Makefile map_clean'
-
-./perlmain.o: ./perlmain.c
-	cd . && $(CC) -I/opt/gnu/lib/perl5/sparc-solaris/CORE -c -DDEBUGGING -O perlmain.c
-
-./perlmain.c: Makefile
-	@ echo Writing $@
-	@ $(FULLPERL) $(MAP_PERLINC) -e 'use ExtUtils::Miniperl; \
-		writemain(grep s#.*/auto/##, qw|$(MAP_STATIC)|)' > $@.tmp && mv $@.tmp $@
-
-
-doc_inst_perl:
-	@ echo Appending installation info to $(INSTALLARCHLIB)/perllocal.pod
-	@ $(FULLPERL) -e 'use ExtUtils::MakeMaker; MM->writedoc("Perl binary",' \
-		-e '"$(MAP_TARGET)", "MAP_STATIC=$(MAP_STATIC)",' \
-		-e '"MAP_EXTRA=@ARGV", "MAP_LIBPERL=$(MAP_LIBPERL)")' \
-		-- `cat extralibs.ld` >> $(INSTALLARCHLIB)/perllocal.pod
-
-inst_perl: pure_inst_perl doc_inst_perl
-
-pure_inst_perl: $(MAP_TARGET)
-	cp $(MAP_TARGET) $(INSTALLBIN)/$(MAP_TARGET)
-
-clean :: map_clean
-
-map_clean :
-	rm -f ./perlmain.o ./perlmain.c $(MAP_TARGET) extralibs.ld
+$(MAKE_APERL_FILE) : $(FIRST_MAKEFILE)
+	@echo Writing \"$(MAKE_APERL_FILE)\" for this $(MAP_TARGET)
+	@$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) \
+		Makefile.PL DIR= \
+		MAKEFILE=$(MAKE_APERL_FILE) LINKTYPE=static \
+		MAKEAPERL=1 NORECURS=1 CCCDLFLAGS=
 
 
 # --- MakeMaker test section:
 
 TEST_VERBOSE=0
-TEST_TYPE=test_dynamic
+TEST_TYPE=test_$(LINKTYPE)
+TEST_FILE = test.pl
+TESTDB_SW = -d
+
+testdb :: testdb_$(LINKTYPE)
 
 test :: $(TEST_TYPE)
 
-test_dynamic :: all
-	$(FULLPERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) test.pl
+test_dynamic :: pure_all
+	PERL_DL_NONLAZY=1 $(FULLPERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) test.pl
 
-test_static :: all $(MAP_TARGET)
-	./$(MAP_TARGET) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) test.pl
+testdb_dynamic :: pure_all
+	PERL_DL_NONLAZY=1 $(FULLPERL) $(TESTDB_SW) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(TEST_FILE)
 
+test_ : test_dynamic
+
+test_static :: pure_all $(MAP_TARGET)
+	PERL_DL_NONLAZY=1 ./$(MAP_TARGET) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) test.pl
+
+testdb_static :: pure_all $(MAP_TARGET)
+	PERL_DL_NONLAZY=1 ./$(MAP_TARGET) $(TESTDB_SW) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) $(TEST_FILE)
+
+
+
+# --- MakeMaker pm_to_blib section:
+
+pm_to_blib: $(TO_INST_PM)
+	@$(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
+	"-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -MExtUtils::Install \
+        -e 'pm_to_blib({qw{$(PM_TO_BLIB)}},"$(INST_LIB)/auto")'
+	@$(TOUCH) $@
+
+
+# --- MakeMaker selfdocument section:
 
 
 # --- MakeMaker postamble section:
@@ -597,5 +730,5 @@ test_static :: all $(MAP_TARGET)
 .SUFFIXES: .ec
 
 .ec.o:
-	esql -c -I$(ESQL_LIB) -I$(PERL_LIB) -I$(PERL_ARCHLIB) -I$(PERL_ARCHLIB)/DBI -I$(PERL_ARCHLIB)/CORE dbdimp.ec
+	esql -c  -I$(ESQL_LIB) -I$(PERL_LIB) -I$(PERL_ARCHLIB) -I$(PERL_ARCHLIB)/DBI -I$(PERL_ARCHLIB)/CORE dbdimp.ec
 

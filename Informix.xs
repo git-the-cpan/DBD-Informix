@@ -63,6 +63,28 @@ disconnect_all(drh)
     }
     XST_mIV(0, 1);
 
+void
+_ListDBs( drh )
+    SV *    drh
+    PPCODE:
+#define MAXDBS 100
+#define FASIZE ( MAXDBS * 19 )
+    int sqlcode;
+    int ndbs;
+    int i;
+    char *dbsname[MAXDBS + 1];
+    char dbsarea[FASIZE];
+    if ( ( sqlcode = sqgetdbs( &ndbs, dbsname, MAXDBS, dbsarea, FASIZE ) ) != 0
+) {
+        do_error( sqlcode );
+      } else {
+        for ( i = 0 ; i < ndbs ; ++i ) {
+            EXTEND( sp, 1 );
+            PUSHs( sv_2mortal((SV*)newSVpv(dbsname[i], strlen(dbsname[i]))));
+          }
+      }
+
+
 MODULE = DBD::Informix    PACKAGE = DBD::Informix::db
 
 void

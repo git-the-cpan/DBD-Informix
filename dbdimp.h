@@ -168,5 +168,4 @@ void    dbd_init _((dbistate_t *dbistate));
 void    dbd_preparse _((imp_sth_t *imp_sth, char *statement));
 int     dbd_bind_ph _((SV *h, imp_sth_t *imp_sth, char *ph_name, SV *newvalue));
 int     dbd_describe _((SV *h, imp_sth_t *imp_sth));
-
 /* end */

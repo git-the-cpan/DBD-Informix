@@ -13,7 +13,7 @@
     require DynaLoader;
     @ISA = qw(DynaLoader);
 
-	$VERSION = "0.20pl1";
+	$VERSION = "0.22";
 
     bootstrap DBD::Informix;
 

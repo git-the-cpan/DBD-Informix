@@ -100,20 +100,6 @@ alloc_imp_dbh()
 }
 */
 
-/*
-static void
-free_imp_dbh(imp_dbh)
-    imp_dbh_t *imp_dbh;
-{
-    if (imp_dbh_cache_av)
-	imp_dbh_cache_av = newAV(); */
-    /* This is the last chance we get to free up the memory	*/
-    /* allocated to this object.				*/
-    /* XXX check for what to free	*/
-/*    imp_dbh->in_use = FALSE;
-    av_push(imp_dbh_cache_av, (SV*)imp_dbh_cache_av);
-}
-*/
 
 int
 dbd_db_login(dbh, host, dbname, user, pass)
@@ -541,8 +527,19 @@ dbd_describe(h, imp_sth)
         $get descriptor 'demodesc' value $i $type = type, $len = length, $name = name;
         if ( dbis->debug >= 2 ) 
             warn( "Type: %d\tName: %s\tLength: %d\n", type, name, len );
-        f_cbufl[i] = len;
-        t_cbufl += len;
+        /** INTEGER kludge. */
+        if ( type == 2 ) {
+            char tmpstring[1024]; 
+            sprintf( tmpstring, "%i", name );
+            f_cbufl[i] = strlen( tmpstring );
+            t_cbufl += f_cbufl[i];
+            if ( dbis->debug >= 2 )
+                warn( "Type: %d\tName: %s\tLength: %d\n", 
+                      type, name, f_cbufl[i] );
+          } else {            
+            f_cbufl[i] = len;
+            t_cbufl += len;
+          }
       }
     imp_sth->row_num++;
 

@@ -9,5 +9,7 @@ README
 ToDo
 dbdimp.ec
 dbdimp.h
+extratests/dblist.pl
+extratests/integerbug.pl
 extratests/original_0.20pl0_test.pl
 test.pl

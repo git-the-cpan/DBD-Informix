@@ -11,7 +11,7 @@
 # Initial revision
 #
 
-use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose %att);
+use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose);
 use Getopt::Std;
 use Config;
 
@@ -19,7 +19,7 @@ use DBI;	# The DBI must be installed before we can build a DBD
 
 %opts = (
     'NAME'    => 'DBD::Informix',
-    'VERSION' => '0.20pl1',
+    'VERSION' => '0.22',
 );
 
 print "\nConfiguring DBD::Informix version $opts{VERSION}...\n";
@@ -69,12 +69,16 @@ if ( $infversion eq '5' ) {
 # - requires to build
 print "Informix sysliblist: $sysliblist\n";
 
+$ccflags = "";			# Fudge to get round HP-UX brain-death
 if ( $Config{osname} eq 'solaris' ) {
     $linkwith = "-L$ID/lib -R$ID/lib -L$ID/lib/esql -R$ID/lib/esql";
   } else {
     if ( $Config{osname} eq 'aix' ) {
         $linkwith = "-L$ID/lib -lbsd";
       } else {
+        if ( $Config{osname} eq 'hpux' ) {
+            $ccflags = $Config{ccflags};
+          }
         $linkwith = "-L$ID/lib";
       }
   }
@@ -111,7 +115,7 @@ WriteMakefile(%opts);
 system( "echo \".SUFFIXES: .ec\" >> Makefile" );
 system( "echo \"\" >> Makefile" );
 system( "echo \".ec.o:\" >> Makefile" );
-system( "echo \"	esql -c -I\$(ESQL_LIB) -I\$(PERL_LIB) -I\$(PERL_ARCHLIB) -I\$(PERL_ARCHLIB)/DBI -I\$(PERL_ARCHLIB)/CORE dbdimp.ec\
+system( "echo \"	esql -c $ccflags -I\"\$\"(ESQL_LIB) -I\"\$\"(PERL_LIB) -I\"\$\"(PERL_ARCHLIB) -I\"\$\"(PERL_ARCHLIB)/DBI -I\"\$\"(PERL_ARCHLIB)/CORE dbdimp.ec\
 \" >> Makefile" );
 
 # Cleanly exit from the Makefile-build process

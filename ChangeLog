@@ -18,3 +18,17 @@ DBD::Informix for DBI - Written by Alligator Descartes <descarte@mcqueen.com>
 		Fixed Makefile.PL
 		Removed hacky 'build' file and uses Makefile.PL exclusively
 		now.
+
+0.21
+----
+
+01/09/95: 	Fixed truncated INTEGER bug. Other numerical types still
+		screwed. Patch on the way.
+
+0.22
+----
+
+09/09/96:	Added @ary = $drh->func( '_ListDBs' ); method for getting
+		a list of extant databases on the local Informix server.
+		( From original code and suggestion by 
+                  George.Vicherek@Sciatl.COM )
