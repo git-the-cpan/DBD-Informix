@@ -1,0 +1,72 @@
+#!/usr/bin/perl -w
+#
+# @(#)esqlcc	25.4 96/12/09 17:11:27
+#
+# DBD::Informix for Perl Version 5
+#
+# Surrogate C Compiler for Informix ESQL/C versions 4.10.UC1 upwards
+#
+# Copyright (c) 1996 Jonathan Leffler
+#
+# You may distribute under the terms of either the GNU General Public
+# License or the Artistic License, as specified in the Perl README file.
+
+@ARGS = ();
+$libs = 1;
+
+sub firstline
+{
+	my ($file) = @_;
+	my ($line) = `sed 1q $file`;
+	chomp $line;
+	$line;
+}
+
+# Cannot use for $arg (@ARGV) because of '-[Ll] name' processing!
+for ($i = 0; $i < @ARGV; $i++)
+{
+	$arg = $ARGV[$i];
+	if ($arg =~ /^[^-].*\.c$/o)
+	{
+		# C file
+		system "perl esqlsed $arg"
+			if (-w $arg && &firstline($arg) eq "#include <sqlhdr.h>");
+		push @ARGS, $arg;
+	}
+	elsif ($arg =~ /^-c$/o)
+	{
+		# -c option (no linking)
+		$libs = 0;
+		push @ARGS, $arg;
+	}
+	elsif ($arg =~ /^[^-].*\.[ao]$/o)
+	{
+		# Object file or archive library specified by name
+		push @ARGS, $arg if ($libs);
+	}
+	elsif ($arg =~ /^-[lL].+/o)
+	{
+		# -lname or -Ldirectory -- not wanted if no libraries
+		push @ARGS, $arg if ($libs);
+	}
+	elsif ($arg =~ /^-[lL]$/o)
+	{
+		# -l name or -L directory -- not wanted if no libraries
+		push @ARGS, $arg if ($libs);
+		$arg = $ARGV[++$i];
+		push @ARGS, $arg if ($libs);
+	}
+	else
+	{
+		# Copy argument to new argument list
+		push @ARGS, $arg;
+	}
+}
+
+# Sort out the real compiler.
+# Note that if $ENV{ESQLCC} contains, for example, 'cc -G', then we
+# need to split this into two words for the exec to work correctly.
+$cmd = $ENV{ESQLCC};
+$cmd = 'cc' unless ($cmd);
+@cmd = split /\s+/, $cmd;
+exec @cmd, @ARGS;

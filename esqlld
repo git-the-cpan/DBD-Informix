@@ -1,0 +1,28 @@
+#!/usr/bin/perl -w
+#
+# @(#)esqlld	25.1 96/12/01 15:15:43
+#
+# DBD::Informix for Perl Version 5
+#
+# Surrogate Linker for Informix ESQL/C versions 4.10.UC1 upwards
+# -- Used to create shared libraries.
+#
+# Copyright (c) 1996 Jonathan Leffler
+#
+# You may distribute under the terms of either the GNU General Public
+# License or the Artistic License, as specified in the Perl README file.
+
+@ARGS = ();
+
+for $arg (@ARGV)
+{
+	push @ARGS, $arg unless ($arg =~ /^-[DIU]/o);
+}
+
+# Sort out the real compiler.
+# Note that if $ENV{ESQLLD} contains, for example, 'cc -G', then we
+# need to split this into two words for the exec to work correctly.
+$cmd = $ENV{ESQLLD};
+$cmd = 'cc' unless ($cmd);
+@cmd = split /\s+/, $cmd;
+exec @cmd, @ARGS;

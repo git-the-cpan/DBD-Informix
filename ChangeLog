@@ -1,58 +1,137 @@
-DBD::Informix for DBI - Written by Alligator Descartes <descarte@mcqueen.com>
+DBD::Informix for DBI
 
-18/08/95:	Started. 
+- Written by Alligator Descartes <descarte@mcqueen.com>
+- Rewritten by Jonathan Leffler (johnl@informix.com)
 
-		Version 0.0.0 ( Totally pre-alpha! )
+18/08/95:       Started.
+                Version 0.0.0 (Totally pre-alpha!)
 
-17/10/95:15:39	After a good break of about a month and a half, back in the
-		saddle.
+17/10/95:15:39  After a good break of about a month and a half, back in the
+                saddle.
 
-		We have data from SELECTs coming back from the database!
+                We have data from SELECTs coming back from the database!
 
-		Released 0.20pl0 Disney on ftp.mcqueen.com. Limited hacker
-		release.
+                Released 0.20pl0 Disney on ftp.mcqueen.com. Limited hacker
+                release.
 
-14/04/96:18:04	Added support for CREATE, DROP, INSERT, UPDATE and DELETE.
-		Fixed $DBI::errnum and $DBI::errstr problems
-		Fixed Informix.pm to stop reporting MSQL_HOME errors
-		Fixed Makefile.PL
-		Removed hacky 'build' file and uses Makefile.PL exclusively
-		now.
+14/04/96:18:04  Added support for CREATE, DROP, INSERT, UPDATE and DELETE.
+                Fixed $DBI::errnum and $DBI::errstr problems
+                Fixed Informix.pm to stop reporting MSQL_HOME errors
+                Fixed Makefile.PL
+                Removed hacky 'build' file and uses Makefile.PL exclusively
+                now.
 
-0.21
-----
+0.21 Release
+------------
 
-01/09/95: 	Fixed truncated INTEGER bug. Other numerical types still
-		screwed. Patch on the way.
+01/09/95:       Fixed truncated INTEGER bug. Other numerical types still
+                screwed. Patch on the way.
 
-0.22
-----
+0.22 Release
+------------
 
-09/09/96:	Added @ary = $drh->func( '_ListDBs' ); method for getting
-		a list of extant databases on the local Informix server.
-		( From original code and suggestion by 
-                  George.Vicherek@Sciatl.COM )
+09/09/96:       Added @ary = $drh->func('_ListDBs'); method for getting
+                a list of extant databases on the local Informix server.
+                (From original code and suggestion by
+                  George.Vicherek@Sciatl.COM)
 
-10/09/96:	Fixed all numeric types to return correctly. CHAR fields don't
-		quite behave as planned, or perhaps they do. Added 'multicursor'
-		test which proves that simultanous multiple cursors fails
-		miserably.
+10/09/96:       Fixed all numeric types to return correctly. CHAR fields don't
+                quite behave as planned, or perhaps they do. Added 'multicursor'
+                test which proves that simultanous multiple cursors fails
+                miserably.
 
-		0.23 release.
+0.23 Release
+------------
 
-17/09/96:	Added patch for bad column names as show in George Vicherek's
-		splendid test case. ( extratests/primitives.pl exercises this )
+17/09/96:       Added patch for bad column names as show in George Vicherek's
+                splendid test case. (extratests/primitives.pl exercises this)
 
-18/09/96:	Wrapped in a patch to Makefile.PL from Christophe Martin.
-		Added some other Makefile.PL patches of my own. It should now
-		support cleaner builds on HP-UX ( spit! ) and correctly detect
-		when dbdimp.ec has changed.
+18/09/96:       Wrapped in a patch to Makefile.PL from Christophe Martin.
+                Added some other Makefile.PL patches of my own. It should now
+                support cleaner builds on HP-UX (spit!) and correctly detect
+                when dbdimp.ec has changed.
 
-18/09/96:	Wrapped in patches by Terry Nightingale based on Bill Hailes'
-		isqlperl for supporting multi-cursors. Cleaned the type 
-		handling code again.
+18/09/96:       Wrapped in patches by Terry Nightingale based on Bill Hailes'
+                isqlperl for supporting multi-cursors. Cleaned the type
+                handling code again.
 
-		0.24 release.
+0.24 Release
+------------
 
-26/09/96:	Patches from Terry arrived. This'll be the 0.25 release. Seems
-		to work.
+26/09/96:       Patches from Terry arrived. This'll be the 0.25 release. Seems
+                to work.
+
+0.25 Release
+------------
+
+96-11-01: Control transferred to Jonathan Leffler (johnl@informix.com).
+96-11-19: Rewrite of dbdimp.ec more or less complete.  The ESQL/C code
+          has been almost totally rewritten; the Perl interface code is
+          still similar to what was there previously.  Nearly ready to go
+          into release.  5.0x ESQL/C not linking OK on Solaris; not sure
+          why.  7.21 is doing fine.
+96-11-25: Changes leading up to 0.25b1 release.  Add sqlca record handling
+          for statements.  Add use of EXEC IMMEDIATE when feasible.
+96-11-26: Feedback from beta testers incorporated into build process.
+          Not all problems will be resolved yet.  Version 0.25b2.
+96-11-30: Move sqlca handling to connection (not statement).
+          Fix blob handling to the extent that SELECT works.  (INSERT and
+          UPDATE still need fixing.  INSERT will probably be able to adapt
+          the SELECT code to handle blobs.  UPDATE will be very tricky.
+          Memory leaks may (probably) occur.
+          Upgrade Makefile.PL to always set INFORMIXC when compiling ESQL/C.
+96-12-01: Upgrade Makefile.PL to use new Perl scripts esqlcc, esqlsed and
+          esqlld to protect platforms such as DEC OSF/1 where the C
+          compiler is not used to link shared libraries.  Also, only use
+          GCC warnings when DBD_GCC_DEBUG is set in the environment.  Also
+          use $(RM_F) to remove the generated C files instead of $(RM) so
+          that it works for platforms like SCO where $(RM) is not defined
+          by MAKE automatically.
+96-12-02: Release 0.25b3 with some work incomplete.  Update Makefile.PL so
+          that "make perl" works.  Note that INSERT and blobs does not work!
+96-12-03: Update Makefile.PL (and esqlcc) to use '$(FULLPERL) esqlcc' etc.
+          Rename the extratests directory to t for automatic testing as
+          documented in the Test::Harness module.  Create (and document)
+          InformixTest.pm to help with the test programs.  Note that
+          test.pl does not exploit it all that much because it has to test
+          some more basic stuff.  However, the other tests do use it.
+          NB: ESQL/C 5.00 and 5.01 have a bug in the SQL descriptor code
+          which means that using 'char *' as a type restricts you to precisely
+          3 characters of data.  This is fixed in 5.02 and above.  Dammit!
+96-12-04: Update Makefile.PL to overcome Dave Thomas problems on DEC OSF
+          (version 25.13 sent to him for approval, and comments incorporated
+          into version 25.14 .. 25.16).  Also finish converting the tests in
+          the t directory.
+96-12-05: More revisions to Makefile.PL, some putting teeth into the
+          prerequisites, some more dealing with DEC OSF (there's a compiler
+          flag to say set __STDC__, as there usually is).  Rename nm_* inside
+          the imp_sth structure.  Redefine the type of imp_sth->blobs and
+          upgrade code to match.  Test t/blob03.t passes; some work to do to
+          get t/blob04.t to pass.  Improved README.  Etc.
+96-12-09: Finally worked out how SQL descriptors handle blobs.  Code now works
+          safely with blobs located in memory.  However, with ESQL/C 7.21.UC1
+          on Solaris 2.4, there is a memory leak corresponding to the space
+          allocated for the blobs for a given statement unless you manually
+          release it before deallocating the descriptor.  This is nasty, and
+          may not be true of other versions.  Added test t/blob02.t.  Note
+          that t/blob03.t uses the data created by t/blob02.t, so it must be
+          run (reasonably successfully) before t/blob03.t can be run
+          successfully.  Use decsci.[ch] code (plus auxilliary function
+          decgen() inside dbdimp.ec) to format FLOAT, SMALLFLOAT, DECIMAL and
+          MONEY quantities.  The 5.0x and 6.0x libraries do not always handle
+          these gracefully.
+
+With Thanks to the DBD::Informix v0.25 Testing Team:
+John Wang - wangj@aromat.com
+Del Simmons - del@infoman.com
+Dave Thomas - dave@thomases.com
+Oyvind Gjerstad - ogj@tglobe1.tollpost.no
+Jeff Rowe - j.p.rowe@larc.nasa.gov
+Rodlyn Joseph - bluephi@sharpcomm.com
+Duc Nguyen - dhn@benvolio.nova.att.com
+Serge Davidov - serge@fcmc.com
+  
+--------------
+
+Jonathan Leffler (johnl@informix.com)
+@(#)ChangeLog	25.7 96/12/09 20:30:20

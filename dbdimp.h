@@ -1,186 +1,114 @@
 /*
-   $Id: dbdimp.h,v 1.5 1995/06/22 00:37:04 timbo Rel $
-
-   Copyright (c) 1994,1995  Tim Bunce
-
-   You may distribute under the terms of either the GNU General Public
-   License or the Artistic License, as specified in the Perl README file.
-
-*/
-
-/* these are (almost) random values ! NOTE: DBD::Oracle hangover */
-#define MAX_BIND_VARS 99
-#define MAX_COLS 128
-
-/** Maximum number of simltaneously open cursors */
-#define MAX_CURSORS 9
-
-/* various maiximum lengths for string representations */
-/* In cases of uncertainty, I've erred on the side of caution */
-#define MAXINTLEN       24
-#define MAXSMINTLEN     12
-#define MAXINTERVALLEN  26
-#define MAXDTIMELEN     26
-#define MAXMONEYLEN     34
-#define MAXDATELEN      11
-#define MAXSERIALLEN    MAXINTLEN
-#define MAXDECIMALLEN   34
-#define MAXSMFLOATLEN   MAXDECIMALLEN
-#define MAXFLOATLEN     MAXDECIMALLEN
-#define MAXNULLLEN      1
-
-/* */
-
-#ifndef HDA_SIZE
-#define HDA_SIZE 512
-#endif
-
-typedef struct imp_fbh_st imp_fbh_t;
-
-/* Lda_def is defined to just being an int. It holds the socket code return
- * - value.
+ * @(#)dbdimp.h	25.14 96/12/09 14:48:25
  *
- * We also find from $ORACLE_HOME/rdbms/demo/ocidfn.h that Cda_Def is the
- * - same as Lda_Def
+ * $Derived-From: dbdimp.h,v 1.5 1995/06/22 00:37:04 timbo Archaic $
+ *
+ * Copyright (c) 1994,1995  Tim Bunce
+ *           (c) 1996       Jonathan Leffler
+ *
+ * You may distribute under the terms of either the GNU General Public
+ * License or the Artistic License, as specified in the Perl README file.
  */
 
-struct imp_drh_st {
-    dbih_drc_t com;         /* MUST be first element in structure   */
+#ifndef DBDIMP_H
+#define DBDIMP_H
+
+#define NAMESIZE 19				/* 18 character name plus '\0' */
+
+/* Different states for a statement */
+enum State
+{
+	Unused, Prepared, Allocated, Described, Declared, Opened, Finished
 };
 
-struct Lda_Def_st {
-    int lda;
-    int rc;		/* Return code? */
-    char *svdb;		/* Database Name */
-    char *svhost;	/* Hostname of database */
-    int svsock;		/* Socket doo-dah */
-  };
-
-typedef struct Lda_Def_st Lda_Def;
-/* typedef struct Lda_Def_st Cda_Def; */
-/* typedef struct result_s Cda_Def; */
-typedef int Cda_Def;
-
-/* We need to define some Oracle typedefs too */
-
-#define eb1 char
-#define ub1 unsigned char
-#define ub2 unsigned short
-#define ub4 unsigned long
-#define sb1 signed char
-#define sb2 signed short
-#define sb4 signed int
-#define sword signed int
-
-typedef enum cursorstate {
-    closed,
-    prepared,
-    described,
-    allocated,
-    declared,
-    opened
-} cursorstate;
-
-struct sqlta {
-    short sqld;
-    struct sqltype_struct *sqltype;
+enum Boolean
+{
+	False, True
 };
 
-typedef struct {
-    struct sqlda *udesc;
-    struct sqlta *tdesc;
-    char *buffer;
-    cursorstate is_open;
-    int sttmnttype;
-    char *statement;
-} cursor;
+typedef enum State State;		/* Cursor/Statement states */
+typedef enum Boolean Boolean;
+typedef long ErrNum;			/* Informix Error Number */
+typedef char Name[NAMESIZE];
+
+/* Define drh implementor data structure */
+struct imp_drh_st
+{
+	dbih_drc_t      com;		/* MUST be first element in structure   */
+	int             max_connections;	/* Maximum concurrent connections */
+	int             n_connections;		/* Number of active connections */
+	const char     *current_connection;	/* Name of current connection */
+};
 
 /* Define dbh implementor data structure */
-struct imp_dbh_st {
-    dbih_dbc_t com;         /* MUST be first element in structure   */
-
-    Lda_Def lda;
-    ub1     hda[HDA_SIZE];
+struct imp_dbh_st
+{
+	dbih_dbc_t      com;		/* MUST be first element in structure */
+	char           *database;	/* Name of database */
+	Name            nm_connection;	/* Name of connection */
+	Boolean         is_onlinedb;/* Is OnLine Engine */
+	Boolean         is_modeansi;/* Is MODE ANSI Database */
+	Boolean         is_loggeddb;/* Has transaction log */
+	Boolean         autocommit; /* Treat each statement as a transaction? */
+	Boolean         autoreport; /* Report all errors when they happen? */
+	BlobLocn        blob_bind;	/* Blob binding */
+	Sqlca           sqlca;      /* Last SQLCA record for connection */
 };
 
 /* Define sth implementor data structure */
-struct imp_sth_st {
-    dbih_stc_t com;         /* MUST be first element in structure   */
-
-    Cda_Def *cda;	/* currently just points to cdabuf below */
-    Cda_Def cdabuf;
-/*    imp_dbh_t *imp_dbh;
-    U32       dbh_generation; 
-    U16       flags; */
-
-    int is_create,
-        is_drop,
-        is_delete,
-        is_insert,
-        is_update;
-
-    /* Current index of statement in cursor index? */
-    int cursoridx;
-    int row_num;
-
-    /* Input Details	*/
-    char      *statement;   /* sql (see sth_scan)		*/
-    HV        *bind_names;
-
-    /* Output Details	*/
-    int        done_desc;   /* have we described this sth yet ?	*/
-    int        fbh_num;     /* number of output fields		*/
-    imp_fbh_t *fbh;	    /* array of imp_fbh_t structs	*/
-    char      *fbh_cbuf;    /* memory for all field names       */
-    sb4   long_buflen;      /* length for long/longraw (if >0)	*/
-    bool  long_trunc_ok;    /* is truncating a long an error	*/
-};
-#define IMP_STH_EXECUTING	0x0001
-
-
-struct imp_fbh_st { 	/* field buffer EXPERIMENTAL */
-    imp_sth_t *imp_sth;	/* 'parent' statement */
-
-    /* Oracle's description of the field	*/
-    sb4  dbsize;
-    sb2  dbtype;
-    sb1  *cbuf; 		/* ptr to name of select-list item */
-    sb4  cbufl;		/* length of select-list item name */
-    sb4  dsize;		/* max display size if field is a char */
-    sb2  prec;
-    sb2  scale;
-    sb2  nullok;
-
-    /* Our storage space for the field data as it's fetched	*/
-    sb2  indp;		/* null/trunc indicator variable	*/
-    sword ftype;	/* external datatype we wish to get	*/
-    ub1  *buf;		/* data buffer (points to sv data)	*/
-    ub2  bufl;		/* length of data buffer		*/
-    ub2  rlen;		/* length of returned data		*/
-    ub2  rcode;		/* field level error status		*/
-
-    SV	*sv;
+struct imp_sth_st
+{
+	dbih_stc_t      com;		/* MUST be first element in structure   */
+	Name            nm_stmnt;	/* Name of prepared statement */
+	Name            nm_obind;	/* Name of allocated descriptor */
+	Name            nm_cursor;	/* Name of declared cursor */
+	Name            nm_ibind;	/* Name of input (bind) descriptor */
+	State           st_state;	/* State of statement */
+	int             st_type;	/* Type of statement */
+	BlobLocn        blob_bind;	/* Blob Binding */
+	int             n_blobs;	/* Number of blobs for statement */
+	int             n_columns;	/* Number of output fields */
+	int             n_bound;	/* Number of input fields */
+	imp_dbh_t	   *dbh;		/* Database handle for statement */
 };
 
+extern void dbd_ix_debug _((int n, char *fmt, const char *arg));
+extern void dbd_ix_sqlcode _((imp_dbh_t *dbh));
+extern void dbd_ix_seterror _((ErrNum rc));
 
+extern void dbd_dr_init _((dbistate_t *dbistate));
+extern int dbd_ix_driver _((SV *drh));
 
-typedef struct phs_st phs_t;    /* scalar placeholder   */
+extern SV      *dbd_db_FETCH _((SV *dbh, SV *keysv));
+extern int dbd_db_STORE _((SV *dbh, SV *keysv, SV *valuesv));
+extern int dbd_db_commit _((SV *sth));
+extern int dbd_db_disconnect _((SV *dbh));
+extern int dbd_db_login _((SV *dbh, char *dbname, char *uid, char *pwd));
+extern int dbd_db_rollback _((SV *sth));
+extern void dbd_db_destroy _((SV *dbh));
 
-struct phs_st { /* scalar placeholder EXPERIMENTAL      */
-    SV  *sv;            /* the scalar holding the value         */
-    sword ftype;        /* external OCI field type              */
-    sb2 indp;           /* null indicator                       */
-};
+extern AV      *dbd_st_fetch _((SV *sth));
+extern SV      *dbd_st_FETCH _((SV *sth, SV *keysv));
+extern int dbd_st_STORE _((SV *sth, SV *keysv, SV *valuesv));
+extern int dbd_st_bind_ph _((SV *sth, SV *param, SV *value, SV *attribs, int boolean, int len));
+extern int dbd_st_blob_read _((SV *sth, int field, long offset, long len, SV *destsv, int destoffset));
+extern int dbd_st_execute _((imp_sth_t *sth));
+extern int dbd_st_finish _((SV *sth));
+extern int dbd_st_prepare _((SV *sth, char *statement, SV *attribs));
+extern int dbd_st_rows _((SV *sth));
+extern void dbd_st_destroy _((SV *sth));
+extern int dbd_ix_immediate _((SV *dbh, char *stmt));
 
-extern SV *dbd_errnum;
-extern SV *dbd_errstr;
+extern int dbd_ix_setbindnum _((imp_sth_t *sth, int items));
+extern int dbd_ix_bindsv _((imp_sth_t *sth, int idx, SV *val));
+extern int dbd_ix_setconnection _((imp_sth_t *imp_sth));
 
-/*void    do_error _((SV *h, Lda_Def *lda, int rc, char *what)); */
-void	do_error _((int rc));
-void    fbh_dump _((imp_fbh_t *fbh, int i));
+#if ESQLC_VERSION >= 600
+extern void     dbd_ix_disconnect _((char *connection));
+extern void     dbd_ix_connect _((char *conn, char *dbase, char *user, char *pass));
+#else
+extern void     dbd_ix_closedatabase _((void));
+extern void     dbd_ix_opendatabase _((char *dbase));
+#endif	/* ESQLC_VERSION >= 600 */
 
-void    dbd_init _((dbistate_t *dbistate));
-void    dbd_preparse _((imp_sth_t *imp_sth, char *statement));
-int     dbd_bind_ph _((SV *h, imp_sth_t *imp_sth, char *ph_name, SV *newvalue));
-int     dbd_describe _((SV *h, imp_sth_t *imp_sth));
-/* end */
+#endif	/* DBDIMP_H */

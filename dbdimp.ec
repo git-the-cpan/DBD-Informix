@@ -1,1453 +1,1320 @@
 /*
- * $Id: dbdimp.ec,v 1.2 1996/04/14 17:18:19 descarte Exp descarte $
+ * @(#)dbdimp.ec	25.28 96/12/09 20:55:35
  *
- * Copyright (c) 1994,1995  Tim Bunce
- *           (c)1995, 1996 Alligator Descartes
- *           (c)1994 Bill Hailes
- *           (c)1996 Terry Nightingale
+ * DBD::Informix for Perl Version 5 -- implementation details
+ *
+ * Copyright (c) 1994,1995 Tim Bunce
+ *           (c) 1995,1996 Alligator Descartes
+ *           (c) 1994      Bill Hailes
+ *           (c) 1996      Terry Nightingale
+ *           (c) 1996      Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
- *
- * $Log: dbdimp.ec,v $
- * Revision 1.2  1996/04/14 17:18:19  descarte
- * Added CREATE, DROP, DELETE, INSERT and UPDATE primitives. Patched some other
- * bits.
- *
- * Revision 1.1  1996/04/14 16:21:57  descarte
- * Initial revision
- *
- *
  */
 
-#include "Informix.h"
-$include sqlca.h;
-$include sqltypes.h;
+/*TABSTOP=4*/
 
-static cursor cursors[MAX_CURSORS + 1]; /* MAX_CURSORS arbitrary for now   */
-                                        /* If cursors[x].is_open != 0,     */
-                                        /* cursor is in use.  Necessary    */
-                                        /* for multiple cursors to be      */
-                                        /* active simultaneously.          */
+#ifndef lint
+static const char sccs[] = "@(#)dbdimp.ec	25.28 96/12/09";
+#endif
+
+#include <stdio.h>
+#include <string.h>
+
+#define MAIN_PROGRAM	/* Embed SCCS identification of JLSS headers */
+#include "Informix.h"
+#include "decsci.h"
+
+/*
+** Check whether key defined by key length (kl) and key value (kv)
+** matches keyword (kw), which should be a character literal ("KeyWord")!
+*/
+#define KEY_MATCH(kl, kv, kw) ((kl) == (sizeof(kw) - 1) && strEQ((kv), (kw)))
 
 DBISTATE_DECLARE;
 
-/*---------------------------------------------------*
- * Function:    new_cursor
- *
- * Purpose:     locates a free cursor from the array
- *
- * Arguments:   none
- *
- * Returns:     cursor id or -1 if not found
- *---------------------------------------------------*/
+static const char module[] = "DBD::Informix";
 
-static int new_cursor()
-{
-    int i;
+static SV *dbd_errnum = NULL;
+static SV *dbd_errstr = NULL;
 
-    for (i = 0; i < MAX_CURSORS; ++i) {
-        if (!cursors[i].is_open) {
-            memset( &cursors[i], 0, sizeof( cursor ) );
-            return i;
-        }
-    }
-
-    sqlca.sqlcode = -276;    /* fake: `Cursor not found' */
-    return -1;
-}
-
+/* Do some semi-standard initialization */
 void
-dbd_init(dbistate)
-    dbistate_t *dbistate;
+dbd_dr_init(dbistate)
+dbistate_t     *dbistate;
 {
-    DBIS = dbistate;
-    dbd_errnum = GvSV(gv_fetchpv("DBD::Informix::err",    1, SVt_IV));
-    dbd_errstr = GvSV(gv_fetchpv("DBD::Informix::errstr", 1, SVt_PV));
+	DBIS = dbistate;
+	dbd_errnum = GvSV(gv_fetchpv("DBD::Informix::err", 1, SVt_IV));
+	dbd_errstr = GvSV(gv_fetchpv("DBD::Informix::errstr", 1, SVt_PV));
 }
 
-
-void do_error( rc )
-    sb2 rc;
+/* Formally initialize the DBD::Informix driver structure */
+int
+dbd_ix_driver(SV *drh)
 {
-    char errbuf[256];
-    int sql_num;
+	D_imp_drh(drh);
 
-    sql_num = rgetmsg( rc, errbuf, 100 );
-    if ( sql_num == 0 ) { 
-        sv_setiv( dbd_errnum, (IV)rc );
-        sv_setpv( dbd_errstr, (char*)errbuf );
-      } else {
-        sv_setiv( dbd_errnum, (IV)666 );
-        sv_setpv( dbd_errstr, (char*)"No defined error in Informix!" );
-      }
+	imp_drh->n_connections = 0;			/* No active connections */
+	imp_drh->current_connection = 0;	/* No name */
+#if ESQLC_VERSION < 600
+	imp_drh->max_connections = 1;		/* Unlimited? */
+#else
+	imp_drh->max_connections = 0;		/* Unlimited? */
+#endif /* ESQLC_VERSION */
+	return 1;
 }
 
+/* Print message if debug level set high enough */
 void
-fbh_dump(fbh, i)
-    imp_fbh_t *fbh;
-    int i;
+dbd_ix_debug(int n, char *fmt, const char *arg)
 {
-    FILE *fp = DBILOGFP;
-    fprintf(fp, "fbh %d: '%s' %s, ",
-		i, fbh->cbuf, (fbh->nullok) ? "NULLable" : "");
-    fprintf(fp, "type %d,  dbsize %ld, dsize %ld, p%d s%d\n",
-	    fbh->dbtype, (long)fbh->dbsize, (long)fbh->dsize, fbh->prec, fbh->scale);
-    fprintf(fp, "   out: ftype %d, indp %d, bufl %d, rlen %d, rcode %d\n",
-	    fbh->ftype, fbh->indp, fbh->bufl, fbh->rlen, fbh->rcode);
+	if (DBIS->debug >= n)
+		warn(fmt, arg);
 }
 
+void            dbd_ix_seterror(ErrNum rc)
+{
+	char            errbuf[256];
+	char            fmtbuf[256];
+	char            sql_buf[256];
+	char            isambuf[256];
+	char            msgbuf[sizeof(sql_buf)+sizeof(isambuf)];
+
+	if (rc < 0)
+	{
+		/* Format SQL (primary) error */
+		if (rgetmsg(rc, errbuf, sizeof(errbuf)) != 0)
+			strcpy(errbuf, "<<Failed to locate SQL error message>>");
+		sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
+		sprintf(sql_buf, "SQL: %ld: %s", rc, fmtbuf);
+
+		/* Format ISAM (secondary) error */
+		if (sqlca.sqlerrd[1] != 0)
+		{
+			if (rgetmsg(sqlca.sqlerrd[1], errbuf, sizeof(errbuf)) != 0)
+				strcpy(errbuf, "<<Failed to locate ISAM error message>>");
+			sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
+			sprintf(isambuf, "ISAM: %ld: %s", sqlca.sqlerrd[1], fmtbuf);
+		}
+		else
+			isambuf[0] = '\0';
+
+		/* Concatenate SQL and ISAM messages */
+		/* Note that the messages have trailing newlines */
+		strcpy(msgbuf, sql_buf);
+		strcat(msgbuf, isambuf);
+
+		/* Record error number and error message */
+		sv_setiv(dbd_errnum, (IV)rc);
+		sv_setpv(dbd_errstr, msgbuf);
+	}
+}
+
+void            dbd_ix_sqlcode(imp_dbh_t *imp_dbh)
+{
+	/* Save the current sqlca record */
+	imp_dbh->sqlca = sqlca;
+
+	/* If there is an error, record it */
+	if (sqlca.sqlcode < 0)
+	{
+		dbd_ix_seterror(sqlca.sqlcode);
+		if (imp_dbh->autoreport)
+		{
+			STRLEN len;
+			warn("%s", SvPV(dbd_errstr, len));
+		}
+	}
+}
+
+static BlobLocn blob_binding(SV *valuesv)
+{
+	STRLEN vlen;
+	char *value = SvPV(valuesv, vlen);
+	BlobLocn locn = BLOB_DEFAULT;
+
+	if (KEY_MATCH(vlen, value, "InMemory"))
+		locn = BLOB_IN_MEMORY;
+	else if (KEY_MATCH(vlen, value, "InFile"))
+		locn = BLOB_IN_NAMEFILE;
+	else if (KEY_MATCH(vlen, value, "DummyValue"))
+		locn = BLOB_DUMMY_VALUE;
+	else if (KEY_MATCH(vlen, value, "NullValue"))
+		locn = BLOB_NULL_VALUE;
+	else
+		locn = BLOB_DEFAULT;
+	return(locn);
+}
+
+/* ================================================================= */
+/* =================== Database Level Operations =================== */
+/* ================================================================= */
+
+/* Initialize a connection structure, allocating names */
+static void     new_connection(imp_dbh)
+imp_dbh_t      *imp_dbh;
+{
+	static long     connection_num = 0;
+	sprintf(imp_dbh->nm_connection, "x_%09ld", connection_num);
+	imp_dbh->is_onlinedb = False;
+	imp_dbh->is_loggeddb = False;
+	imp_dbh->is_modeansi = False;
+	imp_dbh->autocommit  = False;
+	connection_num++;
+}
 
 int
-dbtype_is_long(dbtype)
-    int dbtype;
+dbd_db_login(dbh, name, user, pass)
+SV             *dbh;
+char           *name;			/* Database name */
+char           *user;			/* User name */
+char           *pass;			/* Password */
 {
-    /* Is it a LONG, LONG RAW, LONG VARCHAR or LONG VARRAW?	*/
-    return (dbtype==8 || dbtype==24 || dbtype==94 || dbtype==95) ? 1 : 0;
+	D_imp_dbh(dbh);
+	D_imp_drh_from_dbh;
+
+	new_connection(imp_dbh);
+	if (name && !*name)
+		name = 0;
+
+#if ESQLC_VERSION >= 600
+	if (user && !*user)
+		user = 0;
+	if (pass && !*pass)
+		pass = 0;
+	/* 6.00 and later versions of Informix-ESQL/C support CONNECT */
+	dbd_ix_connect(imp_dbh->nm_connection, name, user, pass);
+#else
+	/* Pre-6.00 versions of Informix-ESQL/C do not support CONNECT */
+	/* Use DATABASE statement */
+	dbd_ix_opendatabase(name);
+#endif	/* ESQLC_VERSION >= 600 */
+
+	if (sqlca.sqlcode < 0)
+	{
+		/* Failure of some sort */
+		dbd_ix_seterror(sqlca.sqlcode);
+		return 0;
+	}
+
+	/* Examine sqlca to see what sort of database we are hooked up to */
+	imp_dbh->database = name;
+	imp_dbh->is_onlinedb = (sqlca.sqlwarn.sqlwarn3 == 'W');
+	imp_dbh->is_modeansi = (sqlca.sqlwarn.sqlwarn2 == 'W');
+	imp_dbh->is_loggeddb = (sqlca.sqlwarn.sqlwarn1 == 'W');
+
+	/* Unlogged databases are deemed to be in autocommit mode */
+	/* They cannot be switched out of autocommit mode */
+	/* MODE ANSI databases currently cannot be switched into autocommit mode */
+	/* Logged non-ANSI databases currently ignore AutoCommit */
+	if (imp_dbh->is_modeansi)
+		imp_dbh->autocommit = False;
+	else
+		imp_dbh->autocommit = True;
+	imp_dbh->autoreport = True;
+
+	/* Record extra active connection and name of current connection */
+	imp_drh->n_connections++;
+	imp_drh->current_connection = imp_dbh->nm_connection;
+
+	DBIc_IMPSET_on(imp_dbh);	/* imp_dbh set up now                   */
+	DBIc_ACTIVE_on(imp_dbh);	/* call disconnect before freeing       */
+	return 1;
 }
 
-/* ================================================================== */
-
-/* 
-static AV *imp_dbh_cache_av;
-static IV imp_dbh_generation;
-
-static imp_dbh_t *
-alloc_imp_dbh()
+static int      dbd_ix_begin(imp_dbh_t *dbh)
 {
-    imp_dbh_t *imp_dbh;
-    SV *sv;
-    if (imp_dbh_cache_av && AvFILL(imp_dbh_cache_av) > -1) {
-	imp_dbh = (imp_dbh_t *)av_pop(imp_dbh_cache_av);
-    } else {
-	Newz(42, imp_dbh, sizeof(*imp_dbh), imp_dbh_t);
-    }
-    imp_dbh->in_use = TRUE;
-    imp_dbh->dbh_generation = ++imp_dbh_generation;
-    return imp_dbh;
-}
-*/
+	int rc = 1;
 
-
-int
-dbd_db_login(dbh, host, dbname, user, pass)
-    SV *dbh;
-    char *host;
-    char *dbname;
-    char *user;
-    char *pass;
-{
-    D_imp_dbh(dbh);
-    int ret;
-
-    if (host && !*host) host = 0;	/* Patch by Sven Verdoolaege */
-/*    imp_dbh->lda.svsock = ( host );  */
-/*    $database test; */
-    _iqdbase( dbname, 0 );
-    if ( sqlca.sqlcode < 0 ) { 
-        do_error( sqlca.sqlcode );
-        return 0;
-      } else {
-    
-        /* Dump the information we have into the Lda_Def */
-
-        imp_dbh->lda.svdb = dbname;
-      }
-/*    imp_dbh->logged_on = TRUE;
-    XST_mIV(0, (IV)imp_dbh); */
-    DBIc_IMPSET_on(imp_dbh);    /* imp_dbh set up now                   */
-    DBIc_ACTIVE_on(imp_dbh);    /* call disconnect before freeing       */
-    return 1;
+	EXEC SQL BEGIN WORK;
+	dbd_ix_sqlcode(dbh);
+	if (sqlca.sqlcode < 0)
+		rc = 0;
+	return rc;
 }
 
-/* Commit and Rollback don't exist in Informix but we'll stub them anyway... */
+static int      dbd_ix_commit(imp_dbh_t *dbh)
+{
+	int rc = 1;
+
+	EXEC SQL COMMIT WORK;
+	dbd_ix_sqlcode(dbh);
+	if (sqlca.sqlcode < 0)
+		rc = 0;
+	return rc;
+}
+
+static int      dbd_ix_rollback(imp_dbh_t *dbh)
+{
+	int rc = 1;
+
+	EXEC SQL ROLLBACK WORK;
+	dbd_ix_sqlcode(dbh);
+	if (sqlca.sqlcode < 0)
+		rc = 0;
+	return rc;
+}
 
 int
 dbd_db_commit(dbh)
-    SV *dbh;
+SV             *dbh;
 {
-    D_imp_dbh(dbh);
-    return 1;
+	D_imp_dbh(dbh);
+	int             rc = 1;
+
+	if (imp_dbh->is_loggeddb != 0)
+	{
+		if ((rc = dbd_ix_commit(imp_dbh)) != 0)
+			rc = dbd_ix_begin(imp_dbh);
+	}
+	return rc;
 }
 
 int
 dbd_db_rollback(dbh)
-    SV *dbh;
+SV             *dbh;
 {
-    D_imp_dbh(dbh);
-    return 1;
+	D_imp_dbh(dbh);
+	int             rc = 1;
+
+	if (imp_dbh->is_loggeddb != 0)
+	{
+		if ((rc = dbd_ix_rollback(imp_dbh)) != 0)
+			rc = dbd_ix_begin(imp_dbh);
+	}
+	return rc;
 }
 
 int
 dbd_db_disconnect(dbh)
-    SV *dbh;
+SV             *dbh;
 {
-    D_imp_dbh(dbh);
-    /* We assume that disconnect will always work       */
-    /* since most errors imply already disconnected.    */
-    DBIc_ACTIVE_off(imp_dbh);
-    if ( dbis->debug >= 2 )
-        printf( "imp_dbh->sock: %i\n", imp_dbh->lda.svsock );
+	D_imp_dbh(dbh);
+	D_imp_drh_from_dbh;
 
-/*    msqlClose( imp_dbh->lda.svsock ); */
+#if ESQLC_VERSION >= 600
+	dbd_ix_disconnect(imp_dbh->nm_connection);
+#else
+	dbd_ix_closedatabase();
+#endif	/* ESQLC_VERSION >= 600 */
 
-    /* We don't free imp_dbh since a reference still exists	*/
-    /* The DESTROY method is the only one to 'free' memory.	*/
-    return 1;
+	dbd_ix_sqlcode(imp_dbh);
+
+	/* We assume that disconnect will always work       */
+	/* since most errors imply already disconnected.    */
+	DBIc_ACTIVE_off(imp_dbh);
+
+	/* Record loss of connection in driver block */
+	imp_drh->n_connections--;
+	imp_drh->current_connection = 0;
+	assert(imp_drh->n_connections >= 0);
+
+	/* We don't free imp_dbh since a reference still exists	 */
+	/* The DESTROY method is the only one to 'free' memory.	 */
+	return 1;
 }
 
 void
 dbd_db_destroy(dbh)
-    SV *dbh;
+SV             *dbh;
 {
-    D_imp_dbh(dbh);
-    if (DBIc_ACTIVE(imp_dbh))
-        dbd_db_disconnect(dbh);
-    /* XXX free contents of imp_dbh */
-    DBIc_IMPSET_off(imp_dbh);
+	D_imp_dbh(dbh);
+	dbd_ix_debug(1, "%s::dbd_db_destroy()\n", module);
+	if (DBIc_ACTIVE(imp_dbh))
+		dbd_db_disconnect(dbh);
+	/* XXX free contents of imp_dbh */
+	DBIc_IMPSET_off(imp_dbh);
 }
 
-int
-dbd_db_STORE(dbh, keysv, valuesv)
-    SV *dbh;
-    SV *keysv;
-    SV *valuesv;
+int             dbd_db_STORE(dbh, keysv, valuesv)
+SV             *dbh;
+SV             *keysv;
+SV             *valuesv;
 {
-    D_imp_dbh(dbh);
-    STRLEN kl;
-    char *key = SvPV(keysv,kl);
-    SV *cachesv = NULL;
-    int on = SvTRUE(valuesv);
+	D_imp_dbh(dbh);
+	STRLEN          kl;
+	char           *key = SvPV(keysv, kl);
+	int             on = SvTRUE(valuesv);
 
-    if (kl==10 && strEQ(key, "AutoCommit")){
-        /* Ignore SvTRUE warning: '=' where '==' may have been intended. */
-/*        if ( (on) ? ocon(&imp_dbh->lda) : ocof(&imp_dbh->lda) ) {
-            ora_error(dbh, &imp_dbh->lda, imp_dbh->lda.rc, "ocon/ocof failed");
-        } else {
-            cachesv = (on) ? &sv_yes : &sv_no;
-        } */
-    } else {
-        return FALSE;
-    }
-    if (cachesv) /* cache value for later DBI 'quick' fetch? */
-        hv_store((HV*)SvRV(dbh), key, kl, cachesv, 0);
-    return TRUE;
+	dbd_ix_debug(1, "%s::dbd_db_DESTROY()\n", module);
+	if (KEY_MATCH(kl, key, "AutoCommit"))
+	{
+		if (imp_dbh->is_loggeddb == False)
+		{
+			/* Cannot set AutoCommit for unlogged databases */
+			on = False;
+		}
+		else
+			imp_dbh->autocommit = on;
+	}
+	else if (KEY_MATCH(kl, key, "BlobLocation"))
+	{
+		imp_dbh->blob_bind = blob_binding(valuesv);
+	}
+	else if (KEY_MATCH(kl, key, "AutoErrorReport"))
+	{
+		imp_dbh->autoreport = on;
+	}
+	else
+	{
+		return FALSE;
+	}
+
+	/* cache value for later DBI 'quick' fetch */
+	hv_store((HV *)SvRV(dbh), key, kl, &sv_yes, 0);
+
+	return TRUE;
 }
 
-SV *
+SV             *
 dbd_db_FETCH(dbh, keysv)
-    SV *dbh;
-    SV *keysv;
+SV             *dbh;
+SV             *keysv;
 {
-    D_imp_dbh(dbh);
-    STRLEN kl;
-    char *key = SvPV(keysv,kl);
-    int i;
-    SV *retsv = NULL;
-    /* Default to caching results for DBI dispatch quick_FETCH  */
-    int cacheit = TRUE;
+	D_imp_dbh(dbh);
+	STRLEN          kl;
+	char           *key = SvPV(keysv, kl);
+	SV             *retsv = Nullsv;
+	int i;
 
-    if (1) {    /* no attribs defined yet       */
-        return Nullsv;
-    }
-    if (cacheit) { /* cache for next time (via DBI quick_FETCH) */
-        hv_store((HV*)SvRV(dbh), key, kl, retsv, 0);
-        SvREFCNT_inc(retsv);    /* so sv_2mortal won't free it  */
-    }
-    return sv_2mortal(retsv);
+	dbd_ix_debug(1, "%s::dbd_db_FETCH()\n", module);
+
+	if (KEY_MATCH(kl, key, "InformixOnLine"))
+	{
+		retsv = newSViv((IV)imp_dbh->is_onlinedb);
+	}
+	else if (KEY_MATCH(kl, key, "LoggedDatabase"))
+	{
+		retsv = newSViv((IV)imp_dbh->is_loggeddb);
+	}
+	else if (KEY_MATCH(kl, key, "ModeAnsiDatabase"))
+	{
+		retsv = newSViv((IV)imp_dbh->is_modeansi);
+	}
+	else if (KEY_MATCH(kl, key, "BlobLocation"))
+	{
+		/* Should return a string! */
+		retsv = newSViv((IV)imp_dbh->blob_bind);
+	}
+	else if (KEY_MATCH(kl, key, "AutoCommit"))
+	{
+		retsv = newSViv((IV)imp_dbh->autocommit);
+	}
+	else if (KEY_MATCH(kl, key, "AutoErrorReport"))
+	{
+		retsv = newSViv((IV)imp_dbh->autoreport);
+	}
+	else if (KEY_MATCH(kl, key, "sqlcode"))
+	{
+		retsv = newSViv((IV)imp_dbh->sqlca.sqlcode);
+	}
+	else if (KEY_MATCH(kl, key, "sqlerrm"))
+	{
+		retsv = newSVpv(imp_dbh->sqlca.sqlerrm, 0);
+	}
+	else if (KEY_MATCH(kl, key, "sqlerrp"))
+	{
+		retsv = newSVpv(imp_dbh->sqlca.sqlerrp, 0);
+	}
+	else if (KEY_MATCH(kl, key, "sqlerrd"))
+	{
+		AV             *av = newAV();
+		retsv = newRV((SV *)av);
+		av_extend(av, (I32)6);
+		for (i = 0; i < 6; i++)
+		{
+			av_store(av, i, newSViv((IV)imp_dbh->sqlca.sqlerrd[i]));
+		}
+	}
+	else if (KEY_MATCH(kl, key, "sqlwarn"))
+	{
+		AV             *av = newAV();
+		char            warning[2];
+		char           *sqlwarn = &imp_dbh->sqlca.sqlwarn.sqlwarn0;
+		retsv = newRV((SV *)av);
+		av_extend(av, (I32)8);
+		warning[1] = '\0';
+		for (i = 0; i < 8; i++)
+		{
+			warning[0] = *sqlwarn++;
+			av_store(av, i, newSVpv(warning, 0));
+		}
+	}
+	else
+		return FALSE;
+
+	/* cache for next time (via DBI quick_FETCH) */
+	(void)hv_store((HV *)SvRV(dbh), key, kl, retsv, 0);
+	(void)SvREFCNT_inc(retsv);	/* so sv_2mortal won't free it  */
+	return sv_2mortal(retsv);
 }
-
 
 /* ================================================================== */
+/* =================== Statement Level Operations =================== */
+/* ================================================================== */
 
-/*
-static imp_sth_t *
-alloc_imp_sth(imp_dbh)
-    imp_dbh_t *imp_dbh;
+/* Initialize a statement structure, allocating names */
+static void     new_statement(imp_sth)
+imp_sth_t      *imp_sth;
 {
-    imp_sth_t *imp_sth;
-    Newz(42, imp_sth, sizeof(imp_sth_t), imp_sth_t);
-    imp_sth->imp_dbh = imp_dbh;
-    imp_sth->dbh_generation = imp_dbh->dbh_generation;
-    return imp_sth;
-}
-static void
-free_imp_sth(imp_sth)
-    imp_sth_t *imp_sth;
-{
-    Safefree(imp_sth);
-}
-*/
-
-int
-dbd_st_prepare(sth, statement)
-    SV *sth;
-    $char *statement;
-{
-    D_imp_sth(sth);
-    D_imp_dbh_from_sth;
-
-    int i, inside_quote, cursor_num;
-    char func[64];
-    $int desc_count;
-
-    imp_sth->done_desc = 0;
-    imp_sth->cda = &imp_sth->cdabuf;
-
-    /* Parse statement for binds ( also, INSERTS! ) */
-    /* Lowercase the statement first */
-
-/*    for ( i = 0 ; i < strlen( statement ) ; i++ ) {
-        if ( ( statement[i] == '\'' ) || ( statement[i] == '"' ) )
-            if ( inside_quote == 1 ) 
-                inside_quote = 0;
-            else
-                inside_quote = 1;
-        if ( isupper( statement[i] ) && ( inside_quote != 1 ) ) 
-            statement[i] = tolower( statement[i] );
-      }
-*/
-
-    sscanf( statement, "%s", func );
-    for ( i = 0 ; i < strlen( func ) ; i++ )
-        if ( isupper( func[i] ) )
-            func[i] = tolower( func[i] );
-
-    if ( strstr( func, "insert" ) != 0 ) {
-        if ( dbis->debug >= 2 )
-            warn( "INSERT present in statement\n" );
-        imp_sth->is_insert = 1;
-      }
-
-    if ( strstr( func, "create" ) != 0 ) {
-        if ( dbis->debug >= 2 )
-            warn( "CREATE present in statement\n" );
-        imp_sth->is_create = 1;
-      }
-
-    if ( strstr( func, "update" ) != 0 ) {
-        if ( dbis->debug >= 2 )
-            warn( "UPDATE present in statement\n" );
-        imp_sth->is_update = 1;
-      }
-
-    if ( strstr( func, "drop" ) != 0 ) {
-        if ( dbis->debug >= 2 )
-            warn( "DROP present in statement\n" );
-        imp_sth->is_drop = 1;
-      }
-
-    if ( strstr( func, "delete" ) != 0 ) {
-        if ( dbis->debug >= 2 )
-            warn( "DELETE present in statement\n" );
-        imp_sth->is_delete = 1;
-      }
-
-    /** Do the special case stuff first */
-    if ( ( imp_sth->is_create == 1 ) || ( imp_sth->is_drop == 1 ) ||
-         ( imp_sth->is_insert == 1 ) || ( imp_sth->is_delete == 1 ) ||
-         ( imp_sth->is_update == 1 ) ) {
-        $prepare tmp_stmt from $statement;
-        if ( sqlca.sqlcode < 0 ) {
-            do_error( sqlca.sqlcode );
-            return 0;
-          }
-        $execute tmp_stmt;
-        if ( sqlca.sqlcode < 0 ) {
-            do_error( sqlca.sqlcode );
-            return 0;
-          }
-        DBIc_IMPSET_on( imp_sth );
-        return 1;
-      }
-
-    /** Bind values for the SELECT statement */
-    cursor_num = new_cursor ();
-
-    switch (cursor_num) {
-        case 0:
-            $prepare usqlobj0 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor0 cursor for usqlobj0;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc0' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor0;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj0 using sql descriptor 'demodesc0';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc0' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 1:
-            $prepare usqlobj1 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor1 cursor for usqlobj1;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc1' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor1;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj1 using sql descriptor 'demodesc1';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc1' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 2:
-            $prepare usqlobj2 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor2 cursor for usqlobj2;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc2' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor2;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj2 using sql descriptor 'demodesc2';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc2' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 3:
-            $prepare usqlobj3 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor3 cursor for usqlobj3;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc3' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor3;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj3 using sql descriptor 'demodesc3';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc3' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 4:
-            $prepare usqlobj4 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor4 cursor for usqlobj3;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc4' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor4;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj4 using sql descriptor 'demodesc4';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc4' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 5:
-            $prepare usqlobj5 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor5 cursor for usqlobj5;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc5' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor5;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj5 using sql descriptor 'demodesc5';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc5' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 6:
-            $prepare usqlobj6 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor6 cursor for usqlobj6;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc6' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor6;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj6 using sql descriptor 'demodesc6';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc6' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 7:
-            $prepare usqlobj7 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor7 cursor for usqlobj7;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc7' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor7;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj7 using sql descriptor 'demodesc7';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc7' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 8:
-            $prepare usqlobj8 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor8 cursor for usqlobj8;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc8' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor8;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj8 using sql descriptor 'demodesc8';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc8' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-        case 9:
-            $prepare usqlobj9 from $statement;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $declare democursor9 cursor for usqlobj9;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $allocate descriptor 'demodesc9' with max 128;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $open democursor9;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $describe usqlobj9 using sql descriptor 'demodesc9';
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            $get descriptor 'demodesc9' $desc_count = count;
-            if ( sqlca.sqlcode < 0 ) {
-                do_error( sqlca.sqlcode );
-                return 0;
-              }
-            break;
-      }
-
-    /** Tell the sth how many fields we have in the cursor */
-    imp_sth->fbh_num = desc_count;
-
-    /** Reset row_num to 0 */
-    imp_sth->row_num = 0;
-
-    /* Store index into cursor array in statement handle */
-    imp_sth->cursoridx = cursor_num;
-
-    /** Update cursor status in cursor array */
-    cursors[cursor_num].is_open = opened;
-
-    /* Get number of fields and space needed for field names      */
-    if ( dbis->debug >= 2 )
-        printf( "DBD::Informix::dbd_db_prepare'imp_sth->fbh_num: %d\n",
-                imp_sth->fbh_num );
-
-    DBIc_IMPSET_on(imp_sth);
-    return 1;
+	D_imp_dbh_from_sth;
+	static long     cursor_num = 0;
+	sprintf(imp_sth->nm_stmnt, "p_%09ld", cursor_num);
+	sprintf(imp_sth->nm_cursor, "c_%09ld", cursor_num);
+	sprintf(imp_sth->nm_obind, "d_%09ld", cursor_num);
+	sprintf(imp_sth->nm_ibind, "b_%09ld", cursor_num);
+	imp_sth->dbh = imp_dbh;
+	imp_sth->st_state = Unused;
+	imp_sth->st_type = 0;
+	imp_sth->n_blobs = 0;
+	imp_sth->n_bound = 0;
+	imp_sth->n_columns = 0;
+	cursor_num++;
 }
 
-void
-dbd_preparse(imp_sth, statement)
-     imp_sth_t *imp_sth;
-     char *statement;
+/* Close cursor */
+static int
+dbd_ix_close(imp_sth_t *imp_sth)
 {
-  bool in_literal = FALSE;
-  char *src, *start, *dest;
-  phs_t phs_tpl;
-  SV *phs_sv;
-  int idx=0, style=0, laststyle=0;
-  
-  /* allocate room for copy of statement with spare capacity	*/
-  /* for editing ':1' into ':p1' so we can use obndrv.	*/
-  imp_sth->statement = (char*)safemalloc(strlen(statement) + 100);
-  
-  /* initialise phs ready to be cloned per placeholder	*/
-  memset(&phs_tpl, sizeof(phs_tpl), 0);
-  phs_tpl.ftype = 1;	/* VARCHAR2 */
-  
-  src  = statement;
-  dest = imp_sth->statement;
-  while(*src) 
-    {
-      if (*src == '\'')
-	in_literal = ~in_literal;
-      if ((*src != ':' && *src != '?') || in_literal) 
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_cursor = imp_sth->nm_cursor;
+	EXEC SQL END DECLARE SECTION;
+
+	if (imp_sth->st_state == Opened || imp_sth->st_state == Finished)
 	{
-	  *dest++ = *src++;
-	  continue;
+		EXEC SQL CLOSE :nm_cursor;
+		dbd_ix_sqlcode(imp_sth->dbh);
+		if (sqlca.sqlcode < 0)
+		{
+			return 0;
+		}
+		imp_sth->st_state = Declared;
 	}
-      start = dest;			/* save name inc colon	*/ 
-      *dest++ = *src++;
-      if (*start == '?') 
-	{		/* X/Open standard	*/
-	  sprintf(start,":%d", ++idx); /* '?' -> ':1' (etc)	*/
-	  dest = start+strlen(start);
-	  style = 3;
-	} 
-      else 
-	if (isDIGIT(*src))
-	  {	/* ':1'		*/
-	    idx = atoi(src);
-	    *dest++ = 'p';		/* ':1'->':p1'	*/
-	    if (idx > MAX_BIND_VARS || idx <= 0)
-	      croak("Placeholder :%d index out of range", idx);
-	    while(isDIGIT(*src))
-	      *dest++ = *src++;
-	    style = 1;
-	  } 
 	else
-	  {			/* ':foo'	*/
-	    while(isALNUM(*src))	/* includes '_'	*/
-	      *dest++ = *src++;
-	    style = 2;
-	  }
-      *dest = '\0';			/* handy for debugging	*/
-      if (laststyle && style != laststyle)
-	croak("Can't mix placeholder styles (%d/%d)",style,laststyle);
-      laststyle = style;
-      if (imp_sth->bind_names == NULL)
-	imp_sth->bind_names = newHV();
-      phs_tpl.sv = newSV(0);
-/*      phs_tpl.rv = newRV(phs_tpl.sv); */
-      phs_sv = newSVpv((char*)&phs_tpl, sizeof(phs_tpl));
-      hv_store(imp_sth->bind_names, start, (STRLEN)(dest-start),
-	       phs_sv, 0);
-      /* warn("bind_names: '%s'\n", start);	*/
-    }
-  *dest = '\0';
-  if (imp_sth->bind_names)
-    {
-      if (dbis->debug >= 2)
-	fprintf(DBILOGFP, "scanned %d distinct placeholders\n",
-		(int)HvKEYS(imp_sth->bind_names));
-    }
+		warn("%s:st::dbd_ix_close: CLOSE called in wrong state\n", module);
+	return 1;
+}
+
+/* Release all database and allocated resources for statement */
+static void     del_statement(imp_sth)
+imp_sth_t      *imp_sth;
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *name;
+	int colno;
+	int coltype;
+	loc_t	blob;
+	EXEC SQL END DECLARE SECTION;
+
+	switch (imp_sth->st_state)
+	{
+	case Finished:
+		/*FALLTHROUGH*/
+	case Opened:
+		name = imp_sth->nm_cursor;
+		EXEC SQL CLOSE :name;
+		/*FALLTHROUGH*/
+	case Declared:
+		name = imp_sth->nm_cursor;
+		EXEC SQL FREE :name;
+		/*FALLTHROUGH*/
+	case Described:
+	case Allocated:
+		name = imp_sth->nm_obind;
+
+		/* ESQL/C does not deallocate blob space automatically */
+		/* Verified for ESQL/C 7.21.UC1 on Solaris 2.4 with Purify */
+		if (imp_sth->n_blobs > 0)
+		{
+			for (colno = 1; colno <= imp_sth->n_columns; colno++)
+			{
+				EXEC SQL GET DESCRIPTOR :name VALUE :colno :coltype = TYPE;
+				/* dbd_ix_sqlcode(imp_sth->dbh); */
+				if (coltype == SQLBYTES || coltype == SQLTEXT)
+				{
+					EXEC SQL GET DESCRIPTOR :name VALUE :colno :blob = DATA;
+					/* dbd_ix_sqlcode(imp_sth->dbh); */
+					if (blob.loc_loctype == LOCMEMORY && blob.loc_buffer != 0)
+						free(blob.loc_buffer);
+				}
+			}
+		}
+		EXEC SQL DEALLOCATE DESCRIPTOR :name;
+		/*FALLTHROUGH*/
+	case Prepared:
+		name = imp_sth->nm_stmnt;
+		EXEC SQL FREE :name;
+		/*FALLTHROUGH*/
+	case Unused:
+		break;
+	}
+	imp_sth->st_state = Unused;
+}
+
+/* Create the input descriptor for the specified number of items */
+int dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	long  bind_size = items;
+	char           *nm_ibind = imp_sth->nm_ibind;
+	EXEC SQL END DECLARE SECTION;
+
+	dbd_ix_debug(1, "%s::dbd_ix_setbindnum entered\n", module);
+
+	if (items > imp_sth->n_bound)
+	{
+		if (imp_sth->n_bound > 0)
+		{
+			EXEC SQL DEALLOCATE DESCRIPTOR :nm_ibind;
+			dbd_ix_sqlcode(imp_sth->dbh);
+			imp_sth->n_bound = 0;
+			if (sqlca.sqlcode < 0)
+			{
+				return 0;
+			}
+		}
+		EXEC SQL ALLOCATE DESCRIPTOR :nm_ibind WITH MAX :bind_size;
+		dbd_ix_sqlcode(imp_sth->dbh);
+		if (sqlca.sqlcode < 0)
+		{
+			return 0;
+		}
+		imp_sth->n_bound = items;
+	}
+	return 1;
+}
+
+/* Bind the value to input descriptor entry */
+int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
+{
+	int rc = 1;
+	STRLEN len;
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_ibind = imp_sth->nm_ibind;
+	char *string;
+	long  integer;
+	float numeric;
+	int		type;
+	int     length;
+	int index = idx;
+	loc_t blob;
+	EXEC SQL END DECLARE SECTION;
+
+	dbd_ix_debug(1, "%s::dbd_ix_bindsv entered\n", module);
+
+	EXEC SQL GET DESCRIPTOR :nm_ibind VALUE :index :type = TYPE;
+	if (type == SQLBYTES || type == SQLTEXT)
+	{
+		/* One day, this will accept SQ_UPDATE and SQ_UPDALL */
+		/* There are no plans to support SQ_UPDCURR */
+		blob_locate(&blob, BLOB_IN_MEMORY);
+		blob.loc_buffer = SvPV(val, len);
+		blob.loc_bufsize = len + 1;
+		blob.loc_size = len;
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index DATA = :blob;
+	}
+	else if (SvIOK(val))
+	{
+		type = SQLINT;
+		integer = SvIV(val);
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, DATA = :integer;
+	}
+	else if (SvNOK(val))
+	{
+		type = SQLFLOAT;
+		numeric = SvNV(val);
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, DATA = :numeric;
+	}
+	else
+	{
+		type = SQLCHAR;
+		string = SvPV(val, len);
+		length = len + 1;
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, LENGTH = :length, DATA = :string;
+	}
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode < 0)
+	{
+		rc = 0;
+	}
+	return(rc);
+}
+
+static int count_blobs(char *descname, int ncols)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_obind = descname;
+	int	colno;
+	int coltype;
+	EXEC SQL END DECLARE SECTION;
+	int nblobs = 0;
+
+	for (colno = 1; colno <= ncols; colno++)
+	{
+		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno :coltype = TYPE;
+		/* dbd_ix_sqlcode(imp_sth->dbh); */
+		if (coltype == SQLBYTES || coltype == SQLTEXT)
+		{
+			nblobs++;
+		}
+	}
+	return(nblobs);
+}
+
+/* Process blobs (if any) */
+static void
+dbd_ix_blobs(imp_sth_t *imp_sth)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_obind = imp_sth->nm_obind;
+	loc_t		   blob;
+	int 			colno;
+	int 			blobno;
+	int coltype;
+	EXEC SQL END DECLARE SECTION;
+	int             n_columns = imp_sth->n_columns;
+
+#ifdef SQ_EXECPROC
+	assert(imp_sth->st_type == SQ_SELECT || imp_sth->st_type == SQ_EXECPROC);
+#else
+	assert(imp_sth->st_type == SQ_SELECT);
+#endif /* SQ_EXECPROC */
+
+	dbd_ix_debug(1, "%s::dbd_ix_blobs\n", module);
+	imp_sth->n_blobs = count_blobs(nm_obind, n_columns);
+	if (imp_sth->n_blobs == 0)
+		return;
+
+	/*warn("dbd_ix_blobs: %d blobs\n", imp_sth->n_blobs);*/
+
+	/* Set blob location */
+	if (blob_locate(&blob, imp_sth->blob_bind) != 0)
+	{
+		croak("memory allocation error 3 in dbd_ix_blobs\n");
+	}
+
+	for (colno = 1; colno <= n_columns; colno++)
+	{
+		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno :coltype = TYPE;
+		dbd_ix_sqlcode(imp_sth->dbh);
+		if (coltype == SQLBYTES || coltype == SQLTEXT)
+		{
+			/* Tell ESQL/C how to handle this blob */
+			EXEC SQL SET DESCRIPTOR :nm_obind VALUE :colno DATA = :blob;
+			dbd_ix_sqlcode(imp_sth->dbh);
+		}
+	}
+	assert(blobno == imp_sth->n_blobs);
+}
+
+/* Declare cursor for SELECT or EXECUTE PROCEDURE */
+static int
+dbd_ix_declare(imp_sth_t *imp_sth)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_stmnt = imp_sth->nm_stmnt;
+	char           *nm_cursor = imp_sth->nm_cursor;
+	EXEC SQL END DECLARE SECTION;
+
+#ifdef SQ_EXECPROC
+	assert(imp_sth->st_type == SQ_SELECT || imp_sth->st_type == SQ_EXECPROC);
+#else
+	assert(imp_sth->st_type == SQ_SELECT);
+#endif /* SQ_EXECPROC */
+	assert(imp_sth->st_state == Described);
+	dbd_ix_blobs(imp_sth);
+
+	EXEC SQL DECLARE :nm_cursor CURSOR FOR :nm_stmnt;
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode < 0)
+	{
+		return 0;
+	}
+	imp_sth->st_state = Declared;
+	return 1;
 }
 
 int
-dbd_bind_ph(h, imp_sth, ph_name, newvalue)
-    SV *h;
-    imp_sth_t *imp_sth;
-    char *ph_name;
-    SV *newvalue;
+dbd_st_prepare(sth, stmt, attribs)
+SV             *sth;
+char           *stmt;
+SV             *attribs;
 {
-    SV **svp;
-    STRLEN value_len;
-    void *value_ptr;
-    phs_t *phs;
+	D_imp_sth(sth);
+	int  rc = 1;
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *statement = stmt;
+	int             desc_count;
+	char           *nm_stmnt;
+	char           *nm_obind;
+	char           *nm_cursor;
+	EXEC SQL END DECLARE SECTION;
 
-    if (dbis->debug >= 2)
-        warn("bind '%s' ==> %s\n", SvPV(newvalue,na), ph_name );
+	dbd_ix_debug(1, "%s::dbd_st_prepare()\n", module);
+	new_statement(imp_sth);
+	nm_stmnt = imp_sth->nm_stmnt;
+	nm_obind = imp_sth->nm_obind;
+	nm_cursor = imp_sth->nm_cursor;
 
-    svp = hv_fetch(imp_sth->bind_names, ph_name, strlen(ph_name), 0);
-    if (svp == NULL)
-        croak("dbd_bind_ph placeholder '%s' unknown", ph_name);
-    phs = (phs_t*)((void*)SvPVX(*svp));
+	EXEC SQL PREPARE :nm_stmnt FROM :statement;
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode < 0)
+	{
+		return 0;
+	}
+	imp_sth->st_state = Prepared;
 
-    /* At the moment we always do sv_setsv() and rebind.        */
-    /* Later we may optimise this so that more often we can     */
-    /* just copy the value & length over and not rebind!        */
+	EXEC SQL ALLOCATE DESCRIPTOR :nm_obind WITH MAX 128;
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode < 0)
+	{
+		del_statement(imp_sth);
+		return 0;
+	}
+	imp_sth->st_state = Allocated;
 
-    if (SvOK(newvalue)) {
-        sv_setsv(phs->sv, newvalue);
-        value_ptr = SvPV(phs->sv, value_len);
-        phs->indp = 0;
-        phs->ftype = (SvCUR(phs->sv) <= 2000) ? 1 : 8;
-    } else {
-        value_ptr = "";
-        value_len = 0;
-        phs->indp = -1;
-        phs->ftype = 1;
-    }
+	EXEC SQL DESCRIBE :nm_stmnt USING SQL DESCRIPTOR :nm_obind;
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode < 0)
+	{
+		del_statement(imp_sth);
+		return 0;
+	}
+	imp_sth->st_state = Described;
+	imp_sth->st_type = sqlca.sqlcode;
+	if (imp_sth->st_type == 0)
+		imp_sth->st_type = SQ_SELECT;
 
-    /* this will change to odndra sometime      */
-/*    if (obndrv(imp_sth->cda, (text*)ph_name, -1,
-            (ub1*)value_ptr, (sword)value_len,
-            phs->ftype, -1, &phs->indp,
-            (text*)0, -1, -1)) {
-        D_imp_dbh_from_sth;
-        ora_error(h, &imp_dbh->lda, imp_sth->cda->rc, "obndrv failed");
-        return 1;
-    } */
-    return 0;
-}
+	EXEC SQL GET DESCRIPTOR :nm_obind :desc_count = COUNT;
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode < 0)
+	{
+		del_statement(imp_sth);
+		return 0;
+	}
 
+	/* Record the number of fields in the cursor for DBI and DBD::Informix  */
+	DBIc_NUM_FIELDS(imp_sth) = imp_sth->n_columns = desc_count;
 
-int
-dbd_describe(h, imp_sth)
-     SV *h;
-     imp_sth_t *imp_sth;
-{
-  sb1 *cbuf_ptr;
-  int t_cbufl=0;
-  sb4 f_cbufl[MAX_COLS];
-  $int i;
-  int field_info_loop;
-  int length;
-  FILE *fp = DBILOGFP;
-  struct sqlda *demodesc;
-  $int desc_count;
-  $char result[65536];
-  $int loop;
-  $int type;
-  $int len;
-  $char name[40];
-  
-  if ( dbis->debug >= 2 )
-      warn( "In: DBD::Informix::dbd_describe()\n" );
+	/**
+	** Only non-cursory statements need an output descriptor.
+	** Only cursory statements need a cursor declared for them.
+	** INSERT may need an input descriptor (which will appear to be the
+	** output descriptor, such being the wonders of Informix).
+	*/
+	if (imp_sth->st_type == SQ_SELECT)
+		rc = dbd_ix_declare(imp_sth);
+#ifdef SQ_EXECPROC
+	else if (imp_sth->st_type == SQ_EXECPROC && desc_count > 0)
+		rc = dbd_ix_declare(imp_sth);
+#endif	/* SQ_EXECPROC */
+	else if (imp_sth->st_type == SQ_INSERT && desc_count > 0)
+	{
+		dbd_ix_blobs(imp_sth);
+		if (imp_sth->n_blobs > 0)
+		{
+			/*
+			** Switch the nm_obind and nm_ibind names so that when
+			** dbd_ix_bindsv() is at work, it has an already populated
+			** SQL descriptor to work with, that already has the blobs
+			** set up correctly.
+			*/
+			Name tmpname;
+			strcpy(tmpname, imp_sth->nm_ibind);
+			strcpy(imp_sth->nm_ibind, imp_sth->nm_obind);
+			strcpy(imp_sth->nm_obind, tmpname);
+			imp_sth->n_bound = desc_count;
+		}
+		rc = 1;
+	}
+	else
+	{
+		EXEC SQL DEALLOCATE DESCRIPTOR :nm_obind;
+		imp_sth->st_state = Prepared;
+		rc = 1;
+	}
 
-  if (imp_sth->done_desc ) {
-      if ( dbis->debug >= 2 ) 
-          warn( "In: DBD::Informix::dbd_describe()'done_desc = true\n" );
-      return 1;	/* success, already done it */
-    }
-  imp_sth->done_desc = 1;
+	/* Get number of fields and space needed for field names      */
+	if (DBIS->debug >= 2)
+		printf("%s::dbd_st_prepare'imp_sth->n_columns: %d\n", module,
+		    imp_sth->n_columns);
 
-  t_cbufl = 0;
-
-    field_info_loop = 0;
-    for ( i = 1 ; i <= imp_sth->fbh_num ; i++ ) {
-        switch ( imp_sth->cursoridx ) {
-            case 0:
-                $get descriptor 'demodesc0' value $i $type = type, $len = length, $name = name;
-                break;
-            case 1:
-                $get descriptor 'demodesc1' value $i $type = type, $len = length, $name = name;
-                break;
-            case 2:
-                $get descriptor 'demodesc2' value $i $type = type, $len = length, $name = name;
-                break;
-            case 3:
-                $get descriptor 'demodesc3' value $i $type = type, $len = length, $name = name;
-                break;
-            case 4:
-                $get descriptor 'demodesc4' value $i $type = type, $len = length, $name = name;
-                break;
-            case 5:
-                $get descriptor 'demodesc5' value $i $type = type, $len = length, $name = name;
-                break;
-            case 6:
-                $get descriptor 'demodesc6' value $i $type = type, $len = length, $name = name;
-                break;
-            case 7:
-                $get descriptor 'demodesc7' value $i $type = type, $len = length, $name = name;
-                break;
-            case 8:
-                $get descriptor 'demodesc8' value $i $type = type, $len = length, $name = name;
-                break;
-            case 9:
-                $get descriptor 'demodesc9' value $i $type = type, $len = length, $name = name;
-                break;
-          } 
-
-        if ( dbis->debug >= 2 ) 
-            warn( "Type: %d\tName: %s\tLength: %d\n", type, name, len );
-
-/*
-    This code does not give correct date for date values, pasted previous
-    patch back in.
-
-        switch ( type ) {
-            case SQLCHAR: {
-                f_cbufl[i] = len;
-                t_cbufl += len;
-                break;
-              }
-            case SQLINT:
-            case SQLSMINT:
-            case SQLDECIMAL:
-            case SQLSMFLOAT:
-            case SQLFLOAT: {
-                char tmpstring[1024]; 
-                sprintf( tmpstring, "%i", name );
-                f_cbufl[i] = strlen( tmpstring );
-                t_cbufl += f_cbufl[i];
-                if ( dbis->debug >= 2 ) {
-                    warn( "Type2: %d\tName: %s\tLength: %d\n",
-                          type, name, f_cbufl[i] );
-                  }
-                break;
-              }
-            case SQLINTERVAL:
-            case SQLDTIME:
-            case SQLMONEY:
-            case SQLDATE:
-            case SQLSERIAL:
-                f_cbufl[i] = len;
-                t_cbufl += len;
-                break;
-          }
-*/
-/*
-    This code lifted from 0.20pl1t 
-*/
-        switch (type) {
-            case SQLCHAR:
-              /* leave len alone if char */
-              break;
-            case SQLINT:
-              len = MAXINTLEN;
-              break;
-            case SQLSMINT:
-              len = MAXSMINTLEN;
-              break;
-            case SQLINTERVAL:
-              len = MAXINTERVALLEN;
-              break;
-            case SQLDTIME:
-              len = MAXDTIMELEN;
-              break;
-            case SQLMONEY:
-              len = MAXMONEYLEN;
-              break;
-            case SQLDATE:
-              len = MAXDATELEN;
-              break;
-            case SQLSERIAL:
-              len = MAXSERIALLEN;
-              break;
-            case SQLDECIMAL:
-              len = MAXDECIMALLEN;
-              break;
-            case SQLSMFLOAT:
-              len = MAXSMFLOATLEN;
-              break;
-            case SQLFLOAT:
-              len = MAXFLOATLEN;
-              break;
-        }
-
-        f_cbufl[i] = len;
-        t_cbufl += len;
-/*
-    End of 0.20pl1t lift
-*/
-      }
-    imp_sth->row_num++;
-
-  /* Assign the number of fields to fbh_num */
-
-    switch ( imp_sth->cursoridx ) {
-        case 0:
-            $fetch democursor0 using sql descriptor 'demodesc0';
-            break;
-        case 1:
-            $fetch democursor1 using sql descriptor 'demodesc1';
-            break;
-        case 2:
-            $fetch democursor2 using sql descriptor 'demodesc2';
-            break;
-        case 3:
-            $fetch democursor3 using sql descriptor 'demodesc3';
-            break;
-        case 4:
-            $fetch democursor4 using sql descriptor 'demodesc4';
-            break;
-        case 5:
-            $fetch democursor5 using sql descriptor 'demodesc5';
-            break;
-        case 6:
-            $fetch democursor6 using sql descriptor 'demodesc6';
-            break;
-        case 7:
-            $fetch democursor7 using sql descriptor 'demodesc7';
-            break;
-        case 8:
-            $fetch democursor8 using sql descriptor 'demodesc8';
-            break;
-        case 9:
-            $fetch democursor9 using sql descriptor 'demodesc9';
-            break;
-      }
-
-  if ( sqlca.sqlcode != 0 ) {
-      return 1;
-    }
-
-  /* allocate field buffers	*/
-  Newz(42, imp_sth->fbh,      imp_sth->fbh_num + 1, imp_fbh_t);
-  /* allocate a buffer to hold all the column names */
-  Newz(42, imp_sth->fbh_cbuf, t_cbufl + imp_sth->fbh_num + 1, char);
-
-  cbuf_ptr = (sb1*)imp_sth->fbh_cbuf;
-
-  /* Foreach row, we need to allocate some space and link the
-   * - header record to it */
-
-  for(i = 1 ; i <= imp_sth->fbh_num ; ++i ) {
-      imp_fbh_t *fbh = &imp_sth->fbh[i];
-      fbh->imp_sth = imp_sth;
-      fbh->cbuf    = cbuf_ptr;
-      fbh->cbufl   = f_cbufl[i];
-	      
-      if ( dbis->debug >= 2 )
-          warn( "In: DBD::Informix::dbd_describe'LinkRow: %d\n", i );
-
-      switch ( imp_sth->cursoridx ) {
-          case 0:
-              $get descriptor 'demodesc0' value $i $result = data, $type = type;
-              break;
-          case 1:
-              $get descriptor 'demodesc1' value $i $result = data, $type = type;
-              break;
-          case 2:
-              $get descriptor 'demodesc2' value $i $result = data, $type = type;
-              break;
-          case 3:
-              $get descriptor 'demodesc3' value $i $result = data, $type = type;
-              break;
-          case 4:
-              $get descriptor 'demodesc4' value $i $result = data, $type = type;
-              break;
-          case 5:
-              $get descriptor 'demodesc5' value $i $result = data, $type = type;
-              break;
-          case 6:
-              $get descriptor 'demodesc6' value $i $result = data, $type = type;
-              break;
-          case 7:
-              $get descriptor 'demodesc7' value $i $result = data, $type = type;
-              break;
-          case 8:
-              $get descriptor 'demodesc8' value $i $result = data, $type = type;
-              break;
-          case 9:
-              $get descriptor 'demodesc9' value $i $result = data, $type = type;
-              break;
-        }
-
-      strcpy( cbuf_ptr, result );
-      if ( result == '\0' ) { 
-          if ( dbis->debug >= 2 )
-              warn( "Looks like a NULL!\n" ); 
-          fbh->cbuf[0] = '\0'; 
-          fbh->cbufl = 0;
-          fbh->rlen = fbh->cbufl;
-        } else {
-/*          fbh->cbuf = result; */
-/*          fbh->rlen = fbh->cbufl; */
-/*
-    Don't get correct string lengths from cbufl, only from strlen as below.
-*/
-          fbh->rlen = strlen (result);
-        } 
-
-      if ( dbis->debug >= 2 )
-          warn( "Name: %s\t%i\n", fbh->cbuf, fbh->cbufl );
-
-      fbh->cbuf[fbh->cbufl] = '\0'; /* ensure null terminated */ 
-      cbuf_ptr += fbh->cbufl + 1;   /* increment name pointer	*/ 
-	      
-      /* Now define the storage for this field data.		*/
-      /* Hack buffer length value */
-
-      fbh->dsize = fbh->cbufl;
-	      
-      /* Is it a LONG, LONG RAW, LONG VARCHAR or LONG VARRAW?	*/
-      /* If so we need to implement oraperl truncation hacks.	*/
-      /* This may change in a future release.			*/
-
-      fbh->bufl = fbh->dsize + 1;
-	      
-      /* for the time being we fetch everything as strings	*/
-      /* that will change (IV, NV and binary data etc)	*/
-      /* currently we use an sv, later we'll use an array     */
-
-      if ( dbis->debug >= 2 )
-          warn( "In: DBD::Informix::dbd_describe'newSV\n" );
-      fbh->sv = newSV((STRLEN)fbh->bufl); 
-
-      if ( dbis->debug >= 2 )
-          warn( "In: DBD::Informix::dbd_describe'SvUPGRADE\n" );
-      (void)SvUPGRADE(fbh->sv, SVt_PV);
-
-      if ( dbis->debug >= 2 )
-          warn( "In: DBD::Informix::dbd_describe'SvREADONLY_ON\n" );
-      SvREADONLY_on(fbh->sv);
-
-      if ( dbis->debug >= 2 )
-          warn( "In: DBD::Informix::dbd_describe'SvPOK_only\n" );
-      (void)SvPOK_only(fbh->sv);
-
-      if ( dbis->debug >= 2 )
-          warn( "In: DBD::Informix::dbd_describe'SvPVX\n" );
-      fbh->buf = (ub1*)SvPVX(fbh->sv);
-   }
-
-  if ( dbis->debug >= 3 ) {
-       printf( "Entering imp_sth->fbh test cycle\n" );
-       for(i = 1 ; i <= imp_sth->fbh_num /* && imp_sth->cda->rc!=10 */ ; ++i ) {
-
-            imp_fbh_t *fbh = &imp_sth->fbh[i];
-
-            printf( "In: DBD::Informix::dbd_describe'FBHDump[%d]: %s\t%d\n",
-                    i, fbh->cbuf, fbh->rlen );
-         }
-    }
-  if ( dbis->debug >= 2 )
-      warn( "Out: DBD::Informix::dbd_describe()\n" );
-  return 0;
-}
-
-SV *
-dbd_st_readblob(sth, field, offset, len, destsv)
-    SV *sth;
-    int field;
-    long offset;
-    long len;
-    SV *destsv;
-{
-    D_imp_sth(sth);
-    ub4 retl;
-    SV *bufsv;
-
-    if (destsv) {               /* write to users buffer        */
-        bufsv = SvRV(destsv);
-        sv_setpvn(bufsv,"",0);  /* ensure it's writable string  */
-        SvGROW(bufsv, len+1);   /* SvGROW doesn't do +1 itself  */
-    } else {
-        bufsv = newSV((STRLEN)len);     /* allocate new buffer  */
-    }
-
-    /* Sadly, even though retl is a ub4, oracle will cap the    */
-    /* value of retl at 65535 even if more was returned!        */
-    /* This is according to the OCI manual for Oracle 7.0.      */
-    /* Once again Oracle causes us grief. How can we tell what  */
-    /* length to assign to destsv? We do have a compromise: if  */
-    /* retl is exactly 65535 we assume that all data was read.  */
-    SvCUR_set(bufsv, (retl == 65535) ? len : retl);
-    *SvEND(bufsv) = '\0'; /* consistent with perl sv_setpvn etc */
-
-    return sv_2mortal(bufsv);
+	if (rc != 0)
+		DBIc_IMPSET_on(imp_sth);
+	return rc;
 }
 
 int
 dbd_st_finish(sth)
-    SV *sth;
+SV             *sth;
 {
-    D_imp_sth(sth);
-    /* Cancel further fetches from this cursor.                 */
-    /* We don't close the cursor till DESTROY.                  */
-    /* The application may re execute it.                       */
-/* LOOK INTO   if (DBIc_ACTIVE(imp_sth) ) {
-        do_error( sqlca.sqlcode, "DBIc_ACTIVE error" );
-        return 0;
-    } */
-    DBIc_ACTIVE_off(imp_sth);
-    return 1;
+	D_imp_sth(sth);
+	int rc;
+	dbd_ix_debug(1, "%s::dbd_st_finish()\n", module);
+	rc = dbd_ix_close(imp_sth);
+	DBIc_ACTIVE_off(imp_sth);
+	return 1;
 }
 
 void
 dbd_st_destroy(sth)
-    SV *sth;
+SV             *sth;
 {
-    D_imp_sth(sth);
-    D_imp_dbh_from_sth;
-    if (DBIc_ACTIVE(imp_dbh) /* && oclose(imp_sth->cda) */ ) {
-      }
+	D_imp_sth(sth);
+	dbd_ix_debug(1, "%s::dbd_st_destroy()\n", module);
 
-    if ( dbis->debug >= 2 )
-        warn( "In: DBD::Informix::dbd_st_destroy, calling free_cursor(%d)\n",
-            imp_sth->cursoridx );
-/*
-    Need to free up resources so the cursor can be used again.
-*/
-    free_cursor (imp_sth->cursoridx);
+	/* Need to free up resources so the cursor can be used again.  */
+	del_statement(imp_sth);
 
-    if ( dbis->debug >= 2 )
-        warn( "In: DBD::Informix::dbd_st_destroy, back from free_cursor\n" );
-
-    /* XXX free contents of imp_sth here */
-    DBIc_IMPSET_off(imp_sth);
+	/* XXX free contents of imp_sth here */
+	DBIc_IMPSET_off(imp_sth);
 }
 
 int
 dbd_st_STORE(sth, keysv, valuesv)
-    SV *sth;
-    SV *keysv;
-    SV *valuesv;
+SV             *sth;
+SV             *keysv;
+SV             *valuesv;
 {
-    D_imp_sth(sth);
-    STRLEN kl;
-    char *key = SvPV(keysv,kl);
-    SV *cachesv = NULL;
-    int on = SvTRUE(valuesv);
+	D_imp_sth(sth);
+	STRLEN          kl;
+	char           *key = SvPV(keysv, kl);
+	dbd_ix_debug(1, "%s::dbd_st_STORE()\n", module);
 
-    if (kl==8 && strEQ(key, "ora_long")){
-        imp_sth->long_buflen = SvIV(valuesv);
+	if (KEY_MATCH(kl, key, "BlobLocation"))
+	{
+		imp_sth->blob_bind = blob_binding(valuesv);
+	}
+	else
+		return FALSE;
 
-    } else if (kl==9 && strEQ(key, "ora_trunc")){
-        imp_sth->long_trunc_ok = on;
+	/* cache value for later DBI 'quick' fetch? */
+	hv_store((HV *)SvRV(sth), key, kl, &sv_yes, 0);
 
-    } else {
-        return FALSE;
-    }
-    if (cachesv) /* cache value for later DBI 'quick' fetch? */
-        hv_store((HV*)SvRV(sth), key, kl, cachesv, 0);
-    return TRUE;
+	return TRUE;
 }
 
-
-SV *
+SV             *
 dbd_st_FETCH(sth, keysv)
-    SV *sth;
-    SV *keysv;
+SV             *sth;
+SV             *keysv;
 {
-    D_imp_sth(sth);
-    STRLEN kl;
-    char *key = SvPV(keysv,kl);
-    int i;
-    SV *retsv = NULL;
-    /* Default to caching results for DBI dispatch quick_FETCH  */
-    int cacheit = TRUE;
+	D_imp_sth(sth);
+	STRLEN          kl;
+	char           *key = SvPV(keysv, kl);
+	SV             *retsv = NULL;
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_obind = imp_sth->nm_obind;
+	long			coltype;
+	long			collength;
+	long			colnull;
+	char			colname[NAMESIZE];
+	int             i;
+	EXEC SQL END DECLARE SECTION;
 
-    if (!imp_sth->done_desc && dbd_describe(sth, imp_sth)) {
-        return Nullsv;  /* dbd_describe called do_error()       */
-    }
+	dbd_ix_debug(1, "%s::dbd_st_FETCH()\n", module);
 
-    i = imp_sth->fbh_num;
+	if (KEY_MATCH(kl, key, "NAME"))
+	{
+		AV             *av = newAV();
+		retsv = newRV((SV *)av);
+		for (i = 1; i <= imp_sth->n_columns; i++)
+		{
+			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
+				:colname = NAME;
+			av_store(av, i - 1, newSVpv(colname, 0));
+		}
+	}
+	else if (KEY_MATCH(kl, key, "NULLABLE"))
+	{
+		AV             *av = newAV();
+		retsv = newRV((SV *)av);
+		for (i = 1; i <= imp_sth->n_columns; i++)
+		{
+			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
+				:colnull = NULLABLE;
+			av_store(av, i - 1, newSViv((IV)colnull));
+		}
+	}
+	else if (KEY_MATCH(kl, key, "TYPE"))
+	{
+		AV             *av = newAV();
+		char buffer[SQLTYPENAME_BUFSIZ];
+		SV		*sv;
+		retsv = newRV((SV *)av);
+		for (i = 1; i <= imp_sth->n_columns; i++)
+		{
+			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
+				:coltype = TYPE, :collength = LENGTH;
+			sv = newSVpv(sqltypename(coltype, collength, buffer), 0);
+			av_store(av, i - 1, sv);
+		}
+	}
+	else if (KEY_MATCH(kl, key, "PRECISION"))
+	{
+		AV             *av = newAV();
+		retsv = newRV((SV *)av);
+		for (i = 1; i <= imp_sth->n_columns; i++)
+		{
+			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
+				:collength = LENGTH;
+			av_store(av, i - 1, newSViv((IV)collength));
+		}
+	}
+	else if (KEY_MATCH(kl, key, "SCALE"))
+	{
+		AV             *av = newAV();
+		retsv = newRV((SV *)av);
+		for (i = 1; i <= imp_sth->n_columns; i++)
+		{
+			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
+				:collength = LENGTH;
+			av_store(av, i - 1, newSViv((IV)collength));
+		}
+	}
+	else if (KEY_MATCH(kl, key, "NUM_OF_PARAMS"))
+	{
+		retsv = newSViv((IV)imp_sth->n_bound);
+	}
+	else if (KEY_MATCH(kl, key, "NUM_OF_FIELDS"))
+	{
+		retsv = newSViv((IV)imp_sth->n_columns);
+	}
+	else if (KEY_MATCH(kl, key, "BlobLocation"))
+	{
+		/* Should return a string! */
+		retsv = newSViv((IV)imp_sth->blob_bind);
+	}
+	else if (KEY_MATCH(kl, key, "sqlcode"))
+	{
+		retsv = newSViv((IV)imp_sth->dbh->sqlca.sqlcode);
+	}
+	else if (KEY_MATCH(kl, key, "sqlerrm"))
+	{
+		retsv = newSVpv(imp_sth->dbh->sqlca.sqlerrm, 0);
+	}
+	else if (KEY_MATCH(kl, key, "sqlerrp"))
+	{
+		retsv = newSVpv(imp_sth->dbh->sqlca.sqlerrp, 0);
+	}
+	else if (KEY_MATCH(kl, key, "sqlerrd"))
+	{
+		AV             *av = newAV();
+		retsv = newRV((SV *)av);
+		av_extend(av, (I32)6);
+		for (i = 0; i < 6; i++)
+		{
+			av_store(av, i, newSViv((IV)imp_sth->dbh->sqlca.sqlerrd[i]));
+		}
+	}
+	else if (KEY_MATCH(kl, key, "sqlwarn"))
+	{
+		AV             *av = newAV();
+		char            warning[2];
+		char           *sqlwarn = &imp_sth->dbh->sqlca.sqlwarn.sqlwarn0;
+		retsv = newRV((SV *)av);
+		av_extend(av, (I32)8);
+		warning[1] = '\0';
+		for (i = 0; i < 8; i++)
+		{
+			warning[0] = *sqlwarn++;
+			av_store(av, i, newSVpv(warning, 0));
+		}
+	}
+	else
+	{
+		return Nullsv;
+	}
 
-    if (kl==11 && strEQ(key, "ora_lengths")){
-        AV *av = newAV();
-        retsv = newRV((SV*)av);
-        while(--i >= 0)
-            av_store(av, i, newSViv((IV)imp_sth->fbh[i].dsize));
+	/* cache for next time (via DBI quick_FETCH) */
+	(void)hv_store((HV *)SvRV(sth), key, kl, retsv, 0);
+	(void)SvREFCNT_inc(retsv);	/* so sv_2mortal won't free it  */
 
-    } else if (kl==9 && strEQ(key, "ora_types")){
-        AV *av = newAV();
-        retsv = newRV((SV*)av);
-        while(--i >= 0)
-            av_store(av, i, newSViv(imp_sth->fbh[i].dbtype));
+	dbd_ix_debug(1, "%s::dbd_st_FETCH exited\n", module);
 
-    } else if (kl==9 && strEQ(key, "NumParams")){
-        HV *bn = imp_sth->bind_names;
-        retsv = newSViv( (bn) ? HvKEYS(bn) : 0 );
-
-    } else if (kl==4 && strEQ(key, "NAME")){
-        AV *av = newAV();
-        retsv = newRV((SV*)av);
-        while(--i >= 0)
-/*            av_store(av, i, newSVpv((char*)imp_sth->fbh[i].cbuf,0)); */
-              av_store(av, i, newSVpv(imp_sth->fbh[i].cbuf,0));
-
-    } else {
-        return Nullsv;
-    }
-    if (cacheit) { /* cache for next time (via DBI quick_FETCH) */
-        hv_store((HV*)SvRV(sth), key, kl, retsv, 0);
-        (void)SvREFCNT_inc(retsv);      /* so sv_2mortal won't free it  */
-    }
-    return sv_2mortal(retsv);
+	return sv_2mortal(retsv);
 }
 
-/*---------------------------------------------------*
- * Function:    free_cursor
- *
- * Purpose:     frees/closes/deallocates/removes/obliterates ...
- *
- * Arguments:   cursor index
- *
- * Returns:     status
- *---------------------------------------------------*/
-
-static void free_cursor(sqc)
-int sqc;
+/* Convert DECIMAL to convenient string */
+/* Patches problems with Informix conversion routines in pre-7.10 versions */
+/* Don't forget that decimals are stored in a base-100 notation */
+static char *decgen(dec_t *val, int plus)
 {
-    switch (cursors[sqc].is_open)    /* fallthrough case statement */
-    {
-    case opened:
-        iqclose(sqc);    /* $ close usqlcurs; */
-    case declared:
-    case allocated:
-    case described:
-        /* descriptor should be freed here. */
-    case prepared:
-        if ( dbis->debug >= 2 )
-            warn( "In: free_cursor, calling iqfree(%d)\n", sqc );
-        iqfree(sqc);    /* For now, descriptor is freed here. */
-    case closed:
-        break;
-    }
+	char *str;
+	int	ndigits = val->dec_ndgts * 2;
+	int nbefore = (val->dec_exp) * 2;
+	int nafter = (ndigits - nbefore);
 
-    cursors[sqc].is_open = closed;
+	if (nbefore > 14 || nbefore < -2)
+	{
+		/* Too large or too small for fixed point */
+		str = decsci(val, ndigits, 0);
+	}
+	else
+	{
+		str = decfix(val, nafter, 0);
+	}
+	if (*str == ' ')
+		str++;
+	/* Chop trailing blanks */
+	str[byleng(str, strlen(str))] = '\0';
+	return str;
 }
 
-/*---------------------------------------------------
- * Function:    iqclose
- * 
- * Purpose:    closes cursor
- * 
- * Arguments:    cursor index
- * 
- * Returns:    void
- *---------------------------------------------------*/
-
-static void iqclose(sqc)
-int sqc;
+AV *
+dbd_st_fetch(SV *sth)
 {
-    switch (sqc) {
-        case 0:
-            $ close democursor0;
-            break;
-        case 1:
-            $ close democursor1;
-            break;
-        case 2:
-            $ close democursor2;
-            break;
-        case 3:
-            $ close democursor3;
-            break;
-        case 4:
-            $ close democursor4;
-            break;
-        case 5:
-            $ close democursor5;
-            break;
-        case 6:
-            $ close democursor6;
-            break;
-        case 7:
-            $ close democursor7;
-            break;
-        case 8:
-            $ close democursor8;
-            break;
-        case 9:
-            $ close democursor9;
-            break;
-    }
+	D_imp_sth(sth);
+	AV	*av;
+	char *decstr;
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_cursor = imp_sth->nm_cursor;
+	char           *nm_obind = imp_sth->nm_obind;
+	char            coldata[256];
+	long			coltype;
+	long			collength;
+	long			colind;
+	char			colname[NAMESIZE];
+	int				index;
+	char           *result;
+	long            length;
+	loc_t			blob;
+	dec_t			decval;
+	EXEC SQL END DECLARE SECTION;
+
+	dbd_ix_debug(1, "Enter %s::dbd_st_fetch()\n", module);
+
+	EXEC SQL FETCH :nm_cursor USING SQL DESCRIPTOR :nm_obind;
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode != 0)
+	{
+		if (sqlca.sqlcode != SQLNOTFOUND)
+		{
+			dbd_ix_debug(1, "Exit %s::dbd_st_fetch() -- fetch failed\n", module);
+		}
+		else
+		{
+			imp_sth->st_state = Finished;
+			dbd_ix_debug(1, "Exit %s::dbd_st_fetch() -- SQLNOTFOUND\n", module);
+		}
+		return Nullav;
+	}
+
+	av = DBIS->get_fbav(imp_sth);
+
+	for (index = 1; index <= imp_sth->n_columns; index++)
+	{
+		SV *sv = AvARRAY(av)[index-1];
+		EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+				:coltype = TYPE, :collength = LENGTH,
+				:colind = INDICATOR, :colname = NAME;
+		dbd_ix_sqlcode(imp_sth->dbh);
+
+		if (colind != 0)
+		{
+			/* Data is null */
+			result = coldata;
+			length = 0;
+			result[length] = '\0';
+			/*warn("NULL Data: %d <<%s>>\n", length, result);*/
+		}
+		else
+		{
+			switch (coltype)
+			{
+			case SQLINT:
+			case SQLSERIAL:
+			case SQLSMINT:
+			case SQLDATE:
+			case SQLDTIME:
+			case SQLINTERVAL:
+			case SQLVCHAR:
+#ifdef SQLNVCHAR
+			case SQLNVCHAR:
+#endif /* SQLNVCHAR */
+				/* These types will always fit into a 256 character string */
+				/* NB: VARCHAR strings retain trailing blanks */
+				result = coldata;
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+						:result = DATA;
+				length = strlen(result);
+				/*warn("Normal Data: %d <<%s>>\n", length, result);*/
+				break;
+
+			case SQLFLOAT:
+			case SQLSMFLOAT:
+			case SQLDECIMAL:
+			case SQLMONEY:
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+						:decval = DATA;
+				strcpy(coldata, decgen(&decval, 0));
+				result = coldata;
+				length = strlen(result);
+				/*warn("Decimal Data: %d <<%s>>\n", length, result);*/
+				break;
+
+			case SQLCHAR:
+#ifdef SQLNCHAR
+			case SQLNCHAR:
+#endif /* SQLNCHAR */
+				/**
+				** NB: CHAR strings have trailing blanks (which are added
+				** automatically by the database) removed by byleng() etc.
+				*/
+				if (collength < 256)
+					result = coldata;
+				else
+				{
+					result = malloc(collength+1);
+					if (result == 0)
+						die("%s::st::dbd_st_fetch: malloc failed\n", module);
+				}
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+						:result = DATA;
+				length = byleng(result, strlen(result));
+				result[length] = '\0';
+				/*warn("Character Data: %d <<%s>>\n", length, result);*/
+				break;
+
+			case SQLTEXT:
+			case SQLBYTES:
+				/*warn("fetch: processing blob\n");*/
+				blob_locate(&blob, BLOB_IN_MEMORY);
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+						:blob = DATA;
+				result = blob.loc_buffer;
+				length = blob.loc_size;
+				/* Warning - this data is not null-terminated! */
+				/*warn("Blob Data: %d <<%*.*s>>\n", length, length, length, result);*/
+				break;
+
+			default:
+				warn("%s::st::dbd_st_fetch: Unknown type code: %ld (treated as NULL)\n",
+					module, coltype);
+				length = 0;
+				result = coldata;
+				result[length] = '\0';
+				break;
+			}
+		}
+		dbd_ix_sqlcode(imp_sth->dbh);
+		if (sqlca.sqlcode < 0)
+		{
+			*result = '\0';
+		}
+		sv_setpvn(sv, result, length);
+		if (result != coldata)
+		{
+			if (coltype != SQLBYTES && coltype != SQLTEXT)
+				free(result);
+		}
+	}
+	dbd_ix_debug(1, "Exit %s::dbd_st_fetch()\n", module);
+	return(av);
 }
 
-/*---------------------------------------------------
- * Function:    iqfree
- * 
- * Purpose:    frees closed cursor
- * 
- * Arguments:    cursor index
- * 
- * Returns:    void
- * 
- *---------------------------------------------------*/
-
-static void iqfree(sqc)
-int sqc;
+int dbd_st_rows (SV *sth)
 {
-    switch (sqc)
-    {
-        case 0:
-            $ free usqlobj0;
-            $ free demodesc0;
-            $ deallocate descriptor 'demodesc0';
-            break;
-        case 1:
-            $ free usqlobj1;
-            $ free demodesc1;
-            $ deallocate descriptor 'demodesc1';
-            break;
-        case 2:
-            $ free usqlobj2;
-            $ free demodesc2;
-            $ deallocate descriptor 'demodesc2';
-            break;
-        case 3:
-            $ free usqlobj3;
-            $ free demodesc3;
-            $ deallocate descriptor 'demodesc3';
-            break;
-        case 4:
-            $ free usqlobj4;
-            $ free demodesc4;
-            $ deallocate descriptor 'demodesc4';
-            break;
-        case 5:
-            $ free usqlobj5;
-            $ free demodesc5;
-            $ deallocate descriptor 'demodesc5';
-            break;
-        case 6:
-            $ free usqlobj6;
-            $ free demodesc6;
-            $ deallocate descriptor 'demodesc6';
-            break;
-        case 7:
-            $ free usqlobj7;
-            $ free demodesc7;
-            $ deallocate descriptor 'demodesc7';
-            break;
-        case 8:
-            $ free usqlobj8;
-            $ free demodesc8;
-            $ deallocate descriptor 'demodesc8';
-            break;
-        case 9:
-            $ free usqlobj9;
-            $ free demodesc9;
-            $ deallocate descriptor 'demodesc9';
-            break;
-    }
-    memset( &cursors[sqc], 0, sizeof( cursor ) );
+	dbd_ix_debug(0, "** NOT IMPLEMENTED ** %s::dbd_st_rows()\n", module);
+	return 0;
 }
 
-/* --------------------------------------- */
+int dbd_st_bind_ph (SV *sth, SV *param, SV *value, SV *attribs, int boolean, int len)
+{
+	dbd_ix_debug(0, "** NOT IMPLEMENTED ** %s::dbd_st_bind_ph()\n", module);
+	return 0;
+}
+
+int dbd_st_blob_read (SV *sth, int field, long offset, long len, SV *destsv, int destoffset)
+{
+	dbd_ix_debug(0, "** NOT IMPLEMENTED ** %s::dbd_st_blob_read()\n", module);
+	return 0;
+}
+
+static int dbd_ix_open(imp_sth_t *imp_sth)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_cursor = imp_sth->nm_cursor;
+	char           *nm_ibind = imp_sth->nm_ibind;
+	EXEC SQL END DECLARE SECTION;
+
+	dbd_ix_debug(1, "%s::dbd_ix_open\n", module);
+	if (imp_sth->st_state == Opened || imp_sth->st_state == Finished)
+		dbd_ix_close(imp_sth);
+	assert(imp_sth->st_state == Declared);
+	if (imp_sth->n_bound > 0)
+		EXEC SQL OPEN :nm_cursor USING SQL DESCRIPTOR :nm_ibind;
+	else
+		EXEC SQL OPEN :nm_cursor;
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode < 0)
+	{
+		return 0;
+	}
+	imp_sth->st_state = Opened;
+	return 1;
+}
+
+static int dbd_ix_exec(imp_sth_t *imp_sth)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *nm_stmnt = imp_sth->nm_stmnt;
+	char           *nm_ibind = imp_sth->nm_ibind;
+	EXEC SQL END DECLARE SECTION;
+
+	dbd_ix_debug(1, "%s::dbd_ix_exec\n", module);
+	if (imp_sth->n_bound > 0)
+	{
+		EXEC SQL EXECUTE :nm_stmnt USING SQL DESCRIPTOR :nm_ibind;
+	}
+	else
+	{
+		EXEC SQL EXECUTE :nm_stmnt;
+	}
+	dbd_ix_sqlcode(imp_sth->dbh);
+	if (sqlca.sqlcode < 0)
+	{
+		return 0;
+	}
+	DBIc_IMPSET_on(imp_sth);
+	return 1;
+}
+
+/*
+** Execute the statement.
+** - OPEN the cursor for a SELECT or cursory EXECUTE PROCEDURE.
+** - EXECUTE the statement for anything else.
+*/
+int
+dbd_st_execute(imp_sth_t *imp_sth)
+{
+	int rc;
+
+	if (imp_sth->st_type == SQ_SELECT)
+		rc = dbd_ix_open(imp_sth);
+#ifdef SQ_EXECPROC
+	else if (imp_sth->st_type == SQ_EXECPROC && imp_sth->n_columns > 0)
+		rc = dbd_ix_open(imp_sth);
+#endif /* SQ_EXECPROC */
+	else
+		rc = dbd_ix_exec(imp_sth);
+	return(rc);
+}
+
+int dbd_ix_immediate(SV *dbh, char *stmt)
+{
+	EXEC SQL BEGIN DECLARE SECTION;
+	char           *statement = stmt;
+	EXEC SQL END DECLARE SECTION;
+
+	dbd_ix_debug(1, "%s::dbd_ix_immediate() called\n", module);
+	EXEC SQL EXECUTE IMMEDIATE :statement;
+	dbd_ix_seterror(sqlca.sqlcode);
+	return(sqlca.sqlcode == 0);
+}
+
+/* -------------- End of dbdimp.ec -------------- */
