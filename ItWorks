@@ -2,10 +2,11 @@
 #
 #   @(#)$Id: ItWorks version /main/8 2000-02-04 15:49:46 $
 #
-#   Generate a report that Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) works
+#   Generate a report that IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) works
 #
 #   Portions Copyright 1999 Jonathan Leffler
 #   Portions Copyright 2000 Informix Software Inc
+#	Portions Copyright 2002 IBM
 
 ### This trick was more or less standard with Perl 4 ###
 eval "exec perl $0 $*"

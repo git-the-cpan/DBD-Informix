@@ -6,6 +6,7 @@
 #
 # Portions Copyright 1997 Jonathan Leffler
 # Portions Copyright 2000 Informix Software Inc
+# Portions Copyright 2002 IBM
 
 # Enumerate the DATETIME types
 $i = 0;

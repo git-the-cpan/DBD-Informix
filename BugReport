@@ -2,10 +2,11 @@
 #
 #	@(#)$Id: BugReport version /main/6 2000-02-01 13:45:37 $
 #
-#	Produce output for a Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) Bug Report
+#	Produce output for a IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) Bug Report
 #
 #	Portions Copyright (C) 1999 Jonathan Leffler
 #	Portions Copyright (C) 2000 Informix Software Inc
+#	Portions Copyright (C) 2002 IBM
 #
 # * See Notes/bug.reports for lots more details.
 # * By default (no arguments), produces just the most basic bug

@@ -8,6 +8,8 @@
 #   Not significantly different from the testing in transact03.t.
 #
 #	Copyright (C) 1996-97,1999 Jonathan Leffler
+#	Copyright (C) 2000         Informix Software Inc
+#	Copyright (C) 2002         IBM
 
 use DBD::Informix::TestHarness;
 

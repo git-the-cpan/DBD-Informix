@@ -2,11 +2,12 @@
 #
 # @(#)$Id: Makefile.PL version /main/128 2000-02-25 10:30:23 $
 #
-# Configuration script for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) (aka DBD::Informix)
+# Configuration script for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) (aka DBD::Informix)
 #
 # Portions Copyright 1996-99 Jonathan Leffler
 # Portions Copyright 1996    Alligator Descartes
 # Portions Copyright 2000    Informix Software Inc
+# Portions Copyright 2002    IBM
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
@@ -46,7 +47,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "1.00.PC1";
+my $dbd_ix = "1.00.PC2";
 # Hack for handling builds directly in Atria Clearcase view.
 $dbd_ix = "0.97002" unless $dbd_ix =~ /^\d+\.\d+/;
 
@@ -72,7 +73,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 

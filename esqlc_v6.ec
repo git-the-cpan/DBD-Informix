@@ -1,11 +1,12 @@
 /*
  * @(#)$Id: esqlc_v6.ec version /main/26 2000-02-24 15:51:57 $ 
  *
- * Informix Database Driver for Perl (DBD::Informix)
+ * IBM Informix Database Driver for Perl (DBD::Informix)
  * Connection Management for ESQL/C Version 6.0x and later
  *
  * Portions Copyright 1996-98 Jonathan Leffler
  * Portions Copyright 2000    Informix Software Inc
+ * Portions Copyright 2002    IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.

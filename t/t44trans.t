@@ -5,6 +5,8 @@
 #	Test AutoCommit On for DBD::Informix
 #
 #	Copyright (C) 1996-97,1999 Jonathan Leffler
+#	Copyright (C) 2000         Informix Software Inc
+#	Copyright (C) 2002         IBM
 
 # AutoCommit On => Each statement is a self-contained transaction
 # Ensure MODE ANSI databases use cursors WITH HOLD

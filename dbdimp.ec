@@ -1,7 +1,7 @@
 /*
  * @(#)$Id: dbdimp.ec version /main/137 2000-02-29 10:07:52 $
  *
- * @(#)$Product: Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) $ -- implementation details
+ * @(#)$Product: IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) $ -- implementation details
  *
  * Portions Copyright 1994-95 Tim Bunce
  * Portions Copyright 1995-96 Alligator Descartes
@@ -9,6 +9,7 @@
  * Portions Copyright 1996    Terry Nightingale
  * Portions Copyright 1996-99 Jonathan Leffler
  * Portions Copyright 2000    Informix Software Inc
+ * Portions Copyright 2002    IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.

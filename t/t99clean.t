@@ -6,6 +6,8 @@
 #   NB: Running with AutoCommit on.
 #
 #	Copyright (C) 1998-99 Jonathan Leffler
+#	Copyright (C) 2000    Informix Software Inc
+#	Copyright (C) 2002    IBM
 
 use DBD::Informix::TestHarness;
 

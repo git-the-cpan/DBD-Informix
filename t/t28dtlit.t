@@ -3,6 +3,8 @@
 # @(#)$Id: t/t28dtlit.t version /main/7 2000-01-27 16:20:47 $
 #
 # Copyright (C) 1998-99 Jonathan Leffler
+# Copyright (C) 2000    Informix Software Inc
+# Copyright (C) 2002    IBM
 #
 # Test for handling DATETIME literals in SQL statements
 # Note that DBD::Informix used to mangle a time such as '12:30:23' to '12??'

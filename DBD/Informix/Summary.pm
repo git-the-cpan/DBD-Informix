@@ -1,11 +1,12 @@
 # $Id: DBD/Informix/Summary.pm version /main/3 2000-02-10 14:26:14 $
 #
-# Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+# IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 #
 # This driver summary is for DBD::Informix
 #
 # Portions Copyright 1999-2000 Tim Bunce and Jonathan Leffler.
 # Portions Copyright 2000      Informix Software Inc.
+# Portions Copyright 2002      IBM
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
@@ -13,7 +14,7 @@
 {
 	package DBD::Informix::Summary;
 
-	$VERSION = "1.00.PC1";
+	$VERSION = "1.00.PC2";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	1;
@@ -37,7 +38,7 @@ This file is an updated version of the information about DBD::Informix in the DB
 
 =head2 Driver Version
 
-C<DBD::Informix> version 1.00.PC1.
+C<DBD::Informix> version 1.00.PC2.
 
 =head2 Feature Summary
 

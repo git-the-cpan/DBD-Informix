@@ -5,6 +5,7 @@
 #	Test basic handling of user-defined data types
 #
 #	Copyright 2000 Informix Software Inc
+#	Copyright 2002 IBM
 
 use strict;
 use DBD::Informix::TestHarness;

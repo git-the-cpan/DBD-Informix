@@ -5,6 +5,7 @@
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
 # Portions Copyright (C) 1996-99 Jonathan Leffler
+# Portions Copyright (C) 2002    IBM
 #
 # Exercises the returning of error codes in ESQL/C intermediate step failure
 

@@ -1,0 +1,1 @@
+sed -e 's/Informix Database Driver/IBM &/g' -e 's/IBM IBM/IBM/g' $*

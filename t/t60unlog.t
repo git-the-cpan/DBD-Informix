@@ -4,6 +4,7 @@
 #
 # Portions Copyright 1997,1999 Jonathan Leffler
 # Portions Copyright 2000      Informix Software Inc
+# Portions Copyright 2002      IBM
 #
 # Test that unlogged databases refuse to connect with AutoCommit => 0
 

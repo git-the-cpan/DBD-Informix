@@ -2,10 +2,11 @@
 #
 #   @(#)$Id: InformixTechSupport version /main/5 2000-02-01 16:59:48 $
 #
-#   Tech Support Tool for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+#   Tech Support Tool for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 #
 #   Portions Copyright (c) 1999 Jonathan Leffler
 #   Portions Copyright (c) 2000 Informix Software Inc
+#	Portions Copyright (C) 2002 IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -54,7 +55,7 @@ __END__
 
 =head1 NAME
 
-InformixTechSupport - Technical Support tool for Informix Database Driver for Perl
+InformixTechSupport - Technical Support tool for IBM Informix Database Driver for Perl
 
 =head1 SYNOPSIS
 
@@ -71,7 +72,7 @@ C<InformixTechSupport -w>
 =head1 DESCRIPTION
 
 The InformixTechSupport script is used for a variety of purposes
-related to technical support of Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03).
+related to technical support of IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01).
 
 =head2 CHECKING SOFTWARE VERSIONS
 
@@ -141,14 +142,16 @@ with your bug report.
 
 =head2 CREATING A REPORT THAT IT WORKS
 
-Use C<InformixTechSupport -w> to create a report that Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) works.
+Use C<InformixTechSupport -w> to create a report that IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) works.
 You may need to edit the output; you may certainly add comments in the
 'Optional comments' section.
 The output is written to standard output only.
 It is never sent anywhere unless you actually choose to send it.
 
-If you do send the report, please put "DBD::Informix - It Works" in
-the subject line and send the report to C<dbd-informix@informix.com>.
+If you do send the report, please put "DBD::Informix - It Works" in the
+subject line and send the report to C<dbd-informix@informix.com> (up to
+2002-06-30) or to C<dbd-informix@us.ibm.com> (from 2002-07-01, though
+you may try this address now if you wish).
 
 =head1 AUTHOR
 

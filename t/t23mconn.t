@@ -6,6 +6,7 @@
 #
 #	Portions Copyright 1996-99 Jonathan Leffler
 #	Portions Copyright 2000    Informix Software Inc
+#	Portions Copyright 2002    IBM
 
 use DBD::Informix::TestHarness;
 

@@ -2,7 +2,7 @@
 #
 #   @(#)$Id: Informix.pm.PL version /main/8 2000-02-17 12:13:36 $
 #
-#   Generate configured Informix.pm file for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+#   Generate configured Informix.pm file for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 #
 #   Script to create annotated version of Informix.pm recording
 #   default values of INFORMIXDIR and INFORMIXSERVER during build.
@@ -67,17 +67,18 @@ __END__
 
 #	@(#)$Id: Informix.pm.PL version /main/8 2000-02-17 12:13:36 $
 #
-#   @(#)Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+#   @(#)IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 #
 #   Portions Copyright 1994-95 Tim Bunce
 #   Portions Copyright 1996-99 Jonathan Leffler
 #   Portions Copyright 2000    Informix Software Inc
+#   Portions Copyright 2001-02 IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
 #
 #-------------------------------------------------------------------------
-# Code and explanations follow for Informix Database Driver for Perl
+# Code and explanations follow for IBM Informix Database Driver for Perl
 # (also known as DBD::Informix).
 #-------------------------------------------------------------------------
 
@@ -88,7 +89,7 @@ __END__
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION          = "1.00.PC1";
+	$VERSION          = "1.00.PC2";
 	$ATTRIBUTION      = 'Jonathan Leffler <j.leffler@acm.org>';
 	$Revision         = '$Id: Informix.pm.PL version /main/8 2000-02-17 12:13:36 $';
 	$INFORMIX_LICENCE = ":INFORMIX_LICENCE:";
@@ -496,7 +497,7 @@ __END__
 
 =head1 NAME
 
-DBD::Informix - Informix Database Driver for Perl
+DBD::Informix - IBM Informix Database Driver for Perl
 
 =head1 SYNOPSIS
 
@@ -504,7 +505,7 @@ DBD::Informix - Informix Database Driver for Perl
 
 =head1 DESCRIPTION
 
-This document describes Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03).
+This document describes IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01).
 
 You should also read the documentation for DBI C<perldoc DBI> as this document
 qualifies what is stated there.
@@ -541,15 +542,15 @@ strings for cursor names and statement names, and these features were
 not available before Version 5.00.
 
 For information about Informix software, you should also read the
-Notes/FAQ file that is distributed with Informix Database Driver for Perl. 
+Notes/FAQ file that is distributed with IBM Informix Database Driver for Perl. 
 
 =head2 TECHNICAL SUPPORT
 
-For information on technical support for Informix Database Driver for Perl, please run:
+For information on technical support for IBM Informix Database Driver for Perl, please run:
 
 		perldoc DBD::Informix::TechSupport
 
-For information on reporting bugs in Informix Database Driver for Perl, please review the
+For information on reporting bugs in IBM Informix Database Driver for Perl, please review the
 Notes/bug.reports file as well.
 
 =head2 JAPANESE DOCUMENTATION
@@ -1495,7 +1496,10 @@ At various times:
 =over 2
 
 =item *
-Tim Bunce (Tim.Bunce@ig.co.uk)
+Tim Bunce (Tim.Bunce@ig.co.uk) # Obsolete email address
+
+=item *
+Tim Bunce (Tim.Bunce@pobox.com)
 
 =item *
 Alligator Descartes (descarte@hermetica.com) # Obsolete email address
@@ -1516,7 +1520,10 @@ Jonathan Leffler (jleffler@visa.com) # Obsolete email address
 Jonathan Leffler (j.leffler@acm.org)
 
 =item *
-Jonathan Leffler (jleffler@informix.com)
+Jonathan Leffler (jleffler@informix.com) # Obsolete email address
+
+=item *
+Jonathan Leffler (jleffler@us.ibm.com)
 
 =back
 

@@ -1,6 +1,8 @@
 #!/usr/bin/perl
 #
 # Copyright (C) 1999 Bibliotech Ltd., 631-633 Fulham Rd., London SW6 5UQ.
+# Copyright (C) 2000 Informix Software Inc
+# Copyright (C) 2002 IBM
 #
 # Amended to fit into DBD::InformixTest harness: J Leffler
 #

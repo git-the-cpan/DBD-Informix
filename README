@@ -1,8 +1,9 @@
-README for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+README for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 
    Portions Copyright 1994-96 Alligator Descartes
    Portions Copyright 1996-99 Jonathan Leffler
    Portions Copyright 2000    Informix Software
+   Portions Copyright 2002    IBM
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the Perl README file.
@@ -11,7 +12,7 @@ README for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
 
 PREREQUISITES
 
-    You need the following five items to build Informix Database Driver for Perl:
+    You need the following five items to build IBM Informix Database Driver for Perl:
 
     1.  Perl 5.004 or later.
     2.  DBI 1.13 or later.
@@ -39,8 +40,10 @@ PREREQUISITES
     When you have DBD::Informix working *and* installed, use the ItWorks
     Perl script (previously a shell script) to report your successful
     installation.  Be sure to review the output (especially the email
-    address it deduces), and send it in an email to the maintainers at
-    dbd-informix@informix.com with the subject "DBD::Informix - It Works".
+    address it deduces), and send it in an email with the subject
+    "DBD::Informix - It Works" to either dbd-informix@informix.com (up
+    to 2002-06-30) or to dbd-informix@us.ibm.com (from 2002-07-01,
+    though you may try this address now if you wish).
 
 TECHNICAL SUPPORT
 

@@ -5,6 +5,8 @@
 #	Test SQLCA Record Handling for DBD::Informix
 #
 #	Copyright (C) 1997,1999 Jonathan Leffler
+#	Copyright (C) 2000      Informix Software Inc
+#	Copyright (C) 2002      IBM
 
 use DBD::Informix::TestHarness;
 

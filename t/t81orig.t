@@ -5,6 +5,8 @@
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
 # Portions Copyright (C) 1996-97,1999 Jonathan Leffler
+# Portions Copyright (C) 2000         Informix Software Inc
+# Portions Copyright (C) 2002         IBM
 #
 # Original basic test -- rewritten to use DBD::InformixTest
 

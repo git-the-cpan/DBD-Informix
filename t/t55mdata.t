@@ -4,8 +4,9 @@
 #
 #   Test MetaData functions _tables, _columns for DBD::Informix
 #
-#   Portions Copyright (C) 1997,1999 Jonathan Leffler
-#   Portions Copyright     2000      Informix Software Inc
+#   Portions Copyright 1997,1999 Jonathan Leffler
+#   Portions Copyright 2000      Informix Software Inc
+#	Portions Copyright 2002      IBM
 
 use DBD::Informix::TestHarness;
 

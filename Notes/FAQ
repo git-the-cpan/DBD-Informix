@@ -1,7 +1,7 @@
-Frequently Asked Questions about Informix Database Driver for Perl
+Frequently Asked Questions about IBM Informix Database Driver for Perl
 ==================================================================
 
-Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 
 --------------------------------------------------------------------------
 
@@ -11,13 +11,13 @@ DBD::INFORMIX?
 Spelling.
 
 The official product name had to be changed from DBD::Informix to
-Informix Database Driver for Perl because the acronym DBD is a contested
+IBM Informix Database Driver for Perl because the acronym DBD is a contested
 trademark of two other companies in the USA, so Informix could not
 release the product as DBD::Informix without potentially infringing on
 this trademark.  Internally, Perl and DBI still uses the name
 DBD::Informix to access the driver, and much of the documentation still
 references DBD::Informix because that is how Perl references it, and
-because it is less of a mouthful than Informix Database Driver for Perl.
+because it is less of a mouthful than IBM Informix Database Driver for Perl.
 
 --------------------------------------------------------------------------
 

@@ -5,6 +5,7 @@
 #	Test handling of bind_param for DBD::Informix
 #
 #	Copyright 2000 Informix Software Inc
+#	Copyright 2002 IBM
 
 use strict;
 use DBD::Informix::TestHarness;

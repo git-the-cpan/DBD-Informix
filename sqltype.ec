@@ -5,7 +5,7 @@
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1988-1993,1995-98
-@(#)Product:         Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 */
 
 /*TABSTOP=4*/

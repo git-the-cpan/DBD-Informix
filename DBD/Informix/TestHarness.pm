@@ -1,9 +1,10 @@
 #   @(#)$Id: DBD/Informix/TestHarness.pm version /main/6 2000-02-25 10:40:27 $ 
 #
-#   Pure Perl Test Harness for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+#   Pure Perl Test Harness for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 #
 #   Portions Copyright 1996-99 Jonathan Leffler
 #   Portions Copyright 2000    Informix Software Inc
+#   Portions Copyright 2002    IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -40,7 +41,7 @@
 	use Config;
 	require_version DBI 1.02;
 
-	$VERSION = "1.00.PC1";
+	$VERSION = "1.00.PC2";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.

@@ -5,6 +5,8 @@
 #	Test AutoCommit Off for DBD::Informix
 #
 #	Copyright (C) 1996-97,1999 Jonathan Leffler
+#	Copyright (C) 2000         Informix Software Inc
+#	Copyright (C) 2002         IBM
 
 # AutoCommit Off => Explicit transactions in force
 

@@ -5,6 +5,7 @@
 # Portions Copyright 1996    Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 # Portions Copyright 1996-99 Jonathan Leffler
 # Portions Copyright 2000    Informix Software Inc
+# Portions Copyright 2002    IBM
 #
 # List of available databases:
 #   @ary = $DBI->data_sources('Informix');

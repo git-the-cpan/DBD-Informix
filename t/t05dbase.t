@@ -4,6 +4,7 @@
 #
 # Portions Copyright 1997,1999 Jonathan Leffler
 # Portions Copyright 2000      Informix Software Inc
+# Portions Copyright 2002      IBM
 #
 # Test database creation and default connections.
 # Note that database statements cannot be used with an explicit connection

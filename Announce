@@ -1,10 +1,17 @@
-To: dbi-announce@isc.org, dbi-dev@isc.org, dbi-users@isc.org,
+To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, descarte@symbolstone.org
-Subject: ANNOUNCE: Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) released
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) released
 
-Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) has been uploaded to CPAN.
 
-Informix Database Driver for Perl (previously known as DBD::Informix)
+This is a purely administrative release.  It changes the version number
+from 1.00.PC1 to 1.00.PC2 solely to fix the email addresses for
+reporting problems.  Functionally, it is identical to 1.00.PC1 - bugs
+and all.  All previous releases of DBD::Informix are scheduled to be
+removed from CPAN on 2002-02-04.  Copyright information has been changed
+to recognize that IBM owns Informix.
+
+IBM Informix Database Driver for Perl (previously known as DBD::Informix)
 is the driver code that enables Perl 5.004 or 5.005 to access Informix
 databases via the DBI module.  You will need the code for DBI version
 1.13 as well.  You should be planning to upgrade to at least version
@@ -14,21 +21,21 @@ version (eg DBI::Shell).  The code is available for download via:
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
 http://www.symbolstone.org/technology/perl/DBI
 
-** When you successfully build Informix Database Driver for Perl,
-** use the ItWorks (Perl) script to report your configuration to
-** the maintenance team at dbd-informix@informix.com.  Note that
-** ItWorks does not send email to anybody; you have to do that
-** yourself.
+** When you successfully build IBM Informix Database Driver for Perl,
+** use the ItWorks (Perl) script to report your configuration to the
+** maintenance team at either dbd-informix@informix.com (up to
+** 2002-06-30) or to dbd-informix@us.ibm.com (from 2002-07-01, though
+** you may try this address now if you wish).  Note that ItWorks does
+** not send email to anybody; you have to do that yourself.
 
 New in release 1.00:
 * This is the first release supported by Informix. That means that Informix
   R&D engineers will both add new features and fix problems. That also means 
   that Informix customers will be able to purchase support from Informix for
-  Informix Database Driver for Perl.
+  IBM Informix Database Driver for Perl.
 * This release provides a (limited) support for UDTs - see README for details.
 * See the ChangeLog file for details about what has changed.
 
-Jonathan Leffler (jleffler@informix.com)
-Michael Kopchenov (myk@informix.com)
+Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce version /main/36 2000-02-09 14:01:07 $
+@(#)$Id: Announce version /main/36 2000-02-09 14:01:07 - hacked $

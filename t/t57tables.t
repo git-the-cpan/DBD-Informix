@@ -5,6 +5,8 @@
 #	Test tables
 #
 #	Copyright (C) 1999 Jonathan Leffler
+#	Copyright (C) 2000 Informix Software Inc
+#	Copyright (C) 2002 IBM
 
 use DBD::Informix::TestHarness;
 use strict;

@@ -1,4 +1,9 @@
-Change Log for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) (aka DBD::Informix)
+
+1.00.PC2 Release
+----------------
+2002-01-31: Update email addresses, web sites, copyright information.
+            Purely repackaging; no functional changes whatsoever.
 
 1.00.PC1 Release
 ----------------
@@ -43,7 +48,7 @@ Change Log for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) (
             shared library names from relative to absolute when using 'ld'
             well as when using 'cc'.
 2000-02-01: Generate error -402, not core dump, on $dbh->prepare(undef).
-2000-02-01: Change official name to "Informix Database Driver for Perl" to
+2000-02-01: Change official name to "IBM Informix Database Driver for Perl" to
             avoid trademark problems.  The acronym DBD is claimed by two
             other companies in the USA, DBD Group (http://www.dbd.com) and
             Digital By Design (http://www.digitalbydesign.net).  Upgrades

@@ -4,6 +4,7 @@
 #
 # Portions Copyright 1998-99 Jonathan Leffler
 # Portions Copyright 2000    Informix Software Inc
+# Portions Copyright 2002    IBM
 #
 # Test for UPDATE on zero rows in MODE ANSI database.
 # Note that database statements cannot be used with an explicit connection

@@ -5,7 +5,7 @@
 @(#)Purpose:         JLSS Functions to manipulate DECIMAL values
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1996-99
-@(#)Product:         Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+@(#)Product:         IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 */
 
 /*TABSTOP=4*/

@@ -5,6 +5,7 @@
  * Portions Copyright 1995-96 Alligator Descartes
  * Portions Copyright 1996-99 Jonathan Leffler
  * Portions Copyright 2000    Informix Software Inc
+ * Portions Copyright 2002    IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.

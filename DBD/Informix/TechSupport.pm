@@ -1,8 +1,9 @@
 #   @(#)$Id: DBD/Informix/TechSupport.pm version /main/7 2000-02-23 13:09:56 $
 #
-#	Technical Support Tools for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+#	Technical Support Tools for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 #
 #   Copyright 2000 Informix Software Inc
+#   Copyright 2002 IBM
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -14,7 +15,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(print_versions set_licence_number bug_report it_works);
 
-	$VERSION = "1.00.PC1";
+	$VERSION = "1.00.PC2";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -316,32 +317,33 @@ use DBD::Informix::TechSupport;
 =head1 DESCRIPTION
 
 This document describes how to obtain technical support for
-Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 (which is also known as DBD::Informix).
 It also describes how to use the Perl module to report information to
 any of technical support channels.
 
 =head1 INFORMIX TECHNICAL SUPPORT
 
-Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 is a supported product of Informix Software, Inc.,
 provided that you are using a supported configuration.
 
-You can send your problem reports to the dbd-informix@informix.com
-mail alias.
-Under normal circumstances, you will receive a response by the end
-of the next working day (California time).
+You can send your problem reports to either dbd-informix@informix.com
+(up to 2002-06-30) or to dbd-informix@us.ibm.com (from 2002-07-01,
+though you may try this address now if you wish).  Under normal
+circumstances, you will receive a response by the end of the next
+working day (California time).
 
 =head1 OTHER SUPPORT
 
-You can also submit questions by subscribing to the dbi-users@isc.org
-mailing list (use http//www.isc.org/dbi-lists.html to sign up), and
-email your questions to dbi-users@isc.org.
-This may provide quicker support, especially over holiday weekends.
+You can also submit questions by subscribing to the dbi-users@perl.org
+mailing list (use http//dbi.perl.org/ to sign up), and email your
+questions to dbi-users@perl.org.  This may provide quicker support,
+especially over holiday weekends.
 
 =head1 CONFIGURATIONS SUPPORTED BY INFORMIX
 
-Informix Technical Support will only support Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03)
+Informix Technical Support will only support IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01)
 if you are using certain supported versions of ESQL/C or Client SDK:
 
 =over 2
@@ -373,7 +375,7 @@ above.
 
 =head1 OTHER CONFIGURATIONS WHICH PROBABLY WORK
 
-Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) is believed to work with all versions of ESQL/C and
+IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) is believed to work with all versions of ESQL/C and
 ClientSDK from ESQL/C 5.00.UC1 upwards.
 However, you may run into problems with shared libraries if you use
 versions of ESQL/C which are not explicitly supported.
@@ -429,7 +431,7 @@ builds it (classes B, C, D) and tests it (classes C, D).
 =head2 Using it_works
 
 This generates the information needed for a report that you have managed
-to get Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03) working.
+to get IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01) working.
 
 	it_works;
 
@@ -470,7 +472,7 @@ Licence
 
 By default, the licence number associated with the product will is
 ACN#J334912, and this does not have any support.
-If you buy support for Informix Database Driver for Perl Version 1.00.PC1 (2000-03-03), then you will be given a new licence
+If you buy support for IBM Informix Database Driver for Perl Version 1.00.PC2 (2002-02-01), then you will be given a new licence
 number and you should install that number in the software so that bug
 reports will contain a valid licence number.
 Normally, you'd do this with the InformixTechSupport script, but that

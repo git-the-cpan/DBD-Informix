@@ -4,7 +4,8 @@
 #
 #	Test handling of bind_param_inout for DBD::Informix
 #
-#	Copyright 2000 Informix Software Inc
+#	Copyright (C) 2000 Informix Software Inc
+#	Copyright (C) 2002 IBM
 
 use strict;
 use DBD::Informix::TestHarness;
