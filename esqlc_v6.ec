@@ -1,5 +1,5 @@
 /*
- * @(#)esqlc_v6.ec	51.1 97/02/26 12:03:41
+ * @(#)esqlc_v6.ec	52.1 97/02/28 18:51:06
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 #include "Informix.h"
 
 #ifndef lint
-static const char sccs[] = "@(#)esqlc_v6.ec	51.1 97/02/26";
+static const char sccs[] = "@(#)esqlc_v6.ec	52.1 97/02/28";
 #endif
 
 /* ================================================================= */
@@ -118,7 +118,6 @@ int dbd_ix_setconnection(imp_dbh_t *imp_dbh)
 		dbd_ix_debug(1, "SET CONNECTION %s\n", nm_connection);
 		EXEC SQL SET CONNECTION :nm_connection;
 		imp_drh->current_connection = nm_connection;
-		dbd_ix_sqlcode(imp_dbh);
 		if (sqlca.sqlcode < 0)
 			rc = 0;
 	}

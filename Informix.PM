@@ -1,4 +1,4 @@
-#	@(#)Informix.PM	51.1 97/02/26 12:06:10
+#	@(#)Informix.PM	52.1 97/03/05 15:51:42
 #
 #   Portions Copyright (c) 1994,1995 Tim Bunce
 #   Portions Copyright (c) 1996,1997 Jonathan Leffler
@@ -20,7 +20,7 @@
 	my $PRODUCTVERSION      = "<<Product Version>>";
 	my $MultipleConnections = "<<Multiple Connections>>";
 	my $ATTRIBUTION         = 'By Alligator Descartes and Jonathan Leffler';
-	my $Revision            = substr(q@(#)Informix.PM 51.1 (97/02/26)@, 3);
+	my $Revision            = substr(q@(#)Informix.PM 52.1 (97/03/05)@, 3);
 
 	require_version DBI 0.69;
 
@@ -58,14 +58,17 @@
 
 		# Create new driver handle.
 		$drh = DBI::_new_drh($class, {
-			'Name'                => 'Informix',
-			'Version'             => $VERSION,
-			'ProductName'         => $PRODUCTNAME,
-			'ProductVersion'      => $PRODUCTVERSION,
-			'MultipleConnections' => $MultipleConnections,
-			'Err'                 => \$DBD::Informix::err,
-			'Errstr'              => \$DBD::Informix::errstr,
-			'Attribution'         => $ATTRIBUTION,
+			'Name'                   => 'Informix',
+			'Version'                => $VERSION,
+			'ProductName'            => $PRODUCTNAME,
+			'ProductVersion'         => $PRODUCTVERSION,
+			'MultipleConnections'    => $MultipleConnections,
+			'ix_ProductName'         => $PRODUCTNAME,
+			'ix_ProductVersion'      => $PRODUCTVERSION,
+			'ix_MultipleConnections' => $MultipleConnections,
+			'Err'                    => \$DBD::Informix::err,
+			'Errstr'                 => \$DBD::Informix::errstr,
+			'Attribution'            => $ATTRIBUTION,
 			%{$attr}
 		});
 
@@ -226,24 +229,24 @@ basic information:
     print "    Name:                  $drh->{Name}\n";
     # Version is the version of DBD::Informix (eg 0.51).
     print "    Version:               $drh->{Version}\n";
-    # The ProductName is the version of ESQL/C; it corresponds to
-    # the first line of the output from "esql -V".
-    print "    Product:               $drh->{ProductName}\n";
-    # The ProductVersion is an integer version number such as 721
-    # for ESQL/C version 7.21.UC1.
-    print "    Product Version:       $drh->{ProductVersion}\n";
     # The Attribution identifies the culprits who provided you
     # with this software.
     print "    Attribution:           $drh->{Attribution}\n";
+    # The ProductName is the version of ESQL/C; it corresponds to
+    # the first line of the output from "esql -V".
+    print "    Product:               $drh->{ix_ProductName}\n";
+    # The ProductVersion is an integer version number such as 721
+    # for ESQL/C version 7.21.UC1.
+    print "    Product Version:       $drh->{ix_ProductVersion}\n";
     # The MultipleConnections indicates whether the driver
     # supports multiple connections (1) or not (0).
-    print "    Multiple Connections:  $drh->{MultipleConnections}\n";
+    print "    Multiple Connections:  $drh->{ix_MultipleConnections}\n";
 
     # -- Not implemented in DBD::Informix yet --
     # ActiveConnections identifies the number of open connections.
-    print "    Active Connections:      $drh->{ActiveConnections}\n";
+    print "    Active Connections:      $drh->{ix_ActiveConnections}\n";
     # CurrentConnection identifies the current connection.
-    print "    Current Connections:     $drh->{CurrentConnection}\n";
+    print "    Current Connections:     $drh->{ix_CurrentConnection}\n";
 
 Once you have the driver loaded, you can connect to a database, or you
 can sever all connections to databases with disconnect_all.
@@ -316,27 +319,26 @@ information about the database, etc.
      print "    Type:                    $dbh->{Type}\n";
      # Name is the name of the database specified at connect
      print "    Database Name:           $dbh->{Name}\n";
+     # AutoCommit is 1 (true) if the database commits each statement.
+     print "    AutoCommit:              $dbh->{AutoCommit}\n";
      # InformixOnLine is 1 (true) if the handle is connected to an
      # Informix-OnLine server.
-     print "    Informix-OnLine:         $dbh->{InformixOnLine}\n";
+     print "    Informix-OnLine:         $dbh->{ix_InformixOnLine}\n";
      # LoggedDatabase is 1 (true) if the database has
      # transactions.
-     print "    Logged Database:         $dbh->{LoggedDatabase}\n";
+     print "    Logged Database:         $dbh->{ix_LoggedDatabase}\n";
      # ModeAnsiDatabase is 1 (true) if the database is MODE ANSI.
-     print "    Mode ANSI Database:      $dbh->{ModeAnsiDatabase}\n";
-     # AutoCommit is 1 (true) if the database commits each
-     # statement.
-     print "    AutoCommit:              $dbh->{AutoCommit}\n";
+     print "    Mode ANSI Database:      $dbh->{ix_ModeAnsiDatabase}\n";
      # AutoErrorReport is 1 (true) if errors are reported as they
      # are detected.
-     print "    AutoErrorReport:         $dbh->{AutoErrorReport}\n";
+     print "    AutoErrorReport:         $dbh->{ix_AutoErrorReport}\n";
      # InTransaction is 1 (true) if the database is in a transaction
-     print "    Transaction Active:      $dbh->{InTransaction}\n";
+     print "    Transaction Active:      $dbh->{ix_InTransaction}\n";
      # ConnectionName is the name of the ESQL/C connection.
      # Mainly applicable with Informix-ESQL/C 6.00 and later.
-     print "    Connection Name:         $dbh->{ConnectionName}\n";
+     print "    Connection Name:         $dbh->{ix_ConnectionName}\n";
 
-If $dbh->{AutoErrorReport} is true, then DBD::Informix will report each
+If $dbh->{ix_AutoErrorReport} is true, then DBD::Informix will report each
 error automatically on STDERR when it is detected.  The error is also
 available via the package variables $DBI::errstr and $DBI::err.  Note that
 $DBI::errstr includes the SQL error number and the ISAM error number if
@@ -344,7 +346,7 @@ there is one, and ends with a newline.  The message may or may not extend
 over several lines, and is generally formatted so that it will display
 neatly within 80 columns.
 
-If $dbh->{AutoErrorReport} is false, then DBD::Informix does not report any
+If $dbh->{ix_AutoErrorReport} is false, then DBD::Informix does not report any
 errors when it detects them; it is up to the user to note that errors have
 occurred and to report them.
 
@@ -463,10 +465,10 @@ declared for the prepared statement.
 According to the DBI specification, the prepare call accepts an
 optional attributes parameter which is a reference to a hash.
 At the moment, no parameters are recognized.
-It would be reasonable to add, for example, {CursorWithHold => 1} to
+It would be reasonable to add, for example, {ix_CursorWithHold => 1} to
 specify that the cursor should be declared WITH HOLD.
-Similarly, you could add {BlobLocation => 'InFile'} to support
-per-statement blob location, and {ScrollCursor => 1} to support
+Similarly, you could add {ix_BlobLocation => 'InFile'} to support
+per-statement blob location, and {ix_ScrollCursor => 1} to support
 scroll cursors.
 
 Note: in versions of DBD::Informix prior to 0.25, preparing a statement
@@ -484,6 +486,8 @@ using:
 
 BUG: There is no way to tell whether the statement is just executable or
 whether it is a cursory (fetchable) statement.  You are assumed to know.
+An attribute such as {ix_IsCursory} could be added to povide this key piece
+of information, and it shouldn't really be Informix-specific.
 
 =back
 
@@ -522,11 +526,15 @@ nullability, etc are.  You do this with:
 
     @name = @{$sth->{NAME}};        # Column names
     @null = @{$sth->{NULLABLE}};    # True => accepts nulls
-    @type = @{$sth->{TYPE}};        # Data types with qualifiers
+    @type = @{$sth->{TYPE}};        # ODBC Data Type numbers
     @prec = @{$sth->{PRECISION}};   # Numeric length from SysColumns.Collength
     @scal = @{$sth->{SCALE}};       # Same as PRECISION
 
 =over 4
+
+BUG: $sth->{TYPE} currently returns the Native (Informix) Type Names.
+So does {ix_NativeTypeNames}, which should not be an Informix-specific
+attribute.
 
 BUG: PRECISION is not clearly defined, and neither is SCALE.  It isn't
 clear which types should have a these attributes.  There should, probably,
@@ -829,6 +837,64 @@ warning nor an error.
 Both $dbh->commit and $dbh->rollback succeed but do nothing.
 Executing any Group 3B or 3C statement will generate an error.
 
+=head1 ATTRIBUTE NAME CHANGES
+
+Note that with this version of DBD::Informix, most (theoretically all)
+of the Informix-specific attributes have been renamed so that they
+start ix_ (eg: $dbh->{ix_AutoErrorReport}), and the old names which do
+not have this systematic prefix are now officially deprecated.
+And additional attribute, $dbh->{ix_Deprecated} has been invented
+which can be set to 1 to report on the use of deprecated attribute
+names.
+For this release (0.52), the default value of {ix_Deprecated} is 0
+(False), so the deprecated warnings won't appear unless you ask for
+them.
+The deprecated form {Deprecated} is also supported.
+
+In the next release (0.53), the warnings will be enabled by default,
+but both versions will work.
+In the release after that (0.54), the warnings will be enabled without
+a mechanism to switch them off, but both versions will work.
+The attributes {Deprecated} and {ix_Deprecated} will In the release
+after that (0.55), the warnings will be enabled without a mechanism to
+switch them off, and the old style attribute names won't work.
+In the release after that (0.56), using the old-style attribute names
+will generate an error.
+In the release after that (0.57), using the old-style name changes
+will do nothing silently.
+The exact time scale for these releases is not clear, but if you don't
+upgrade for a few releases, you could run into problems unexpectedly.
+
+Note that some names may retain the form with no prefix if they are
+accepted by the larger DBD/DBD community.
+Two of the prime candidates for not having to change are ProductName
+and ProductVersion.
+
+=head1 MAPPING BETWEEN ESQL/C AND DBD::INFORMIX
+
+A crude form of the mapping between DBD::Informix functions and ESQL/C
+equivalents follows -- there are a number of ways in which it isn't quite
+precise (eg the influence of AutoCommit), but it is accurate enough for
+most purposes.
+
+	DBI->connect            => DATABASE in 5.0x
+	$dbh->disconnect        => CLOSE DATABASE in 5.0x
+
+	DBI->connect            => CONNECT in 6.0x and later
+	$dbh->disconnect        => DISCONNECT in 6.0x and later
+
+	$dbh->commit            => COMMIT WORK (+BEGIN WORK)
+	$dbh->rollback          => ROLLBACK WORK (+BEGIN WORK)
+
+	$dbh->do                => EXECUTE IMMEDIATE
+	$dbh->prepare           => PREPARE, DESCRIBE (DECLARE)
+	$sth->execute           => EXECUTE or OPEN
+	$sth->fetch             => FETCH
+	$sth->fetchrow          => FETCH
+	$sth->finish            => CLOSE
+
+	undef $sth              => FREE cursor, FREE statement, etc
+
 =head1 KNOWN RESTRICTIONS
 
 =over 2
@@ -839,6 +905,10 @@ Blobs can only be located in memory (reliably).
 =item *
 Some driver attributes (notably CurrentConnection and
 ActiveConnections) cannot be queried.
+
+=item *
+The new DBI spec (version 1.64) from Tim Bunce has not been assimilated
+into the 0.52 version of DBD::Informix.
 
 =back
 
@@ -861,6 +931,6 @@ Jonathan Leffler (johnl@informix.com)
 
 =head1 SEE ALSO
 
-perl(1).
+perl(1), perldoc for DBI.
 
 =cut

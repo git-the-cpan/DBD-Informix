@@ -1,4 +1,4 @@
-#	@(#)InformixTest.pm	50.2 97/01/23 16:25:45
+#	@(#)InformixTest.pm	52.1 97/02/28 18:54:20
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
@@ -53,6 +53,7 @@
 	&stmt_note("# DBI->connect('$dbname', '$dbuser', '$xxpass', 'Informix')\n");
 	my ($dbh) = DBI->connect($dbname, $dbuser, $dbpass, 'Informix');
 	&stmt_fail() unless (defined $dbh);
+	$dbh->{ix_Deprecated} = 0;
 	$dbh;
 	}
 

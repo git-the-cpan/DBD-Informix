@@ -13,20 +13,25 @@ WARNING: THIS IS ALPHA SOFTWARE. IT IS POSSIBLY UNRELIABLE!
 
 BUILDING DBD::Informix
 
-    If Perl 5.003 or later is NOT installed, then build, test and install it!
+    If you do not have Perl version 5.003 or later, then build, test and
+    install it before doing anything else!
 
     If the DBI module (version 0.73 or later preferred; 0.69 or later is
     mandatory) is not installed, then build, test and install it.
 
-    You must have a version of ESQL/C available to you.  At the moment,
-    version 4.0x or 4.1x are not supported.  If someone wants to code up
-    the fix necessary to get versions 4.0x or 4.1x to work, then contact
-    the DBD::Informix Maintenance Team.  ESQL/C Versions 5.00 upwards
-    should be OK.  Please ensure that you have $INFORMIXDIR set, and that
-    $INFORMIXDIR/bin is on your PATH.  The build may work without these
-    environment variables being set, but it will be more reliable if they
-    are.  Also, if you are using ESQL/C version 6.x or later, you will be
-    using ESQL/C shared libraries which are found in $INFORMIXDIR/lib and
+    You must have a version of Informix-ESQL/C available to you.  You
+    should read the Informix.Licence file for information about what you
+    need.  At the moment, ESQL/C Versions 4.0x or 4.1x are not supported,
+    nor are any earlier versions.  If someone wants to do the coding which
+    is necessary to get versions 4.0x or 4.1x to work, then contact the
+    DBD::Informix Maintenance Team.  ESQL/C Versions 5.00 upwards should be
+    OK.
+
+    Please ensure that you have $INFORMIXDIR set, and that $INFORMIXDIR/bin
+    is on your PATH.  The build may work without these environment
+    variables being set, but it will be more reliable if they are.  Also,
+    if you are using ESQL/C version 6.x or later, you will be using ESQL/C
+    shared libraries which are found in $INFORMIXDIR/lib and
     $INFORMIXDIR/lib/esql.  You need to ensure that these will be found
     when you run Perl with DBD::Informix.  On SVR4 machines, this means
     adding these directories to LD_LIBRARY_PATH; on HP-UX, the variable is,
@@ -54,8 +59,9 @@ BUILDING DBD::Informix
     should also read the section on ExtUtils::MakeMaker in the 2nd Edition
     of 'Programming Perl'.
 
-    You should never need to make any changes.  If you do *please* let me
-    know so that I can try to make it automatic in a later release.
+    You should never need to make any changes to the generated Makefile,
+    nor to Makefile.PL.  If you do *please* let me know so that I can try
+    to make it automatic in a later release.
 
     You should then take a look at the documentation in InformixTest.pm,
     and set the DBD_INFORMIX_* environment variables as appropriate for
@@ -67,7 +73,7 @@ BUILDING DBD::Informix
 
         make test
 
-    On the reference system (Sun Sparc 10 running Solaris 2.4, compiling
+    On the reference system (Sun Sparc 10 running Solaris 2.5.1, compiling
     with GCC 2.7.0 or SUNWspro SC3.0.1), all the tests pass for ESQL/C
     versions 5.03.UC1, 5.07.UC1, 6.00.UC1, 7.13.UC1 and 7.21.UC1.
     Nevertheless, it is a good idea to run:
@@ -114,6 +120,14 @@ BUILDING DBD::Informix
     obsolete file; over time and multiple versions, this could, eventually,
     lead to 'coronary thrombosis' on your disk drive -- or disk full.
 
+    If you run into problems which suggest that the ESQL/C you have won't work
+    as dynamically loaded libraries (eg on HP-UX or SCO), then you should
+    create a statically linked version of Perl with DBD::Informix linked to
+    it.  Use:
+
+        make perl
+        make test_static
+
 KNOWN PROBLEMS:
 
     * DBD::Informix uses SQL DESCRIPTORS which are not part of ESQL/C
@@ -129,14 +143,22 @@ KNOWN PROBLEMS:
       required.
 
     * Some problems have been encountered on HP-UX 9.x when building shared
-      libraries using 5.0x ESQL/C.  This seems to be because the HP-UX
-      compilers and loader do not accept code not compiled for shared
-      libraries inside a shared library.  Help (or reassurance) is needed
-      on this.
+      libraries using 5.0x and 6.0x ESQL/C.  This seems to be because the
+      HP-UX compilers and loader do not accept code not compiled for shared
+      libraries inside a shared library.  Help (or reassurance) is needed on
+      this.
 
     * Some problems have been encountered on SCO which seems to be related
       to the equivalent of LD_LIBRARY_PATH on System V Release 4 machines.
       Again, help or reassurance is needed on this.
+
+    * If you are using GCC to compile the software on Solaris, ensure that
+      you also use GCC to build the shared libraries, rather than trying to
+      use 'ld'.  If you use ld instead, you are likely to run into problems
+      with an undefined symbol __eprintf.  If you have this problem, the
+      fix is usually to reconfigure (and therefore rebuild) Perl to use GCC
+      to create the shared libraries.  It is not clear why using GCC gives
+      this problem.
 
 -------------------------------------------------------------------------------
 
@@ -178,21 +200,24 @@ If this does *not* resolve your problem, please post the details of your
 problem to dbi-users@fugue.com and CC them to me at johnl@informix.com.
 Please include:
 
-1. A complete log of a complete build, e.g.:
+1. A complete log of a complete build:
 
     perl Makefile.PL           (do a make realclean first)
     make
-    ./test.pl
-    PERL_DBI_DEBUG=2 ./test.pl
+    make test
+    make test TEST_VERBOSE=1
+
+    You can also use (with Bourne/Korn Shells) to get a lot more debug
+    information, but don't send this unless asked to do so:
+
+    PERL_DBI_DEBUG=2 make test TEST_VERBOSE=1
 
 2. A complete, sorted dump of your environment:
 
     env | sort
 
 3. Full details of which version of Informix-ESQL/C and Perl you're using.
-
-4. The output of:
-    perl -e 'use Config; print Config::myconfig()'
+   The output of "perl -V" gives the Perl information.
 
 5. If you get a core dump, try to include a stack trace from it.  If the
    stack trace mentions XS_DynaLoader_dl_load_file then rerun make test
@@ -207,9 +232,9 @@ Please include:
    dbi-announce@fugue.com, dbi-users@fugue.com and dbi-dev@fugue.com.
 
 Regards,
-Tim & Al & Jonathan
+Jonathan Leffler (johnl@informix.com)
 
-@(#)README	50.2 97/01/24 09:17:03
+@(#)README	52.1 97/02/28 18:55:09
 
 ---------------------------------------------------------------------------
 

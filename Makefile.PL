@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)Makefile.PL	51.2 97/02/26 12:14:47
+# @(#)Makefile.PL	52.3 97/03/05 15:45:05
 #
 # Portions Copyright (c) 1996,1997 Jonathan Leffler (johnl@informix.com)
 # Portions Copyright (c) 1996 Alligator Descartes (descarte@hermetica.com)
@@ -15,7 +15,7 @@ use Config;
 
 %opts = (
 	'NAME'    => 'DBD::Informix',
-	'VERSION' => '0.51',
+	'VERSION' => '0.52',
 );
 
 print "\nConfiguring DBD::Informix version $opts{VERSION}...\n";
@@ -31,7 +31,7 @@ require_version DBI 0.69;
 
 unless ($ENV{INFORMIXDIR}){
     warn "\$INFORMIXDIR not defined. Searching for Informix...\n";
-    foreach(qw(/usr/informix /opt/informix /opt/Informix))
+    foreach(qw(/usr/informix /opt/informix /home/informix /opt/Informix))
 	{
 		$ENV{'INFORMIXDIR'} = $_, last if (-d "$_/lib");
     }
@@ -230,12 +230,19 @@ else
 	print "Don't you need to upgrade your compiler?\n";
 }
 
-$objects = "Informix.o sqltype.o ixblob.o decsci.o dbdimp.o link.o $vercode";
+$objects = "Informix.o sqltype.o ixblob.o decsci.o dbdimp.o dbdattr.o link.o $vercode";
 
 # Need to pick up the DBI headers.
 # NB: If using ESQL/C 4.xy, use -I$ID/incl, not -I$ID/incl/esql!
 # However, you've got other major work to do to handle 4.xy ESQL/C.
-$opts{INC} = "-I$ID/incl/esql -I$Config{archlib}/DBI -I$Config{sitearch}/DBI";
+# With DBI-0.77 and up, DBIXS.h is in an auto sub-directory.
+ 
+$INC1 = "-I$ID/incl/esql";
+$INC2 = "-I$Config{archlib}/DBI";
+$inc_pad = "/auto" if ($DBI::VERSION >= 0.77);
+$INC3 = "-I$Config{sitearch}$inc_pad/DBI";
+
+$opts{INC} = "$INC1 $INC2 $INC3";
 $opts{OBJECT} = $objects;
 
 # The best way to get the library linked reliably is to use the script that

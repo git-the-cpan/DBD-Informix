@@ -23,13 +23,11 @@ DBD::Informix for DBI
 
 0.21 Release
 ------------
-
 01/09/95:       Fixed truncated INTEGER bug. Other numerical types still
                 screwed. Patch on the way.
 
 0.22 Release
 ------------
-
 09/09/96:       Added @ary = $drh->func('_ListDBs'); method for getting
                 a list of extant databases on the local Informix server.
                 (From original code and suggestion by
@@ -42,7 +40,6 @@ DBD::Informix for DBI
 
 0.23 Release
 ------------
-
 17/09/96:       Added patch for bad column names as show in George Vicherek's
                 splendid test case. (extratests/primitives.pl exercises this)
 
@@ -57,13 +54,11 @@ DBD::Informix for DBI
 
 0.24 Release
 ------------
-
 26/09/96:       Patches from Terry arrived. This'll be the 0.25 release. Seems
                 to work.
 
 0.25 Release
 ------------
-
 96-11-01: Control transferred to Jonathan Leffler (johnl@informix.com).
 96-11-19: Rewrite of dbdimp.ec more or less complete.  The ESQL/C code
           has been almost totally rewritten; the Perl interface code is
@@ -199,8 +194,27 @@ Serge Davidov - serge@fcmc.com
 97-02-26: Add $sth->{CursorName} and $dbh->{ConnectionName}.  Add test
           updcursor.t to check that you can do 'UPDATE ... WHERE CURRENT OF'.
           Add ".DEFAULT." as an explicit way of making the default connection.
+          Release version 0.51, and a patch, version 0.51p1.
+
+0.52 Release
+------------
+97-02-28: Add the Informix.Licence file to explain the licencing issues for
+          Informix-ESQL/C.  Update the README file.  Fix the caching of
+          attributes.  Add 'deprecated' warning to the system, and a way of
+          turning the deprecated warnings off.  Use this method in
+          InformixTest.pm.  Add the attribute handling of ix_XyZ as well as
+          deprecating the corresponding XyZ attribute.  Fix the handling of
+          SQLCA so that the inserted serial number is available, etc.  Version
+          bumped to 0.52.
+97-03-02: Split attribute handling code from dbdimp.ec into dbdattr.ec.
+          Add dbd_ix_module() function.  Revise the interface to the functions
+          dbd_st_{FETCH|STORE} to match dbd_db_{FETCH|STORE} (they now take a
+          pointer to imp_sth_t argument instead of a pointer to SV).
+97-03-03: Use $DBI::VERSION to determine where DBIXS.h should be found.
+97-03-05: Add ESQL/C => DBD::Informix statement mapping to POD in Informix.PM,
+          after suggestion by Bill Mitlyng (Bill.Mitlyng@abnamro.com).
 
 --------------
 
 Jonathan Leffler (johnl@informix.com)
-@(#)ChangeLog	51.2 97/02/26 12:08:36
+@(#)ChangeLog	52.3 97/03/05 15:47:01

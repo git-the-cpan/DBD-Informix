@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)basic00.t	51.1 97/02/25 19:42:59
+#	@(#)basic00.t	52.1 97/03/05 15:53:07
 #
 #	Primary test script for DBD::Informix
 #
@@ -19,6 +19,8 @@ $testtable = "dbd_ix_test01";
 $drh = DBI->install_driver('Informix');
 &stmt_ok(0);
 
+print "# DBI Information\n";
+print "#     Version:               $DBI::VERSION\n";
 print "# Driver Information\n";
 print "#     Type:                  $drh->{Type}\n";
 print "#     Name:                  $drh->{Name}\n";

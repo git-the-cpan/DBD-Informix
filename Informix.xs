@@ -1,5 +1,5 @@
 /*
- * @(#)Informix.xs	50.1 97/01/12 17:54:44
+ * @(#)Informix.xs	52.2 97/03/02 12:57:42
  *
  * Portions Copyright (c) 1994,1995 Tim Bunce
  * Portions Copyright (c) 1995,1996 Alligator Descartes
@@ -17,7 +17,7 @@ DBISTATE_DECLARE;
 
 /* Assume string concatenation is available */
 #ifndef lint
-static const char sccs[] = "@(#)Informix.xs	50.1 97/01/12";
+static const char sccs[] = "@(#)Informix.xs	52.2 97/03/02";
 static const char esqlc_ver[] = "@(#)" ESQLC_VERSION_STRING;
 #endif
 
@@ -153,7 +153,7 @@ STORE(dbh, keysv, valuesv)
 	CODE:
 	D_imp_dbh(dbh);
 	ST(0) = &sv_yes;
-	if (dbd_db_STORE(imp_dbh, keysv, valuesv))
+	if (dbd_db_STORE_attrib(imp_dbh, keysv, valuesv))
 	{
 		/* This caching should be handled by the DBI switch, somehow */
 		/* Cache for next time (via DBI quick_FETCH) */
@@ -174,18 +174,10 @@ FETCH(dbh, keysv)
 	SV *        keysv
 	CODE:
 	D_imp_dbh(dbh);
-	SV *valuesv = dbd_db_FETCH(imp_dbh, keysv);
-	if (valuesv)
-	{
-		/* This caching should be handled by the DBI switch, somehow */
-		/* Cache for next time (via DBI quick_FETCH) */
-		STRLEN          kl;
-		char           *key = SvPV(keysv, kl);
-		(void)hv_store((HV *)SvRV(dbh), key, kl, valuesv, 0);
-	}
-	else
+	SV *valuesv = dbd_db_FETCH_attrib(imp_dbh, keysv);
+	if (!valuesv)
 		valuesv = DBIS->get_attr(dbh, keysv);
-	ST(0) = valuesv;    /* dbd_db_FETCH did sv_2mortal  */
+	ST(0) = valuesv;    /* dbd_db_FETCH_attrib did sv_2mortal  */
 
 # Disconnect from whichever database it is connected to.
 void
@@ -373,7 +365,7 @@ STORE(sth, keysv, valuesv)
 	CODE:
 	D_imp_sth(sth);
 	ST(0) = &sv_yes;
-	if (!dbd_st_STORE(sth, keysv, valuesv))
+	if (!dbd_st_STORE_attrib(imp_sth, keysv, valuesv))
 		if (!DBIS->set_attr(sth, keysv, valuesv))
 			ST(0) = &sv_no;
 
@@ -387,10 +379,10 @@ FETCH(sth, keysv)
 	SV *        keysv
 	CODE:
 	D_imp_sth(sth);
-	SV *valuesv = dbd_st_FETCH(sth, keysv);
+	SV *valuesv = dbd_st_FETCH_attrib(imp_sth, keysv);
 	if (!valuesv)
 		valuesv = DBIS->get_attr(sth, keysv);
-	ST(0) = valuesv;    /* dbd_st_FETCH did sv_2mortal  */
+	ST(0) = valuesv;    /* dbd_st_FETCH_attrib did sv_2mortal  */
 
 # Finish a statement (CLOSE a cursor; free allocated resources)
 void

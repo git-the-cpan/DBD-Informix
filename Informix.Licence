@@ -1,0 +1,81 @@
+DBD::Informix, Informix-ESQL/C and Informix Software Inc.
+=========================================================
+
+This is an explanation of the relationship between DBD::Informix and
+Informix-ESQL/C, and also of the relationship between Informix Technical
+Support and the maintenance of DBD::Informix.
+
+DBD::Informix and Informix-ESQL/C
+=================================
+
+DBD::Informix is freely available software which is licensed on the same
+terms as Perl, under the GNU General Public Licence or the Perl Artistic
+Licence.
+
+However, to compile or use DBD::Informix, you need Informix-ESQL/C, and it
+is a commercial product which is not available free of charge.  There are
+no sites where you can download Informix-ESQL/C for free (or, at least,
+there shouldn't be any).  You need to purchase a licensed copy of the
+Informix-ESQL/C Development system for each machine where you need to
+compile DBD::Informix, and you need at least an Informix-ESQL/C RunTime or
+Informix-Connect license on each machine where you wish to run it.  If you
+need to purchase these, you should contact your local Informix Sales
+Office, or try contacting Informix at the address below, asking for the
+information about your local sales office:
+
+    Informix Software Inc
+    4100 Bohannon Drive
+    Menlo Park CA 94025
+    USA
+
+    Tel: +1 415-926-6300
+    Fax: +1 415-926-6006
+
+DBD::Informix is known to work with ESQL/C Version 5.00 upwards to 7.2x.
+If you have ESQL/C Version 8.0x (XPS), DBD::Informix will probably work,
+but this has not been proven.  If you have ESQL/C Version 9.0x or later
+(IUS), then DBD::Informix will probably work as long as the database tables
+you access do not use the new extended and user-defined types, but this is
+more speculative.  If you have ESQL/C Version 4.1x or earlier, then
+DBD::Informix is known not to work -- it relies on features introduced to
+Version 5.00 ESQL/C.  The code can probably be modified to work, but it
+will take considerable effort.  If you have Informix-4GL (C-code) for
+version 6.0x, then you can use it in lieu of a 6.0x ESQL/C, but the
+resulting executable code is likely to be much larger than it would be
+using a pure ESQL/C version.  You cannot use 4.1x I4GL because it uses the
+4.1x ESQL/C compiler, which doesn't provide the features needed by
+DBD::Informix.
+
+You do not need to have any Informix database engine (OnLine or SE) on the
+machine where you build or use DBD::Informix.
+
+Note that the software that comes with LiveWire is just an OnLine server;
+you do not get an ESQL/C Development licence.  I am not clear whether you
+get Informix-Connect, but you must have the ESQL/C Development licence to
+be able to compile DBD::Informix.
+
+DBD::Informix and Informix Technical Support
+============================================
+
+DBD::Informix is in no sense an official product supported by Informix
+Software Inc.  You should not try to use Informix Technical Support to
+help with problems with DBD::Informix.  You should subscribe to the
+dbi-users@fugue.com mailing list (sign up from http://www.fugue.com/dbi)
+and then mail your questions to dbi-users@fugue.com.
+
+Although the current developer, Jonathan Leffler (johnl@informix.com)
+does indeed work for Informix Software, DBD::Informix is not a part of
+his job description and any development of it is done in his 'spare'
+time.  Consequently, none of the Informix Technical Support channels are
+available to support DBD::Informix.  If you ask Informix Technical
+Support any questions about DBD::Informix, you can reasonably expect a
+completely blank response from them -- it is not in their job description
+either.
+
+See also the README file.
+
+===========================================================================
+
+Jonathan Leffler (johnl@informix.com)
+Informix Software Inc
+@(#)Informix.Licence	52.1 97/02/28
