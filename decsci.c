@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: decsci.c,v $
-@(#)Version:         $Revision: 1.11 $
-@(#)Last changed:    $Date: 1997/07/08 19:47:10 $
+@(#)Version:         $Revision: 1.12 $
+@(#)Last changed:    $Date: 1999/04/14 06:29:15 $
 @(#)Purpose:         Fixed, Exponential and Engineering formatting of DECIMALs
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1991-93,1996-97
-@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
+@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
 */
 
 #include "esqlc.h"
@@ -22,7 +22,7 @@
 static char     buffer[166];
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: decsci.c,v 1.11 1997/07/08 19:47:10 johnl Exp $";
+static const char rcs[] = "@(#)$Id: decsci.c,v 1.12 1999/04/14 06:29:15 jleffler Exp $";
 #endif
 
 /*
@@ -202,6 +202,8 @@ char           *deceng(const dec_t *d, int ndigit, int plus, int cw)
 
 #ifdef TEST
 
+#include <stdio.h>
+
 #define DIM(x)	(sizeof(x)/sizeof(*(x)))
 
 static char    *values[] =
@@ -233,7 +235,7 @@ static char    *values[] =
  " 9.99999999999999999999e-131",
 };
 
-main()
+int main(void)
 {
 	char           *s;
 	dec_t           d;

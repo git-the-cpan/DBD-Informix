@@ -5,7 +5,7 @@
 @(#)Purpose:         Function prototypes for ESQL/C Versions 5.00..5.07
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
+@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
 */
 
 /*

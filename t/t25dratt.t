@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t25dratt.t,v 61.1 1998/10/29 22:43:38 jleffler Exp $ 
+#	@(#)$Id: t25dratt.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Driver Attribute test script for DBD::Informix
 #
-#	Copyright (C) 1997-98 Jonathan Leffler
+#	Copyright (C) 1997-99 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 &stmt_note("1..4\n");
 
@@ -34,7 +34,7 @@ print "# \n";
 &stmt_fail() unless $drh->{ix_ActiveConnections} == 0;
 &stmt_ok();
 
-$dbh = &connect_to_test_database(1);
+$dbh = &connect_to_test_database();
 
 print "#     Multiple Connections:  $drh->{ix_MultipleConnections}\n";
 print "#     Active Connections:    $drh->{ix_ActiveConnections}\n";

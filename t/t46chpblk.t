@@ -1,16 +1,16 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t46chpblk.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+#	@(#)$Id: t46chpblk.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	ChopBLanks attribute test script for DBD::Informix
 #
-#	Copyright (C) 1997 Jonathan Leffler
+#	Copyright (C) 1997,1999 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 $tabname = "dbd_ix_chbl_01";
 
-$dbh = &connect_to_test_database(1);
+$dbh = &connect_to_test_database();
 print "# OnLine - will test VARCHAR data types\n"
 	if ($dbh->{ix_InformixOnLine});
 print "# SE - no testing for VARCHAR data types\n"

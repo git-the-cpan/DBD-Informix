@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdattr.ec,v 61.2 1998/10/30 00:32:11 jleffler Exp $ 
+ * @(#)$Id: dbdattr.ec,v 62.1 1999/08/30 23:12:51 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- attribute handling
  *
@@ -12,7 +12,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec,v 61.2 1998/10/30 00:32:11 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 62.1 1999/08/30 23:12:51 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -76,11 +76,12 @@ static char *blob_bindname(BlobLocn locn)
 
 SV *dbd_ix_dr_FETCH_attrib(imp_drh_t *imp_drh, SV *keysv)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_dr_FETCH_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	SV             *retsv = Nullsv;
 
-	dbd_ix_debug(1, "%s::dbd_dr_FETCH_attrib()\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	if (KEY_MATCH(kl, key, "ix_MultipleConnections"))
 	{
@@ -107,7 +108,12 @@ SV *dbd_ix_dr_FETCH_attrib(imp_drh_t *imp_drh, SV *keysv)
 	}
 
 	else
+	{
+		dbd_ix_exit(function);
 		return FALSE;
+	}
+
+	dbd_ix_exit(function);
 
 	return sv_2mortal(retsv);
 }
@@ -115,12 +121,14 @@ SV *dbd_ix_dr_FETCH_attrib(imp_drh_t *imp_drh, SV *keysv)
 /* Set database connection attributes */
 int dbd_ix_db_STORE_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_STORE_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	int             newval = SvTRUE(valuesv);
 	int             retval = True;
 
-	dbd_ix_debug(1, "Enter %s::dbd_db_STORE_attrib()\n", dbd_ix_module());
+	dbd_ix_enter(function);
+
 	if (KEY_MATCH(kl, key, "AutoCommit"))
 	{
 		if (imp_dbh->is_loggeddb == False)
@@ -166,7 +174,8 @@ int dbd_ix_db_STORE_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 		retval = FALSE;
 	}
 
-	dbd_ix_debug(1, "Exit %s::dbd_db_STORE_attrib()\n", dbd_ix_module());
+	dbd_ix_exit(function);
+
 	return retval;
 }
 
@@ -235,11 +244,12 @@ static SV *dbd_ix_getsqlca(imp_dbh_t *imp_dbh, STRLEN kl, char *key)
 
 SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_FETCH_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	SV             *retsv = Nullsv;
 
-	dbd_ix_debug(1, "%s::dbd_db_FETCH_attrib()\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	if (KEY_MATCH(kl, key, "AutoCommit"))
 	{
@@ -288,8 +298,11 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 	else
 	{
 		/* Treat it as a driver query */
+		dbd_ix_exit(function);
 		return dbd_ix_dr_FETCH_attrib(imp_dbh->drh, keysv);
 	}
+
+	dbd_ix_exit(function);
 
 	return sv_2mortal(retsv);
 }
@@ -297,11 +310,13 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 /* Store statement attributes */
 int dbd_ix_st_STORE_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv, SV *valuesv)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_STORE_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	int             rc = TRUE;
 
-	dbd_ix_debug(1, "Enter %s::dbd_st_STORE_attrib()\n", dbd_ix_module());
+	dbd_ix_enter(function);
+
 	if (KEY_MATCH(kl, key, "ix_BlobLocation"))
 	{
 		imp_sth->blob_bind = blob_bindtype(valuesv);
@@ -309,12 +324,14 @@ int dbd_ix_st_STORE_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv, SV *valuesv)
 	else
 		rc = FALSE;
 
-	dbd_ix_debug(1, "Exit %s::dbd_st_STORE_attrib()\n", dbd_ix_module());
+	dbd_ix_exit(function);
+
 	return rc;
 }
 
 SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_FETCH_attrib";
 	STRLEN          kl;
 	char           *key = SvPV(keysv, kl);
 	SV             *retsv = NULL;
@@ -328,7 +345,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	int             i;
 	EXEC SQL END DECLARE SECTION;
 
-	dbd_ix_debug(1, "Enter %s::dbd_st_FETCH_attrib()\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	/* Standard attributes */
 	if (KEY_MATCH(kl, key, "NAME"))
@@ -468,16 +485,24 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 			text = SvPV(imp_sth->st_text, na);
 		retsv = newSVpv(text, 0);
 	}
+	else if (KEY_MATCH(kl, key, "ix_CursorWithHold"))
+	{
+		retsv = newSViv((IV)imp_sth->is_holdcursor);
+	}
+	else if (KEY_MATCH(kl, key, "ix_ScrollCursor"))
+	{
+		retsv = newSViv((IV)imp_sth->is_scrollcursor);
+	}
 	else
 	{
+		dbd_ix_exit(function);
 		return Nullsv;
 	}
 
-	dbd_ix_debug(1, "Exit %s::dbd_st_FETCH_attrib\n", dbd_ix_module());
+	dbd_ix_exit(function);
 
 	if (av != 0)
 		sv_2mortal((SV *)av);
 
 	return sv_2mortal(retsv);
 }
-

@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t23mconn.t,v 61.2 1998/10/29 23:08:07 jleffler Exp $ 
+#	@(#)$Id: t23mconn.t,v 62.2 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test abuse of statements after DISCONNECT ALL for DBD::Informix
 #
-#	Copyright (C) 1996-98 Jonathan Leffler
+#	Copyright (C) 1996-99 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);
@@ -15,6 +15,9 @@ $user1 = $ENV{DBD_INFORMIX_USERNAME};
 $user2 = $ENV{DBD_INFORMIX_USERNAME2};
 $pass1 = $ENV{DBD_INFORMIX_PASSWORD};
 $pass2 = $ENV{DBD_INFORMIX_PASSWORD2};
+
+$user1 = "" if (! defined $user1);
+$pass1 = "" if (! defined $pass1);
 
 if (!$dbase2)
 {
@@ -107,8 +110,8 @@ print "#     Active Connections:      $dbh1->{ix_ActiveConnections}\n";
 print "#     Current Connection:      $dbh1->{ix_CurrentConnection}\n";
 
 # Turn off automatic error reporting...
-$dbh1->{PrintError} = 0;
-$dbh2->{PrintError} = 0;
+$st1->{PrintError} = 0;
+$st2->{PrintError} = 0;
 
 # Resume as if nothing had happened (see t21mconn.t)
 while (@row1 = $st1->fetchrow_array)

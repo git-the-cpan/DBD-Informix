@@ -1,21 +1,18 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t41trans.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+#	@(#)$Id: t41trans.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test Transactions with AutoCommit Off for DBD::Informix
 #
 #   Simple transaction testing setting AutoCommit Off.
 #   Not significantly different from the testing in transact03.t.
-#   Requires DBI 0.85 or later.
 #
-#	Copyright (C) 1996,1997 Jonathan Leffler
+#	Copyright (C) 1996-97,1999 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 # Test connection
-$dbh = &connect_to_test_database(0, { AutoCommit => 1, PrintError => 1 });
-#$dbh = &connect_to_test_database(1);
-#$dbh = &connect_to_test_database(0);
+$dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });
 
 if ($dbh->{ix_LoggedDatabase} == 0)
 {

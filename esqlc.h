@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlc.h,v $
-@(#)Version:         $Revision: 3.1 $
-@(#)Last changed:    $Date: 1998/11/05 21:03:49 $
+@(#)Version:         $Revision: 3.6 $
+@(#)Last changed:    $Date: 1999/07/06 23:48:33 $
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1992-93,1995-98
-@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
+@(#)Copyright:       (C) JLSS 1992-93,1995-99
+@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
 */
 
 #ifndef ESQLC_H
@@ -13,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 3.1 1998/11/05 21:03:49 jleffler Exp $";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 3.6 1999/07/06 23:48:33 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -75,15 +75,6 @@ extern "C" {
 /* on some machines do complain if you try to define __STDC__.       */
 #include <sqlhdr.h>
 
-#if ESQLC_VERSION >= 710 && ESQLC_VERSION < 720
-/*
-** Apparently not included by sqlhdr.h on 7.1x platforms.  The problem
-** was found by David Edge <dedge@ak.blm.gov> in 7.10.UC1 on AIX 4.2.1.
-** Some code, notably esqlutil.h, relies on the typedef for value_t.
-*/
-#include <value.h>
-#endif /* 7.1x */
-
 /*
 ** ClientSDK 2.01 or later needs sqliapi.h; it is unknown whether
 ** ClientSDK 2.00 does too.  It is also unknown which version is
@@ -95,16 +86,6 @@ extern "C" {
 #include <sqliapi.h>
 #elif ESQLC_VERSION >= 914
 #include <sqliapi.h>
-#endif
-
-/*
-** Supply missing type information for IUS (IDS/UDO) data types.
-** Two edged sword; it means you have to test rather carefully in
-** your code whether to build with IUS data types or not.
-** Should be keyed of ESQLC_VERSION, rather than features...
-*/
-#if ESQLC_VERSION < 900
-#include "esql_ius.h"
 #endif
 
 #ifdef _WIN32
@@ -122,6 +103,33 @@ extern int      sqgetdbs(int *ret_fcnt,
 #endif /* _WIN32 */
 
 #endif /* ESQLC_VERSION */
+
+#if ESQLC_VERSION < 720
+/*
+** Some code, notably esqlutil.h, relies on the typedef for value_t.
+** However, value.h is not included by sqlhdr.h earlier than 7.20.  The
+** problem was found by David Edge <dedge@ak.blm.gov> in 7.10.UC1 on AIX
+** 4.2.1; it was subsequently also revealed on Solaris 2.6 with ESQL/C
+** versions 5.08, 4.12, and 6.00.  The symbol MAXADDR is defined in
+** value.h.  The 4.12 and 5.08 versions of value.h do not prevent
+** multiple includes, leading to problems.  This test is not perfect; if
+** code after #include "esqlc.h" includes value.h explicitly, it will
+** not compile under many versions of ESQL/C.
+*/
+#ifndef MAXADDR
+#include <value.h>
+#endif /* MAXADDR */
+#endif /* 5.xx or 7.1x */
+
+/*
+** Supply missing type information for IUS (IDS/UDO) data types.
+** Two edged sword; it means you have to test rather carefully in
+** your code whether to build with IUS data types or not.
+** Should be keyed off ESQLC_VERSION, rather than features...
+*/
+#if ESQLC_VERSION < 900
+#include "esql_ius.h"
+#endif
 
 /* -- Constant Definitions */
 
@@ -159,6 +167,7 @@ typedef struct intrvl	Interval;
 typedef struct sqlca_s	Sqlca;
 typedef struct sqlda	Sqlda;
 typedef struct sqlva	Sqlva;
+typedef struct value_t	Value;
 
 #if ESQLC_VERSION >= 900
 
@@ -166,6 +175,25 @@ typedef struct sqlva	Sqlva;
 typedef void *Lvarchar;
 
 #endif /* ESQLC_VERSION >= 900 */
+
+/* ESQL/C Features */
+/* The ESQL/C compiler versions are defined in esqlinfo.h by autoconf */
+#if ESQLC_VERSION >= 500
+#define ESQLC_STORED_PROCEDURES
+#define ESQLC_VARIABLE_CURSORS
+#endif
+
+#if ESQLC_VERSION >= 600
+#define ESQLC_CONNECT
+#endif
+
+#if ESQLC_VERSION >= 720
+#define ESQLC_CONNECT_DORMANT
+#endif
+
+#if ESQLC_VERSION >= 900
+#define ESQLC_IUS_TYPES
+#endif
 
 #ifdef __cplusplus
 }

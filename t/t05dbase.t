@@ -1,15 +1,14 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t05dbase.t,v 56.2 1997/06/25 20:32:57 johnl Exp $ 
+# @(#)$Id: t05dbase.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
-# Copyright (C) 1997 Jonathan Leffler (johnl@informix.com)
+#	Copyright (C) 1997,1999 Jonathan Leffler
 #
 # Test database creation and default connections.
 # Note that database statements cannot be used with an explicit connection
 # with ESQL/C 6.0x and up.
 
-use DBD::InformixTest qw(stmt_ok stmt_fail stmt_note all_ok stmt_test
-select_some_data);
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 $dbname = "dbd_ix_db";
 
@@ -24,12 +23,12 @@ stmt_fail unless ($dbh = DBI->connect('','','','Informix'));
 stmt_ok;
 
 # Don't care about non-existent database
-$dbh->{ix_AutoErrorReport} = 0;
+$dbh->{PrintError} = 0;
 $dbh->do("drop database $dbname");
 
 $selver = "SELECT TabName, Owner FROM 'informix'.SysTables WHERE TabName = ' VERSION'";
 
-$dbh->{ix_AutoErrorReport} = 1;
+$dbh->{PrintError} = 1;
 &stmt_test($dbh, "create database $dbname");
 &select_some_data($dbh, 1, $selver);
 &stmt_test($dbh, "close database");
@@ -43,7 +42,7 @@ undef $dbh;
 stmt_fail unless ($dbh = DBI->connect('.DEFAULT.','','','Informix'));
 stmt_ok;
 
-$dbh->{ix_AutoErrorReport} = 1;
+$dbh->{PrintError} = 1;
 &stmt_test($dbh, "create database $dbname");
 &select_some_data($dbh, 1, $selver);
 &stmt_test($dbh, "close database");
@@ -55,7 +54,7 @@ stmt_ok;
 &stmt_note("# Test (explicit default) DBI->connect('.DEFAULT.',...)\n");
 stmt_fail unless ($dbh = DBI->connect('.DEFAULT.','','','Informix'));
 stmt_ok;
-$dbh->{ix_AutoErrorReport} = 1;
+$dbh->{PrintError} = 1;
 &stmt_test($dbh, "create database $dbname");
 &select_some_data($dbh, 1, $selver);
 &stmt_note("# Test disconnect on DEFAULT connection\n");

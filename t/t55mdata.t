@@ -1,17 +1,17 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t55mdata.t,v 57.4 1997/11/18 05:28:53 johnl Exp $ 
+#	@(#)$Id: t55mdata.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test MetaData functions _tables, _columns for DBD::Informix
 #
-#	Copyright (C) 1997 Jonathan Leffler
+#	Copyright (C) 1997,1999 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 print "1..4\n";
 
 # Test connection
-$dbh = &connect_to_test_database(0, { AutoCommit => 1, PrintError => 1 });
+$dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });
 
 $view = "dbd_ix_view01";
 $private1 = "dbd_ix_private01";

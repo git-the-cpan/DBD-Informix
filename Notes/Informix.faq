@@ -1,0 +1,42 @@
+FAQs for DBD::Informix
+======================
+
+1.  My program works OK when I run it from the command line but fails when
+    I run it via a web server (CGI, mod_perl, etc).
+
+    The answer is the environment - almost invariably.
+
+    You should establish exactly what the environment is when your script
+    is run, using some surrogate for your real script that uses DBI and
+    DBD::Informix.  Then you will have to work out how to set the
+    INFORMIXDIR, INFORMIXSERVER and LD_LIBRARY_PATH environment variables
+    properly.  With Apache, this is usually the SetEnv directive (possibly
+    PassEnv instead).  Other web servers will have equivalents.  You could
+    also consider trying to set the environment in a BEGIN block, but it
+    may well set the environment too late to be useful.
+
+2.  In the following code, I get error -280 (a quoted string exceeds 256
+    bytes) when the value of $longcharstring contains more than 256
+    characters.  This is odd because LongCharCol is defined to contain many
+    more than 256 characters (eg CHAR(2500)).
+
+        $sql = "INSERT INTO SomeTable(LongCharCol) VALUES('$longcharstring')";
+        my $sth = $dbh->prepare($sql) or die($DBI::errstr);
+        $sth->execute() or dir($DBI::errstr)
+
+    ESQL/C has an irritating limitation that the longest character literal
+    that it allows is 256 characters long.  There's a simple workaround
+    which always works; use a place-holder in place of the string.  This
+    has the additional advantage of not breaking when the $longcharstring
+    variable itself contains quote characters, whereas the example code
+    will break.
+
+        $sql = "INSERT INTO SomeTable(LongCharCol) VALUES(?)";
+        my $sth = $dbh->prepare($sql) or die($DBI::errstr);
+        $sth->execute($longcharstring) or dir($DBI::errstr)
+
+3.  Where can I find documentation on Informix?
+
+    At the Informix web-site: http://www.informix.com/answers
+
+@(#)$Id: Informix.faq,v 62.2 1999/08/30 18:01:46 jleffler Exp $

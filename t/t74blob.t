@@ -1,15 +1,15 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t74blob.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+#	@(#)$Id: t74blob.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
-#	Copyright (C) 1996,1997 Jonathan Leffler
+#	Copyright (C) 1996-97,1999 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 # Test install...
-$dbh = connect_to_test_database(1);
+$dbh = connect_to_test_database();
 
 if (!$dbh->{ix_InformixOnLine})
 {
@@ -21,7 +21,7 @@ else
 {
 	print("1..14\n");
 	&stmt_ok(0);
-	$dbh->{ix_AutoErrorReport} = 1;
+	$dbh->{PrintError} = 1;
 
 	$stmt2 = 'CREATE TEMP TABLE DBD_IX_BlobTest2 (I SERIAL UNIQUE, B BYTE IN TABLE, ' .
 				'T TEXT IN TABLE)';

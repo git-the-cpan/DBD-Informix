@@ -1,18 +1,18 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t81orig.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+# @(#)$Id: t81orig.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
-# Portions Copyright (C) 1996,1997 Jonathan Leffler
+# Portions Copyright (C) 1996-97,1999 Jonathan Leffler
 #
 # Original basic test -- rewritten to use DBD::InformixTest
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 print("1..11\n");
 
-$dbh = connect_to_test_database(1);
+$dbh = connect_to_test_database();
 &stmt_ok;
 
 print "# Preparing SELECT * from 'informix'.SysTables ***\n";

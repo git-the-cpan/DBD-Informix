@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: sqltoken.c,v $
-@(#)Version:         $Revision: 1.7 $
-@(#)Last changed:    $Date: 1998/06/29 22:56:39 $
+@(#)Version:         $Revision: 1.9 $
+@(#)Last changed:    $Date: 1999/03/12 18:53:55 $
 @(#)Purpose:         Identify SQL token in string
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1998
-@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
+@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
 */
 
 /*TABSTOP=4*/
@@ -20,7 +20,7 @@
 #define RCURLY '}'
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltoken.c,v 1.7 1998/06/29 22:56:39 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: sqltoken.c,v 1.9 1999/03/12 18:53:55 jleffler Exp $";
 #endif
 
 /*
@@ -40,8 +40,17 @@ char *sqltoken(char *input, char **end)
 	{
 		while ((c = *input) != '\0' && isspace(c))
 			input++;
-		if ((c = *input) == LCURLY)
+		if ((c = *input) == LCURLY && *(input + 1) == '+')
 		{
+			/* Optimizer hint; treat as symbol */
+			if ((token = strchr(input, RCURLY)) == 0)
+				break;
+			*end = token + 1;
+			return input;
+		}
+		else if ((c = *input) == LCURLY)
+		{
+			/* Routine comment -- ignore */
 			if ((token = strchr(input, RCURLY)) == 0)
 				break;
 			input = token + 1;
@@ -114,9 +123,9 @@ char *sqltoken(char *input, char **end)
 		{
 			/* Punctuation - symbols */
 			token = input++;
-			/* Only compound symbols known are: <> != <= >= || */
+			/* Only compound symbols known are: <> != <= >= || :: (used in IUS) */
 			/* Any other punctuation character is a single token */
-			if (*input != '\0' && (c == '<' || c == '!' || c == '|' || c == '>'))
+			if (*input != '\0' && (c == '<' || c == '!' || c == '|' || c == '>' || c == ':'))
 			{
 				switch (c)
 				{
@@ -134,6 +143,10 @@ char *sqltoken(char *input, char **end)
 					break;
 				case '|':
 					if (*input == '|')
+						input++;
+					break;
+				case ':':
+					if (*input == ':')
 						input++;
 					break;
 				default:
@@ -171,7 +184,8 @@ static char *input[] =
 	"SELECT (a>=<=<>!=||...(b)) FROM Nowhere",
 	"{cc}-1{c}+1{c}.1{c}-.1{c}+.1{}-1.2E3{c}+1.23E+4{c}-1.234e-56",
 	"info columns for 'cdhdba'.cdh_user",
-	"select a as _ from _",
+	"select a::type as _ from _",
+	"select {+ hint} _ as _ from _",
 };
 
 int main(void)

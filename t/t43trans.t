@@ -1,17 +1,17 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t43trans.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+#	@(#)$Id: t43trans.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test AutoCommit Off for DBD::Informix
 #
-#	Copyright (C) 1996,1997 Jonathan Leffler
+#	Copyright (C) 1996-97,1999 Jonathan Leffler
 
 # AutoCommit Off => Explicit transactions in force
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 # Test install...
-$dbh = &connect_to_test_database(1);
+$dbh = &connect_to_test_database();
 
 if ($dbh->{ix_LoggedDatabase} == 0)
 {
@@ -22,7 +22,12 @@ if ($dbh->{ix_LoggedDatabase} == 0)
 	# Set AutoCommit to Off
 	$ac = $dbh->{AutoCommit} ? "On" : "Off";
 	print "# Default AutoCommit is $ac\n";
+	my $msg;
+	$SIG{__WARN__} = sub { $msg = $_[0]; };
 	$dbh->{AutoCommit} = 0;
+	$SIG{__WARN__} = 'DEFAULT';
+	stmt_fail() unless $msg;
+	&stmt_note("# $msg");
 	$ac = $dbh->{AutoCommit} ? "On" : "Off";
 	print "# AutoCommit was set to $ac\n";
 	&stmt_ok(0);

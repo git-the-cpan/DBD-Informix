@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil -*-
- * @(#)$Id: dbdimp.ec,v 61.9 1998/11/17 20:56:47 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 62.6 1999/09/19 21:36:25 jleffler Exp $
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -8,7 +8,7 @@
  *           (c) 1995-96 Alligator Descartes
  *           (c) 1994    Bill Hailes
  *           (c) 1996    Terry Nightingale
- *           (c) 1996-98 Jonathan Leffler
+ *           (c) 1996-99 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 61.9 1998/11/17 20:56:47 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 62.6 1999/09/19 21:36:25 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -39,6 +39,18 @@ DBISTATE_DECLARE;
 static SV      *ix_errnum = NULL;
 static SV      *ix_errstr = NULL;
 static SV      *ix_state = NULL;
+
+/*
+** Debugging macros.  NB: functions dbd_ix_debug() and dbd_ix_debug_l()
+** are used in other source files and must therefore be actual functions.
+** We may fix this one day.
+*/
+#define dbd_ix_debug(n, fmt, arg) \
+	(fflush(stdout), (DBIS->debug >= (n)) ? (void)warn(fmt, arg) : (void)0)
+#define dbd_ix_debug_l(n, fmt, arg) \
+	(fflush(stdout), (DBIS->debug >= (n)) ? (void)warn(fmt, arg) : (void)0)
+#define dbd_ix_debug_2(n, fmt, arg1, arg2) \
+	(fflush(stdout), (DBIS->debug >= (n)) ? (void)warn(fmt, arg1, arg2) : (void)0)
 
 /*
 ** SQLSTATE is only supported in version 6.00 and later.
@@ -66,7 +78,7 @@ dbd_ix_module(void)
 
 /* Print message with string argument if debug level set high enough */
 void
-dbd_ix_debug(int n, char *fmt, const char *arg)
+(dbd_ix_debug)(int n, char *fmt, const char *arg)
 {
 	fflush(stdout);
 	if (DBIS->debug >= n)
@@ -75,7 +87,7 @@ dbd_ix_debug(int n, char *fmt, const char *arg)
 
 /* Print message with long argument if debug level set high enough */
 void
-dbd_ix_debug_l(int n, char *fmt, long arg)
+(dbd_ix_debug_l)(int n, char *fmt, long arg)
 {
 	fflush(stdout);
 	if (DBIS->debug >= n)
@@ -98,14 +110,14 @@ dbd_ix_printenv(const char *s1, const char *s2)
 #endif	/* DBD_IX_DEBUG_ENVIRONMENT */
 
 /* Print message on entry to function */
-static void
+void
 dbd_ix_enter(const char *function)
 {
 	dbd_ix_debug(1, "-->> %s()\n", function);
 }
 
 /* Print message on exit from function */
-static void
+void
 dbd_ix_exit(const char *function)
 {
 	dbd_ix_debug(1, "<<-- %s()\n", function);
@@ -217,6 +229,10 @@ dbd_ix_seterror(ErrNum rc)
 		/* Note that the messages have trailing newlines */
 		strcpy(msgbuf, sql_buf);
 		strcat(msgbuf, isambuf);
+		/* Chop the trailing newline so Perl appends line number info. */
+		/* Problem reported by Andrew Pimlott <pimlott@abel.math.harvard.edu> */
+		assert(msgbuf[strlen(msgbuf)-1] == '\n');
+		msgbuf[strlen(msgbuf)-1] = '\0';
 
 		/* Record error number, error message, and error state */
 		sv_setiv(ix_errnum, (IV)rc);
@@ -587,7 +603,7 @@ dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
 	dbd_ix_disconnect(imp_dbh->nm_connection);
 #else
 	if (imp_dbh->is_connected == True)
-		dbd_ix_closedatabase(imp_dbh->database);
+		dbd_ix_closedatabase(SvPV(imp_dbh->database, na));
 #endif	/* ESQLC_VERSION >= 600 */
 	SvREFCNT_dec(imp_dbh->database);
 
@@ -643,6 +659,8 @@ new_statement(imp_dbh_t *imp_dbh, imp_sth_t *imp_sth)
 	imp_sth->n_bound = 0;
 	imp_sth->n_rows = 0;
 	imp_sth->n_columns = 0;
+	imp_sth->is_holdcursor = False;
+	imp_sth->is_scrollcursor = False;
 	dbd_ix_link_add(&imp_dbh->head, &imp_sth->chain);
 	imp_sth->chain.data = (void *)imp_sth;
 	cursor_num++;
@@ -683,7 +701,7 @@ del_statement(imp_sth_t *imp_sth)
 	char           *name;
 	EXEC SQL END DECLARE SECTION;
 
-	dbd_ix_debug_l(3, "Enter del_statement() 0x%08X\n", (long)imp_sth);
+	dbd_ix_debug_l(3, "-->> del_statement() 0x%08X\n", (long)imp_sth);
 
 	if (dbd_db_setconnection(imp_sth->dbh) == 0)
 	{
@@ -770,7 +788,7 @@ del_statement(imp_sth_t *imp_sth)
 	imp_sth->st_state = Unused;
 	dbd_ix_link_delete(&imp_sth->chain, noop);
 	DBIc_off(imp_sth, DBIcf_IMPSET);
-	dbd_ix_debug_l(3, "Exit del_statement() 0x%08X\n", (long)imp_sth);
+	dbd_ix_debug_l(3, "<<-- del_statement() 0x%08X\n", (long)imp_sth);
 }
 
 /* Create the input descriptor for the specified number of items */
@@ -828,7 +846,7 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	char           *nm_ibind = imp_sth->nm_ibind;
 	char           *string;
 	long            intvar;
-	float           numeric;
+	double          numeric;
 	int             type;
 	int             length;
 	int             index = idx;
@@ -951,10 +969,12 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 #else
 		if (length == 1)
 		{
-			/* * Even if you insert "" as a literal into a VARCHAR(), you get *
-			   a blank returned.  If you manage to insert a zero length *
-			   string via a variable into a VARCHAR, then you get a NULL *
-			   output string.  This is arguably a bug, but oh well. */
+			/**
+			** Even if you insert "" as a literal into a VARCHAR(), you get
+			** a blank returned.  If you manage to insert a zero length
+			** string via a variable into a VARCHAR, then you get a NULL
+			** output string.  This is arguably a bug, but oh well!
+			*/
 			string = " ";
 			length = 2;
 		}
@@ -1041,11 +1061,13 @@ dbd_ix_blobs(imp_sth_t *imp_sth)
 static int
 dbd_ix_declare(imp_sth_t *imp_sth)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_declare";
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_stmnt = imp_sth->nm_stmnt;
 	char           *nm_cursor = imp_sth->nm_cursor;
 	EXEC SQL END DECLARE SECTION;
 
+	dbd_ix_enter(function);
 #ifdef SQ_EXECPROC
 	assert(imp_sth->st_type == SQ_SELECT || imp_sth->st_type == SQ_EXECPROC);
 #else
@@ -1054,40 +1076,68 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 	assert(imp_sth->st_state == Described);
 	dbd_ix_blobs(imp_sth);
 
+	/* Bill R.  Hold Cursor -- Not necessarly correct... */
 	if (imp_sth->dbh->is_modeansi == True &&
 		DBI_AutoCommit(imp_sth->dbh) == True)
 	{
-		EXEC SQL DECLARE :nm_cursor CURSOR WITH HOLD FOR :nm_stmnt;
+		imp_sth->is_holdcursor = True;
 	}
-	else
+#define print_tf(a) (a == True ? "True" : "False")
+	dbd_ix_debug(3,"is_holdcursor = %s",print_tf(imp_sth->is_holdcursor));
+	dbd_ix_debug(3,"is_scrollcursor = %s",print_tf(imp_sth->is_scrollcursor));
+#undef print_tf
+
+	if (imp_sth->is_scrollcursor == True)
 	{
-		EXEC SQL DECLARE :nm_cursor CURSOR FOR :nm_stmnt;
+		if (imp_sth->is_holdcursor == True)
+		{
+			EXEC SQL DECLARE :nm_cursor SCROLL CURSOR WITH HOLD FOR :nm_stmnt;
+		}
+		else
+		{
+			EXEC SQL DECLARE :nm_cursor SCROLL CURSOR FOR :nm_stmnt;
+		}
+	} else /* Scroll Cursor */
+	{
+		if (imp_sth->is_holdcursor == True)
+		{
+			EXEC SQL DECLARE :nm_cursor CURSOR WITH HOLD FOR :nm_stmnt;
+		}
+		else
+		{
+			EXEC SQL DECLARE :nm_cursor CURSOR FOR :nm_stmnt;
+		}
 	}
 	dbd_ix_sqlcode(imp_sth->dbh);
 	if (sqlca.sqlcode < 0)
 	{
 		return 0;
+	    dbd_ix_exit(function);
 	}
 	imp_sth->st_state = Declared;
+	dbd_ix_exit(function);
 	return 1;
 }
 
 /*
 ** dbd_ix_preparse() -- based on dbd_preparse() in DBD::ODBC 0.15
 **
-** Edit string in situ (because the output will never be longer than the
-** input) so that ? parameters are counted and :xx (x = digit) positional
-** parameters are converted to ?.  Note that :abc notation is not
-** converted; it causes problems with Informix's FROM dbase:table notation.
-** Note that this version does not accept :x notation (where x is a digit)
-** either, because it gets confused by DATETIME and INTERVAL literals!
+** Count the placeholders (?) parameters in the statement.
+**
+** The main-stream version also edits the string (in situ because the
+** output will never be longer than the input) and recognizes both :9 (9 =
+** digit string) positional parameters and :a (a = alphanumeric identifier)
+** named parameters and converts them to ?.  However, this Informix version
+** does not handle these non-standard extensions because the :a notation
+** causes problems with Informix's FROM dbase:table notation, and the :9
+** notation causes problems with DATETIME and INTERVAL literals!
+**
 ** The code handles single-quoted literals and double-quoted delimited
 ** identifiers and ANSI SQL "--.*\n" comments and Informix "{.*}" comments.
 ** Note that it does nothing with "#.*\n" Perl/Shell comments.  Also note
 ** that it does not handle ODBC-style extensions.  The shorthand notation
 ** for these is identical to an Informix {} comment; longhand notation
-** looks like "--*(details*)--" without the quotes.  Returns the number of
-** input parameters.
+** looks like "--*(details*)--" without the quotes.
 */
 
 static int
@@ -1101,7 +1151,7 @@ dbd_ix_preparse(char *statement)
 	int             laststyle = 0;
 	char            ch;
 
-	dbd_ix_debug(4, "dbd_ix_preparse-in: <<%s>>\n", statement);
+	dbd_ix_debug(4, "-->>dbd_ix_preparse(): <<%s>>\n", statement);
 	src = statement;
 	dst = statement;
 	while ((ch = *src++) != '\0')
@@ -1160,8 +1210,31 @@ dbd_ix_preparse(char *statement)
 		}
 	}
 	*dst = '\0';
-	dbd_ix_debug(4, "dbd_ix_preparse-out: <<%s>>\n", statement);
+	dbd_ix_debug(4, "<<--dbd_ix_preparse(): <<%s>>\n", statement);
 	return(idx);
+}
+
+static int
+dbd_ix_st_attrib(SV *attribs, const char *attr)
+{
+	int rc = False;
+
+	/* Modularized version of Bill Rothanburg <brothanb@fll-ro.dhl.com> code */
+	/* To determine the setting of Hold and Scroll Cursor Attributes */
+	if (attribs != NULL)
+	{
+		SV				**svpp;
+		U32				len;
+
+		len = strlen(attr);
+		svpp = hv_fetch((HV *) SvRV(attribs), (char *)attr, len, 0);
+		if (svpp != NULL)
+		{
+			rc = SvTRUE(*svpp);
+			dbd_ix_debug_2(1, "%s set to %ld\n", attr, rc);
+		}
+	}
+	return(rc);
 }
 
 int
@@ -1170,6 +1243,8 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_prepare";
 	D_imp_dbh_from_sth;
 	int             rc = 1;
+	static const char ix_hc[] = "ix_CursorWithHold";
+	static const char ix_sc[] = "ix_ScrollCursor";
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *statement = stmt;
 	int             desc_count;
@@ -1192,6 +1267,15 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	nm_obind = imp_sth->nm_obind;
 	nm_cursor = imp_sth->nm_cursor;
 	imp_sth->st_text = newSVpv(stmt, 0);
+
+	/* Bill R. Code to allow the setting of Hold and Scroll Cursor Attribs */
+	if (attribs == NULL)
+		dbd_ix_debug(4, "%s - no attribs set", function);
+	else
+	{
+		imp_sth->is_holdcursor = dbd_ix_st_attrib(attribs, ix_hc);
+		imp_sth->is_scrollcursor = dbd_ix_st_attrib(attribs, ix_sc);
+	}
 
 	/* Record the number of input parameters in the statement */
 	DBIc_NUM_PARAMS(imp_sth) = dbd_ix_preparse(statement);
@@ -1216,7 +1300,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	}
 	imp_sth->st_state = Prepared;
 
-	EXEC SQL ALLOCATE DESCRIPTOR :nm_obind WITH MAX 128;
+	EXEC SQL ALLOCATE DESCRIPTOR :nm_obind WITH MAX 256;
 	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
 	{
@@ -1263,11 +1347,8 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	else if (imp_sth->st_type == SQ_EXECPROC && desc_count > 0)
 		rc = dbd_ix_declare(imp_sth);
 #endif	/* SQ_EXECPROC */
-	else if (desc_count > 0)
+	else if (imp_sth->st_type == SQ_INSERT && desc_count > 0)
 	{
-		/* 7.30 and later servers support describe for UPDATE too! */
-		assert(imp_sth->st_type == SQ_INSERT ||
-			   imp_sth->st_type == SQ_UPDATE);
 		dbd_ix_blobs(imp_sth);
 		if (imp_sth->n_blobs > 0)
 		{
@@ -1285,6 +1366,45 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 		}
 		rc = 1;
 	}
+	else if (imp_sth->st_type == SQ_UPDATE && desc_count > 0)
+	{
+		/**
+		** 7.30 and later servers support describe for UPDATE too! 
+		** However, it requires the server to be configured to do it. 
+		** See Notes/updating.blobs for more information. 
+		** The once-only test is not 100% reliable.  You could have
+		** multiple connections to multiple database servers, and the
+		** first one which supports blob update will trigger the message.
+		** Subsequent updates of blobs on other servers might still fail
+		** because those servers do not have the correct setup.
+		*/
+		static int count = 0;
+		if (count == 0)
+		{
+			count++;
+			dbd_ix_debug(2, "*** %s -- UPDATE of BLOBS is possible\n", dbd_ix_module());
+		}
+		dbd_ix_debug(0, "*** %s -- blob update not fully implemented!!!\n", dbd_ix_module());
+#if 0
+		dbd_ix_blobs(imp_sth);
+		if (imp_sth->n_blobs > 0)
+		{
+			/**
+			** Switch the nm_obind and nm_ibind names so that when
+			** dbd_ix_bindsv() is at work, it has an already populated SQL
+			** descriptor to work with, that already has the blobs set up
+			** correctly.
+			*/
+			Name            tmpname;
+			strcpy(tmpname, imp_sth->nm_ibind);
+			strcpy(imp_sth->nm_ibind, imp_sth->nm_obind);
+			strcpy(imp_sth->nm_obind, tmpname);
+			imp_sth->n_bound = desc_count;
+		}
+#endif /* 0 */
+		rc = 1;
+	}
+
 	else
 	{
 		EXEC SQL DEALLOCATE DESCRIPTOR :nm_obind;
@@ -1292,9 +1412,7 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
 		rc = 1;
 	}
 
-	/* Get number of fields and space needed for field names      */
-	if (DBIS->debug >= 2)
-		warn("%s'imp_sth->n_columns: %d\n", function, imp_sth->n_columns);
+	dbd_ix_debug_2(2, "%s'imp_sth->n_columns: %d\n", function, imp_sth->n_columns);
 
 	dbd_ix_exit(function);
 	return rc;
@@ -1453,6 +1571,8 @@ $endif; -- IUS_DATA_TYPES
 		return Nullav;
 	}
 
+	dbd_ix_blobs(imp_sth);	/* Fix -451 errors; Rich Jones <rich@annexia.org> */
+
 	EXEC SQL FETCH :nm_cursor USING SQL DESCRIPTOR :nm_obind;
 	dbd_ix_savesqlca(imp_sth->dbh);
 	dbd_ix_sqlcode(imp_sth->dbh);
@@ -1472,6 +1592,7 @@ $endif; -- IUS_DATA_TYPES
 		dbd_ix_exit(function);
 		return Nullav;
 	}
+
 	imp_sth->n_rows++;
 
 	av = DBIS->get_fbav(imp_sth);
@@ -1525,7 +1646,10 @@ $endif; -- IUS_DATA_TYPES
 			case SQLSMFLOAT:
 			case SQLDECIMAL:
 			case SQLMONEY:
-				/* Default formatting assumes 2 decimal places -- wrong! */
+				/*
+				** Default formatting (in some versions of ESQL/C)
+				** assumes 2 decimal places -- wrong!
+				*/
 				EXEC SQL GET DESCRIPTOR: nm_obind VALUE:index
 									:decval = DATA;
 				strcpy(coldata, decgen(&decval, 0));
@@ -1707,6 +1831,9 @@ $endif; -- IUS_DATATYPES
 				/* Warning - this data is not null-terminated! */
 				/* warn("Blob Data: %d <<%*.*s>>\n", length, length, length,
 				   result); */
+				/* Data has been passed to Perl; mark it as such! */
+				blob.loc_buffer = 0;
+				blob_release(&blob, 0);	/* 0 => do not delete files */
 				break;
 
 			default:
@@ -1769,6 +1896,8 @@ dbd_ix_open(imp_sth_t *imp_sth)
 	EXEC SQL END DECLARE SECTION;
 
 	dbd_ix_enter(function);
+	assert(imp_sth->st_state == Declared || imp_sth->st_state == Opened ||
+			imp_sth->st_state == Finished || imp_sth->st_state == NoMoreData);
 	if (imp_sth->st_state == Opened || imp_sth->st_state == Finished)
 		dbd_ix_close(imp_sth);
 	assert(imp_sth->st_state == Declared);
@@ -2036,6 +2165,7 @@ dbd_ix_st_rows(SV *sth, imp_sth_t *imp_sth)
 	return(imp_sth->n_rows);
 }
 
+/* Called extensively by execute method when it is given parameters! */
 int
 dbd_ix_st_bind_ph(SV *sth, imp_sth_t *imp_sth, SV *param, SV *value,
 				  IV sql_type, SV *attribs, int is_inout, IV maxlen)

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: x12cgi_noform.pl,v 61.1 1998/11/17 00:28:10 jleffler Exp $
+# @(#)$Id: x12cgi_noform.pl,v 61.2 1999/05/14 00:33:09 jleffler Exp $
 #
 # Simple example CGI script using DBI and DBD::Informix
 
@@ -24,31 +24,6 @@ use CGI::Carp;
 # Run the rest of the script in a block so there are no globals.
 # Globals are shared across scripts in mod_perl.
 {
-
-	# Process a row of a table...
-	# Doesn't seem to be a CGI::tr function?
-	# Beware clash with tr builtin operator.
-	sub tr
-	{
-		my ($ctl, @fields) = @_;
-		my (%control) = %$ctl;
-		my ($x, $u, $key) = "TR";
-		my ($rv);
-		foreach $key (keys %control)
-		{
-			$u = $key;
-			$u =~ tr/[a-z]/[A-Z]/;
-			$u =~ s/^-//;
-			$x .= qq{ $u="$control{$key}"};
-		}
-		$rv = "<$x>\n";
-		foreach $key (@fields)
-		{
-			$rv .= "\t$key\n";
-		}
-		$rv .= "</TR>\n";
-		return $rv;
-	}
 
 	# the environment variables were set in the Apache configuration
 	# file rather than here
@@ -101,7 +76,7 @@ use CGI::Carp;
 	print
 		$query->h1( 'Customer Report' ),
 		"\n<TABLE>\n",
-		&tr( { '-valign'=>'top' }, 
+		$query->TR( { '-valign'=>'top' }, 
 			$query->th( { '-align'=>'left' }, [
 				'Number',
 				'Last Name',
@@ -125,7 +100,7 @@ use CGI::Carp;
 		map { $$_ = "&nbsp;" unless defined $$_ } @cols;
 		# print values as table cells
 		print
-			&tr( { '-valign'=>'top' },
+			$query->TR( { '-valign'=>'top' },
 				$query->td( [
 					$customer_num,
 					$lname,

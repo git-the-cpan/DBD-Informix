@@ -1,17 +1,17 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t42trans.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+#	@(#)$Id: t42trans.t,v 62.3 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test AutoCommit On for DBD::Informix
 #
-#	Copyright (C) 1996,1997 Jonathan Leffler
+#	Copyright (C) 1996-97,1999 Jonathan Leffler
 
 # AutoCommit On => Each statement is a self-contained transaction
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 # Test install...
-$dbh = &connect_to_test_database(1);
+$dbh = &connect_to_test_database();
 
 if ($dbh->{ix_LoggedDatabase} == 0)
 {
@@ -49,18 +49,20 @@ CREATE TEMP TABLE $trans01
 
 # How to insert date values even when you can't be bothered to sort out
 # what DBDATE will do...  You cannot insert an MDY() expression directly.
-$sel1 = "SELECT MDY(12,25,1996) FROM 'informix'.SysTables WHERE Tabid = 1";
+my $date;
+{
+my $sel1 = "SELECT MDY(12,25,1996) FROM 'informix'.SysTables WHERE Tabid = 1";
+my @row;
+my $st1;
 &stmt_fail() unless ($st1 = $dbh->prepare($sel1));
 &stmt_fail() unless ($st1->execute);
 &stmt_fail() unless (@row = $st1->fetchrow);
-undef $st1;
+$date = $row[0];
+}
 
-# Confirm that table exists but is empty (the rollback cancels an empty
-# transaction in a MODE ANSI database, but fails on a ordinary logged DB).
-&stmt_fail() unless ($dbh->{ix_ModeAnsiDatabase} == 0 || $dbh->rollback());
+# Confirm that table exists but is empty.
 select_zero_data $dbh, $select;
 
-$date = $row[0];
 $tag1  = 'Elfdom';
 $insert01 = qq{INSERT INTO $trans01
 VALUES(0, '$tag1', '$date', CURRENT YEAR TO FRACTION(5))};

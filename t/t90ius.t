@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t90ius.t,v 61.3 1998/11/17 00:46:58 jleffler Exp $ 
+#	@(#)$Id: t90ius.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test basic handling of IUS data types
 #
-#	Copyright (C) 1998 Jonathan Leffler
+#	Copyright (C) 1998-99 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 my ($dbh) = &test_for_ius;
 

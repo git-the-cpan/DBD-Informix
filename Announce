@@ -1,16 +1,16 @@
-To: dbi-announce@fugue.com, dbi-dev@fugue.com, dbi-users@fugue.com,
-        informix-list@iiug.org, descarte@arcana.co.uk
-Subject: ANNOUNCE: DBD::Informix Version 0.61_02 released
+To: dbi-announce@isc.org, dbi-dev@isc.org, dbi-users@isc.org,
+        informix-list@iiug.org, descarte@symbolstone.org
+Subject: ANNOUNCE: DBD::Informix Version 0.62 released
 
-The next release of DBD::Informix, version 0.61_02, has been uploaded to CPAN.
+The next release of DBD::Informix, version 0.62, has been uploaded to CPAN.
 It will be available worldwide in a day or three.
 
-This is an experimental version; you should use it with caution.  One aspect
-of the experiment is ensuring that CPAN does not get confused by the new
-mechanism for identifying the product.  The other main reason for labelling
-this an experiment is that the 'bad free()' problems are more prevalent
-than I'd like.  It primarily affects the blob handling code (eg the tests
-t/t7[45]blob.t).
+This is an experimental version like version 0.61_02, but it needs the
+non-experimental number because part of the experiment is ensuring that
+CPAN will handle it correctly.  Because it is experimental, you should use
+it with caution.  The other main reason for labelling this an experiment is
+that the 'bad free()' problems are more prevalent than I'd like.  It
+primarily affects the blob handling code (eg the tests t/t7[45]blob.t).
 
 DBD::Informix is the driver code that enables Perl 5.004 or 5.005 to access
 Informix databases via the DBI module (you'll need the code for both DBI
@@ -20,14 +20,21 @@ family will require this version (eg DBI::Shell).  The DBD::Informix and
 DBI code is available for download via:
 
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
-http://www.arcana.co.uk/technologia/perl/DBI
+http://www.symbolstone.org/technology/perl/DBI
 
    *******************************************************************
-   **  When you successfully build DBD::Informix v0.61_02, please   **
+   **    When you successfully build DBD::Informix v0.62, please    **
    ** report your configuration so I can add it to Working.Versions **
    *******************************************************************
 
-New in this release:
+Change in release 0.62:
+* DBI::errstr loses the trailing newline.  This can affect error messages.
+  The intent is to improve the messages produced by Perl (so that they
+  include a line number).
+
+New in releases 0.61_02 and 0.62:
+* Fix CGI examples to use CGI::TR method.  Information and revisions from
+  David M Davisson <davisson@emuni.com>.
 * Record value of $INFORMIXDIR and $INFORMIXSERVER used at compile time in
   Informix.pm, so that the values can be reset at runtime.  Based on code
   contributed by Honza Pazdziora <adelton@fi.muni.cz>.
@@ -49,19 +56,45 @@ New in this release:
 * Improved support for threaded versions of Perl 5.005.
 * Add support for "perl -MCPAN -e 'install Bundle::DBD::Informix'".
 
+Definitively not about to happen:
+* Use the output from DESCRIBE of an UPDATE statement in ClientSDK 2.00 and
+  the 7.30 servers.  Regrettably, Informix bug B111987 (DESCRIBE ON UPDATE
+  STATEMENT GIVES INADEQUATE (AND UNUSABLE) INFORMATION) needs to be
+  resolved before it is possible to really make use of the feature.
+  Succinctly, the DESCRIBE only tells you about input parameters used in
+  the SET clause in the forms:
+
+        SET a = ?, b = ?        -- ANSI standard
+        SET (a, b) = (?, ?)     -- Informix extension
+
+  It does not tell you about other parameters such as
+
+        SET a = somefunc(?),
+            b = ?,
+            c = totherfunc(?, ?),
+            d = ?
+        WHERE e = ? AND f = yetanother(?)
+
+  This would only yield two described values (instead of the seven it
+  should), and no positional information to help you locate those described
+  values in the SQL DESCRIPTOR.  This is bitterly disappointing, and it
+  means that it is *still* not possible to update blob columns with
+  DBD::Informix.  Further, it is improbable that this will be fixed in the
+  forthcoming Centaur release as the bug was only discovered when the
+  Centaur versions were in the final stages of their beta cycle and this is
+  a mis-designed feature rather than a simple malfunction.
+
 Still to do:
 * Investigate whether using sqlda structures in place of SQL descriptors
-  makes a significant difference to the performance of DBD::Informix.
-  Being worked on by another noble volunteer, Wes Gamble
-  <Wes.Gamble@chron.com>.  Note that this work is a necessary precursor to
-  providing support for Informix-ESQL/C v4.x or earlier versions.
-* Use the output from DESCRIBE of an UPDATE statement in ClientSDK 2.00 and
-  the 7.30 servers.
-* Ensure that the tests clean up behind themselves.
+  makes a significant difference to the performance of DBD::Informix.  Note
+  that although this has previously been described as a necessary precursor
+  to providing support for Informix-ESQL/C v4.x or earlier versions, there
+  are actually no longer any plans to provide such support in
+  DBD::Informix.
 * Ensure that NT support works more nearly out of the box.
 * Support for LongReadLen et al, maybe.
 
-Next release: 0.95
+Next release: 0.95 (yes, really this time!)
 * This should, with luck, have full IUS support, and is planned as a
   preparatory release for a 1.00 DBD::Informix driver which will be fully
   compliant with the DBI standard.  If a miracle occurs, then the same
@@ -90,4 +123,4 @@ Jonathan Leffler (j.leffler@acm.org) #include <disclaimer.h>
 
 PS: Read the README file.  Also read the Informix.Licence file.
 
-@(#)$Id: Announce,v 61.7 1998/12/15 01:00:39 jleffler Exp $
+@(#)$Id: Announce,v 62.2 1999/08/30 17:48:51 jleffler Exp $

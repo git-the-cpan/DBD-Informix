@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: kludge.h,v $
-@(#)Version:         $Revision: 1.4 $
-@(#)Last changed:    $Date: 1998/05/08 23:53:16 $
+@(#)Version:         $Revision: 1.5 $
+@(#)Last changed:    $Date: 1999/08/20 20:36:29 $
 @(#)Purpose:         Provide support for KLUDGE macro
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1995,1997
-@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
+@(#)Copyright:       (C) JLSS 1995,1997-99
+@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.4 1998/05/08 23:53:16 jleffler Exp $";
+static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.5 1999/08/20 20:36:29 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -71,4 +71,4 @@ extern void kludge_use(const char *str);
 
 #endif /* KLUDGE_DISABLE */
 
-#endif	/* KLUDGE_H */
+#endif /* KLUDGE_H */

@@ -1,15 +1,15 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t07dblist.t,v 60.1 1998/07/30 22:37:24 jleffler Exp $ 
+# @(#)$Id: t07dblist.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
-# Portions Copyright (C) 1996,1997 Jonathan Leffler
+# Portions Copyright (C) 1996-99 Jonathan Leffler
 #
 # List of available databases:
 #   @ary = $DBI->data_sources('Informix');
 
-use DBD::InformixTest qw(stmt_ok stmt_fail stmt_note all_ok);
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 @ary = DBI->data_sources('Informix');
 

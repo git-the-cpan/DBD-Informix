@@ -1,15 +1,14 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t50update.t,v 60.1 1998/07/30 04:46:50 jleffler Exp $
+# @(#)$Id: t50update.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $
 #
-# Copyright (C) 1998 Jonathan Leffler (johnl@informix.com)
+#	Copyright (C) 1998-99 Jonathan Leffler
 #
 # Test for UPDATE on zero rows in MODE ANSI database.
 # Note that database statements cannot be used with an explicit connection
 # with ESQL/C 6.0x and up.
 
-use DBD::InformixTest qw(stmt_ok stmt_fail stmt_note all_ok stmt_test
-                         stmt_err select_some_data);
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 $dbname = "dbd_ix_db";
 
@@ -20,7 +19,7 @@ stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.','',''));
 stmt_ok;
 
 # Don't care about non-existent database
-$dbh->{ix_AutoErrorReport} = 0;
+$dbh->{PrintError} = 0;
 $dbh->do("drop database $dbname");
 
 $selver = "SELECT TabName, Owner FROM 'informix'.SysTables WHERE TabName = ' VERSION'";
@@ -35,7 +34,7 @@ else
 	$create = "create database $dbname with log in '/tmp/$dbname.log' mode ansi";
 }
 
-$dbh->{ix_AutoErrorReport} = 1;
+$dbh->{PrintError} = 1;
 stmt_test($dbh, $create);
 select_some_data($dbh, 1, $selver);
 if ($dbname ne $dbh->{ix_DatabaseName})

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlutil.h,v $
-@(#)Version:         $Revision: 2.1 $
-@(#)Last changed:    $Date: 1998/11/05 18:39:10 $
+@(#)Version:         $Revision: 2.2 $
+@(#)Last changed:    $Date: 1998/11/11 05:17:40 $
 @(#)Purpose:         ESQL/C Utility Functions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1995-98
-@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
+@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2.1 1998/11/05 18:39:10 jleffler Exp $";
+static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2.2 1998/11/11 05:17:40 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -100,6 +100,10 @@ extern void sql_printerror(FILE *fp);
 ** identifiers as table names.  It uses statement IDs p_sql_tabid_q001,
 ** p_sql_tabid_q002 and c_sql_tabid_q002.
 ** The function used functions vstrcpy(), strlower(), strupper() from jlss.h.
+**
+** sql_procid --  return procid of procedure, regardless of database type, etc.
+** This is analogous to sql_tabid() and uses statement IDs p_sql_procid_q002
+** and c_sql_procid_q002.
 */
 
 extern long     sql_tabid(const char *table, const char *owner,
@@ -108,5 +112,7 @@ extern char    *sql_mktablename(const char *table, const char *owner,
 								const char *dbase, char *output, size_t outlen);
 extern char    *sql_mkdbasename(const char *dbase, const char *server,
 								char *output, size_t outlen);
+extern long     sql_procid(const char *proc, const char *owner,
+						  const char *dbase, const char *server);
 
 #endif	/* ESQLUTIL_H */

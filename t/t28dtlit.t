@@ -1,21 +1,19 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t28dtlit.t,v 61.1 1998/10/29 22:45:23 jleffler Exp $
+# @(#)$Id: t28dtlit.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $
 #
-# Copyright (C) 1998 Jonathan Leffler (johnl@informix.com)
+# Copyright (C) 1998-99 Jonathan Leffler
 #
 # Test for handling DATETIME literals in SQL statements
 # Note that DBD::Informix used to mangle a time such as '12:30:23' to '12??'
 # because dbd_ix_preparse() would treat the :30 as a positional parameter
 # (in a misguided attempt to accommodate Oracle scripts).
 
-use DBI;
-use DBD::InformixTest qw(stmt_ok stmt_fail stmt_note all_ok stmt_test
-connect_to_test_database select_some_data);
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 print("1..10\n");
 
-$dbh = connect_to_test_database(1);
+$dbh = connect_to_test_database();
 &stmt_ok;
 
 print "# DBI Information\n";

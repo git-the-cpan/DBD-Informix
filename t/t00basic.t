@@ -1,36 +1,38 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t00basic.t,v 61.3 1998/11/25 17:15:16 jleffler Exp $ 
+#	@(#)$Id: t00basic.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Initial test script for DBD::Informix
 #
-#	Copyright (C) 1996-98 Jonathan Leffler
+#	Copyright (C) 1996-99 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 $testtable = "dbd_ix_test01";
 
-&stmt_note("1..48\n");
+&stmt_note("1..41\n");
 
-$dbh = &connect_to_test_database(1);
+$dbh = &connect_to_test_database();
 &stmt_ok(0);
 
 print "# DBI Information\n";
 print "#     Version:               $DBI::VERSION\n";
-print "# Generic Driver Information\n";
+print "# Generic Driver Handle Information\n";
 print "#     Type:                  $dbh->{Driver}->{Type}\n";
 print "#     Name:                  $dbh->{Driver}->{Name}\n";
 print "#     Version:               $dbh->{Driver}->{Version}\n";
 print "#     Attribution:           $dbh->{Driver}->{Attribution}\n";
-print "# Informix Driver Information\n";
-print "#     Product:               $dbh->{ix_ProductName}\n";
-print "#     Product Version:       $dbh->{ix_ProductVersion}\n";
-print "#     Multiple Connections:  $dbh->{ix_MultipleConnections}\n";
-print "#     Active Connections:    $dbh->{ix_ActiveConnections}\n";
-print "#     Current Connection:    $dbh->{ix_CurrentConnection}\n";
-print "# \n";
 
-$dbname = $dbh->{Name};
+# NB: The code in dbd_ix_db_FETCH_attrib (in dbdattr.ec) relays these
+#     driver requests to dbd_ix_dr_FETCH_attrib, because there isn't
+#     an easy way to get the information otherwise.
+print  "# Informix Driver Handle Information\n";
+print  "#     Product:               $dbh->{ix_ProductName}\n";
+print  "#     Product Version:       $dbh->{ix_ProductVersion}\n";
+printf "#     Multiple Connections:  %d\n", $dbh->{ix_MultipleConnections};
+printf "#     Active Connections:    %d\n", $dbh->{ix_ActiveConnections};
+print  "#     Current Connection:    $dbh->{ix_CurrentConnection}\n";
+print  "# \n";
 
 &stmt_note("# Testing: \$dbh->disconnect()\n");
 &stmt_fail() unless ($dbh->disconnect);
@@ -40,39 +42,31 @@ $dbname = $dbh->{Name};
 &stmt_fail() unless ($dbh->disconnect);
 &stmt_ok();
 
-# Reconnect.  Old-style connect -- do not use this notation!
-{
-my $user = $ENV{DBD_INFORMIX_USERNAME};
-my $pass = $ENV{DBD_INFORMIX_PASSWORD};
-$user = "" if (!defined $user);
-$pass = "" if (!defined $pass);
-my $mask = $pass;
-$pass =~ s/./X/g;
-&stmt_note("# Testing: DBI->connect('$dbname', '$user', '$mask', 'Informix')\n");
-&stmt_fail() unless ($dbh = DBI->connect($dbname, $user, $pass, 'Informix'));
-&stmt_ok();
-}
+# Now reconnect to database!
+$dbh = &connect_to_test_database();
+&stmt_ok(0);
 
 $dbh->{ChopBlanks} = 1;		# Force chopping of trailing blanks 
 
-print "# Generic Database Information\n";
-print "#     Type:                    $dbh->{Type}\n";
-print "#     Database Name:           $dbh->{Name}\n";
-print "#     AutoCommit:              $dbh->{AutoCommit}\n";
-print "# Informix Database Information\n";
-print "#     Informix-OnLine:         $dbh->{ix_InformixOnLine}\n";
-print "#     Logged Database:         $dbh->{ix_LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh->{ix_ModeAnsiDatabase}\n";
-print "#     AutoErrorReport:         $dbh->{ix_AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh->{ix_InTransaction}\n";
-print "#\n";
+print  "# Generic Database Handle Information\n";
+print  "#     Type:                    $dbh->{Type}\n";
+print  "#     Database Name:           $dbh->{Name}\n";
+printf "#     AutoCommit:              %d\n", $dbh->{AutoCommit};
+printf "#     PrintError:              %d\n", $dbh->{PrintError};
+printf "#     RaiseError:              %d\n", $dbh->{RaiseError};
+print  "# Informix Database Handle Information\n";
+printf "#     Informix-OnLine:         %d\n", $dbh->{ix_InformixOnLine};
+printf "#     Logged Database:         %d\n", $dbh->{ix_LoggedDatabase};
+printf "#     Mode ANSI Database:      %d\n", $dbh->{ix_ModeAnsiDatabase};
+printf "#     Transaction Active:      %d\n", $dbh->{ix_InTransaction};
+print  "#\n";
 
 # Remove table if it already exists, warning (not failing) if it doesn't
-$oldmode = $dbh->{ix_AutoErrorReport};
-$dbh->{ix_AutoErrorReport} = 0;
+$oldmode = $dbh->{PrintError};
+$dbh->{PrintError} = 0;
 $stmt1 = "DROP TABLE $testtable";
 &stmt_test($dbh, $stmt1, 1);
-$dbh->{ix_AutoErrorReport} = $oldmode;
+$dbh->{PrintError} = $oldmode;
 
 # Create table (now that it does not exist)...
 $stmt2 = "CREATE TABLE $testtable (id INTEGER NOT NULL, name CHAR(64))";
@@ -236,54 +230,6 @@ sub select_all
 # Now the table is dropped.
 &stmt_retest($dbh, $stmt1, 0);
 
-# Test stored procedures...
-if ($dbh->{ix_ProductVersion} >= 500)
-{
-	$stmt10 = "DROP PROCEDURE dbd_ix_01";
-	&stmt_test($dbh, $stmt10, 1);
-
-	$stmt11 =
-	q{
-	CREATE PROCEDURE dbd_ix_01(val1 DECIMAL, val2 DECIMAL)
-		-- Sometimes known as ndelta_eq()
-		RETURNING INTEGER;
-		IF (val1 = val2) THEN RETURN 1; END IF;
-		IF NOT (val1 = val2) THEN RETURN 0; END IF;
-		RETURN NULL;
-	END PROCEDURE;
-	};
-	&stmt_test($dbh, $stmt11, 0);
-
-	$stmt12 = "EXECUTE PROCEDURE dbd_ix_01(23.00, 23)";
-	&stmt_note("# Testing: \$cursor = \$dbh->prepare('$stmt12')\n");
-	&stmt_fail() unless ($cursor = $dbh->prepare($stmt12));
-	&stmt_ok(0);
-
-	&stmt_note("# Re-testing: \$cursor->execute\n");
-	&stmt_fail() unless ($cursor->execute);
-	&stmt_ok(0);
-
-	&stmt_note("# Re-testing: \$cursor->fetchrow\n");
-	&stmt_fail() unless (@row = $cursor->fetchrow);
-	&stmt_ok(0);
-
-	&stmt_note("# Values returned/expected: ", $#row + 1, "/1\n");
-	for ($i = 0; $i <= $#row; $i++)
-	{
-			&stmt_note("# Row value $i: $row[$i]\n");
-			die "Unexpected value returned\n" unless $row[$i] == 1;
-	}
-
-	&stmt_note("# Re-testing: \$cursor->finish\n");
-	&stmt_fail() unless ($cursor->finish);
-	&stmt_ok(0);
-
-	# FREE the cursor and asociated data
-	undef $cursor;
-
-	# Remove stored procedure
-	&stmt_retest($dbh, $stmt10, 0);
-}
 
 # Test execute with bound values
 &stmt_retest($dbh, $stmt2, 0);	# CREATE TABLE

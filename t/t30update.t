@@ -1,19 +1,19 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t30update.t,v 60.2 1998/07/30 00:22:29 jleffler Exp $ 
+#	@(#)$Id: t30update.t,v 62.2 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test script for DBD::Informix
 #
-#	Copyright (C) 1998 Jonathan Leffler
+#	Copyright (C) 1998-99 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 use strict;
 
 my($testtable) = "dbd_ix_test1";
 
 &stmt_note("1..40\n");
 
-my($dbh) = &connect_to_test_database(1);
+my($dbh) = &connect_to_test_database();
 &stmt_ok(0);
 
 # Create temporary table...
@@ -61,7 +61,7 @@ $st1->execute('ROM', -1, 'Julius Caesar', 1) || &stmt_fail();
 	2 => ['Alligator Descartes', 'ABC', 123.4567]
 });
 
-my(@data) = ('AAA', '9999.8822', 'Jonathan Leffler', 1);
+my(@data) = ('AAA', 9999.8822, 'Jonathan Leffler', 1);
 $st1->execute(@data) || &stmt_fail();
 
 &select_all({

@@ -5,7 +5,7 @@
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1988-1993,1995-98
-@(#)Product:         $Product: DBD::Informix Version 0.61_02 (1998-12-14) $
+@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
 */
 
 /*TABSTOP=4*/

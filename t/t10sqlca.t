@@ -1,15 +1,15 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t10sqlca.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+#	@(#)$Id: t10sqlca.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test SQLCA Record Handling for DBD::Informix
 #
-#	Copyright (C) 1997 Jonathan Leffler
+#	Copyright (C) 1997,1999 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 # Test install...
-$dbh = &connect_to_test_database(1);
+$dbh = &connect_to_test_database();
 print_sqlca($dbh);
 
 &stmt_note("1..7\n");

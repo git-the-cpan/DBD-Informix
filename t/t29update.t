@@ -1,29 +1,37 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t29update.t,v 60.1 1998/07/30 00:26:44 jleffler Exp $ 
+#	@(#)$Id: t29update.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Simple test for UPDATE with attributes listed in execute call
 #
-#	Copyright (C) 1998 Jonathan Leffler
+#	Copyright (C) 1998-99 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
-&stmt_note("1..2\n");
+&stmt_note("1..3\n");
 
-$dbh = connect_to_test_database();
+my $tabname = "dbd_ix_t1";
 
-$dbh->do(qq"CREATE TEMP TABLE T1(c1 INTEGER, c2 INTEGER, c3 INTEGER)");
-$dbh->do(qq"INSERT INTO T1 VALUES(1, 2, 3)");
-$sth = $dbh->prepare("UPDATE T1 SET (c1, c2) = (?, ?) WHERE c3 = ?");
+my $dbh = connect_to_test_database();
+
+$dbh->{RaiseError} = 1;
+$dbh->do(qq"CREATE TEMP TABLE $tabname(c1 INTEGER, c2 INTEGER, c3 INTEGER)");
+$dbh->do(qq"INSERT INTO $tabname VALUES(1, 2, 3)");
+my $sth = $dbh->prepare("UPDATE $tabname SET (c1, c2) = (?, ?) WHERE c3 = ?");
 
 &stmt_note("# Values should be 1 2 3\n");
-&select_some_data($dbh, 1, "SELECT * FROM T1");
+&select_some_data($dbh, 1, "SELECT * FROM $tabname");
 @vals = (55, 66, 3);
 $sth->execute(@vals);
 
-&select_some_data($dbh, 1, "SELECT * FROM T1");
-
+&select_some_data($dbh, 1, "SELECT * FROM $tabname");
 &stmt_note("# Values should be @vals\n");
+
+$sth->execute(12, 14, 3);
+&select_some_data($dbh, 1, "SELECT * FROM $tabname");
+&stmt_note("# Values should be 12 14 3\n");
+
+$dbh->disconnect;
 
 &all_ok;
 

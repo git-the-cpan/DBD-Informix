@@ -1,4 +1,4 @@
-#	@(#)$Id: Informix.pm.PL,v 61.4 1998/12/15 01:04:13 jleffler Exp $ 
+#	@(#)$Id: Informix.pm.PL,v 62.6 1999/09/19 21:53:02 jleffler Exp $
 #
 #   Portions Copyright (c) 1994-95 Tim Bunce
 #   Portions Copyright (c) 1996-98 Jonathan Leffler
@@ -27,7 +27,7 @@ print "Extracting $filename from $0\n",
 		"\t* setting default INFORMIXSERVER to `$server'\n";
 
 print OUT <<'EOF';
-#	@(#)$Id: Informix.pm.PL,v 61.4 1998/12/15 01:04:13 jleffler Exp $ 
+#	@(#)$Id: Informix.pm.PL,v 62.6 1999/09/19 21:53:02 jleffler Exp $
 #
 #   Portions Copyright (c) 1994-95 Tim Bunce
 #   Portions Copyright (c) 1996-98 Jonathan Leffler
@@ -42,9 +42,9 @@ print OUT <<'EOF';
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.61_02";
+	$VERSION     = "0.62";
 	$ATTRIBUTION = 'Jonathan Leffler <j.leffler@acm.org>';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm.PL,v $ $Revision: 61.4 $ ($Date: 1998/12/15 01:04:13 $)@, 3);
+	$Revision    = substr(q@(#)$RCSfile: Informix.pm.PL,v $ $Revision: 62.6 $ ($Date: 1999/09/19 21:53:02 $)@, 3);
 	$Revision    =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
 
 	require_version DBI 1.02;	# Requires features from DBI 1.02 release
@@ -167,13 +167,13 @@ print OUT <<'EOF';
 
 	sub prepare
 	{
-		my($dbh, $statement)= @_;
+		my($dbh, $statement, $attr) = @_;
 
 		my $sth = DBI::_new_sth($dbh, {
 			'Statement' => $statement,
 			});
 
-		DBD::Informix::st::_prepare($sth, $statement)
+		DBD::Informix::st::_prepare($sth, $statement, $attr)
 			or return undef;
 
 		$sth;
@@ -187,6 +187,30 @@ print OUT <<'EOF';
 	# So, DBD::Informix needs to use the full prepare, execute, finish
 	# functions under all circumstances.  The default routine does that.
 	# So use the default routine.
+	# -----------------------------------------------------------------
+
+	# -----------------------------------------------------------------
+	# Override DBD::_::db::tables - it doesn't quote table owner names.
+	# Mostly, this doesn't matter, unless you happen to be working with a
+	# MODE ANSI database, where informix.systables and "informix".systables
+	# are two very different tables, and the former does not usually exist!
+	# Almost, but not quite, a copy of the function from DBI.pm.
+	# NB: using double quotes around the name is correct even if DELIMIDENT
+	# is set; using single quotes is OK unless DELIMIDENT is set.
+	sub tables
+	{
+		my ($dbh, @args) = @_;
+		my $sth = $dbh->table_info(@args);
+		return () unless $sth;
+		my ($row, @tables);
+		while($row = $sth->fetch)
+		{
+			my $name = $row->[2];
+			$name = qq{"$row->[1]".$name} if $row->[1];
+			push @tables, $name;
+		}
+		return @tables;
+	}
 	# -----------------------------------------------------------------
 
 	# -----------------------------------------------------------------
@@ -247,7 +271,7 @@ print OUT <<'EOF';
 	# Generating complete lists of columns for local tables, views, and
 	# synonyms is hard!  For example, you need to do:
 	#
-	#-- Base Table Information 
+	#-- Base Table Information
 	# SELECT T.Owner, T.TabName, C.ColNo, C.ColName, C.ColType, C.ColLength
 	#     FROM 'informix'.SysTables T, 'informix'.SysColumns C
 	#     WHERE T.Tabid = C.Tabid
@@ -255,7 +279,7 @@ print OUT <<'EOF';
 	#       AND (T.TabName IN ('privsyn', 'pubsyn', 'tabcol') OR
 	# 	 	     ((T.TabName = 'syscolumns' AND T.Owner = 'informix')))
 	# UNION
-	# -- Local Synonyms (PUBLIC and PRIVATE)   
+	# -- Local Synonyms (PUBLIC and PRIVATE)
 	# SELECT T.Owner, T.TabName, C.ColNo, C.ColName, C.ColType, C.ColLength
 	#     FROM 'informix'.SysTables T, 'informix'.SysColumns C,
 	#          'informix'.SysSynTable S
@@ -264,7 +288,7 @@ print OUT <<'EOF';
 	#       AND ((T.TabType = 'P' AND T.Owner = USER) OR T.TabType =  'S')
 	#       AND (T.TabName IN ('privsyn', 'pubsyn', 'tabcol') OR
 	# 		     ((T.TabName = 'syscolumns' AND T.Owner = 'informix')))
-	# -- Remote Synonyms are not handled! 
+	# -- Remote Synonyms are not handled!
 	# ORDER BY 1, 2, 3;
 	#
 	# Mercifully, local synonyms cannot be built on top of other local
@@ -285,7 +309,7 @@ print OUT <<'EOF';
 	$columns{'direct'}  =
 		q{ WHERE T.Tabid = C.Tabid AND T.TabType IN ('T', 'V') };
 	$columns{'synonym'} = qq{ , 'informix'.SysSynTable S
-	WHERE T.Tabid = S.Tabid AND S.BTabid = C.Tabid 
+	WHERE T.Tabid = S.Tabid AND S.BTabid = C.Tabid
 	$tables{'synonym'}
 		};
 	$columns{'order'}   = q{ ORDER BY 1, 2, 3 };
@@ -347,7 +371,60 @@ print OUT <<'EOF';
 		@result;
 	}
 
-	# -----------------------------------------------------------------
+	#-----------------------------------------------------------------
+	# table_info function - originally by David Bitseff <dbitsef@uswest.com>
+	# NB: DBI spec says it needs: TABLE_QUALIFIER, TABLE_OWNER, TABLE_NAME,
+	# TABLE_TYPE and TABLE_REMARKS in that order, possibly with extra data.
+	# There's no explanation of what a TABLE_QUALIFIER is, so null (undef)
+	# should be returned.  The table type is supposed to be one of:
+	# "TABLE", "VIEW", "SYSTEM TABLE", "GLOBAL TEMPORARY", "LOCAL
+	# TEMPORARY", "ALIAS", "SYNONYM" or a datasource-specific type.
+	# Informix can't identify temporary tables;  there are no
+	# ALIAS tables; there are private and public synonyms, so we'll return
+	# the datasource specific 'PRIVATE SYNONYM' for them.
+	# Note that the temp table cannot be dropped until the statement handle
+	# is destroyed, but we don't know when the handle is destroyed, so we
+	# either have to drop it and recreate it each time, or check whether
+	# it has already been created and only create it if not.
+
+	sub table_info
+	{
+		my($dbh) = @_;
+		my($tab) = "dbd_ix_tabinfo_typ";
+		my($msg);
+		my($handler) = $SIG{__WARN__};
+		$SIG{__WARN__} = sub { $msg = $_[0]; };
+		my ($ok) = $dbh->do("CREATE TEMP TABLE $tab (tabtype CHAR(1) NOT NULL UNIQUE, typename CHAR(20) NOT NULL);");
+		$SIG{__WARN__} = $handler;
+		if ($ok)
+		{
+			$dbh->do("INSERT INTO $tab VALUES('T', 'TABLE');
+					  INSERT INTO $tab VALUES('C', 'SYSTEM TABLE');
+					  INSERT INTO $tab VALUES('V', 'VIEW');
+					  INSERT INTO $tab VALUES('A', 'ALIAS');
+					  INSERT INTO $tab VALUES('S', 'SYNONYM');
+					  INSERT INTO $tab VALUES('P', 'PRIVATE SYNONYM');
+					  INSERT INTO $tab VALUES('G', 'GLOBAL TEMPORARY');
+					  INSERT INTO $tab VALUES('L', 'LOCAL TEMPORARY');
+					 ") or return undef;
+		}
+		my $sth = $dbh->prepare(qq{
+			SELECT
+				'' AS TABLE_QUALIFIER,
+				T.Owner AS TABLE_OWNER,
+				T.TabName AS TABLE_NAME,
+				I.TypeName AS TABLE_TYPE,
+				'TabID: ' || T.TabID || ' Created: ' || EXTEND(T.Created, YEAR TO DAY) AS TABLE_REMARKS
+			FROM "informix".systables T, $tab I
+			WHERE (T.TabID >= 100 AND I.TabType = T.TabType)
+			   OR (T.TabID < 100 AND T.TabType = 'T' AND I.TabType = 'C')
+			ORDER BY TABLE_OWNER, TABLE_NAME
+			}) or return undef;
+		$sth->execute or return undef;
+		$sth;
+	}
+
+  	# -----------------------------------------------------------------
 
 	1;
 }
@@ -375,25 +452,26 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes DBD::Informix version 0.61.
+This document describes DBD::Informix version 0.62.
 
 You should also read the documentation for DBI as this document
 qualifies what is stated there.
 Note that this document was last updated for the DBI 0.85
-specification, but the code requires features from the DBI 0.89
-release.
-The DBI specification is particularly volatile at the moment
-(mid-1997), and using newer versions of DBI with this version of
-DBD::Informix may lead to problems (but shouldn't).
+specification, but the code requires features from the DBI 1.02
+release or later.
+Consequently, both this document and DBD::Informix are probably
+considerably out of line with some of the new features and minor
+details of the DBI specification.
 
 This document still has a biassed view of how to use DBI and
 DBD::Informix.
 It covers parts of DBI and most of DBD::Informix.
-Originally, the DBI documentation was in a parless state, but it is
-improving with each release of DBI, and the DBI document's comments
-about DBI should take precedence over comments in this document (but
-this document may be a better reflection of the actual behaviour of
-DBD::Informix).
+Originally (say late 1996), the DBI documentation was in a parless
+state.
+It has improved with each release of DBI, and the DBI document's
+comments about DBI should take precedence over comments in this
+document (but this document may be a better reflection of the actual
+behaviour of DBD::Informix).
 
 Be aware that on occasion, the description in this document gets
 complex because of differences between different versions of Informix
@@ -428,6 +506,10 @@ calls DBI->connect().
 Note that some of the DBD::Informix test code does not operate under
 normal circumstances, and therefore uses the non-preferred techniques
 in the section "Driver Attributes and Methods".
+
+Note that you do not write:
+
+    use DBD::Informix;      # !!BUGGY CODE!!
 
 =head2 Driver Attributes and Methods
 
@@ -516,9 +598,9 @@ will silently ignore the username.
 You can also specify certain attributes in the connect call.
 These include:
 
-	AutoCommit
-	PrintError
-	RaiseError
+    AutoCommit
+    PrintError
+    RaiseError
 
 Note that you cannot specify ChopBlanks in this list.
 For the time being, the PrintError attribute is synonymous with the
@@ -531,8 +613,8 @@ Using the new style connect, you could therefore specify that the
 database is not to operate in AutoCommit mode but errors should be
 reported automatically by specifying:
 
-	$dbh = DBI->connect("dbi:Informix:$database", '', '',
-						{ AutoCommit => 0, PrintError => 1 });
+    $dbh = DBI->connect("dbi:Informix:$database", '', '',
+                        { AutoCommit => 0, PrintError => 1 });
 
 Using this style of connection, the default value for AutoCommit is
 On (or 1); this is a contrast to the old style where the default is
@@ -593,7 +675,7 @@ Examples include:
     /some/where/dbase   # Connect to local SE database
 
 No database name is supplied implicitly by DBD::Informix (though the
-test code in DBD::InformixTest does supply the names of test databases
+test code in InformixTest.pl does supply the names of test databases
 implicitly).
 Read the DBI driver documentation to see what, if any, defaults will
 be supplied (eg check for the DBI_DRIVER and DBI_DSN environment
@@ -634,7 +716,7 @@ information about the database, etc.
      # ix_InTransaction is 1 (true) if the database is in a transaction
      print "    Transaction Active:      $dbh->{ix_InTransaction}\n";
      # ix_ConnectionName is the name of the ESQL/C connection.
-     # Mainly applicable with Informix-ESQL/C 6.00 and later.
+     # Mainly applicable with Informix ESQL/C 6.00 and later.
      print "    Connection Name:         $dbh->{ix_ConnectionName}\n";
 
 If $dbh->{PrintError} is true, then DBI will report each error
@@ -642,10 +724,12 @@ automatically on STDERR when it is detected.
 The error is also available via the package variables $DBI::errstr and
 $DBI::err.
 Note that $DBI::errstr includes the SQL error number and the ISAM
-error number if there is one, and ends with a newline.
+error number if there is one.
 The message may or may not extend over several lines, and is generally
 formatted so that it will display neatly within 80 columns.
-The last character of the message is a newline.
+The last character of the message used be a newline, but (as of
+version 0.62) the trailing new line is omitted to improve the
+automatic error reports from Perl.
 
 If $dbh->{PrintError} is false, then DBI does not report any errors
 when it detects them; it is up to the user to note that errors have
@@ -670,13 +754,13 @@ to be tracked.
 There are two methods which can be called using the DBI func() to get
 at some basic Informix metadata relatively conveniently.
 
-	@list = $dbh->func('_tables');
-	@list = $dbh->func('user', '_tables');
-	@list = $dbh->func('base', '_tables');
-	@list = $dbh->func('user', 'base', '_tables');
-	@list = $dbh->func('system', '_tables');
-	@list = $dbh->func('view', '_tables');
-	@list = $dbh->func('synonym', '_tables');
+    @list = $dbh->func('_tables');
+    @list = $dbh->func('user', '_tables');
+    @list = $dbh->func('base', '_tables');
+    @list = $dbh->func('user', 'base', '_tables');
+    @list = $dbh->func('system', '_tables');
+    @list = $dbh->func('view', '_tables');
+    @list = $dbh->func('synonym', '_tables');
 
 The lists of tables are all qualified as 'owner'.tablename, and may be
 used in SQL statements without fear that the table is not present in
@@ -684,8 +768,8 @@ the database (unless someone deletes it behind your back).
 The leading arguments qualify the list of names returned.
 Private synonyms are only reported for the current user.
 
-	@list = $dbh->func('_columns');
-	@list = $dbh->func(@tables, '_columns');
+    @list = $dbh->func('_columns');
+    @list = $dbh->func(@tables, '_columns');
 
 The lists are each references to an array of values corresponding to
 the owner name, table name, the column number, the column name, the
@@ -920,8 +1004,8 @@ WHERE ...", both the return columns are described as 'column'.
 If the statement is a cursory statement, you can retrieve the values
 in any of a number of ways, as described in the DBI specification.
 
-	$ref = $sth->fetchrow_arrayref;
-    $ref = $sth->fetch;					# Alternative spelling...
+    $ref = $sth->fetchrow_arrayref;
+    $ref = $sth->fetch;                 # Alternative spelling...
     @row = @{$ref};
 
     @row = @{$sth->fetchrow_arrayref};  # Shorthand for above...
@@ -930,8 +1014,8 @@ in any of a number of ways, as described in the DBI specification.
 
     $ref = $sth->fetchall_arrayref;
 
-As usual, you have to worry about whether this worked or not.  You would
-normally, therefore, use:
+As usual, you have to worry about whether this worked or not.
+You would normally, therefore, use:
 
     while ($ref = $sth->fetch)
     {
@@ -999,7 +1083,7 @@ This does not cause any memory leaks.
 You can retrieve use the ix_StatementText attribute to (re)discover
 the text of a statement:
 
-	$txt = $sth->{ix_StatementText};
+    $txt = $sth->{ix_StatementText};
 
 =head2 CURSORS FOR UPDATE
 
@@ -1022,19 +1106,48 @@ or 'UPDATE...WHERE CURRENT OF' statement.
 
 =head2 ACCESSING THE SQLCA RECORD
 
-You can access the SQLCA record via either a database handle or a statement
-handle.
+You can access the SQLCA record via either a database handle or a
+statement handle.
 
     $sqlcode = $sth->{ix_sqlcode};
     $sqlerrm = $sth->{ix_sqlerrm};
     $sqlerrp = $sth->{ix_sqlerrp};
-    @sqlerrd = $sth->{ix_sqlerrd};
-    @sqlwarn = $sth->{ix_sqlwarn};
+    @sqlerrd = @{$sth->{ix_sqlerrd}};
+    @sqlwarn = @{$sth->{ix_sqlwarn}};
 
-Note that the warning information is treated as an array (as in Informix-4GL)
-rather than as a bunch of separate fields (as in Informix-ESQL/C).  Inspect
-the code in the print_sqlca() function in InformixTest.pm for more ideas on
-the use of these.  You cannot set the sqlca record.
+Note that the warning information is treated as an array (as in
+Informix 4GL) rather than as a bunch of separate fields (as in
+Informix ESQL/C).
+However, the array is indexed from zero (as in ESQL/C, C, Perl etc),
+rather than from one (as in Informix 4GL).
+Also note that both $sth->{ix_sqlerrd} and $sth->{ix_sqlwarn} return a
+reference to an array.
+Inspect the code in the print_sqlca() function in InformixTest.pl for
+more ideas on the use of these.
+You cannot set the sqlca record.
+
+The sqlerrd array has the following useful columns:
+
+        $sth->{ix_sqlerrd}[1] - serial value after insert or ISAM error code
+        $sth->{ix_sqlerrd}[3] - estimated cost
+        $sth->{ix_sqlerrd}[4] - offset of the error into the SQL statement
+        $sth->{ix_sqlerrd}[5] - rowid of the last row processed
+
+
+=head2 OBTAINING THE VALUE INSERTED FOR A SERIAL COLUMN
+
+The following example is a very useful and important technique with Informix.
+However, it is also not portable to other databases (because they do not have
+the SERIAL data type).
+
+        # insert a row into a table with a primary key that is a SERIAL
+        $stmt = $dbh->do("insert into table (serial_id, number) values(0, 10)");
+        print "the new row has a serial_id of $sth->{ix_sqlerrd}[1]\n";
+
+For more information, you can read the "Informix ESQL/C Programmer's
+Manual" or "Informix Guide to SQL: Reference Manual".
+The exact chapter and verse varies depending on which version you are
+using.
 
 =head1 TRANSACTION MANAGEMENT
 
@@ -1204,23 +1317,23 @@ equivalents follows -- there are a number of ways in which it isn't quite
 precise (eg the influence of AutoCommit), but it is accurate enough for
 most purposes.
 
-	DBI->connect            => DATABASE in 5.0x
-	$dbh->disconnect        => CLOSE DATABASE in 5.0x
+    DBI->connect            => DATABASE in 5.0x
+    $dbh->disconnect        => CLOSE DATABASE in 5.0x
 
-	DBI->connect            => CONNECT in 6.0x and later
-	$dbh->disconnect        => DISCONNECT in 6.0x and later
+    DBI->connect            => CONNECT in 6.0x and later
+    $dbh->disconnect        => DISCONNECT in 6.0x and later
 
-	$dbh->commit            => COMMIT WORK (+BEGIN WORK)
-	$dbh->rollback          => ROLLBACK WORK (+BEGIN WORK)
+    $dbh->commit            => COMMIT WORK (+BEGIN WORK)
+    $dbh->rollback          => ROLLBACK WORK (+BEGIN WORK)
 
-	$dbh->do                => EXECUTE IMMEDIATE
-	$dbh->prepare           => PREPARE, DESCRIBE (DECLARE)
-	$sth->execute           => EXECUTE or OPEN
-	$sth->fetch             => FETCH
-	$sth->fetchrow          => FETCH
-	$sth->finish            => CLOSE
+    $dbh->do                => EXECUTE IMMEDIATE
+    $dbh->prepare           => PREPARE, DESCRIBE (DECLARE)
+    $sth->execute           => EXECUTE or OPEN
+    $sth->fetch             => FETCH
+    $sth->fetchrow          => FETCH
+    $sth->finish            => CLOSE
 
-	undef $sth              => FREE cursor, FREE statement, etc
+    undef $sth              => FREE cursor, FREE statement, etc
 
 =head1 KNOWN RESTRICTIONS
 
@@ -1259,10 +1372,16 @@ Tim Bunce (Tim.Bunce@ig.co.uk)
 Alligator Descartes (descarte@hermetica.com) # Obsolete email address
 
 =item *
-Alligator Descartes (descarte@arcana.co.uk)
+Alligator Descartes (descarte@arcana.co.uk) # Obsolete email address
+
+=item *
+Alligator Descartes (descarte@symbolstone.org)
 
 =item *
 Jonathan Leffler (johnl@informix.com) # Obsolete email address
+
+=item *
+Jonathan Leffler (jleffler@visa.com) # Obsolete email address
 
 =item *
 Jonathan Leffler (j.leffler@acm.org)
@@ -1271,6 +1390,9 @@ Jonathan Leffler (j.leffler@acm.org)
 Jonathan Leffler (jleffler@informix.com)
 
 =back
+
+With contributions from many other people who should all be mentioned in the
+ChangeLog file.
 
 =head1 SEE ALSO
 

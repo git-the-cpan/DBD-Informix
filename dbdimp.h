@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 61.5 1998/11/05 00:36:18 jleffler Exp $ 
+ * @(#)$Id: dbdimp.h,v 62.1 1999/08/30 18:14:23 jleffler Exp $ 
  *
  * Copyright (c) 1994-95 Tim Bunce
  *           (c) 1996-98 Jonathan Leffler
@@ -96,6 +96,8 @@ struct imp_sth_st
 	int             n_columns;  /* Number of output fields */
 	int             n_bound;    /* Number of input fields */
 	int             n_rows;     /* Number of rows processed */
+	Boolean			is_holdcursor;  /* Using a hold Cursor */
+	Boolean			is_scrollcursor;	/* Using a scroll Cursor */
 	imp_dbh_t      *dbh;        /* Database handle for statement */
 	Link            chain;      /* Link in list of statements */
 };
@@ -141,6 +143,8 @@ extern void dbd_ix_st_destroy(SV *, imp_sth_t *);
 
 /* Other non-standard entry points */
 extern const char *dbd_ix_module(void);
+extern void dbd_ix_enter(const char *function);
+extern void dbd_ix_exit(const char *function);
 extern void dbd_ix_seterror(ErrNum rc);
 
 #endif	/* DBDIMP_H */

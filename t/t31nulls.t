@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t31nulls.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+#	@(#)$Id: t31nulls.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test Null Handling for DBD::Informix
 #
-#	Copyright (C) 1997 Jonathan Leffler
+#	Copyright (C) 1997,1999 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 sub select_null_data
 {
@@ -47,7 +47,7 @@ sub select_null_data
 
 
 # Test install...
-$dbh = &connect_to_test_database(1);
+$dbh = &connect_to_test_database();
 
 &stmt_note("1..7\n");
 &stmt_ok();

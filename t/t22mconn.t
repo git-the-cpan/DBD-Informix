@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t22mconn.t,v 61.2 1998/10/29 23:08:07 jleffler Exp $ 
+#	@(#)$Id: t22mconn.t,v 62.2 1999/09/19 21:18:32 jleffler Exp $ 
 #
 #	Test DISCONNECT ALL for DBD::Informix
 #
-#	Copyright (C) 1996-98 Jonathan Leffler
+#	Copyright (C) 1996-99 Jonathan Leffler
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);
@@ -15,6 +15,9 @@ $user1 = $ENV{DBD_INFORMIX_USERNAME};
 $user2 = $ENV{DBD_INFORMIX_USERNAME2};
 $pass1 = $ENV{DBD_INFORMIX_PASSWORD};
 $pass2 = $ENV{DBD_INFORMIX_PASSWORD2};
+
+$user1 = "" if (! defined $user1);
+$pass1 = "" if (! defined $pass1);
 
 if (!$dbase2)
 {

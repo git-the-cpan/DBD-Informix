@@ -1,19 +1,19 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: t24mcurs.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
+# @(#)$Id: t24mcurs.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
-# Portions Copyright (C) 1996,1997 Jonathan Leffler
+#	Portions Copyright (C) 1996-97,1999 Jonathan Leffler
 #
 # Tests multiple simultaneous cursors being open
 
-use DBD::InformixTest;
+BEGIN { require "perlsubs/InformixTest.pl"; }
 
 print "1..17\n";
-$dbh = connect_to_test_database(1);
+$dbh = connect_to_test_database();
 &stmt_ok(0);
-$dbh->{ix_AutoErrorReport} = 0;
+$dbh->{PrintError} = 0;
 
 $tablename1 = "dbd_ix_test1";
 $tablename2 = "dbd_ix_test2";
