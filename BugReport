@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-#	@(#)$Id: BugReport,v 95.1 1999/11/02 19:19:53 jleffler Exp $
+#	@(#)$Id: BugReport,v 95.2 2000/01/15 00:22:02 jleffler Exp $
 #
 #	Copyright (C) 1999 Jonathan Leffler
 #
@@ -78,6 +78,7 @@ for $var (sort keys %ENV)
 	$val = "XXXXXXXX" if ($var =~ m/^DBD_INFORMIX_PASSWORD[12]?$/o);
 	print "$var=$val\n";
 }
+print "\n# End of Configuration Report\n";
 
 exit 0 if ($#ARGV < 0);
 
@@ -104,11 +105,12 @@ if ($ARGV[0] =~ m/^[abcdABCD]$/)
 				if ($#ARGV == 0)
 				{
 					print "\n#\n# Rerunning test with debug fully enabled\n";
-					execute_command("PERL_DBI_DEBUG=9 sh test.one.sh @ARGV", "failed on selective tests");
+					execute_command("sh -c 'PERL_DBI_DEBUG=9 sh test.one.sh @ARGV'", "failed on selective tests");
 				}
 			}
 		}
 	}
+	print "\n# End of Bug Report\n";
 }
 else
 {

@@ -1,22 +1,39 @@
 To: dbi-announce@isc.org, dbi-dev@isc.org, dbi-users@isc.org,
         informix-list@iiug.org, descarte@symbolstone.org
-Subject: ANNOUNCE: DBD::Informix Version 0.95 released
+Subject: ANNOUNCE: DBD::Informix Version 0.97001 released
 
-The next release of DBD::Informix, version 0.95, has been uploaded to CPAN.
-It will be available worldwide in a day or three.
+The next release of DBD::Informix, version 0.97001, was uploaded to
+CPAN on 2000-01-19.  It will be available worldwide in a day or three.
+
+**** This version is not intended for general use.  The differences between
+**** it and the official 0.95 version are in this Announce file, the
+**** BugReport script, and in the handling of the Informix.pm.PL file.  It
+**** is also here partly to test whether CPAN/PAUSE will accept the
+**** Informix-style 1.00.PC1X1 version numbering.  However, it won't cause
+**** you any damage either, so if this is what you got downloaded, don't
+**** fuss and please enjoy.  Normal service will be resumed as soon as
+**** possible.
+
+**** Note that none of the records for any of the 0.96 and 0.97 releases
+**** will appear in the official 1.00.PC1 ChangeLog.  These are purely
+**** experimental versions, but learning how to beat PAUSE and CPAN
+**** requires lots of (slow) testing with the results being semi-public.
+**** Further, these versions will *all* be removed when the official
+**** 1.00 release is ready, or very shortly thereafter, if they are not
+**** removed beforehand.  Do not rely on them.  Do not report problems
+**** with them.
 
 DBD::Informix is the driver code that enables Perl 5.004 or 5.005 to access
 Informix databases via the DBI module (you'll need the code for both DBI
-version 1.02 or later and DBD::Informix).  You should be planning to
-upgrade to at least version Perl 5.004_04 as some software in the DBI
-family will require this version (eg DBI::Shell).  The DBD::Informix and
-DBI code is available for download via:
+version 1.02 or later and DBD::Informix).  You should upgrade to at least
+version Perl 5.004_04.  The DBD::Informix and DBI code is available for
+download via:
 
-http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
+http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces/DBD
 http://www.symbolstone.org/technology/perl/DBI
 
    *******************************************************************
-   **    When you successfully build DBD::Informix v0.95, please    **
+   **    When you successfully build DBD::Informix v0.97001, please    **
    **      use the ItWorks script to report your configuration      **
    *******************************************************************
 
@@ -28,17 +45,40 @@ the next release, which will probably be 1.00 (because software companies
 do not, I'm told, release 0.xy versions of products), will be supported by
 Informix.  With the 1.00 version, if you have support for your Informix
 products, then you will be able to get help for DBD::Informix too.  If you
-do not have support, then you will have to continue to use the mailing
-lists.  I will no longer be doing all the coding etc.  I will still be an
-advisor to the people handling DBD::Informix.  And please be patient until
-the supported release is available, and be patient with the Tech Support
-people who will have to learn how to deal with this product.
+do not have Informix support, then you will have to continue to use the
+mailing lists.  I will no longer be doing all the coding etc.  I will be
+the product manager so I'll still be an advisor to the people handling
+DBD::Informix.  And please be patient until the supported release is
+available, and be patient with the Tech Support people who will have to
+learn how to deal with this product.
 ---------------------------------------------------------------------------
 
+If you have Perl configured correctly and a good Internet connection,
+you should be able to install this version with:
+
+    perl -MCPAN -e 'install Bundle::DBD::Informix'
+
+This worked on RedHat 6.1 Linux using Informix ClientSDK 2.40 (ESQL/C
+9.30.UC1) and SE 7.24.UC5 -- yes, the setup was used for testing perverse
+combinations of products -- once a custom copy of Perl was built and
+installed, and once h2ph was run in /usr/include (*.h, sys/*.h, bits/*.h,
+gnu/*.h), and once an an empty stdarg.h was converted with h2ph too.  Note,
+these are required for the pre-requisites and not by DBD::Informix per se.
+If you have not configured CPAN before, use:
+
+    perl -MCPAN -e 'install CPAN'   # This will ask you questions
+    perl -MCPAN -e shell <<!        # This will default some answers
+    install Bundle::libnet
+    install LWP
+    install Bundle::DBD::Informix
+    !
+
+---------------------------------------------------------------------------
 
 New in release 0.95:
 * Trying to get to a state where release 1.00 is sensible.  Hence, DBI
-  compliance has been an issue that has been addressed.
+  compliance has been an issue that has been addressed, not necessarily
+  very thoroughly.
 * Preliminary support for XPS (8.x) database servers.  Versions of XPS
   prior to 8.30 do not support blobs or stored procedures.
 * New $dbh attributes for XPS support - ix_ServerVersion, ix_BlobSupport
@@ -60,6 +100,17 @@ New in release 0.95:
 * Attribute ix_StatementText is deprecated; use the DBI standard
   attribute Statement instead.
 * Add ItWorks shell script to report working versions in a standard manner.
+* The format of the working versions file has been completely reworked.
+  The file includes most of the entries received from field users during
+  the 'census' in November 1999, plus miscellaneous other reports from
+  people who have sent in details of working versions.  This would have
+  been much easier for everyone if the ItWorks script had available for the
+  census.
+* DBD::Informix versions 0.56, 0.57, 0.59 have been removed from CPAN.
+  Versions 0.55, 0.58 still exist only because they are the ones in the
+  Perl Resource Kits; you are strongly encouraged to upgrade to 0.95.
+  Versions 0.60 and upwards still exist because they are almost current,
+  but you are encouraged to move to 0.95 (especially from 0.61_02).
 
 Still to do:
 * Investigate whether using sqlda structures in place of SQL descriptors
@@ -75,19 +126,11 @@ Next release: 1.00
 * This should, with luck, have full IUS support, and decent support for
   builds on NT.  And it should conform fairly closely to the DBI
   specification.
-* The next release will be version 0.96 if the 0.95 release doesn't work
-  properly with:
-	perl -MCPAN -e 'install Bundle::DBD::Informix'
 
 Apologies:
-* I've not updated the working versions file with those who have told me
-  about working versions.
 * I may have omitted to include contributions from some people in this
   version.  Even worse, I may have accidentally failed to attribute some
   changes.  If you feel slighted, let me know.
-* There appears to be a problem with ix_AutoErrorReport.  Since you should
-  be using PrintError instead, please don't try to report the bug; assume
-  ix_AutoErrorReport is about to vanish and use PrintError instead.
 * I wish the IUS support was more complete, but I found omissions in the
   Informix documentation which side-tracked me instead of allowing me to
   actually code DBD::Informix.
@@ -101,4 +144,4 @@ Jonathan Leffler (j.leffler@acm.org) #include <disclaimer.h>
 
 PS: Read the README file.  Also read the Informix.Licence file.
 
-@(#)$Id: Announce,v 95.5 1999/12/30 23:20:59 jleffler Exp $
+@(#)$Id: Announce,v 97.2 2000/01/19 21:45:52 jleffler Exp $

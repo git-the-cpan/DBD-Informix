@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 4; indent-tabs-mode: nil -*-
- * @(#)$Id: dbdimp.ec,v 95.5 1999/12/30 19:11:44 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 97.1 2000/01/19 17:34:24 jleffler Exp $
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 95.5 1999/12/30 19:11:44 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 97.1 2000/01/19 17:34:24 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -39,6 +39,9 @@ DBISTATE_DECLARE;
 static SV *ix_errnum = NULL;
 static SV *ix_errstr = NULL;
 static SV *ix_state = NULL;
+
+static Sqlca zero_sqlca = { 0 };
+static Link zero_link = { 0, 0, 0 };
 
 /*
 ** Debugging macros.  NB: functions dbd_ix_debug() and dbd_ix_debug_l()
@@ -279,6 +282,12 @@ new_connection(imp_dbh_t *imp_dbh)
 	imp_dbh->has_procs = False;
 	imp_dbh->has_blobs = False;
 	imp_dbh->srvr_vrsn = 0;
+	imp_dbh->database = (SV *)0;
+	imp_dbh->blob_bind = BLOB_DEFAULT;
+	imp_dbh->drh = (imp_drh_t *)0;
+	imp_dbh->ix_sqlca = zero_sqlca;
+	imp_dbh->chain = zero_link;
+	imp_dbh->head = zero_link;
 	connection_num++;
 }
 
@@ -380,6 +389,7 @@ dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 		/* Failure of some sort */
 		dbd_ix_seterror(sqlca.sqlcode);
 		dbd_ix_debug(1, "Exit %s (**ERROR-1**)\n", function);
+		dbd_ix_exit(function);
 		return 0;
 	}
 
@@ -419,6 +429,7 @@ dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 		sqlca.sqlcode = -256;
 		dbd_ix_seterror(sqlca.sqlcode);
 		dbd_ix_debug(1, "Exit %s (**ERROR-2**)\n", function);
+		dbd_ix_exit(function);
 		return 0;
 	}
 
@@ -435,6 +446,7 @@ dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 			{
 				dbd_ix_db_disconnect(dbh, imp_dbh);
 				dbd_ix_debug(1, "Exit %s (**ERROR-3**)\n", function);
+				dbd_ix_exit(function);
 				return 0;
 			}
 		}
@@ -639,6 +651,7 @@ dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
 	{
 		dbd_ix_savesqlca(imp_dbh);
 		dbd_ix_debug(1, "%s -- set connection failed", function);
+		dbd_ix_exit(function);
 		return(0);
 	}
 
@@ -654,7 +667,10 @@ dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
 	dbd_ix_disconnect(imp_dbh->nm_connection);
 #else
 	if (imp_dbh->is_connected == True)
-		dbd_ix_closedatabase(SvPV(imp_dbh->database, na));
+	{
+		char *dbname = (imp_dbh->database) ? SvPV(imp_dbh->database, na) : "";
+		dbd_ix_closedatabase(dbname);
+	}
 #endif	/* ESQLC_VERSION >= 600 */
 	SvREFCNT_dec(imp_dbh->database);
 

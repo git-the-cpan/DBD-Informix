@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 95.3 1999/12/21 18:49:29 jleffler Exp $ 
+# @(#)$Id: Makefile.PL,v 97.6 2000/01/19 21:45:52 jleffler Exp $ 
 #
 # Portions Copyright (c) 1996-99 Jonathan Leffler
 # Portions Copyright (c) 1996    Alligator Descartes
@@ -46,13 +46,17 @@ if ($NTConfiguration)
 
 my %opts = (
 	NAME         => 'DBD::Informix',
-	VERSION_FROM => 'Informix.pm',
-	clean        => { FILES        => 'Informix.xsi esqlinfo.h esqlvrsn.h t/decgen.sql t/dtgen.sql' },
+	VERSION_FROM => 'Informix.pm.PL',
+	clean        => { FILES        => 'Informix.pm Informix.xsi esqlinfo.h esqlvrsn.h t/decgen.sql t/dtgen.sql' },
 	realclean    => { FILES        => 'esql' },
-	dist         => { DIST_DEFAULT => 'clean distcheck disttest tardist',
+	dist         => { DIST_DEFAULT => 'clean pause_hack/Informix.pm distcheck disttest tardist',
 					  PREOP        => '$(MAKE) -f Makefile.old distdir',
 					  COMPRESS     => 'gzip -v9',
 					  SUFFIX       => 'gz'
+					},
+	'PL_FILES'   =>	{ 'Informix.pm.PL' => 'Informix.pm' },
+	'PM'         =>	{ 'Informix.pm' => '$(INST_LIBDIR)/Informix.pm',
+					  'lib/Bundle/DBD/Informix.pm' => 'blib/lib/Bundle/DBD/Informix.pm',
 					}
 		   );
 
@@ -153,7 +157,7 @@ elsif ($vernum >= 500 && $vernum < 600)
 			I'll create a local version and ensure that we use it.\n
 			%);
 		$esql = "./esql";
-		&customize_esql("$ID/bin/$esqlprog", $esql);
+		&customize_esql("$ID/bin/$esqlprog", $esql, $opts{NAME});
 	}
 	print &nlt(qq%
 		You may run into problems creating a shared object version of
@@ -240,6 +244,7 @@ elsif ($vernum >= 912 && $vernum < 1000)
 	# ESQL/C 9.16 was released as ClientSDK 2.10
 	# ESQL/C 9.20 was released as ClientSDK 2.20
 	# ESQL/C 9.21 was released as ClientSDK 2.30
+	# ESQL/C 9.30 was released as ClientSDK 2.40
 	print &nlt(qq%
 			The tests in t/t31nulls.t and t/t32nulls.t will probably fail.
 			Please upgrade to a more recent version of ClientSDK.
@@ -692,7 +697,7 @@ sub which
 
 sub MY::postamble
 {
-my ($p1, $p2, $p3, $p4, $p5);
+my ($p1, $p2, $p3, $p4, $p5, $p6);
 
 $p1 = 
 "
@@ -743,7 +748,16 @@ clean::
 # template from DBI (Driver.xst).  dbd_postamble() is defined by DBI::DBD.
 $p5 = dbd_postamble();
 
-return $p1 . $p2 . $p3 . $p4 . $p5;
+# Code to update the version in the file that we give to PAUSE.
+my $version_src = MM->catfile('pause_hack', 'Informix.pm.src');
+my $version_dst = MM->catfile('pause_hack', 'Informix.pm');
+$p6 = qq!
+$version_dst : Makefile
+	\$\(PERL\) -pe 's/^\\\$\$VERSION = .*/\\\$\$VERSION = \$(VERSION);/' $version_src > $version_dst
+
+!;
+
+return $p1 . $p2 . $p3 . $p4 . $p5 . $p6;
 }
 
 # nlt - no leading tabs.
@@ -764,6 +778,16 @@ sub execute_command
 	my ($cmd, $sx, $msg) = @_;
 	print "+ $cmd\n" if ($sx);
 	die $msg unless system($cmd) == 0;
+}
+
+sub MY::processPL
+{
+	package MY;
+	my $inherited = shift->SUPER::processPL(@_);
+	my $server = '';
+	$server = "-dINFORMIXSERVER=$ENV{INFORMIXSERVER}" if defined $ENV{INFORMIXSERVER};
+	$inherited =~ s/(\$\(PERL\) .* Informix.pm.PL)/$1 -dINFORMIXDIR=$ID $server/;
+	$inherited;
 }
 
 __END__

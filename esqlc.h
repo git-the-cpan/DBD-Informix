@@ -5,7 +5,7 @@
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-99
-@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
+@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
 */
 
 #ifndef ESQLC_H

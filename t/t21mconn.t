@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t21mconn.t,v 95.2 1999/12/04 23:45:10 jleffler Exp $ 
+#	@(#)$Id: t21mconn.t,v 97.1 2000/01/19 17:43:08 jleffler Exp $ 
 #
 #	Test Multiple Connections for DBD::Informix
 #
@@ -74,7 +74,7 @@ print "# \n";
 
 if ($dbh1->{ix_MultipleConnections} == 0)
 {
-	&stmt_note("1..1\n");
+	&stmt_note("1..0\n");
 	&stmt_note("# Multiple connections are not supported\n");
 	&stmt_ok(0);
 	&all_ok();

@@ -1,4 +1,4 @@
-# @(#)$Id: esqlc.pl,v 95.1 1999/11/19 00:36:12 jleffler Exp $ 
+# @(#)$Id: esqlc.pl,v 97.1 2000/01/19 00:22:27 jleffler Exp $ 
 #
 # Copyright (c) 1999 Jonathan Leffler
 #
@@ -19,7 +19,7 @@
 # the INFORMIXC environment variable.
 sub customize_esql
 {
-	my ($src, $dst) = @_;
+	my ($src, $dst, $pkg) = @_;
 	open(ESQL, "<$src") ||
 		die "Unable to open $src for reading";
 	open(LOCAL, ">$dst") ||
@@ -28,7 +28,7 @@ sub customize_esql
 	{
 		if (/^CC=/o && !/INFORMIXC/o)
 		{
-			print LOCAL "# INFORMIXC added by Makefile.PL for $opts{NAME}.\n";
+			print LOCAL "# INFORMIXC added by Makefile.PL for $pkg.\n";
 			chop;
 			s/^CC=//;
 			s/"(.*)"/$1/ if (/".*"/);

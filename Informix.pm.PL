@@ -1,7 +1,37 @@
-#	@(#)$Id: Informix.pm,v 95.6 1999/12/30 23:15:35 jleffler Exp $
+#!/usr/bin/perl -w
 #
-#   Portions Copyright (c) 1994-95 Tim Bunce
-#   Portions Copyright (c) 1996-99 Jonathan Leffler
+#	Script to create annotated version of Informix.pm recording
+#	default values of INFORMIXDIR and $INFORMIXSERVER during build.
+
+use Config;
+my $filename = $0;
+$filename =~ s/\.PL$//;
+
+open OUT,">$filename" or die "Can't create $filename: $!";
+chmod(0755, $filename);
+print "Extracting $filename from $0\n";
+print " -- default \$INFORMIXDIR    = $ENV{INFORMIXDIR}\n";
+print " -- default \$INFORMIXSERVER = $ENV{INFORMIXSERVER})\n" if $ENV{INFORMIXSERVER};
+
+select(OUT);	# Set the default output file handle!
+
+print "# Default value of INFORMIXDIR set when DBD::Informix was configured.\n";
+print "\nBEGIN {\n";
+print "\t\$ENV{'INFORMIXDIR'} = qq[$ENV{'INFORMIXDIR'}]\n";
+print "\t\tunless exists \$ENV{'INFORMIXDIR'}\n";
+if ($ENV{INFORMIXSERVER}) {
+	print "# Default value of INFORMIXSERVER set when DBD::Informix was configured.\n";
+	print "\t\$ENV{'INFORMIXSERVER'} = qq[$ENV{'INFORMIXSERVER'}]\n";
+	print "\t\tunless exists \$ENV{'INFORMIXSERVER'};\n";
+}
+print "};\n\n";
+
+print <<'EOF';
+
+#	@(#)$Id: Informix.pm.PL,v 97.5 2000/01/19 21:45:52 jleffler Exp $
+#
+#   Portions Copyright (c) 1994-95   Tim Bunce
+#   Portions Copyright (c) 1996-2000 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -13,9 +43,9 @@
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.95";
+	$VERSION     = "0.97001";
 	$ATTRIBUTION = 'Jonathan Leffler <j.leffler@acm.org>';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 95.6 $ ($Date: 1999/12/30 23:15:35 $)@, 3);
+	$Revision    = substr(q@(#)$RCSfile: Informix.pm.PL,v $ $Revision: 97.5 $ ($Date: 2000/01/19 21:45:52 $)@, 3);
 	$Revision    =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
 
 	require_version DBI 1.02;	# Requires features from DBI 1.02 release
@@ -412,7 +442,7 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes DBD::Informix version 0.95.
+This document describes DBD::Informix version 0.97001.
 
 You should also read the documentation for DBI as this document
 qualifies what is stated there.
@@ -1376,3 +1406,5 @@ ChangeLog file.
 perl(1), perldoc for DBI.
 
 =cut
+
+EOF

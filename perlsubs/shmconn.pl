@@ -1,4 +1,4 @@
-# @(#)$Id: shmconn.pl,v 95.1 1999/11/27 07:55:53 jleffler Exp $
+# @(#)$Id: shmconn.pl,v 97.1 2000/01/19 17:44:46 jleffler Exp $
 #
 # Copyright (c) 1999 Jonathan Leffler
 #
@@ -15,11 +15,18 @@ sub is_shared_memory_connection
 {
 	my($dbs) = @_;
 	my ($server) = $dbs;
-	$server = "$dbs\@$ENV{INFORMIXSERVER}" unless ($dbs =~ /.*@/);
+	if ($dbs !~ /.*@/)
+	{
+		my ($ixsrvr) = $ENV{INFORMIXSERVER};
+		$ixsrvr = 'unknown server name' unless $ixsrvr;
+		$server = "$dbs\@$ixsrvr";
+	}
 	$server =~ s/.*@//;
 	my($sqlhosts) = $ENV{INFORMIXSQLHOSTS};
 	$sqlhosts = "$ENV{INFORMIXDIR}/etc/sqlhosts" unless $sqlhosts;
-	my($ent) = qx(grep "^$server\[ 	][ 	]*" $sqlhosts);
+	# Implications for NT?
+	my($ent) = qx(grep "^$server\[ 	][ 	]*" $sqlhosts 2>/dev/null);
+	$ent = 'server protocol host service' unless $ent;
 	my(@ent) = split ' ', $ent;
 	return (($ent[1] =~ /o[ln]ipcshm/) ? 1 : 0);
 }

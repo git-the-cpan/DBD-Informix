@@ -5,7 +5,7 @@
 @(#)Purpose:         Provide support for KLUDGE macro
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1995,1997-99
-@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
+@(#)Product:         $Product: DBD::Informix Version 0.97.PC1 (2000-01-18) $
 */
 
 /*TABSTOP=4*/

@@ -2,7 +2,7 @@ Announce
 BugReport
 ChangeLog
 Informix.h
-Informix.pm
+Informix.pm.PL
 Informix.xs
 ItWorks
 MANIFEST
@@ -79,6 +79,8 @@ md5.create
 md5.verify
 odbctype.c
 odbctype.h
+pause_hack/Informix.pm
+pause_hack/Informix.pm.src
 perlsubs/InformixTest.pl
 perlsubs/esqlc.pl
 perlsubs/shmconn.pl
