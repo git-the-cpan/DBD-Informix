@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)multiconn03.t	51.1 97/02/25 19:43:07
+#	@(#)multiconn03.t	53.1 97/03/06 20:37:34
 #
 #	Test abuse of statements after DISCONNECT ALL for DBD::Informix
 #
@@ -41,12 +41,12 @@ if ($drh->{MultipleConnections} == 0)
 
 print "# Database Information\n";
 print "#     Database Name:           $dbh1->{Name}\n";
-print "#     Informix-OnLine:         $dbh1->{InformixOnLine}\n";
-print "#     Logged Database:         $dbh1->{LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh1->{ModeAnsiDatabase}\n";
 print "#     AutoCommit:              $dbh1->{AutoCommit}\n";
-print "#     AutoErrorReport:         $dbh1->{AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh1->{InTransaction}\n";
+print "#     Informix-OnLine:         $dbh1->{ix_InformixOnLine}\n";
+print "#     Logged Database:         $dbh1->{ix_LoggedDatabase}\n";
+print "#     Mode ANSI Database:      $dbh1->{ix_ModeAnsiDatabase}\n";
+print "#     AutoErrorReport:         $dbh1->{ix_AutoErrorReport}\n";
+print "#     Transaction Active:      $dbh1->{ix_InTransaction}\n";
 print "#\n";
 
 &stmt_fail() unless ($dbh2 = $drh->connect($dbase2));
@@ -54,12 +54,12 @@ print "#\n";
 
 print "# Database Information\n";
 print "#     Database Name:           $dbh2->{Name}\n";
-print "#     Informix-OnLine:         $dbh2->{InformixOnLine}\n";
-print "#     Logged Database:         $dbh2->{LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh2->{ModeAnsiDatabase}\n";
 print "#     AutoCommit:              $dbh2->{AutoCommit}\n";
-print "#     AutoErrorReport:         $dbh2->{AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh2->{InTransaction}\n";
+print "#     Informix-OnLine:         $dbh2->{ix_InformixOnLine}\n";
+print "#     Logged Database:         $dbh2->{ix_LoggedDatabase}\n";
+print "#     Mode ANSI Database:      $dbh2->{ix_ModeAnsiDatabase}\n";
+print "#     AutoErrorReport:         $dbh2->{ix_AutoErrorReport}\n";
+print "#     Transaction Active:      $dbh2->{ix_InTransaction}\n";
 print "#\n";
 
 $stmt1 =
@@ -97,8 +97,8 @@ LOOP: while (1)
 &stmt_ok();
 
 # Turn off automatic error reporting...
-$dbh1->{AutoErrorReport} = 0;
-$dbh2->{AutoErrorReport} = 0;
+$dbh1->{ix_AutoErrorReport} = 0;
+$dbh2->{ix_AutoErrorReport} = 0;
 
 # Resume as if nothing had happened (see multiconn02.t)
 while (@row1 = $st1->fetchrow)
@@ -106,7 +106,7 @@ while (@row1 = $st1->fetchrow)
 	# Should not be able to fetch successfully!
 	&stmt_fail();
 }
-&stmt_fail() unless ($st1->{sqlcode} < 0);
+&stmt_fail() unless ($st1->{ix_sqlcode} < 0);
 &stmt_ok();
 
 while ($row2 = $st2->fetch)
@@ -114,7 +114,7 @@ while ($row2 = $st2->fetch)
 	# Should not be able to fetch successfully!
 	&stmt_fail();
 }
-&stmt_fail() unless ($st2->{sqlcode} < 0);
+&stmt_fail() unless ($st2->{ix_sqlcode} < 0);
 &stmt_ok();
 
 undef $st2;

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)transact03.t	51.1 97/02/25 19:43:07
+#	@(#)transact03.t	53.1 97/03/06 20:37:46
 #
 #	Test AutoCommit Off for DBD::Informix
 #
@@ -13,7 +13,7 @@ use DBD::InformixTest;
 # Test install...
 $dbh = &connect_to_test_database();
 
-if ($dbh->{LoggedDatabase} == 0)
+if ($dbh->{ix_LoggedDatabase} == 0)
 {
 	&stmt_note("1..1\n");
 	&stmt_note("# No transactions on unlogged database '$dbh->{Name}'\n");
@@ -31,7 +31,7 @@ if ($dbh->{LoggedDatabase} == 0)
 
 &stmt_note("1..16\n");
 &stmt_ok();
-if ($dbh->{ModeAnsiDatabase})
+if ($dbh->{ix_ModeAnsiDatabase})
 { &stmt_note("# This is a MODE ANSI database\n"); }
 else
 { &stmt_note("# This is a regular logged database\n"); }

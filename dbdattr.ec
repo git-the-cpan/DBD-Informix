@@ -1,5 +1,5 @@
 /*
- * @(#)dbdattr.ec	52.3 97/03/05 15:51:00
+ * @(#)dbdattr.ec	53.1 97/03/06 16:35:31
  *
  * DBD::Informix for Perl Version 5 -- attribute handling
  *
@@ -12,7 +12,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)dbdattr.ec	52.3 97/03/05";
+static const char sccs[] = "@(#)dbdattr.ec	53.1 97/03/06";
 #endif
 
 #include <stdio.h>
@@ -21,9 +21,9 @@ static const char sccs[] = "@(#)dbdattr.ec	52.3 97/03/05";
 #define MAIN_PROGRAM	/* Embed SCCS identification of JLSS headers */
 #include "Informix.h"
 
-/* Deprecated constructs are not flagged by default in the 0.52 release */
-/* Expect this default to change in the following release! */
-static Boolean deprecation = False;
+/* Deprecated constructs are flagged by default in the 0.53 release */
+/* Expect the warning messages to be unavoidable in the 0.54 release */
+static Boolean deprecation = True;
 
 /*
 ** Check whether key defined by key length (kl) and key value (kv)
@@ -483,6 +483,28 @@ SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv)
 	else if ((retsv = dbd_ix_getsqlca(sth->dbh, kl, key)) != NULL)
 	{
 		/* Nothing specific to do */
+	}
+	else if (KEY_MATCH(kl, key, "ix_ColType"))
+	{
+		AV             *av = newAV();
+		retsv = newRV((SV *)av);
+		for (i = 1; i <= sth->n_columns; i++)
+		{
+			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
+				:coltype = TYPE;
+			av_store(av, i - 1, newSViv((IV)coltype));
+		}
+	}
+	else if (KEY_MATCH(kl, key, "ix_ColLength"))
+	{
+		AV             *av = newAV();
+		retsv = newRV((SV *)av);
+		for (i = 1; i <= sth->n_columns; i++)
+		{
+			EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
+				:collength = LENGTH;
+			av_store(av, i - 1, newSViv((IV)collength));
+		}
 	}
 	else
 	{

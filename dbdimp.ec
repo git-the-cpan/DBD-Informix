@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.ec	52.2 97/03/02 12:54:42
+ * @(#)dbdimp.ec	53.4 97/03/17 18:46:28
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char sccs[] = "@(#)dbdimp.ec	52.2 97/03/02";
+static const char sccs[] = "@(#)dbdimp.ec	53.4 97/03/17";
 #endif
 
 #include <stdio.h>
@@ -63,7 +63,7 @@ dbistate_t     *dbistate;
 
 /* Formally initialize the DBD::Informix driver structure */
 int
-dbd_ix_driver(SV *drh)
+dbd_dr_driver(SV *drh)
 {
 	D_imp_drh(drh);
 
@@ -106,8 +106,9 @@ static void dbd_db_destroyer(void *data)
 int dbd_dr_disconnectall(imp_drh_t *imp_drh)
 {
 	dbd_ix_debug(1, "Enter %s::dbd_dr_disconnectall()\n", dbd_ix_module());
-	destroy_chain(&imp_drh->head, del_connection);
+	destroy_chain(&imp_drh->head, dbd_db_destroyer);
 	dbd_ix_debug(1, "Exit %s::dbd_dr_disconnectall()\n", dbd_ix_module());
+	return(1);
 }
 
 /* Print message if debug level set high enough */
@@ -209,13 +210,15 @@ char           *pass;			/* Password */
 	Boolean conn_ok;
 
 	new_connection(imp_dbh);
-	if (name && !*name)
+	if (name != 0 && *name == '\0')
+		name = 0;
+	if (name != 0 && strcmp(name, DEFAULT_DATABASE) == 0)
 		name = 0;
 
 #if ESQLC_VERSION >= 600
-	if (user && !*user)
+	if (user != 0 && *user == '\0')
 		user = 0;
-	if (pass && !*pass)
+	if (pass != 0 && *pass == '\0')
 		pass = 0;
 	/* 6.00 and later versions of Informix-ESQL/C support CONNECT */
 	conn_ok = dbd_ix_connect(imp_dbh->nm_connection, name, user, pass);
@@ -263,6 +266,27 @@ char           *pass;			/* Password */
 	DBIc_IMPSET_on(imp_dbh);	/* imp_dbh set up now                   */
 	DBIc_ACTIVE_on(imp_dbh);	/* call disconnect before freeing       */
 	return 1;
+}
+
+/* Ensure that the correct connection is current */
+static int dbd_db_setconnection(imp_dbh_t *imp_dbh)
+{
+	int rc = 1;
+	D_imp_drh_from_dbh;
+
+	/* If this connection isn't connected, return with failure */
+	/* Primarily a concern when destroying connections */
+	if (imp_dbh->is_connected == False)
+		return(0);
+
+	if (imp_drh->current_connection != imp_dbh->nm_connection)
+	{
+		dbd_ix_setconnection(imp_dbh->nm_connection);
+		imp_drh->current_connection = imp_dbh->nm_connection;
+		if (sqlca.sqlcode < 0)
+			rc = 0;
+	}
+	return(rc);
 }
 
 /* Internal implementation of BEGIN WORK */
@@ -318,7 +342,7 @@ dbd_db_begin(imp_dbh_t *imp_dbh)
 
 	if (imp_dbh->is_loggeddb != 0)
 	{
-		if (dbd_ix_setconnection(imp_dbh) == 0)
+		if (dbd_db_setconnection(imp_dbh) == 0)
 		{
 			dbd_ix_savesqlca(imp_dbh);
 			return(0);
@@ -336,7 +360,7 @@ dbd_db_commit(imp_dbh_t *imp_dbh)
 
 	if (imp_dbh->is_loggeddb != 0)
 	{
-		if (dbd_ix_setconnection(imp_dbh) == 0)
+		if (dbd_db_setconnection(imp_dbh) == 0)
 		{
 			dbd_ix_savesqlca(imp_dbh);
 			return(0);
@@ -358,7 +382,7 @@ dbd_db_rollback(imp_dbh_t *imp_dbh)
 
 	if (imp_dbh->is_loggeddb != 0)
 	{
-		if (dbd_ix_setconnection(imp_dbh) == 0)
+		if (dbd_db_setconnection(imp_dbh) == 0)
 		{
 			dbd_ix_savesqlca(imp_dbh);
 			return(0);
@@ -381,7 +405,7 @@ dbd_db_disconnect(imp_dbh_t *imp_dbh)
 
 	dbd_ix_debug(1, "Enter %s::dbd_db_disconnect\n", dbd_ix_module());
 
-	if (dbd_ix_setconnection(imp_dbh) == 0)
+	if (dbd_db_setconnection(imp_dbh) == 0)
 	{
 		dbd_ix_savesqlca(imp_dbh);
 		dbd_ix_debug(1, "dbd_db_disconnect -- %s\n", "set connection failed");
@@ -493,7 +517,7 @@ static void del_statement(imp_sth_t *imp_sth)
 	loc_t	blob;
 	EXEC SQL END DECLARE SECTION;
 
-	if (dbd_ix_setconnection(imp_sth->dbh) == 0)
+	if (dbd_db_setconnection(imp_sth->dbh) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
 		return;
@@ -556,7 +580,7 @@ int dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 
 	dbd_ix_debug(1, "%s::dbd_ix_setbindnum entered\n", dbd_ix_module());
 
-	if (dbd_ix_setconnection(imp_sth->dbh) == 0)
+	if (dbd_db_setconnection(imp_sth->dbh) == 0)
 		return 0;
 
 	if (items > imp_sth->n_bound)
@@ -611,15 +635,26 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 
 	dbd_ix_debug(1, "%s::dbd_ix_bindsv entered\n", dbd_ix_module());
 
-	if ((rc = dbd_ix_setconnection(imp_sth->dbh)) == 0)
+	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
 		return(rc);
 	}
 
 	EXEC SQL GET DESCRIPTOR :nm_ibind VALUE :index :type = TYPE;
-	if (type == SQLBYTES || type == SQLTEXT)
+
+
+	if (!SvOK(val))
 	{
+		/* It's a null! */
+		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- null\n", dbd_ix_module());
+		type = SQLCHAR;
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, LENGTH = 0, INDICATOR = -1;
+	}
+	else if (type == SQLBYTES || type == SQLTEXT)
+	{
+		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- blob\n", dbd_ix_module());
 		/* One day, this will accept SQ_UPDATE and SQ_UPDALL */
 		/* There are no plans to support SQ_UPDCURR */
 		blob_locate(&blob, BLOB_IN_MEMORY);
@@ -628,15 +663,9 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 		blob.loc_size = len;
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index DATA = :blob;
 	}
-	else if (!SvOK(val))
-	{
-		/* It's a null! */
-		type = SQLCHAR;
-		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
-						TYPE = :type, DATA = "", LENGTH = 1, INDICATOR = -1;
-	}
 	else if (SvIOK(val))
 	{
+		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- integer\n", dbd_ix_module());
 		type = SQLINT;
 		integer = SvIV(val);
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
@@ -644,6 +673,7 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	}
 	else if (SvNOK(val))
 	{
+		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- numeric\n", dbd_ix_module());
 		type = SQLFLOAT;
 		numeric = SvNV(val);
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
@@ -651,11 +681,12 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	}
 	else
 	{
+		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- string\n", dbd_ix_module());
 		type = SQLCHAR;
 		string = SvPV(val, len);
 		length = len + 1;
 #if ESQLC_VERSION == 500 || ESQLC_VERSION == 501
-		if (length < 256)
+		if (length < sizeof(shortchar))
 		{
 			strncpy(shortchar, string, length);
 			shortchar[length] = '\0';
@@ -672,6 +703,17 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 						TYPE = :type, LENGTH = :length, DATA = :longchar;
 		}
 #else
+		if (length == 1)
+		{
+			/*
+			** Even if you insert "" as a literal into a VARCHAR(), you get
+			** a blank returned.  If you manage to insert a zero length
+			** string via a variable into a VARCHAR, then you get a NULL
+			** output string.  This is arguably a bug, but oh well.
+			*/
+			string = " ";
+			length = 2;
+		}
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
 						TYPE = :type, LENGTH = :length, DATA = :string;
 #endif /* ESQLC_VERSION in {500, 501} */
@@ -792,7 +834,7 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	dbd_ix_debug(1, "%s::dbd_st_prepare()\n", dbd_ix_module());
 	new_statement(imp_sth);
 
-	if ((rc = dbd_ix_setconnection(imp_sth->dbh)) == 0)
+	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
 		return(rc);
@@ -898,7 +940,7 @@ dbd_st_finish(imp_sth_t *imp_sth)
 
 	dbd_ix_debug(1, "%s::dbd_st_finish()\n", dbd_ix_module());
 
-	if ((rc = dbd_ix_setconnection(imp_sth->dbh)) == 0)
+	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
 		return(rc);
@@ -947,7 +989,6 @@ AV *
 dbd_st_fetch(imp_sth_t *imp_sth)
 {
 	AV	*av;
-	char *decstr;
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_cursor = imp_sth->nm_cursor;
 	char           *nm_obind = imp_sth->nm_obind;
@@ -975,7 +1016,7 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 
 	dbd_ix_debug(1, "Enter %s::dbd_st_fetch()\n", dbd_ix_module());
 
-	if (dbd_ix_setconnection(imp_sth->dbh) == 0)
+	if (dbd_db_setconnection(imp_sth->dbh) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
 		return Nullav;
@@ -1270,7 +1311,7 @@ dbd_st_execute(imp_sth_t *imp_sth)
 {
 	int rc;
 
-	if ((rc = dbd_ix_setconnection(imp_sth->dbh)) == 0)
+	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
 		return(rc);
@@ -1286,14 +1327,14 @@ dbd_st_execute(imp_sth_t *imp_sth)
 	return(rc);
 }
 
-int dbd_ix_immediate(imp_dbh_t *imp_dbh, char *stmt)
+int dbd_db_immediate(imp_dbh_t *imp_dbh, char *stmt)
 {
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *statement = stmt;
 	EXEC SQL END DECLARE SECTION;
 
 	dbd_ix_debug(1, "%s::dbd_ix_immediate() called\n", dbd_ix_module());
-	if (dbd_ix_setconnection(imp_dbh) == 0)
+	if (dbd_db_setconnection(imp_dbh) == 0)
 	{
 		dbd_ix_savesqlca(imp_dbh);
 		return(0);

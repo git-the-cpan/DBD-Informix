@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)blob04.t	51.1 97/02/25 19:43:02
+#	@(#)blob04.t	53.1 97/03/06 20:37:27
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
@@ -11,7 +11,7 @@ use DBD::InformixTest;
 # Test install...
 $dbh = connect_to_test_database();
 
-if (!$dbh->{InformixOnLine})
+if (!$dbh->{ix_InformixOnLine})
 {
 	print("1..2\n");
 	&stmt_note("# Not Informix-OnLine -- no blob testing\n");
@@ -21,7 +21,7 @@ else
 {
 	print("1..14\n");
 	&stmt_ok(0);
-	$dbh->{AutoErrorReport} = 1;
+	$dbh->{ix_AutoErrorReport} = 1;
 
 	$stmt2 = 'CREATE TEMP TABLE DBD_IX_BlobTest2 (I SERIAL UNIQUE, B BYTE IN TABLE, ' .
 				'T TEXT IN TABLE)';

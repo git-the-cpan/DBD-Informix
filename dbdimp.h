@@ -1,5 +1,5 @@
 /*
- * @(#)dbdimp.h	52.2 97/03/02 12:57:04
+ * @(#)dbdimp.h	53.3 97/03/06 20:40:00
  *
  * $Derived-From: dbdimp.h,v 1.5 1995/06/22 00:37:04 timbo Archaic $
  *
@@ -22,13 +22,7 @@ enum State
 	Unused, Prepared, Allocated, Described, Declared, Opened, Finished
 };
 
-enum Boolean
-{
-	False, True
-};
-
 typedef enum State State;		/* Cursor/Statement states */
-typedef enum Boolean Boolean;
 typedef long ErrNum;			/* Informix Error Number */
 typedef char Name[NAMESIZE];
 
@@ -89,11 +83,10 @@ struct imp_sth_st
 	Link            chain;      /* Link in list of statements */
 };
 
-extern void dbd_ix_debug _((int n, char *fmt, const char *arg));
 extern void dbd_ix_seterror _((ErrNum rc));
 
 extern void dbd_dr_init _((dbistate_t *dbistate));
-extern int dbd_ix_driver _((SV *drh));
+extern int dbd_dr_driver _((SV *drh));
 extern int dbd_dr_disconnectall _((imp_drh_t *));
 
 extern SV *dbd_db_FETCH_attrib _((imp_dbh_t *dbh, SV *keysv));
@@ -102,12 +95,12 @@ extern int dbd_db_begin _((imp_dbh_t *sth));
 extern int dbd_db_commit _((imp_dbh_t *sth));
 extern int dbd_db_connect _((imp_dbh_t *dbh, char *dbs, char *uid, char *pwd));
 extern int dbd_db_disconnect _((imp_dbh_t *dbh));
+extern int dbd_db_immediate _((imp_dbh_t *dbh, char *stmt));
 extern int dbd_db_rollback _((imp_dbh_t *sth));
 extern void dbd_db_destroy _((imp_dbh_t *dbh));
 
 extern AV *dbd_st_fetch _((imp_sth_t *sth));
 extern SV *dbd_st_FETCH_attrib _((imp_sth_t *sth, SV *keysv));
-extern int dbd_ix_immediate _((imp_dbh_t *dbh, char *stmt));
 extern int dbd_st_STORE_attrib _((imp_sth_t *sth, SV *keysv, SV *valuesv));
 extern int dbd_st_bind_ph _((SV *sth, SV *param, SV *value, SV *attribs, int boolean, int len));
 extern int dbd_st_blob_read _((SV *sth, int field, long offset, long len, SV *destsv, int destoffset));
@@ -119,16 +112,11 @@ extern void dbd_st_destroy _((imp_sth_t *sth));
 
 extern int dbd_ix_setbindnum _((imp_sth_t *sth, int items));
 extern int dbd_ix_bindsv _((imp_sth_t *sth, int idx, SV *val));
-extern int dbd_ix_setconnection _((imp_dbh_t *imp_dbh));
-
 extern const char *dbd_ix_module(void);
 
-#if ESQLC_VERSION >= 600
-extern void dbd_ix_disconnect _((char *connection));
-extern Boolean dbd_ix_connect _((char *conn, char *dbase, char *user, char *pass));
-#else
-extern void dbd_ix_closedatabase _((void));
-extern Boolean dbd_ix_opendatabase _((char *dbase));
-#endif	/* ESQLC_VERSION >= 600 */
+extern void add_link(Link *link_1, Link *link_n);
+extern void delete_link(Link *link_d, void (*function)(void *));
+extern void destroy_chain(Link *head, void (*function)(void *));
+extern void new_headlink(Link *link);
 
 #endif	/* DBDIMP_H */

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)dbase.t	51.2 97/02/26 11:59:55
+# @(#)dbase.t	53.1 97/03/06 20:37:28
 #
 # Copyright (C) 1997 Jonathan Leffler (johnl@informix.com)
 #
@@ -18,10 +18,10 @@ stmt_fail unless ($dbh = DBI->connect('','','','Informix'));
 stmt_ok;
 
 # Don't care about non-existent database
-$dbh->{AutoErrorReport} = 0;
+$dbh->{ix_AutoErrorReport} = 0;
 $dbh->do("drop database $dbname");
 
-$dbh->{AutoErrorReport} = 1;
+$dbh->{ix_AutoErrorReport} = 1;
 stmt_fail unless ($dbh->do("create database $dbname"));
 stmt_ok;
 stmt_fail unless ($dbh->do("close database"));
@@ -36,7 +36,7 @@ undef $dbh;
 stmt_fail unless ($dbh = DBI->connect('.DEFAULT.','','','Informix'));
 stmt_ok;
 
-$dbh->{AutoErrorReport} = 1;
+$dbh->{ix_AutoErrorReport} = 1;
 stmt_fail unless ($dbh->do("create database $dbname"));
 stmt_ok;
 stmt_fail unless ($dbh->do("close database"));

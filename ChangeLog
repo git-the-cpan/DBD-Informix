@@ -214,7 +214,28 @@ Serge Davidov - serge@fcmc.com
 97-03-05: Add ESQL/C => DBD::Informix statement mapping to POD in Informix.PM,
           after suggestion by Bill Mitlyng (Bill.Mitlyng@abnamro.com).
 
+0.53 Release
+------------
+97-03-06: Change the handling of deprecated attributes per Informix.PM.
+          Update the README file to spell out the pre-requisites better.
+          Update Makefile.PL with 0.53a1 version number, and so that it
+          insists that $INFORMIXDIR is set, and that $INFORMIXDIR/bin is in
+          $PATH.  Update tests to use the non-deprecated attributes.  Add the
+          test program esqltest.ec to check that the ESQL/C environment is OK
+          before creating the Makefile.
+97-03-10: No changes over the weekend - the skiing at Squaw was fabulous!
+          Update the POD to encourage the use of DBI->connect() in preference
+          to $drh = DBI->install_driver().  Add two new, but fore-shadowed,
+          driver attributes, ix_CurrentConnection and ix_ActiveConnections,
+          though they're currently only set when the driver is loaded.
+97-03-17: Update Informix.Licence to contain more comprehensive information
+          on licencing and Netscape's LiveWire Pro.  Update t/updcursor.t so
+          it passes on a logged (non-MODE ANSI) database.  Fix the problem
+          with nulls found by Oyvind Gjerstad (ogj@tglobe1.tollpost.no) and
+          now immortalized in the test case t/nulls02.t.  Change version to
+          0.53 and release.
+
 --------------
 
 Jonathan Leffler (johnl@informix.com)
-@(#)ChangeLog	52.3 97/03/05 15:47:01
+@(#)ChangeLog	53.2 97/03/17 18:50:19

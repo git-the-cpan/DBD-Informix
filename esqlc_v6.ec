@@ -1,5 +1,5 @@
 /*
- * @(#)esqlc_v6.ec	52.1 97/02/28 18:51:06
+ * @(#)esqlc_v6.ec	53.2 97/03/06 17:17:55
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -14,10 +14,10 @@
 /*TABSTOP=4*/
 
 #include <string.h>
-#include "Informix.h"
+#include "esqlperl.h"
 
 #ifndef lint
-static const char sccs[] = "@(#)esqlc_v6.ec	52.1 97/02/28";
+static const char sccs[] = "@(#)esqlc_v6.ec	53.2 97/03/06";
 #endif
 
 /* ================================================================= */
@@ -44,8 +44,7 @@ Boolean dbd_ix_connect(char *connection, char *dbase, char *user, char *pass)
 	EXEC SQL END DECLARE SECTION;
 	Boolean         conn_ok = False;
 
-	if (dbase == (char *)0 || *dbase == '\0' ||
-		strcmp(dbase, DEFAULT_DATABASE) == 0)
+	if (dbase == (char *)0 || *dbase == '\0')
 	{
 		/* Not frequently used, but valid */
 		/* Reset connection name to empty string, and connect to default */
@@ -80,8 +79,7 @@ Boolean dbd_ix_connect(char *connection, char *dbase, char *user, char *pass)
 	return(conn_ok);
 }
 
-void
-dbd_ix_disconnect(char *connection)
+void dbd_ix_disconnect(char *connection)
 {
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *dbconn = connection;
@@ -100,26 +98,12 @@ dbd_ix_disconnect(char *connection)
 }
 
 /* Ensure that the correct connection is current -- a no-op in version 5.0x */
-int dbd_ix_setconnection(imp_dbh_t *imp_dbh)
+void dbd_ix_setconnection(char *conn)
 {
-	int rc = 1;
-	D_imp_drh_from_dbh;
 	EXEC SQL BEGIN DECLARE SECTION;
-	char           *nm_connection = imp_dbh->nm_connection;
+	char           *nm_connection = conn;
 	EXEC SQL END DECLARE SECTION;
 
-	/* If this connection isn't connected, return with failure */
-	/* Primarily a concern when destroying connections */
-	if (imp_dbh->is_connected == False)
-		return(0);
-
-	if (imp_drh->current_connection != nm_connection)
-	{
-		dbd_ix_debug(1, "SET CONNECTION %s\n", nm_connection);
-		EXEC SQL SET CONNECTION :nm_connection;
-		imp_drh->current_connection = nm_connection;
-		if (sqlca.sqlcode < 0)
-			rc = 0;
-	}
-	return(rc);
+	dbd_ix_debug(1, "SET CONNECTION %s\n", nm_connection);
+	EXEC SQL SET CONNECTION :nm_connection;
 }

@@ -1,4 +1,4 @@
-#	@(#)Informix.PM	52.1 97/03/05 15:51:42
+#	@(#)Informix.PM	53.2 97/03/10 19:52:48
 #
 #   Portions Copyright (c) 1994,1995 Tim Bunce
 #   Portions Copyright (c) 1996,1997 Jonathan Leffler
@@ -20,7 +20,7 @@
 	my $PRODUCTVERSION      = "<<Product Version>>";
 	my $MultipleConnections = "<<Multiple Connections>>";
 	my $ATTRIBUTION         = 'By Alligator Descartes and Jonathan Leffler';
-	my $Revision            = substr(q@(#)Informix.PM 52.1 (97/03/05)@, 3);
+	my $Revision            = substr(q@(#)Informix.PM 53.2 (97/03/10)@, 3);
 
 	require_version DBI 0.69;
 
@@ -66,6 +66,8 @@
 			'ix_ProductName'         => $PRODUCTNAME,
 			'ix_ProductVersion'      => $PRODUCTVERSION,
 			'ix_MultipleConnections' => $MultipleConnections,
+			'ix_ActiveConnections'   => 0,
+			'ix_CurrentConnection'   => undef,
 			'Err'                    => \$DBD::Informix::err,
 			'Errstr'                 => \$DBD::Informix::errstr,
 			'Attribution'            => $ATTRIBUTION,
@@ -209,10 +211,22 @@ because it uses SQL descriptors and these are not available prior to version
 
 =head2 Loading DBD::Informix
 
-To use the DBD::Informix software, you need to load the DBI software
-and then install the Informix driver:
+To use the DBD::Informix software, you need to load the DBI software.
 
     use DBI;
+
+Under normal circumstances, you should then connect to your database
+using the notation in the section "CONNECTING TO A DATABASE" which
+calls DBI->connect().
+Note that the DBD::Informix test code does not operate under normal
+circumstances, and therefore uses the non-preferred techniques in the
+section "Driver Attributes and Methods".
+
+=head2 Driver Attributes and Methods
+
+If you have a burning desire to do so, you can explicitly install the
+Informix driver independently of connecting to any database using:
+
     $drh = DBI->install_driver('Informix');
 
 This gives you a reference to the driver, aka the driver handle.  If the
@@ -262,29 +276,41 @@ You can test whether this worked with:
     if (defined @dbnames) { ...process array... }
     else                  { ...process error... }
 
-=head2 CONNECTING TO A DATABASE
+=over 4
 
-To connect to a database, you can use the connect function,
-which yields a valid reference or database handle if it is successful
-(and aborts the script if it is not successful).  FWIW: the abort is
-done by DBI, not by DBD::Informix.
+Item: since ODBC recognizes DataSources, and Informix databases listed
+by _ListDBs correspond rather closely to data sources, there is an
+argument which says that DBI should have a method
 
-    $dbh = $drh->connect($database, $username, $password);
+	@sources = $drh->DataSources();
 
-You can also use the equivalent statement below which does not require the
-explicit driver handle (and which is the officially approved way of making
-the connection), but it requires you to specify the username and password,
-whereas if these are omitted in the form above, you can still specify the
-database and it will work correctly.
+=back
+
+=head1 CONNECTING TO A DATABASE
+
+To connect to a database, you can use the connect function, which
+yields a valid reference or database handle if it is successful.
+If the driver itself cannot be loaded (by the DBI->install_driver()
+method mentioned above), DBI aborts the script (and DBD::Informix can
+do nothing about it because it wasn't loaded successfully).
 
     $dbh = DBI->connect($database, $username, $password, 'Informix');
 
-The 5.0x versions ignore the username and password data, and the statement
-is equivalent to "EXEC SQL DATABASE :database;".  If an empty string is
-passed as the database name, this is a no-op; no database is opened.
+Note that if you omit the fourth argument ('Informix'), then DBI will
+load the driver specified by $ENV{DBI_DRIVER}.
+If you omit the fourth argument, you can also omit the $password and
+$username arguments if desired.
+If you specify the fourth argument, you can leave the $password and
+$username arguments empty and they will be ignored.
 
-The 6.0x versions only use the username and password if both are supplied,
-but it is equivalent to:
+    $dbh = DBI->connect($database, $username, $password);
+    $dbh = DBI->connect($database, $username);
+    $dbh = DBI->connect($database);
+
+The 5.0x versions ignore the username and password data, and the
+statement is equivalent to "EXEC SQL DATABASE :database;".
+The 6.0x versions only use the username and password if both are
+supplied, but it is then equivalent to:
 
     EXEC SQL CONNECT TO :database AS :connection
         USER :username USING :password
@@ -302,14 +328,17 @@ CONNECT statements.  Examples include:
     /some/where/dbase   # Connect to local SE database
 
 The database name is not supplied implicitly by DBD::Informix, but the
-DBI driver will supply the value in $ENV{DBI_DBNAME} if the environment
-variable is set and no database name is supplied in the connect call.
+DBI driver will supply the value in $ENV{DBI_DBNAME} if the
+environment variable is set and no database name is supplied in the
+connect call.
 If DBD::Informix sees an empty string, then it makes no connection to
 any database with ESQL/C 5.0x, and it makes a default connection with
-ESSQL/C 6.00 and later.  There is an additional string, ".DEFAULT.",
-which can be specified explicitly as the database name and which will
-be interpreted as a request for a default connection.  Note that this
-is not a valid Informix database name, so there can be no confusion.
+ESQL/C 6.00 and later.
+There is an additional string, ".DEFAULT.", which can be specified
+explicitly as the database name and which will be interpreted as a
+request for a default connection.
+Note that this is not a valid Informix database name, so there can be
+no confusion.
 
 Once you have a database handle, you can interrogate it for some basic
 information about the database, etc.
@@ -321,20 +350,21 @@ information about the database, etc.
      print "    Database Name:           $dbh->{Name}\n";
      # AutoCommit is 1 (true) if the database commits each statement.
      print "    AutoCommit:              $dbh->{AutoCommit}\n";
-     # InformixOnLine is 1 (true) if the handle is connected to an
+
+     # ix_InformixOnLine is 1 (true) if the handle is connected to an
      # Informix-OnLine server.
      print "    Informix-OnLine:         $dbh->{ix_InformixOnLine}\n";
-     # LoggedDatabase is 1 (true) if the database has
+     # ix_LoggedDatabase is 1 (true) if the database has
      # transactions.
      print "    Logged Database:         $dbh->{ix_LoggedDatabase}\n";
-     # ModeAnsiDatabase is 1 (true) if the database is MODE ANSI.
+     # ix_ModeAnsiDatabase is 1 (true) if the database is MODE ANSI.
      print "    Mode ANSI Database:      $dbh->{ix_ModeAnsiDatabase}\n";
-     # AutoErrorReport is 1 (true) if errors are reported as they
+     # ix_AutoErrorReport is 1 (true) if errors are reported as they
      # are detected.
      print "    AutoErrorReport:         $dbh->{ix_AutoErrorReport}\n";
-     # InTransaction is 1 (true) if the database is in a transaction
+     # ix_InTransaction is 1 (true) if the database is in a transaction
      print "    Transaction Active:      $dbh->{ix_InTransaction}\n";
-     # ConnectionName is the name of the ESQL/C connection.
+     # ix_ConnectionName is the name of the ESQL/C connection.
      # Mainly applicable with Informix-ESQL/C 6.00 and later.
      print "    Connection Name:         $dbh->{ix_ConnectionName}\n";
 
@@ -350,17 +380,21 @@ If $dbh->{ix_AutoErrorReport} is false, then DBD::Informix does not report any
 errors when it detects them; it is up to the user to note that errors have
 occurred and to report them.
 
-If you have forgotten the driver, you can discover it again using:
+If you connect using the DBI->connect() method, or if you have
+forgotten the driver, you can discover it again using:
 
     $drh = $dbh->{Driver};
 
+This allows you to access the driver methods and attributes described
+previously.
+
 =over 4
 
-BUG: The name of the database should be tracked more carefully via
-the DATABASE, CLOSE DATABASE, CREATE DATABASE, ROLLFORWARD DATABASE
-and START DATABASE statements.
-Note that you cannot prepare CONNECT statements, so they do not have to be
-tracked.
+BUG: The name of the database should be tracked more carefully via the
+DATABASE, CLOSE DATABASE, CREATE DATABASE, ROLLFORWARD DATABASE and
+START DATABASE statements.
+Note that you cannot prepare CONNECT statements, so they do not have
+to be tracked.
 
 =back
 
@@ -507,13 +541,22 @@ second place-holder, etc.
 
 =over 4
 
-Issue: At the moment, there is no checking by DBD::Informix on how many
-parameters are supplied and how many are needed.
+Issue: At the moment, there is no checking by DBD::Informix on how
+many input parameters are supplied and how many are needed.
+Note that the Informix engines give no support for determining the
+number of input parameters except in the VALUES clause of an INSERT
+statement.
 This needs to be resolved.
-Also, the Informix engines give no support for determining the types of
-those parameters except in the VALUES clause of an INSERT statement.
-This means that DBD::Informix v0.25 cannot handle blobs in the SET clause
-of an UPDATE statement.
+
+Issue: The Informix engines give no support for determining the types
+of input parameters except in the VALUES clause of an INSERT
+statement.
+This means that DBD::Informix cannot handle blobs in the SET clause of
+an UPDATE statement.
+The only known way to deal with this is to use a SELECT to retrieve
+the old data, a DELETE to remove it, and an INSERT to replace it with
+the modified data.
+Not nice, but it works.
 
 BUG: The various bind routines defined by DBI (primarily to support
 DBD::Oracle) are not implemented in DBD::Informix because there are no
@@ -527,29 +570,29 @@ nullability, etc are.  You do this with:
     @name = @{$sth->{NAME}};        # Column names
     @null = @{$sth->{NULLABLE}};    # True => accepts nulls
     @type = @{$sth->{TYPE}};        # ODBC Data Type numbers
-    @prec = @{$sth->{PRECISION}};   # Numeric length from SysColumns.Collength
-    @scal = @{$sth->{SCALE}};       # Same as PRECISION
+    @prec = @{$sth->{PRECISION}};   # ODBC PRECISION numbers (or undef)
+    @scal = @{$sth->{SCALE}};       # ODBC SCALE numbers (or undef)
+
+    # Native (Informix) type equivalents
+    @tnam = @{$sth->{ix_NativeTypeName}};# Type name
+    @tnum = @{$sth->{ix_ColType}};       # Type number from SysColumns.ColType
+    @tlen = @{$sth->{ix_ColLength}};     # Type length from SysColumns.ColLength
 
 =over 4
 
 BUG: $sth->{TYPE} currently returns the Native (Informix) Type Names.
-So does {ix_NativeTypeNames}, which should not be an Informix-specific
-attribute.
 
-BUG: PRECISION is not clearly defined, and neither is SCALE.  It isn't
-clear which types should have a these attributes.  There should, probably,
-be $sth->{ColLength} to do what $sth->{PRECISION} and $sth->{SCALE} do, and
-the precision and scale should be defined for FLOAT, SMALLFLOAT, DECIMAL,
-MONEY types and their synonyms.  It is not clear whether the various types
-of integer values should be given precision and scale values, though it is
-relatively easy to define valid values for them.  It is not clear how
-floating point numbers are represented in SCALE.  It is not clear whether
-the various CHAR types should be given a PRECISION corresponding to their
-length.  Etc... This is one point where the DBI specification is badly in need
-of definition.
+BUG: $sth->{PRECISION} returns the value of SysColumns.ColLength.
 
-BUG: You might be able to do the same with INSERT statements, except that
-some internal machinations mean that it probably does not work in 0.25.
+BUG: $sth->{SCALE} returns the value of SysColumns.ColLength.
+
+Note: Informix uses '(expression)' in the array $sth->{NAME} for any
+non-aliassed computed value in a SELECT list, and to describe the
+return values from stored procedures, and so on.
+This could be usefully improved.
+There is also no guarantee that the names returned are unique.
+For example, in "SELECT A.Column, B.Column FROM Table1 A, Table1 B
+WHERE ...", both the return columns are described as 'column'.
 
 =back
 
@@ -844,26 +887,32 @@ of the Informix-specific attributes have been renamed so that they
 start ix_ (eg: $dbh->{ix_AutoErrorReport}), and the old names which do
 not have this systematic prefix are now officially deprecated.
 And additional attribute, $dbh->{ix_Deprecated} has been invented
-which can be set to 1 to report on the use of deprecated attribute
-names.
-For this release (0.52), the default value of {ix_Deprecated} is 0
-(False), so the deprecated warnings won't appear unless you ask for
-them.
+which can be set to 0 to suppress the warning reports when
+a deprecated attribute
+is used.
 The deprecated form {Deprecated} is also supported.
 
-In the next release (0.53), the warnings will be enabled by default,
-but both versions will work.
-In the release after that (0.54), the warnings will be enabled without
-a mechanism to switch them off, but both versions will work.
-The attributes {Deprecated} and {ix_Deprecated} will In the release
-after that (0.55), the warnings will be enabled without a mechanism to
-switch them off, and the old style attribute names won't work.
+For this release (0.53), the default value of {ix_Deprecated} is 1
+(True), so the deprecated warnings appear unless you ask for
+them to be suppressed.
+You can suppress the warning by setting:
+
+    $sth->{ix_Deprecated} = 0;
+
+In the next release (0.54), the warnings will be enabled without a
+mechanism to switch them off, but both the deprecated and the
+non-deprecated forms of the attribute names will work.
+In the release after that (0.55), the warnings will be enabled without
+a mechanism to switch them off, and the old style attribute names
+won't work.
 In the release after that (0.56), using the old-style attribute names
 will generate an error.
-In the release after that (0.57), using the old-style name changes
+In the release after that (0.57), using the old-style attribute names
 will do nothing silently.
-The exact time scale for these releases is not clear, but if you don't
-upgrade for a few releases, you could run into problems unexpectedly.
+The exact time scale for these releases is not clear (but will
+probably be completed in Q3 of 1997 (give or take a year or two), so
+if you don't upgrade for a few releases, you could run into problems
+unexpectedly.
 
 Note that some names may retain the form with no prefix if they are
 accepted by the larger DBD/DBD community.

@@ -1,7 +1,7 @@
 /*
 @(#)File:            link.c
-@(#)Version:         50.1
-@(#)Last changed:    97/01/12
+@(#)Version:         53.1
+@(#)Last changed:    97/03/06
 @(#)Purpose:         Specialized doubly-linked list management routines
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1996,1997
@@ -16,12 +16,11 @@
 #include "Informix.h"
 
 #ifndef lint
-static const char sccs[] = "@(#)link.c	50.1 97/01/12";
+static const char sccs[] = "@(#)link.c	53.1 97/03/06";
 #endif
 
 /* Initialize the head link of a list */
-void
-new_headlink(Link *link)
+void new_headlink(Link *link)
 {
 	link->next = link;
 	link->prev = link;

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)multiconn01.t	51.1 97/02/25 19:43:06
+#	@(#)multiconn01.t	53.1 97/03/06 20:37:31
 #
 #	Test Multiple Connections for DBD::Informix
 #
@@ -66,12 +66,12 @@ if ($drh->{MultipleConnections} == 0)
 
 print "# Database Information\n";
 print "#     Database Name:           $dbh1->{Name}\n";
-print "#     Informix-OnLine:         $dbh1->{InformixOnLine}\n";
-print "#     Logged Database:         $dbh1->{LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh1->{ModeAnsiDatabase}\n";
 print "#     AutoCommit:              $dbh1->{AutoCommit}\n";
-print "#     AutoErrorReport:         $dbh1->{AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh1->{InTransaction}\n";
+print "#     Informix-OnLine:         $dbh1->{ix_InformixOnLine}\n";
+print "#     Logged Database:         $dbh1->{ix_LoggedDatabase}\n";
+print "#     Mode ANSI Database:      $dbh1->{ix_ModeAnsiDatabase}\n";
+print "#     AutoErrorReport:         $dbh1->{ix_AutoErrorReport}\n";
+print "#     Transaction Active:      $dbh1->{ix_InTransaction}\n";
 print "#\n";
 
 &info_usertables($dbh1);
@@ -81,12 +81,12 @@ print "#\n";
 
 print "# Database Information\n";
 print "#     Database Name:           $dbh2->{Name}\n";
-print "#     Informix-OnLine:         $dbh2->{InformixOnLine}\n";
-print "#     Logged Database:         $dbh2->{LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh2->{ModeAnsiDatabase}\n";
 print "#     AutoCommit:              $dbh2->{AutoCommit}\n";
-print "#     AutoErrorReport:         $dbh2->{AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh2->{InTransaction}\n";
+print "#     Informix-OnLine:         $dbh2->{ix_InformixOnLine}\n";
+print "#     Logged Database:         $dbh2->{ix_LoggedDatabase}\n";
+print "#     Mode ANSI Database:      $dbh2->{ix_ModeAnsiDatabase}\n";
+print "#     AutoErrorReport:         $dbh2->{ix_AutoErrorReport}\n";
+print "#     Transaction Active:      $dbh2->{ix_InTransaction}\n";
 print "#\n";
 
 &info_usertables($dbh2);

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)numerics.t	51.1 97/02/25 19:43:04
+# @(#)numerics.t	53.1 97/03/06 20:37:38
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #

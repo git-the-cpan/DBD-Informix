@@ -11,33 +11,64 @@ WARNING: THIS IS ALPHA SOFTWARE. IT IS POSSIBLY UNRELIABLE!
 
 ---------------------------------------------------------------------------
 
-BUILDING DBD::Informix
+PREREQUISITES
 
     If you do not have Perl version 5.003 or later, then build, test and
-    install it before doing anything else!
+    install it before doing anything else!  And please ensure that you
+	compile it with whatever options are necessary to get __STDC__ defined.
 
     If the DBI module (version 0.73 or later preferred; 0.69 or later is
     mandatory) is not installed, then build, test and install it.
 
+    To build DBD::Informix, the C compiler must accept function prototypes.
+    This is not a problem on any machine to which Informix is currently
+    ported.
+
     You must have a version of Informix-ESQL/C available to you.  You
     should read the Informix.Licence file for information about what you
     need.  At the moment, ESQL/C Versions 4.0x or 4.1x are not supported,
-    nor are any earlier versions.  If someone wants to do the coding which
-    is necessary to get versions 4.0x or 4.1x to work, then contact the
-    DBD::Informix Maintenance Team.  ESQL/C Versions 5.00 upwards should be
+    nor are any earlier versions.  ESQL/C Versions 5.00 upwards should be
     OK.
 
+    You need to have a fully working Informix environment before you try to
+    build and test DBD::Informix.  This means that you will need to have
+    access to at least one database where you have at least RESOURCE level
+    privileges.  You should consider creating the 'stores' database using
+    the dbaccessdemoN program which comes with your server if you don't
+    have DBA privileges on any databases.  The multiple connection tests
+    use two databases for preference (though the tests will use the same
+    database twice if you do not specify two separate databases) and the
+    test will fail if you try using olipcshm (shared memory) connections to
+    both databases.  If your databases are not on the machine where you are
+    building DBD::Informix, you need to ensure that you have the necessary
+    privileges to connect to the machine where the databases are.
+
     Please ensure that you have $INFORMIXDIR set, and that $INFORMIXDIR/bin
-    is on your PATH.  The build may work without these environment
-    variables being set, but it will be more reliable if they are.  Also,
-    if you are using ESQL/C version 6.x or later, you will be using ESQL/C
-    shared libraries which are found in $INFORMIXDIR/lib and
-    $INFORMIXDIR/lib/esql.  You need to ensure that these will be found
-    when you run Perl with DBD::Informix.  On SVR4 machines, this means
-    adding these directories to LD_LIBRARY_PATH; on HP-UX, the variable is,
-    I believe, SHLIB_PATH; other systems may have other variable names.
-    You can test that this is correct by compiling and running a trivial
-    ESQL/C program which simply opens a database and exits.
+    is on your PATH.  The build no longer works unless these environment
+    variables are set.  Also, if you are using ESQL/C version 6.x or later,
+    you may be using ESQL/C shared libraries which are found in
+    $INFORMIXDIR/lib and $INFORMIXDIR/lib/esql.  You need to ensure that
+    these will be found when you run Perl with DBD::Informix.  On SVR4
+    machines, this means adding these directories to LD_LIBRARY_PATH; on
+    HP-UX, the variable is SHLIB_PATH; other systems may have other
+    variable names.  You need to set INFORMIXSERVER correctly if you are using
+    version 6.0x or later.  You may need to set other environment variables
+    too -- consult the Informix manuals for more information.
+
+    You should take a look at the documentation in InformixTest.pm, and set
+    the DBD_INFORMIX_DATABASE, DBD_INFORMIX_USERNAME, DBD_INFORMIX_PASSWORD
+    and DBD_INFORMIX_SERVER environment variables as appropriate for your
+    system.  Although the testing does as little damage as possible, it is
+    not a good idea to use your prize database for this.  The stores
+    database is a good bet (unless you are using an old version of Fourgen
+    software and it is using the stores database for its data dictionary).
+
+    One step in the setup process tests that you have permissions on the
+    databases which will be used by the testing.  It does this by compiling
+    and running a relatively simple ESQL/C program which simply opens a few
+    databases, creates and drops some tables, and exits.
+
+BUILDING DBD::Informix
 
     When Perl, DBI and ESQL/C are all installed do:
 
@@ -63,12 +94,6 @@ BUILDING DBD::Informix
     nor to Makefile.PL.  If you do *please* let me know so that I can try
     to make it automatic in a later release.
 
-    You should then take a look at the documentation in InformixTest.pm,
-    and set the DBD_INFORMIX_* environment variables as appropriate for
-    your system.  Although the testing does as little damage as possible,
-    it is not a good idea to use your prize database for this.  The stores
-    database is a good bet (unless you are using an old version of Fourgen
-    software and it is using the stores database for its data dictionary).
     Then run:
 
         make test
@@ -234,7 +259,7 @@ Please include:
 Regards,
 Jonathan Leffler (johnl@informix.com)
 
-@(#)README	52.1 97/02/28 18:55:09
+@(#)README	53.2 97/03/12 12:41:25
 
 ---------------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 /*
- * @(#)Informix.xs	52.2 97/03/02 12:57:42
+ * @(#)Informix.xs	53.1 97/03/06 19:28:48
  *
  * Portions Copyright (c) 1994,1995 Tim Bunce
  * Portions Copyright (c) 1995,1996 Alligator Descartes
@@ -17,7 +17,7 @@ DBISTATE_DECLARE;
 
 /* Assume string concatenation is available */
 #ifndef lint
-static const char sccs[] = "@(#)Informix.xs	52.2 97/03/02";
+static const char sccs[] = "@(#)Informix.xs	53.1 97/03/06";
 static const char esqlc_ver[] = "@(#)" ESQLC_VERSION_STRING;
 #endif
 
@@ -50,7 +50,7 @@ void
 driver_init(drh)
 	SV *        drh
 	CODE:
-	ST(0) = dbd_ix_driver(drh) ? &sv_yes : &sv_no;
+	ST(0) = dbd_dr_driver(drh) ? &sv_yes : &sv_no;
 
 # Disconnect all current connections for this driver
 # The conditional code is a legacy -- it is neither clear what it means
@@ -198,7 +198,7 @@ immediate(dbh, stmt)
 	char *stmt
 	CODE:
 	D_imp_dbh(dbh);
-	ST(0) = dbd_ix_immediate(imp_dbh, stmt) ? &sv_yes : &sv_no;
+	ST(0) = dbd_db_immediate(imp_dbh, stmt) ? &sv_yes : &sv_no;
 
 # Destroy the database handle
 # The conditional code is a legacy -- it is neither clear what it means

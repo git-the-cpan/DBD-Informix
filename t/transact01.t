@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)transact01.t	51.1 97/02/25 19:43:08
+#	@(#)transact01.t	53.1 97/03/06 20:37:43
 #
 #	Test Transactions for DBD::Informix
 #
@@ -11,7 +11,7 @@ use DBD::InformixTest;
 # Test install...
 $dbh = &connect_to_test_database();
 
-if ($dbh->{LoggedDatabase} == 0)
+if ($dbh->{ix_LoggedDatabase} == 0)
 {
 	&stmt_note("1..1\n");
 	&stmt_note("# No transactions on unlogged database '$dbh->{Name}'\n");
@@ -21,7 +21,7 @@ if ($dbh->{LoggedDatabase} == 0)
 
 &stmt_note("1..20\n");
 &stmt_ok();
-if ($dbh->{ModeAnsiDatabase})
+if ($dbh->{ix_ModeAnsiDatabase})
 { &stmt_note("# This is a MODE ANSI database\n"); }
 else
 { &stmt_note("# This is a regular logged database\n"); }
@@ -47,13 +47,13 @@ $sel1 = "SELECT MDY(12,25,1996) FROM 'informix'.SysTables WHERE Tabid = 1";
 &stmt_fail() unless (@row = $st1->fetchrow);
 undef $st1;
 
-if ($dbh->{ModeAnsiDatabase})
+if ($dbh->{ix_ModeAnsiDatabase})
 {
 	&stmt_fail() unless ($dbh->commit());
 }
 
 # Turn off automatic errors (we're going to generate some errors)
-$dbh->{AutoErrorReport} = 0;
+$dbh->{ix_AutoErrorReport} = 0;
 
 # Start a transaction (to be rolled back).
 stmt_test $dbh, "BEGIN WORK";
@@ -123,6 +123,6 @@ select_zero_data $dbh, $select;
 select_some_data $dbh, 2, $select;
 
 # Report any errors during cleanup operations
-$dbh->{AutoErrorReport} = 1;
+$dbh->{ix_AutoErrorReport} = 1;
 
 &all_ok();

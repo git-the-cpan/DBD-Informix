@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)basic00.t	52.1 97/03/05 15:53:07
+#	@(#)basic00.t	53.1 97/03/06 20:37:22
 #
 #	Primary test script for DBD::Informix
 #
@@ -51,20 +51,20 @@ $dbname = $dbh->{Name};
 print "# Database Information\n";
 print "#     Type:                    $dbh->{Type}\n";
 print "#     Database Name:           $dbh->{Name}\n";
-print "#     Informix-OnLine:         $dbh->{InformixOnLine}\n";
-print "#     Logged Database:         $dbh->{LoggedDatabase}\n";
-print "#     Mode ANSI Database:      $dbh->{ModeAnsiDatabase}\n";
 print "#     AutoCommit:              $dbh->{AutoCommit}\n";
-print "#     AutoErrorReport:         $dbh->{AutoErrorReport}\n";
-print "#     Transaction Active:      $dbh->{InTransaction}\n";
+print "#     Informix-OnLine:         $dbh->{ix_InformixOnLine}\n";
+print "#     Logged Database:         $dbh->{ix_LoggedDatabase}\n";
+print "#     Mode ANSI Database:      $dbh->{ix_ModeAnsiDatabase}\n";
+print "#     AutoErrorReport:         $dbh->{ix_AutoErrorReport}\n";
+print "#     Transaction Active:      $dbh->{ix_InTransaction}\n";
 print "#\n";
 
 # Remove table if it already exists, warning (not failing) if it doesn't
-$oldmode = $dbh->{AutoErrorReport};
-$dbh->{AutoErrorReport} = 0;
+$oldmode = $dbh->{ix_AutoErrorReport};
+$dbh->{ix_AutoErrorReport} = 0;
 $stmt1 = "DROP TABLE $testtable";
 &stmt_test($dbh, $stmt1, 1);
-$dbh->{AutoErrorReport} = $oldmode;
+$dbh->{ix_AutoErrorReport} = $oldmode;
 
 # Create table (now that it does not exist)...
 $stmt2 = "CREATE TABLE $testtable (id INTEGER NOT NULL, name CHAR(64))";
@@ -218,10 +218,10 @@ sub select_all
 
 	# Drop the table...!?!...
 	# Will fail because of cursor referencing it.
-	my $old = $dbh->{AutoErrorReport};
-	$dbh->{AutoErrorReport} = 0;
+	my $old = $dbh->{ix_AutoErrorReport};
+	$dbh->{ix_AutoErrorReport} = 0;
 	&stmt_retest($dbh, $stmt1, 1);
-	$dbh->{AutoErrorReport} = $old;
+	$dbh->{ix_AutoErrorReport} = $old;
 
 	# Free cursor referencing the table...
 	undef $cursor;

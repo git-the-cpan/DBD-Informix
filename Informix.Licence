@@ -39,7 +39,9 @@ you access do not use the new extended and user-defined types, but this is
 more speculative.  If you have ESQL/C Version 4.1x or earlier, then
 DBD::Informix is known not to work -- it relies on features introduced to
 Version 5.00 ESQL/C.  The code can probably be modified to work, but it
-will take considerable effort.  If you have Informix-4GL (C-code) for
+will take considerable effort.  If someone wants to do the coding which is
+necessary to get versions 4.0x or 4.1x to work, then contact the
+DBD::Informix Maintenance Team.  If you have Informix-4GL (C-code) for
 version 6.0x, then you can use it in lieu of a 6.0x ESQL/C, but the
 resulting executable code is likely to be much larger than it would be
 using a pure ESQL/C version.  You cannot use 4.1x I4GL because it uses the
@@ -49,10 +51,33 @@ DBD::Informix.
 You do not need to have any Informix database engine (OnLine or SE) on the
 machine where you build or use DBD::Informix.
 
-Note that the software that comes with LiveWire is just an OnLine server;
-you do not get an ESQL/C Development licence.  I am not clear whether you
-get Informix-Connect, but you must have the ESQL/C Development licence to
-be able to compile DBD::Informix.
+Using LiveWire Pro from Netscape
+================================
+
+When you purchase LiveWire Pro from Netscape, the product comes with certain
+restrictions to the Informix OnLine Workgroup Server (OWS) license that is
+bundled with the product.  Those restrictions are outlined below:
+
+    -Use of the Informix database is restricted to those applications that
+     have been developed using LiveWire Pro.
+
+    -There is a limit of 32 simultaneous connections to the database
+
+    -Support for the Informix OWS shipped with LiveWire Pro is handled through
+     Netscape.  Informix is not required to perform direct technical support
+     on Netscape products other than what is shipped through Informix's own
+     channels.
+
+Informix offers upgrades to the OWS license shipped with LiveWire Pro for
+those customers that wish to have these restrictions removed from their
+license.
+
+If you wish to use OWS other than via LiveWire Pro, or if you wish to use ODS
+(OnLine Dynamic Server), you must purchase a standard Informix licence for OWS
+or ODS.  You will also need to get an ESQL/C Development licence to be able to
+compile DBD::Informix.
+
+Any other use of the database is a violation of your license with Netscape.
 
 DBD::Informix and Informix Technical Support
 ============================================
@@ -78,4 +103,4 @@ See also the README file.
 
 Jonathan Leffler (johnl@informix.com)
 Informix Software Inc
-@(#)Informix.Licence	52.1 97/02/28
+@(#)Informix.Licence	53.4 97/03/17

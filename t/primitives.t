@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)primitives.t	51.1 97/02/25 19:43:05
+# @(#)primitives.t	53.1 97/03/06 20:37:40
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #

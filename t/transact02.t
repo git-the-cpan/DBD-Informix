@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)transact02.t	51.1 97/02/25 19:43:09
+#	@(#)transact02.t	53.1 97/03/06 20:37:45
 #
 #	Test AutoCommit On for DBD::Informix
 #
@@ -13,7 +13,7 @@ use DBD::InformixTest;
 # Test install...
 $dbh = &connect_to_test_database();
 
-if ($dbh->{LoggedDatabase} == 0)
+if ($dbh->{ix_LoggedDatabase} == 0)
 {
 	&stmt_note("1..1\n");
 	&stmt_note("# No transactions on unlogged database '$dbh->{Name}'\n");
@@ -23,7 +23,7 @@ if ($dbh->{LoggedDatabase} == 0)
 
 &stmt_note("1..13\n");
 &stmt_ok();
-if ($dbh->{ModeAnsiDatabase})
+if ($dbh->{ix_ModeAnsiDatabase})
 { &stmt_note("# This is a MODE ANSI database\n"); }
 else
 { &stmt_note("# This is a regular logged database\n"); }
@@ -57,7 +57,7 @@ undef $st1;
 
 # Confirm that table exists but is empty (the rollback cancels an empty
 # transaction in a MODE ANSI database, but fails on a ordinary logged DB).
-&stmt_fail() unless ($dbh->{ModeAnsiDatabase} == 0 || $dbh->rollback());
+&stmt_fail() unless ($dbh->{ix_ModeAnsiDatabase} == 0 || $dbh->rollback());
 select_zero_data $dbh, $select;
 
 $date = $row[0];

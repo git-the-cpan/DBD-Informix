@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)blob02.t	51.1 97/02/25 19:43:00
+#	@(#)blob02.t	53.1 97/03/06 20:37:24
 #
 #	Test Basic Blobs (INSERT) for DBD::Informix
 #
@@ -11,7 +11,7 @@ use DBD::InformixTest;
 # Test install...
 $dbh = connect_to_test_database();
 
-if (!$dbh->{InformixOnLine})
+if (!$dbh->{ix_InformixOnLine})
 {
 	print("1..2\n");
 	&stmt_note("# Not Informix-OnLine -- no blob testing\n");
@@ -22,7 +22,7 @@ else
 	print("1..9\n");
 	&stmt_ok(0);
 
-	$dbh->{AutoErrorReport} = 0;
+	$dbh->{ix_AutoErrorReport} = 0;
 	$stmt1 = 'DROP TABLE Dbd_IX_BlobTest';
 	&stmt_test($dbh, $stmt1, 1);
 	$stmt2 = 'CREATE TABLE Dbd_IX_BlobTest (I SERIAL UNIQUE, ' .
@@ -57,7 +57,7 @@ else
 	&stmt_fail() unless ($insert->finish);
 	&stmt_ok(0);
 
-	$dbh->commit if ($dbh->{ModeAnsiDatabase});
+	$dbh->commit if ($dbh->{ix_ModeAnsiDatabase});
 }
 
 &stmt_note("# Testing: \$dbh->disconnect()\n");

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)blob03.t	51.1 97/02/25 19:43:01
+#	@(#)blob03.t	53.1 97/03/06 20:37:25
 #
 #	Test Basic Blobs (SELECT) for DBD::Informix
 #
@@ -10,7 +10,7 @@ use DBD::InformixTest;
 
 $dbh = &connect_to_test_database();
 
-if (!$dbh->{InformixOnLine})
+if (!$dbh->{ix_InformixOnLine})
 {
 	print("1..2\n");
 	&stmt_note("# Not Informix-OnLine -- no blob testing\n");

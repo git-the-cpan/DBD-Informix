@@ -1,7 +1,7 @@
 /*
 @(#)File:            esqlperl.h
-@(#)Version:         50.1
-@(#)Last changed:    97/01/12
+@(#)Version:         53.2
+@(#)Last changed:    97/03/06
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1996,1997
@@ -15,12 +15,18 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)esqlperl.h	50.1 97/01/12";
+static const char esqlperl_h[] = "@(#)esqlperl.h	53.2 97/03/06";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
 #include <stdio.h>
 #include "esqlc.h"
+
+enum Boolean
+{
+	False, True
+};
+typedef enum Boolean Boolean;
 
 /*
 ** The sqltypename() routine assumes is has a buffer of at least
@@ -49,5 +55,16 @@ typedef enum BlobLocn BlobLocn;
 */
 extern int blob_locate(Blob *blob, BlobLocn locn);
 extern void blob_release(Blob *blob, int dflag);
+
+extern void dbd_ix_debug(int n, char *fmt, const char *arg);
+extern void dbd_ix_setconnection(char *conn);
+
+#if ESQLC_VERSION >= 600
+extern void dbd_ix_disconnect(char *connection);
+extern Boolean dbd_ix_connect(char *conn, char *dbase, char *user, char *pass);
+#else
+extern void dbd_ix_closedatabase(void);
+extern Boolean dbd_ix_opendatabase(char *dbase);
+#endif	/* ESQLC_VERSION >= 600 */
 
 #endif	/* ESQLPERL_H */

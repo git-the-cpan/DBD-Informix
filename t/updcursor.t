@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)updcursor.t	51.2 97/02/26 12:40:16
+#	@(#)updcursor.t	53.1 97/03/17 17:47:43
 #
 #	Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
 #
@@ -54,11 +54,15 @@ print "# $selupd\n";
 &stmt_fail() unless ($st1 = $dbh->prepare($selupd));
 &stmt_ok();
 
+# Attribute caching working again!
 $name = $st1->{CursorName};
-# Atribute caching not working!
-#print "# Cursor name 1: $st1->{CursorName}\n";
-#print "# Cursor name 2: $st1->{CursorName}\n";
-#print "# Cursor name 3: $st1->{CursorName}\n";
+for ($i = 0; $i < 3; $i++)
+{
+	$x = ($name eq $st1->{CursorName}) ? "OK" : "** BROKEN **";
+	print "# Cursor name $i: $st1->{CursorName} $x\n";
+}
+
+$name = $st1->{CursorName};
 $updstmt = "UPDATE $table SET Col02 = ? WHERE CURRENT OF $name";
 print "# $updstmt\n";
 &stmt_fail() unless ($st2 = $dbh->prepare($updstmt));
@@ -68,6 +72,10 @@ $delstmt = "DELETE FROM $table WHERE CURRENT OF $name";
 print "# $delstmt\n";
 &stmt_fail() unless ($st3 = $dbh->prepare($delstmt));
 &stmt_ok();
+
+# In a logged database, must be in a transaction
+$dbh->do('BEGIN WORK')
+	unless (!$dbh->{ix_LoggedDatabase} || $dbh->{ix_InTransaction});
 
 $n = 0;
 &stmt_fail() unless ($st1->execute());
@@ -96,6 +104,9 @@ for ($i = 0; $i <= $#row; $i++)
 
 &stmt_fail() unless ($st3->execute);
 &stmt_ok;
+
+# In a logged database, must be in a transaction
+$dbh->commit unless (!$dbh->{ix_LoggedDatabase});
 
 # Check that there is some data
 select_some_data $dbh, 1, $select;
