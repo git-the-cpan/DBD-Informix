@@ -1,9 +1,9 @@
 /*
- * @(#)$Id: esqltest.ec,v 61.3 1998/11/09 18:24:35 jleffler Exp $ 
+ * @(#)$Id: esqltest.ec,v 95.2 1999/12/30 23:08:49 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
- * Copyright (c) 1997-98 Jonathan Leffler
+ * Copyright (c) 1997-99 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -30,7 +30,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 61.3 1998/11/09 18:24:35 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 95.2 1999/12/30 23:08:49 jleffler Exp $";
 #endif
 
 /*
@@ -50,7 +50,7 @@ void            ix_printerr(FILE *fp, long rc)
 	char            isambuf[256];
 	char            msgbuf[sizeof(sql_buf)+sizeof(isambuf)];
 
-	if (rc < 0)
+	if (rc != 0)
 	{
 		/* Format SQL (primary) error */
 		/* The int cast on 3rd argument to rgetmsg() prevents warning */
@@ -246,7 +246,7 @@ int main(int argc, char **argv)
     conn_ok = dbd_ix_opendatabase(dbase1);
 #endif  /* ESQLC_VERSION >= 600 */
 
-	if (sqlca.sqlcode < 0)
+	if (sqlca.sqlcode != 0)
 	{
 		ix_printerr(stderr, sqlca.sqlcode);
 	}
@@ -269,9 +269,16 @@ int main(int argc, char **argv)
     conn_ok = dbd_ix_opendatabase(dbase2);
 #endif  /* ESQLC_VERSION >= 600 */
 
-	if (sqlca.sqlcode < 0)
+	if (sqlca.sqlcode != 0)
 	{
-		ix_printerr(stderr, sqlca.sqlcode);
+		if (sqlca.sqlcode == -27000)
+		{
+			printf("You're using shared memory connections for both databases.\n");
+			printf("DBD::Informix cannot test multiple concurrent connections.\n");
+			printf("The multi-connection tests will be skipped.\n");
+		}
+		else
+			ix_printerr(stderr, sqlca.sqlcode);
 	}
 	else
 		test_permissions(dbase2);

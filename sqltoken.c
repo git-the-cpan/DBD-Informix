@@ -5,7 +5,7 @@
 @(#)Purpose:         Identify SQL token in string
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1998
-@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
+@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
 */
 
 /*TABSTOP=4*/

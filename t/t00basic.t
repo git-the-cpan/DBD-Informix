@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t00basic.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t00basic.t,v 95.1 1999/11/19 02:28:14 jleffler Exp $ 
 #
 #	Initial test script for DBD::Informix
 #
@@ -29,6 +29,9 @@ print "#     Attribution:           $dbh->{Driver}->{Attribution}\n";
 print  "# Informix Driver Handle Information\n";
 print  "#     Product:               $dbh->{ix_ProductName}\n";
 print  "#     Product Version:       $dbh->{ix_ProductVersion}\n";
+print  "#     Server  Version:       $dbh->{ix_ServerVersion}\n";
+printf "#     Blob Support:          %d\n", $dbh->{ix_BlobSupport};
+printf "#     Stored Procedures:     %d\n", $dbh->{ix_StoredProcedures};
 printf "#     Multiple Connections:  %d\n", $dbh->{ix_MultipleConnections};
 printf "#     Active Connections:    %d\n", $dbh->{ix_ActiveConnections};
 print  "#     Current Connection:    $dbh->{ix_CurrentConnection}\n";

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t41trans.t,v 62.1 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t41trans.t,v 95.1 1999/12/04 23:50:27 jleffler Exp $ 
 #
 #	Test Transactions with AutoCommit Off for DBD::Informix
 #
@@ -16,10 +16,10 @@ $dbh = &connect_to_test_database({ AutoCommit => 1, PrintError => 1 });
 
 if ($dbh->{ix_LoggedDatabase} == 0)
 {
-	&stmt_note("1..1\n");
+	&stmt_note("1..0\n");
 	&stmt_note("# No transactions on unlogged database '$dbh->{Name}'\n");
-	&stmt_ok(0);
-	&all_ok();
+	$dbh->disconnect;
+	exit(0);
 }
 
 # Only the maintainers of DBD::Informix should have to wrap their brains

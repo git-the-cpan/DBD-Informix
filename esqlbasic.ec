@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlbasic.ec,v 61.1 1998/10/28 21:46:20 jleffler Exp $
+ * @(#)$Id: esqlbasic.ec,v 95.1 1999/12/30 23:08:49 jleffler Exp $
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -12,7 +12,7 @@
  *
  *     esql -o esqlbasic esqlbasic.ec
  *
- * Copyright (c) 1997-98 Jonathan Leffler
+ * Copyright (c) 1997-99 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -35,7 +35,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlbasic.ec,v 61.1 1998/10/28 21:46:20 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqlbasic.ec,v 95.1 1999/12/30 23:08:49 jleffler Exp $";
 #endif
 
 /*
@@ -55,7 +55,7 @@ void            ix_printerr(FILE *fp, long rc)
 	char            isambuf[256];
 	char            msgbuf[sizeof(sql_buf)+sizeof(isambuf)];
 
-	if (rc < 0)
+	if (rc != 0)
 	{
 		/* Format SQL (primary) error */
 		if (rgetmsg(rc, errbuf, sizeof(errbuf)) != 0)
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
 
 	EXEC SQL DATABASE :dbase1;
 
-	if (sqlca.sqlcode < 0)
+	if (sqlca.sqlcode != 0)
 	{
 		ix_printerr(stderr, sqlca.sqlcode);
 	}
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 	test_permissions(dbase1);
 
 	if (estat == EXIT_SUCCESS)
-		printf("Your Informix environment is OK\n\n");
+		printf("Your Informix environment is (probably) OK\n\n");
 	else
 	{
 		printf("\n*** Your Informix environment is not usable");

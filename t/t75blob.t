@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t75blob.t,v 62.3 1999/09/19 22:36:52 jleffler Exp $ 
+#	@(#)$Id: t75blob.t,v 95.3 1999/12/04 23:45:10 jleffler Exp $ 
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
@@ -9,10 +9,8 @@
 BEGIN { require "perlsubs/InformixTest.pl"; }
 
 # KLUDGE - of the worst type!
-print("1..1\n");
+print("1..0\n");
 &stmt_note("# Test disabled - because it routinely fails!\n");
-&stmt_ok(0);
-&all_ok();
 exit(0);
 
 $tablename = "DBD_IX_BlobTest2";
@@ -20,11 +18,12 @@ $tablename = "DBD_IX_BlobTest2";
 # Test install...
 $dbh = connect_to_test_database();
 
-if (!$dbh->{ix_InformixOnLine})
+if (!$dbh->{ix_BlobSupport})
 {
-	print("1..2\n");
-	&stmt_note("# Not Informix-OnLine -- no blob testing\n");
-	&stmt_ok(0);
+	print("1..0\n");
+	&stmt_note("# No blob support -- no blob testing\n");
+	$dbh->disconnect;
+	exit(0);
 }
 else
 {

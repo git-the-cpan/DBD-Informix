@@ -1,0 +1,166 @@
+Key Environment Variables for DBD::Informix
+===========================================
+
+There are many possible environment variables which affect Informix
+software and therefore which affect DBD::Informix.  All of the ones
+mentioned here are also documented in the Informix documentation (usually
+the Informix Guide to SQL: Reference manual for the version of the software
+that you are using).  You should be able to obtain this documentation from
+the Informix web site http://www.informix.com/answers.
+
+Major Environment Variables
+---------------------------
+
+INFORMIXSERVER
+    This must be set with 6.00 and later versions of Informix ESQL/C (and
+    all versions of ClientSDK, therefore).  Even if no other Informix
+    variable is set, this one must be.  This is mandated by the products
+    used by DBD::Informix, so it is also required by DBD::Informix.
+    Further, the server referenced by it must be available; things are apt
+    to fail, but take a very long time (many seconds) over doing so, if the
+    server is missing.
+
+INFORMIXDIR
+    When building DBD::Informix, this must be set, even if the value is is
+    the default of /usr/informix (I'm discussing Unix primarily!).  When
+    running, you can get away without this environment variable being set,
+    because the process which creates Informix.pm records the value of
+    $INFORMIXDIR used at compile time.  It is still a good idea, in
+    general, to set it explicitly in the environment.
+
+PATH
+    Usually, you will need $INFORMIXDIR/bin on your PATH to find other
+    Informix executable programs.  When building DBD::Informix, it is
+    mandatory that it is on your PATH.  At runtime, you could get away
+    without having it on your PATH provided that you use an explicit
+    pathname to identify any executable found in $INFORMIXDIR/bin.
+
+LD_LIBRARY_PATH
+    Also known as SHLIB_PATH on HP-UX and LIBPATH on AIX.  If you are using
+    shared libraries, you may need to set this when you build your
+    executable.  The versions of DBD::Informix from 0.95 onwards arrange
+    for the shared libraries to be identified by full pathname rather than
+    by the abbreviated (relative) name, so new versions of DBD::Informix
+    won't need LD_LIBRARY_PATH set unless you compiled DBD::Informix with
+    the DBD_INFORMIX_RELOCATABLE_INFORMIXDIR environment variable set.
+
+Minor Environment Variables
+---------------------------
+
+INFORMIXSQLHOSTS
+    The name of the sqlhosts file if it is not $INFORMIXDIR/etc/sqlhosts
+
+SQLEXEC
+    Only of relevance to version 5.x versions of ESQL/C.  The name of the
+    server executable.  You might need to know about SQLRM and SQLRMDIR,
+    which give an alternative method of identifying the server.
+
+ONCONFIG
+    TBCONFIG in version 5.x OnLine.  The configuration file for the server.
+    Seldom needed with 7.x and later systems.
+
+DBDATE
+    Controls format of date variables on output, and assumed format on
+    input.
+
+DBMONEY
+DBFORMAT
+    Should control format of MONEY values (and, arguably, DECIMAL and FLOAT
+    and SMALLFLOAT values) when converted to a string.  However,
+    DBD::Informix leaves FLOAT and SMALLFLOAT values as C doubles, and
+    ignores it for DECIMAL and MONEY types.
+
+INFORMIXCONRETRY
+INFORMIXCONTIME
+    You might need to have these set on some systems.  Such systems are
+    most likely to be Windows 95/98/NT client machines connecting to a
+    remote server.  I've never needed them on Unix; I'm not sure whether
+    they work on Unix.
+
+CLIENT_LOCALE
+SERVER_LOCALE
+DB_LOCALE
+DBLANG
+GL_DATE
+GL_TIME
+GL_*
+LANG
+LC_ALL
+LC_COLLATE
+LC_DATE
+LC_MESSAGES
+LC_MONETARY
+LC_NUMERIC
+    These are environment variables which collectively control the locale
+    in which the DBD::Informix software works.
+
+DBD::Informix Environment Variables
+-----------------------------------
+
+All these environment variables apply strictly to the build and test
+phases of making DBD::Informix.  They are of no relevance when running
+DBD::Informix unless you've modified something.
+
+DBD_INFORMIX_AUXILLIARY_OBJECT_FILES
+    A list of other object files to include in the Perl shared library.
+
+DBD_INFORMIX_DATABASE
+    The primary test database.  You need DBA permissions on this
+    database.  It does not matter which logging mode you use, but a
+    logging mode gives better test coverage.
+
+DBD_INFORMIX_DATABASE2
+    The secondary test database.  You need CONNECT permissions on this
+    database.  It does not matter which logging mode you use.
+
+DBD_INFORMIX_DEBUG_ESQLCC
+    Set to debug what the esqlcc script is doing.  Seldom set by users.
+
+DBD_INFORMIX_DEBUG_ESQLLD
+    Set to debug what the esqlld script is doing.  Seldom set by users.
+
+DBD_INFORMIX_DEBUG_ESQLTEST
+    Set to see the compilation for the esqltest program.  Seldom set by
+    users.
+
+DBD_INFORMIX_ENABLE_ASSERT
+    Set to include assertions in the code.  Seldom set by users.
+
+DBD_INFORMIX_ESQLC_LINKAGE
+    Set to -shared or -static to force a particular linkage mechanism.
+    Seldom set by users.
+
+DBD_INFORMIX_NO_ESQLTEST
+    Suppress the esqltest phase of the checking.  Do not attempt to
+    report build errors if you have this value set in your environment.
+
+DBD_INFORMIX_PASSWORD
+    Password for connection to primary test database.
+
+DBD_INFORMIX_PASSWORD2
+    Password for connection to secondary test database.
+
+DBD_INFORMIX_RELOCATABLE_INFORMIXDIR
+    Set if the shared libraries should be linked specifying relative
+    library names (-L$INFORMIXDIR/lib -lname) rather than absolute path
+    names ($INFORMIXDIR/lib/libname.so).
+
+DBD_INFORMIX_SERVER
+    Obsolete.
+
+DBD_INFORMIX_USERNAME
+    Username for connection to primary test database.
+
+DBD_INFORMIX_USERNAME2
+    Username for connection to secondary test database.
+
+DBD_INFORMIX_USE_EPRINTF_CODE
+    If you run into problems with GCC and missing symbol eprintf
+    (possibly with one or two leading underscore characters), then set
+    this to use the supplied alternative eprintf.c code.  It is much
+    better to avoid setting this.
+
+---------------------------------------------------------------------------
+
+Author: Jonathan Leffler (j.leffler@acm.org)
+@(#)$Id: environment.variables,v 95.1 1999/11/17 19:49:22 jleffler Exp $

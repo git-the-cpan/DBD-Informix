@@ -1,28 +1,51 @@
 /*
 @(#)File:            $RCSfile: decsci.c,v $
-@(#)Version:         $Revision: 1.12 $
-@(#)Last changed:    $Date: 1999/04/14 06:29:15 $
+@(#)Version:         $Revision: 1.13 $
+@(#)Last changed:    $Date: 1999/12/06 19:31:05 $
 @(#)Purpose:         Fixed, Exponential and Engineering formatting of DECIMALs
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1991-93,1996-97
-@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
+@(#)Copyright:       (C) JLSS 1991-93,1996-97,1999
+@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
 */
 
 #include "esqlc.h"
 #include "decsci.h"
 
+#ifndef __STDC__
+/*
+** JL - 1999-12-06
+** For some versions of ESQL/C (eg 7.23), the dececvt() and decfcvt()
+** functions are not declared unless __STDC__ is defined.  Patch this
+** up by declaring them, prototype and all, if __STDC__ is not defined.
+*/
+extern char *dececvt(dec_t *np, int ndigit, int *decpt, int *sign);
+extern char *decfcvt(dec_t *np, int ndigit, int *decpt, int *sign);
+#endif /* __STDC__ */
+
+/*
+** JL - 1999-12-06 - Future Directions.
+** There should be cover functions for these routines that use the
+** declared type of the decimal/money value, and only the cover
+** functions should call these functions.  The engineering notation code
+** should be in a separate file.  These routines are neither thread-safe
+** nor re-entrant because of the static buffer used.  This too can be
+** fixed by renaming the routines, with cover functions providing the
+** original functionality as a migration tool - the current interfaces
+** are obsolescent.
+*/
+
 #define SIGN(s, p)  ((s) ? '-' : ((p) ? '+' : ' '))
 #define VALID(n)	(((n) <= 0) ? 6 : (((n) > 32) ? 32 : (n)))
 #define VALID2(n)	(((n) <= 0) ? 0 : (((n) > 151) ? 151 : (n)))
 
-#define CONST_CAST(t, v)	((t)v)
+#define CONST_CAST(t, v)	((t)(v))
 
 /* For 32 digits, 3-digit exponent, leading blanks, etc, 42 is enough */
 /* With fixed format, could have -0.(130*0)(32 digits) + null for length 166 */
 static char     buffer[166];
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: decsci.c,v 1.12 1999/04/14 06:29:15 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: decsci.c,v 1.13 1999/12/06 19:31:05 jleffler Exp $";
 #endif
 
 /*

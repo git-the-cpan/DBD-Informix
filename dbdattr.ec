@@ -1,9 +1,9 @@
 /*
- * @(#)$Id: dbdattr.ec,v 62.1 1999/08/30 23:12:51 jleffler Exp $ 
+ * @(#)$Id: dbdattr.ec,v 95.4 1999/12/30 19:09:50 jleffler Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- attribute handling
  *
- * Copyright (c) 1997-98 Jonathan Leffler
+ * Copyright (c) 1997-99 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -12,7 +12,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdattr.ec,v 62.1 1999/08/30 23:12:51 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdattr.ec,v 95.4 1999/12/30 19:09:50 jleffler Exp $";
 #endif
 
 #include <stdio.h>
@@ -29,12 +29,14 @@ static const char rcs[] = "@(#)$Id: dbdattr.ec,v 62.1 1999/08/30 23:12:51 jleffl
 static const char esql_prodname[] = ESQLC_VERSION_STRING;
 static const int  esql_prodvrsn   = ESQLC_VERSION;
 
+#define USE_DEPRECATED
+
 #ifdef USE_DEPRECATED
-/* Print message deprecating old feature and indicating new */
-static void dbd_ix_deprecate(const char *old)
+/* Print message deprecating old attribute and indicating new */
+static void dbd_ix_deprecate(const char *old_att, const char *new_att)
 {
-	croak("%s - do not use deprecated attribute name %s (use 'ix_' prefix)\n",
-		 dbd_ix_module(), old);
+	croak("%s - do not use deprecated attribute %s (use %s)\n",
+		 dbd_ix_module(), old_att, new_att);
 }
 #endif /* USE_DEPRECATED */
 
@@ -167,7 +169,8 @@ int dbd_ix_db_STORE_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv, SV *valuesv)
 	}
 	else if (KEY_MATCH(kl, key, "ix_AutoErrorReport"))
 	{
-		DBIc_set(imp_dbh, DBIcf_PrintError, newval);
+		warn("Attempt to set obsolete attribute - ix_AutoErrorReport\n"); 
+		retval = FALSE;
 	}
 	else
 	{
@@ -271,13 +274,25 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 	{
 		retsv = newSViv((IV)imp_dbh->is_modeansi);
 	}
+	else if (KEY_MATCH(kl, key, "ix_ServerVersion"))
+	{
+		retsv = newSViv((IV)imp_dbh->srvr_vrsn);
+	}
+	else if (KEY_MATCH(kl, key, "ix_StoredProcedures"))
+	{
+		retsv = newSViv((IV)imp_dbh->has_procs);
+	}
+	else if (KEY_MATCH(kl, key, "ix_BlobSupport"))
+	{
+		retsv = newSViv((IV)imp_dbh->has_blobs);
+	}
 	else if (KEY_MATCH(kl, key, "ix_BlobLocation"))
 	{
 		retsv = newSVpv(blob_bindname(imp_dbh->blob_bind), 0);
 	}
 	else if (KEY_MATCH(kl, key, "ix_AutoErrorReport"))
 	{
-		retsv = newSViv((IV)(DBIc_is(imp_dbh, DBIcf_PrintError) != 0));
+		warn("Attempt to get obsolete attribute - ix_AutoErrorReport\n"); 
 	}
 	else if (KEY_MATCH(kl, key, "ix_ConnectionName"))
 	{
@@ -294,7 +309,6 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
 	{
 		/* Nothing to do */
 	}
-
 	else
 	{
 		/* Treat it as a driver query */
@@ -341,7 +355,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	long			coltype;
 	long			collength;
 	long			colnull;
-	char			colname[NAMESIZE];
+	char            colname[SQL_COLNAMELEN];
 	int             i;
 	EXEC SQL END DECLARE SECTION;
 
@@ -481,6 +495,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
 	else if (KEY_MATCH(kl, key, "ix_StatementText"))
 	{
 		char *text = "";
+		dbd_ix_deprecate("ix_StatementText", "Statement");
 		if (imp_sth->st_text)
 			text = SvPV(imp_sth->st_text, na);
 		retsv = newSVpv(text, 0);

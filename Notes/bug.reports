@@ -22,8 +22,10 @@ doubt, go to CPAN (http://www.perl.com/CPAN/modules/by-module) for the
 latest versions of any of the DBI or DBD files.
 
 If this does *not* resolve your problem, please post the details of your
-problem to dbi-users@isc.org and CC them to me at j.leffler@acm.org using
-one of the two methods outlined below.
+problem to dbi-users@isc.org and CC them to the maintainers at
+j.leffler@acm.org and myk@informix.com using one of the two methods
+outlined below.  Please ensure that any email message has DBD::Informix in
+the subject line -- thanks!
 
 FAILURE CLASSES
 
@@ -171,5 +173,5 @@ Copyright (c) 1999 Jonathan Leffler
 
 Jonathan Leffler (j.leffler@acm.org)
 
-@(#)$Id: bug.reports,v 62.1 1999/09/19 21:54:02 jleffler Exp $
+@(#)$Id: bug.reports,v 95.1 1999/12/30 23:22:04 jleffler Exp $
 

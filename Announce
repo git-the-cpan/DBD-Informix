@@ -1,16 +1,9 @@
 To: dbi-announce@isc.org, dbi-dev@isc.org, dbi-users@isc.org,
         informix-list@iiug.org, descarte@symbolstone.org
-Subject: ANNOUNCE: DBD::Informix Version 0.62 released
+Subject: ANNOUNCE: DBD::Informix Version 0.95 released
 
-The next release of DBD::Informix, version 0.62, has been uploaded to CPAN.
+The next release of DBD::Informix, version 0.95, has been uploaded to CPAN.
 It will be available worldwide in a day or three.
-
-This is an experimental version like version 0.61_02, but it needs the
-non-experimental number because part of the experiment is ensuring that
-CPAN will handle it correctly.  Because it is experimental, you should use
-it with caution.  The other main reason for labelling this an experiment is
-that the 'bad free()' problems are more prevalent than I'd like.  It
-primarily affects the blob handling code (eg the tests t/t7[45]blob.t).
 
 DBD::Informix is the driver code that enables Perl 5.004 or 5.005 to access
 Informix databases via the DBI module (you'll need the code for both DBI
@@ -23,83 +16,68 @@ http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
 http://www.symbolstone.org/technology/perl/DBI
 
    *******************************************************************
-   **    When you successfully build DBD::Informix v0.62, please    **
-   ** report your configuration so I can add it to Working.Versions **
+   **    When you successfully build DBD::Informix v0.95, please    **
+   **      use the ItWorks script to report your configuration      **
    *******************************************************************
 
-Change in release 0.62:
-* DBI::errstr loses the trailing newline.  This can affect error messages.
-  The intent is to improve the messages produced by Perl (so that they
-  include a line number).
+---------------------------------------------------------------------------
+                                GREAT NEWS
+Informix will be officially supporting DBD::Informix starting with the next
+release.  And Informix R&D engineers will be doing the coding.  So, with
+the next release, which will probably be 1.00 (because software companies
+do not, I'm told, release 0.xy versions of products), will be supported by
+Informix.  With the 1.00 version, if you have support for your Informix
+products, then you will be able to get help for DBD::Informix too.  If you
+do not have support, then you will have to continue to use the mailing
+lists.  I will no longer be doing all the coding etc.  I will still be an
+advisor to the people handling DBD::Informix.  And please be patient until
+the supported release is available, and be patient with the Tech Support
+people who will have to learn how to deal with this product.
+---------------------------------------------------------------------------
 
-New in releases 0.61_02 and 0.62:
-* Fix CGI examples to use CGI::TR method.  Information and revisions from
-  David M Davisson <davisson@emuni.com>.
-* Record value of $INFORMIXDIR and $INFORMIXSERVER used at compile time in
-  Informix.pm, so that the values can be reset at runtime.  Based on code
-  contributed by Honza Pazdziora <adelton@fi.muni.cz>.
-* Add partial support for IUS datatypes.  My profound thanks to Rocky
-  Bernstein <rocky@thewire.ap.org> for the sterling work he did in
-  providing the code for LVARCHAR and BOOLEAN types.  Also to Informix for
-  allowing me to do some of this work in company time.  I ran into some
-  problems with the (lack of) documentation on handling SET, LIST,
-  MULTISET, ROW types in dynamic ESQL/C, and ended up helping to write some
-  of example code for the documentation.  This was not completed.
-* DBD_INFORMIX_SERVER environment variable is obsolete (set server
-  information in DBD_INFORMIX_DATABASE).  Added DBD_INFORMIX_USERNAME2 and
-  DBD_INFORMIX_PASSWORD2 for second connection.
-* Cleaned up tests -- only one test uses DBI->install_driver().
-* Added some examples, including code for use with a web-server.  See the
-  examples subdirectory for details.  Some of these exercise the more
-  recent methods added to DBI (eg selectall_arrayref()).
-* Improve the NT support, mainly by pacifying MSVC better.
-* Improved support for threaded versions of Perl 5.005.
-* Add support for "perl -MCPAN -e 'install Bundle::DBD::Informix'".
 
-Definitively not about to happen:
-* Use the output from DESCRIBE of an UPDATE statement in ClientSDK 2.00 and
-  the 7.30 servers.  Regrettably, Informix bug B111987 (DESCRIBE ON UPDATE
-  STATEMENT GIVES INADEQUATE (AND UNUSABLE) INFORMATION) needs to be
-  resolved before it is possible to really make use of the feature.
-  Succinctly, the DESCRIBE only tells you about input parameters used in
-  the SET clause in the forms:
-
-        SET a = ?, b = ?        -- ANSI standard
-        SET (a, b) = (?, ?)     -- Informix extension
-
-  It does not tell you about other parameters such as
-
-        SET a = somefunc(?),
-            b = ?,
-            c = totherfunc(?, ?),
-            d = ?
-        WHERE e = ? AND f = yetanother(?)
-
-  This would only yield two described values (instead of the seven it
-  should), and no positional information to help you locate those described
-  values in the SQL DESCRIPTOR.  This is bitterly disappointing, and it
-  means that it is *still* not possible to update blob columns with
-  DBD::Informix.  Further, it is improbable that this will be fixed in the
-  forthcoming Centaur release as the bug was only discovered when the
-  Centaur versions were in the final stages of their beta cycle and this is
-  a mis-designed feature rather than a simple malfunction.
+New in release 0.95:
+* Trying to get to a state where release 1.00 is sensible.  Hence, DBI
+  compliance has been an issue that has been addressed.
+* Preliminary support for XPS (8.x) database servers.  Versions of XPS
+  prior to 8.30 do not support blobs or stored procedures.
+* New $dbh attributes for XPS support - ix_ServerVersion, ix_BlobSupport
+  and ix_StoredProcedures.
+* Various extra documents in Notes sub-directory.
+* No longer records INFORMIXDIR and INFORMIXSERVER in Informix.pm during
+  build; PAUSE/CPAN was confused by absence of Informix.pm file.
+* Another attempt at providing Bundle::DBD::Informix support.
+* Basic support for long table and column (and owner) names.
+* Use absolute pathnames for shared libraries unless the environment
+  variable DBD_INFDORMIX_RELOCATABLE_INFORMIXDIR is set.  Should mean that
+  LD_LIBRARY_PATH et al are not required at run time, which should improve
+  support for web servers.  INFORMIXDIR and INFORMIXSERVER must be set,
+  though.
+* New $sth attribute ix_Fetchable indicates whether you can (and therefore
+  must) do fetches on this statement handle.
+* Attribute ix_AutoErrorReport is officially obsolete.  You get a warning
+  that you are using an obsolete attribute.  In future, you won't.
+* Attribute ix_StatementText is deprecated; use the DBI standard
+  attribute Statement instead.
+* Add ItWorks shell script to report working versions in a standard manner.
 
 Still to do:
 * Investigate whether using sqlda structures in place of SQL descriptors
-  makes a significant difference to the performance of DBD::Informix.  Note
-  that although this has previously been described as a necessary precursor
-  to providing support for Informix-ESQL/C v4.x or earlier versions, there
-  are actually no longer any plans to provide such support in
-  DBD::Informix.
+  makes a significant difference to the performance of DBD::Informix.
+  Note that although this has previously been described as a necessary
+  precursor to providing support for Informix-ESQL/C v4.x or earlier
+  versions, there are actually no longer any plans to provide support
+  for ESQL/C versions prior to 5.00 in DBD::Informix.
 * Ensure that NT support works more nearly out of the box.
 * Support for LongReadLen et al, maybe.
 
-Next release: 0.95 (yes, really this time!)
-* This should, with luck, have full IUS support, and is planned as a
-  preparatory release for a 1.00 DBD::Informix driver which will be fully
-  compliant with the DBI standard.  If a miracle occurs, then the same
-  code would be released as 1.00.  Assuming the normal development cycle,
-  there will be a short succession of releases leading up to 1.00.
+Next release: 1.00
+* This should, with luck, have full IUS support, and decent support for
+  builds on NT.  And it should conform fairly closely to the DBI
+  specification.
+* The next release will be version 0.96 if the 0.95 release doesn't work
+  properly with:
+	perl -MCPAN -e 'install Bundle::DBD::Informix'
 
 Apologies:
 * I've not updated the working versions file with those who have told me
@@ -123,4 +101,4 @@ Jonathan Leffler (j.leffler@acm.org) #include <disclaimer.h>
 
 PS: Read the README file.  Also read the Informix.Licence file.
 
-@(#)$Id: Announce,v 62.2 1999/08/30 17:48:51 jleffler Exp $
+@(#)$Id: Announce,v 95.5 1999/12/30 23:20:59 jleffler Exp $

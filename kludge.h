@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: kludge.h,v $
-@(#)Version:         $Revision: 1.5 $
-@(#)Last changed:    $Date: 1999/08/20 20:36:29 $
+@(#)Version:         $Revision: 1.6 $
+@(#)Last changed:    $Date: 1999/11/24 22:07:44 $
 @(#)Purpose:         Provide support for KLUDGE macro
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1995,1997-99
-@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
+@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.5 1999/08/20 20:36:29 jleffler Exp $";
+static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.6 1999/11/24 22:07:44 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -27,6 +27,7 @@ static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.5 1999/08/20 20:36:29 jlef
 #ifdef KLUDGE_DISABLE
 
 #define KLUDGE(x)	((void)0)
+#define FEATURE(x)	((void)0)
 
 #else
 
@@ -59,9 +60,11 @@ static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.5 1999/08/20 20:36:29 jlef
  */
 
 #define KLUDGE_DEC	static const char kludge[]
+#define FEATURE_DEC	static const char feature[]
 
 extern void kludge_use(const char *str);
 #define KLUDGE(x)	{ KLUDGE_DEC = "@(#)KLUDGE: " x; KLUDGE_USE(kludge); }
+#define FEATURE(x)	{ FEATURE_DEC = "@(#)Feature: " x; KLUDGE_USE(kludge); }
 
 #ifdef KLUDGE_FORCE
 #define KLUDGE_USE(x)	kludge_use(x)

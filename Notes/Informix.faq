@@ -17,19 +17,19 @@ FAQs for DBD::Informix
 
 2.  In the following code, I get error -280 (a quoted string exceeds 256
     bytes) when the value of $longcharstring contains more than 256
-    characters.  This is odd because LongCharCol is defined to contain many
-    more than 256 characters (eg CHAR(2500)).
+    characters.  This is odd because LongCharCol is defined to contain
+    many more than 256 characters (eg CHAR(2500)).
 
         $sql = "INSERT INTO SomeTable(LongCharCol) VALUES('$longcharstring')";
         my $sth = $dbh->prepare($sql) or die($DBI::errstr);
         $sth->execute() or dir($DBI::errstr)
 
-    ESQL/C has an irritating limitation that the longest character literal
-    that it allows is 256 characters long.  There's a simple workaround
-    which always works; use a place-holder in place of the string.  This
-    has the additional advantage of not breaking when the $longcharstring
-    variable itself contains quote characters, whereas the example code
-    will break.
+    ESQL/C has an irritating limitation that the longest character
+    literal that it allows is 256 characters long.  There's a simple
+    workaround which always works; use a place-holder in place of the
+    string.  This has the additional advantage of not breaking when the
+    $longcharstring variable itself contains quote characters, whereas
+    the example code will break.
 
         $sql = "INSERT INTO SomeTable(LongCharCol) VALUES(?)";
         my $sth = $dbh->prepare($sql) or die($DBI::errstr);
@@ -39,4 +39,36 @@ FAQs for DBD::Informix
 
     At the Informix web-site: http://www.informix.com/answers
 
-@(#)$Id: Informix.faq,v 62.2 1999/08/30 18:01:46 jleffler Exp $
+4.  When I try to build the shared library, I get an error message about
+    lots of missing symbols like Perl_newAV (referenced in dbdattr.o)
+    and Perl_newSV (referenced in Informix.o) and main.  What's up?
+
+    This most frequently occurs when you need to modify the esql script
+    to change the default compiler from cc to (typically) gcc, and you
+    don't respect the INFORMIXC environment variable.  At the start of
+    the original esql script is a line that reads:
+
+        CC=${INFORMIXC=cc}                  # Original version
+
+    If you need to change that to use gcc by default, then modify it to
+    keep the option of overriding the C compiler with the INFORMIXC
+    environment variable, because DBD::Informix uses INFORMIXC to ensure
+    that it can build the shared library on many systems (specifically,
+    this is necessary on Solaris 2.6, Solaris 7 and Linux; it will be
+    necessary on many SVR4-derived systems).
+
+        CC=${INFORMIXC=gcc}                 # Correct change
+        CC=${INFORMIXC=/usr/local/bin/gcc}  # Correct change
+
+        CC=gcc                              # Incorrect change
+        CC=/usr/local/bin/gcc               # Incorrect change
+
+    Why?  On these platforms, the -G option needs to be relayed to the C
+    compiler or loader, but the esql script thinks that -G is an option
+    intended for its own benefit.  So, to get the -G option to the C
+    compiler, it is set in the ESQLLD environment variable, and
+    INFORMIXC is set to run the esqlld Perl script.  If you modify esql
+    to ignore INFORMIXC, you make it ignore a lot of hard work -- and
+    cause the build to fail.
+
+@(#)$Id: Informix.faq,v 95.1 1999/12/16 01:59:49 jleffler Exp $

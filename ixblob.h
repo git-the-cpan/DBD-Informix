@@ -5,7 +5,7 @@
 @(#)Purpose:         ESQL/C Utility Functions for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1997-98
-@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
+@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
 */
 
 /*TABSTOP=4*/

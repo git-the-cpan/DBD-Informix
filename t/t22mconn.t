@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t22mconn.t,v 62.2 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t22mconn.t,v 95.2 1999/12/04 23:45:10 jleffler Exp $ 
 #
 #	Test DISCONNECT ALL for DBD::Informix
 #
 #	Copyright (C) 1996-99 Jonathan Leffler
 
-BEGIN { require "perlsubs/InformixTest.pl"; }
+BEGIN { require "perlsubs/InformixTest.pl"; require "perlsubs/shmconn.pl"; }
 
 $dbase1 = $ENV{DBD_INFORMIX_DATABASE};
 $dbase1 = "stores" unless ($dbase1);
@@ -24,6 +24,14 @@ if (!$dbase2)
 	$dbase2 = $dbase1;
 	$user2 = $user1;
 	$pass2 = $pass1;
+}
+
+if (&is_shared_memory_connection($dbase1) &&
+	&is_shared_memory_connection($dbase2))
+{
+	&stmt_note("1..0\n");
+	&stmt_note("# Two shared memory connections - test skipped\n");
+	exit(0);
 }
 
 &stmt_note("# Connect to: $dbase1\n");

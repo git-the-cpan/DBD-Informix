@@ -1,6 +1,6 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 62.8 1999/09/19 22:49:47 jleffler Exp $ 
+# @(#)$Id: Makefile.PL,v 95.3 1999/12/21 18:49:29 jleffler Exp $ 
 #
 # Portions Copyright (c) 1996-99 Jonathan Leffler
 # Portions Copyright (c) 1996    Alligator Descartes
@@ -12,9 +12,7 @@
 
 # A sufficiently recent version of Perl and DBI must be installed before we
 # can build the DBD module.  The code in DBD::Informix needs the features
-# present in Perl 5.004 and DBI 1.02.  Well, perhaps not strictly anything
-# in DBI 1.02, but that's the current stable version and should be used now
-# we are not in alpha mode any more!
+# present in Perl 5.004 and DBI 1.02.
 use 5.004;
 use ExtUtils::MakeMaker qw(&WriteMakefile $Verbose);
 use Config;
@@ -23,6 +21,8 @@ use DBI 1.02;
 use DBI::DBD;
 
 BEGIN { require "perlsubs/esqlc.pl"; }
+
+$| = 1;     # Ensure that Perl output is interleaved with test output.
 
 # Configure for Unix vs Windows 95/NT
 my $objext = $Config{obj_ext};
@@ -44,18 +44,14 @@ if ($NTConfiguration)
 	});
 }
 
-$| = 1;     # Ensure that Perl output is interleaved with test output.
-
 my %opts = (
 	NAME         => 'DBD::Informix',
-	VERSION_FROM => 'Informix.pm.PL',
-	PL_FILES     => { 'Informix.pm.PL' => 'Informix.pm' },
-	PM           => { 'Informix.pm' => '$(INST_LIBDIR)/Informix.pm' },
-	clean        => { FILES        => 'Informix.xsi esqlinfo.h esqlvrsn.h Informix.pm t/decgen.sql t/dtgen.sql' },
+	VERSION_FROM => 'Informix.pm',
+	clean        => { FILES        => 'Informix.xsi esqlinfo.h esqlvrsn.h t/decgen.sql t/dtgen.sql' },
 	realclean    => { FILES        => 'esql' },
 	dist         => { DIST_DEFAULT => 'clean distcheck disttest tardist',
 					  PREOP        => '$(MAKE) -f Makefile.old distdir',
-					  COMPRESS     => 'gzip',
+					  COMPRESS     => 'gzip -v9',
 					  SUFFIX       => 'gz'
 					}
 		   );
@@ -90,7 +86,7 @@ my $dbi_ref_ver = "1.13";
 warn "*** Ideally, you should upgrade to DBI version $dbi_ref_ver.\n\n"
 	unless ($DBI::VERSION >= $dbi_ref_ver);
 
-my ($ID, $esqlprog) = &find_informixdir_and_esql();
+my ($ID, $esqlprog) = &find_informixdir_and_esql($NTConfiguration);
 
 my $auxincl = "";
 $auxincl = " -I$ID/incl/tools" if ($esqlprog =~ /\bc4gl\b/);
@@ -113,8 +109,32 @@ my $esql = "$esqlprog";
 my $esqlc_flags = "";
 my $vercode = "esqlc_v6";
 my $multiconn = 1;
-if ($vernum >= 500 && $vernum < 600)
+if ($vernum < 100)
 {
+	die qq{
+	The ESQL/C version information found was: <<$infversion>>
+	$opts{NAME} failed to find a version number ($vernum).
+	Please report this to the $opts{NAME} maintenance team.
+	};
+}
+elsif ($vernum >= 100 && $vernum < 500)
+{
+	die qq{
+	$infversion does not support string-named cursors.
+	This version of $opts{NAME} requires this facility.
+	There are no longer any plans to back-port $opts{NAME}
+	to such old and obsolete versions of ESQL/C.
+	Please investigate upgrading your software.
+	If all else fails, try installing DBD::Informix4 instead.
+	}
+}
+elsif ($vernum >= 500 && $vernum < 600)
+{
+	warn &nlt(qq%
+			This version of ESQL/C is not considered Y2K-safe by Informix.
+			Please check out the Y2K page at the Informix web site (http://www.informix.com)
+			Please upgrade to version 5.10 or later.
+			%) unless $vernum >= 510;
 	$vercode = "esqlc_v5";
 	$multiconn = 0;
 	if ($NTConfiguration)
@@ -141,13 +161,28 @@ if ($vernum >= 500 && $vernum < 600)
 		instead.  Read the Notes/static.build file.\n
 		%);
 }
-elsif (($vernum >= 600 && $vernum < 700) or ($vernum >= 710 && $vernum < 720))
+elsif ($vernum >= 600 && $vernum < 700)
 {
-	print "Ideally, you should upgrade to a more recent version of ESQL/C.\n";
+	warn &nlt(qq%
+			This version of ESQL/C is obsolete.
+			It is also not considered Y2K-safe by Informix.
+			Please check out the Y2K page at the Informix web site (http://www.informix.com)
+			Please upgrade to version 7.24 or later.
+			%);
 	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
 	$esqlc_flags .= &set_esqlc_linkage("");
 }
-elsif ($vernum >= 720 && $vernum < 800)
+elsif ($vernum >= 700 && $vernum < 720)
+{
+	warn &nlt(qq%
+			This version of ESQL/C is obsolete.
+			It is also not considered Y2K-safe by Informix.
+			Please check out the Y2K page at the Informix web site (http://www.informix.com)
+			Please upgrade to version 7.24 or later.
+			%);
+	print "Also check whether you should set DBD_INFORMIX_ESQLC_LINKAGE.\n";
+	$esqlc_flags .= &set_esqlc_linkage("");
+}elsif ($vernum >= 720 && $vernum < 800)
 {
 	# 7.2x is already released.  There should not be an ESQL/C version
 	# 7.3x.  The 7.3x server is Informix Dynamic Server, IDS.  You use
@@ -161,16 +196,24 @@ elsif ($vernum >= 720 && $vernum < 800)
 	# by report, some versions have reverted to static linking as the
 	# default.  Use the -shared flag to force shared library linking.
 	# Provide DBD_INFORMIX_ESQLC_LINKAGE to override the default.
+	warn &nlt(qq%
+			This version of ESQL/C is not considered Y2K-safe by Informix.
+			Please check out the Y2K page at the Informix web site (http://www.informix.com)
+			Please upgrade to version 7.24 or later.
+			%) if ($vernum < 724);
 	$esqlc_flags .= &set_esqlc_linkage("-shared");
 }
-elsif ($vernum >= 100 && $vernum < 500)
+elsif ($vernum >= 800 && $vernum < 900)
 {
-	die qq{
-	$infversion does not support string-named cursors.
-	This version of $opts{NAME} requires this facility.
-	There are no longer any plans to back-port $opts{NAME}
-	to such old and obsolete versions of ESQL/C.
-	}
+	# Informix XPS.  Versions 8.00 through 8.2x probably use ESQL/C 8.xy.
+	# Starting with version 8.30, you are expected to use ClientSDK, normally.
+	# We finally have some feedback from a real user (Robert E Wyrick <rob@wyrick.org>),
+	# so we can say we support 8.x at last.
+	print &nlt(qq%
+				$opts{NAME} is still learning about XPS, so please report
+				your experience installing $opts{NAME} with XPS.  Thanks!
+				%);
+	$esqlc_flags .= &set_esqlc_linkage("-shared");
 }
 elsif ($vernum >= 900 && $vernum < 912)
 {
@@ -195,6 +238,8 @@ elsif ($vernum >= 912 && $vernum < 1000)
 	# ESQL/C 9.14 was released as ClientSDK 2.01
 	# ESQL/C 9.15 was released as ClientSDK 2.02
 	# ESQL/C 9.16 was released as ClientSDK 2.10
+	# ESQL/C 9.20 was released as ClientSDK 2.20
+	# ESQL/C 9.21 was released as ClientSDK 2.30
 	print &nlt(qq%
 			The tests in t/t31nulls.t and t/t32nulls.t will probably fail.
 			Please upgrade to a more recent version of ClientSDK.
@@ -207,17 +252,18 @@ else
 	die &nlt(qq{
 	$opts{NAME} does not know anything about $infversion.
 	Please report this to the $opts{NAME} maintenance team.
-	However, if it is later than 5.00, there is a fair chance that
-	$opts{NAME} will work if you modify the code in Makefile.PL which
-	contains this message to recognize your version.  If you have a
-	5.1x release, then you should be fine treating it as a 5.0x
-	release.  If you have an 8.0x release, you may need to treat it as
-	7.1x or 7.2x; if you have 9.0x or later, there is likely to be a lot
+	However, there is a fair chance that $opts{NAME} will work if
+	you modify the code in Makefile.PL which contains this message
+	to recognize your version.
+
+	Since you appear to have 10.0x or later, there is likely to be a lot
 	of functionality in the database which $opts{NAME} does not know
-	how to handle, but you should try treating it like 7.2x.
+	how to handle, but you should try treating it like version 9.2x.
 	You should modify the code in Makefile.PL to handle your version
 	number correctly -- find this error message and look at the code
 	above it to see what you might need to alter.
+
+	Please report your experiences to the $opts{NAME} maintenance team.
 	});
 }
 
@@ -237,6 +283,9 @@ else
 	print "Assert macro will be disabled!\n\n";
 	$opts{DEFINE} .= " -DNDEBUG";
 }
+
+print "** Warning ** you will build $opts{NAME} for a relocatable INFORMIXDIR!\n\n"
+	if (defined($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR}));
 
 $opts{INC} = " ";
 
@@ -290,6 +339,12 @@ $opts{DEFINE} .= ' -std1'
 # Ensure that __STDC__ is defined for SUNWspro compilers on Solaris.
 $opts{DEFINE} .= ' -Xa'
 	if ($Config{osname} eq 'solaris' and &which($Config{cc}) =~ m%/SUNWspro/%);
+
+# Ensure that __STDC__ is defined for cc on AIX (ie if Perl was not
+# compiled with xlc); reported by Joachim Schrod <jschrod@acm.org> in
+# January 1998.
+$opts{DEFINE} .= ' -qlanglvl=ansi'
+        if ($Config{osname} eq 'aix' and $Config{cc} eq 'cc');
 
 # Workaround Informix bug B08223 (aka B14937, and other numbers too)
 # AIX localedef31.h defines a loc_t and is used by some system headers.
@@ -349,6 +404,8 @@ $objects =~ s/\.o\w/$objext/g if ($objext ne ".o");
 # Need to pick up the DBI headers.  The DBI headers might be in
 # $INSTALLARCHLIB rather than $INSTALLSITEARCH.  This is the case under
 # Debian, according to Roderick Schertler <roderick@argon.org>, 1999-09.
+# May also, or instead, need -I\$(SITEARCHEXP)/auto/DBI; this was reported
+# by Joachim Schrod <jschrod@acm.org> in January 1998 on AIX.
 my $INC2 = "-I\$(INSTALLARCHLIB)/auto/DBI -I\$(INSTALLSITEARCH)/auto/DBI";
 
 $opts{INC} .= " $INC1 $INC2";
@@ -707,16 +764,6 @@ sub execute_command
 	my ($cmd, $sx, $msg) = @_;
 	print "+ $cmd\n" if ($sx);
 	die $msg unless system($cmd) == 0;
-}
-
-sub MY::processPL
-{
-	package MY;
-	my $inherited = shift->SUPER::processPL(@_);
-	my $server = '';
-	$server = "-dINFORMIXSERVER=$ENV{INFORMIXSERVER}" if defined $ENV{INFORMIXSERVER};
-	$inherited =~ s/(\$\(PERL\) .* Informix.pm.PL)/$1 -dINFORMIXDIR=$ID $server/;
-	$inherited;
 }
 
 __END__

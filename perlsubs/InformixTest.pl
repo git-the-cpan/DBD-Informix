@@ -1,4 +1,4 @@
-#	@(#)$Id: InformixTest.pl,v 62.4 1999/09/19 22:25:08 jleffler Exp $ 
+#	@(#)$Id: InformixTest.pl,v 95.1 1999/12/04 23:53:22 jleffler Exp $ 
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
@@ -209,10 +209,9 @@ sub test_for_ius
 	print "#     Product Version:       $drh->{ix_ProductVersion}\n";
 	if ($drh->{ix_ProductVersion} < 900)
 	{
-		&stmt_note("1..1\n");
+		&stmt_note("1..0\n");
 		&stmt_note("# IUS data types are not supported by $drh->{ix_ProductName}\n");
-		&stmt_ok(0);
-		&all_ok();
+		exit(0);
 	}
 
 	my ($dbh, $sth, $numtabs);
@@ -225,10 +224,10 @@ sub test_for_ius
 	&stmt_fail() unless (($numtabs) = $sth->fetchrow_array);
 	if ($numtabs < 40)
 	{
-		&stmt_note("1..1\n");
+		&stmt_note("1..0\n");
 		&stmt_note("# IUS data types are not supported by database server.\n");
-		&stmt_ok(0);
-		&all_ok();
+		$dbh->disconnect;
+		exit(0);
 	}
 	&stmt_note("# IUS data types can be tested!\n");
 	return $dbh;

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlc.h,v $
-@(#)Version:         $Revision: 3.6 $
-@(#)Last changed:    $Date: 1999/07/06 23:48:33 $
+@(#)Version:         $Revision: 3.10 $
+@(#)Last changed:    $Date: 1999/12/06 18:32:54 $
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-99
-@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
+@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
 */
 
 #ifndef ESQLC_H
@@ -13,9 +13,17 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 3.6 1999/07/06 23:48:33 jleffler Exp $";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 3.10 1999/12/06 18:32:54 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
+
+#ifdef HAVE_CONFIG_H
+/*
+** Needed to resolve const-ness problems on AIX 4.2, thanks to the ESQL/C
+** headers in CSDK 2.10, 2.30, etc.
+*/
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
 
 /* If ESQLC_VERSION isn't defined, use version 0 */
 #ifndef ESQLC_VERSION
@@ -34,6 +42,35 @@ static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 3.6 1999/07/06 23:48:33 jleffl
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+/*
+** Some C compilers which can support prototypes do not set __STDC__ at
+** all; the C compiler on AIX 4.2 is a case in point.  In some versions
+** of ESQL/C (CSDK 2.10, CSDK 2.30, etc), decimal.h and datetime.h only
+** declare the function prototypes if __STDC__ is set or if __cplusplus
+** is set.  Internally, they set STDC_FLAG to 1 and declare the
+** prototypes if STDC_FLAG is set.  All the compilers supported by JLSS
+** support prototypes (by definition), so force the prototypes unless
+** JLSS_DO_NOT_FORCE_PROTOTYPES is set.  Consistency is wonderful; in
+** some versions of ESQL/C (CSDK 2.10, CSDK 2.30, etc), sqlhdr.h uses a
+** macro STDC_ENABLE instead of STDC_FLAG.
+*/
+#ifndef JLSS_DO_NOT_FORCE_PROTOTYPES
+#ifndef STDC_FLAG
+#define STDC_FLAG 1
+#endif /* STDC_FLAG */
+#ifndef STDC_ENABLE
+#define STDC_ENABLE 1
+#endif /* STDC_ENABLE */
+#endif /* JLSS_DO_NOT_FORCE_PROTOTYPES */
+
+/*
+** AIX pre-empts the use of loc_t (by declaring a type of that name in
+** the header file /usr/include/sys/localedef31.h, as it is entitled to
+** do according to POSIX.1, if not ISO C).  The standard workaround is
+** to define _H_LOCALEDEF on the compiler command line; doing it in this
+** header usually does not work.
+*/
 
 /* -- Include Files	*/
 
@@ -85,7 +122,21 @@ extern "C" {
 /* Probably an inaccurate value for ESQLC_VERSION -- should be 914 or greater */
 #include <sqliapi.h>
 #elif ESQLC_VERSION >= 914
+
+/*
+** To complete our happiness, in some versions of ESQL/C (CSDK 2.10,
+** CSDK 2.30) sqliapi.h uses neither STDC_FLAG nor STDC_ENABLE, but
+** tests directly on __STDC__ and __cplusplus.  So, for sqliapi.h, we
+** have to set __STDC__ if it is not already set.  Not all C compilers
+** will allow you to do this (and, specifically, the AIX compiler does
+** not allow this).  So, we have to live without prototypes from
+** sqliapi.h on AIX, and #undef const at the end.  This was reported as
+** PTS Bug B118413, but won't be fixed before CSDK 2.50 at the earliest.
+*/
+
 #include <sqliapi.h>
+#undef const
+
 #endif
 
 #ifdef _WIN32
@@ -104,22 +155,26 @@ extern int      sqgetdbs(int *ret_fcnt,
 
 #endif /* ESQLC_VERSION */
 
-#if ESQLC_VERSION < 720
 /*
 ** Some code, notably esqlutil.h, relies on the typedef for value_t.
-** However, value.h is not included by sqlhdr.h earlier than 7.20.  The
-** problem was found by David Edge <dedge@ak.blm.gov> in 7.10.UC1 on AIX
-** 4.2.1; it was subsequently also revealed on Solaris 2.6 with ESQL/C
-** versions 5.08, 4.12, and 6.00.  The symbol MAXADDR is defined in
-** value.h.  The 4.12 and 5.08 versions of value.h do not prevent
-** multiple includes, leading to problems.  This test is not perfect; if
-** code after #include "esqlc.h" includes value.h explicitly, it will
-** not compile under many versions of ESQL/C.
+** However, value.h is not included by sqlhdr.h earlier than 7.20.
+** The problem was found by David Edge <dedge@ak.blm.gov> in 7.10.UC1
+** on AIX 4.2.1 and was confirmed on Solaris 2.6 with ESQL/C versions
+** 5.08, 4.12, and 6.00.  Robert E Wyrick <rob@wyrick.org> had the
+** problem version 8.11.  Versions 8.00 through 8.1x probably had the
+** same problem.  XPS 8.20 uses ClientSDK and hence ESQL/C 9.x.  And
+** the 7.23 version of sqlhdr.h only includes <value.h> when __STDC__
+** is defined, which makes the version-specific testing too complex.
+**
+** The symbol MAXADDR is defined in value.h.  The 4.12 and 5.08
+** versions of value.h do not prevent multiple includes, leading to
+** problems.  This test is not perfect; if code after #include
+** "esqlc.h" includes value.h explicitly, it will not compile under
+** many versions of ESQL/C.
 */
 #ifndef MAXADDR
 #include <value.h>
 #endif /* MAXADDR */
-#endif /* 5.xx or 7.1x */
 
 /*
 ** Supply missing type information for IUS (IDS/UDO) data types.
@@ -144,7 +199,7 @@ extern int      sqgetdbs(int *ret_fcnt,
 ** identifiers.
 */
 #if (ESQLC_VERSION >= 730 && ESQLC_VERSION < 800) || \
-	(ESQLC_VERSION >= 830 && ESQLC_VERSION < 900) || \
+	(ESQLC_VERSION >= 820 && ESQLC_VERSION < 900) || \
 	(ESQLC_VERSION >= 920)
 #define SQL_NAMELEN	128
 #define SQL_USERLEN	32
@@ -160,14 +215,18 @@ extern int      sqgetdbs(int *ret_fcnt,
 
 /* -- Type Definitions */
 
-typedef loc_t	        Blob;
+#if ESQLC_VERSION >= 900
+typedef struct tag_loc_t Blob;
+#else
+typedef loc_t		Blob;
+#endif
+
 typedef struct decimal	Decimal;
 typedef struct dtime	Datetime;
 typedef struct intrvl	Interval;
 typedef struct sqlca_s	Sqlca;
 typedef struct sqlda	Sqlda;
 typedef struct sqlva	Sqlva;
-typedef struct value_t	Value;
 
 #if ESQLC_VERSION >= 900
 

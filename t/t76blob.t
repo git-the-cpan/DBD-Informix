@@ -6,7 +6,7 @@
 #
 # Reproduce 451 errors with Perl.
 #
-# @(#)$Id: t76blob.t,v 62.4 1999/09/19 21:18:32 jleffler Exp $
+# @(#)$Id: t76blob.t,v 95.3 1999/12/04 23:45:10 jleffler Exp $
 
 BEGIN { require "perlsubs/InformixTest.pl"; }
 
@@ -15,11 +15,12 @@ $tablename = "dbd_ix_blobtest";
 # Test install...
 $dbh = connect_to_test_database();
 
-if (!$dbh->{ix_InformixOnLine})
+if (!$dbh->{ix_BlobSupport})
 {
-	print("1..2\n");
-	&stmt_note("# Not Informix-OnLine -- no blob testing\n");
-	&stmt_ok(0);
+	print("1..0\n");
+	&stmt_note("# No blob support -- no blob testing\n");
+	$dbh->disconnect;
+	exit(0);
 }
 else
 {

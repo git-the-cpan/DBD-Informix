@@ -1,22 +1,63 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: esqlld,v 58.1 1998/01/06 02:53:23 johnl Exp $ 
+# @(#)$Id: esqlld,v 95.1 1999/09/23 21:20:57 jleffler Exp $ 
 #
 # DBD::Informix for Perl Version 5
 #
 # Surrogate Linker for Informix ESQL/C versions 4.10.UC1 upwards
 # -- Used to create shared libraries.
 #
-# Copyright (c) 1996-98 Jonathan Leffler
+# Copyright (c) 1996-99 Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
 
-@ARGS = ();
+use strict;
+use Config;
+
+my (@ARGS) = ();
+my $arg;
+my $cmd;
+my @cmd;
+
+# If DBD_INFORMIX_RELOCATABLE_INFORMIXDIR is set, then leave Informix
+# library file specifications alone.  If it is not set, then hard-code the
+# Informix library path names.  This will simplify life on most platforms.
+# It also, more or less, follows the ideas espoused in 'Why LD_LIBRARY_PATH
+# is bad', by David Barr (http://www.visi.com/~barr/ldpath.html).
+#
+# This gets tricky.  We need to remove any library path arguments which
+# refer to $INFORMIXDIR, such as -L$INFORMIXDIR/lib, and map any references
+# to -lixlib into $INFORMIXDIR/lib/libixlib.so (unless that's libixlib.sl,
+# etc).  Further, you can write -L $INFORMIXDIR/lib and -l ixlib, so we
+# have to be prepared to handle adjacent pairs of arguments on occasion.
+# And heaven help us on systems where we are not using this script (eg
+# AIX 4.2).  Note, too, that this assumes you will use shared libraries
+# if they exist.  It needs to be rigged to avoid doing the mapping if
+# shared libaries are not wanted at all.
+
+my $map = ($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR}) ? 0 : 1;
+my $ixd = $ENV{INFORMIXDIR};
+my @ixlibdirs = ();
+my $ar_ext = $Config{lib_ext};	# Regular, static libraries
+my $dl_ext = ".$Config{dlext}";	# Shared, dynamic libraries
 
 for $arg (@ARGV)
 {
-	push @ARGS, $arg unless ($arg =~ /^-[DIU]/o);
+	if ($arg =~ m%-L$ixd/%o && $map)
+	{
+		push @ARGS, $arg;
+		$arg =~ s%-L%%;
+		push @ixlibdirs, $arg;
+	}
+	elsif ($arg =~ m%-l.+%o && $map)
+	{
+		push @ARGS, &map_library($arg, @ixlibdirs);
+	}
+	else
+	{
+		push @ARGS, $arg unless ($arg =~ /^-[DIU]/o);
+	}
 }
 
 # Sort out the real compiler.
@@ -28,3 +69,26 @@ $cmd = 'cc' unless ($cmd);
 
 print STDERR "@cmd @ARGS -lc\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLLD};
 exec @cmd, @ARGS, "-lc";
+
+sub map_library
+{
+	my ($lib, @libdirs) = @_;
+
+	my ($dir, $ext, $path);
+	my $stub = $lib;
+	$stub =~ s/-l//;
+	$stub = "lib$stub";
+	for $dir (@libdirs)
+	{
+		for $ext ($dl_ext, $ar_ext)
+		{
+			$path = "$dir/$stub$ext";
+			if (-f $path)
+			{
+				print "\t$0: map $lib to $path\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLLD};
+				return $path;
+			}
+		}
+	}
+	return $lib;
+}

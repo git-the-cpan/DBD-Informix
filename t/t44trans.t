@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: t44trans.t,v 62.3 1999/09/19 21:18:32 jleffler Exp $ 
+#	@(#)$Id: t44trans.t,v 95.1 1999/12/04 23:50:27 jleffler Exp $ 
 #
 #	Test AutoCommit On for DBD::Informix
 #
@@ -16,11 +16,11 @@ $dbh = &connect_to_test_database();
 
 if (!$dbh->{ix_ModeAnsiDatabase})
 {
-	&stmt_note("1..1\n");
+	&stmt_note("1..0\n");
 	&stmt_note("# This test is for MODE ANSI databases only\n");
 	&stmt_note("# Database '$dbh->{Name}' is not a MODE ANSI database\n");
-	&stmt_ok(0);
-	&all_ok();
+	$dbh->disconnect;
+	exit(0);
 }
 
 &stmt_note("1..15\n");

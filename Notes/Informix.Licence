@@ -82,13 +82,37 @@ To use DBD::Informix, you will need to have access to an Informix database
 engine, which means that you need either OnLine or SE or IUS on one of the
 machines in your network.  I cannot think of any circumstances where
 DBD::Informix will be of use to you without having a database to access.
-You need to know the version number of the engine to ensure that you
-compile DBD::Informix with a compatible version of Informix ESQL/C, and run
-it in a compatible runtime environment.  The possible versions are 5.0x,
-(6.0x), 7.1x, 7.2x, (8.0x), 9.0x or 9.1x, where the x will be a string such
-as '0.UC1', yielding a complete version string such as 7.22.UC2.  Note that
+You should know the version number of the engine to ensure that you compile
+DBD::Informix with a compatible version of Informix ESQL/C, and run it in a
+compatible runtime environment.  The possible versions are 5.0x, (6.0x),
+7.1x, 7.2x, (8.0x), 9.0x or 9.1x, where the x will be a string such as
+'0.UC1', yielding a complete version string such as 7.22.UC2.  Note that
 DBD::Informix does not work with version 4.1x or earlier versions of the
 engines.
+
+Note that ESQL/C exists in versions 5.0x (obsolete), 5.1x, 6.0x (obsolete),
+7.0x (obsolete), 7.1x (obsolete), 7.2x, 8.0x (obsolete), 8.1x, and 9.x.
+Within the 9.x family, the 9.0x versions are obsolete, and the other
+available versions are mostly part of ClientSDK.
+
+    ESQL/C 9.11     - ESQL/C 9.11 (obsolete)
+    ESQL/C 9.12     - DevSDK 9.12 (obsolete)
+    ESQL/C 9.13     - ClientSDK 2.00
+    ESQL/C 9.14     - ClientSDK 2.01
+    ESQL/C 9.15     - ClientSDK 2.02
+    ESQL/C 9.16     - ClientSDK 2.10
+    ESQL/C 9.20     - ClientSDK 2.20
+    ESQL/C 9.21     - ClientSDK 2.30
+    ESQL/C 9.30     - ClientSDK 2.40
+
+With the 7.3x servers, you would normally use ClientSDK 2.10 or greater.
+With the 8.2x servers, you would normally use ClientSDK 2.30 or greater.
+With the 9.1x servers, you would normally use ClientSDK.  If you've still
+got 9.11 or 9.12 servers, you are long overdue for an upgrade.  If you've
+got a 9.2x server, you would normally use ClientSDK 2.40.  Finally, note
+that ClientSDK is available free of charge -- you should use it if at all
+possible.  And ClientSDK can be made to talk to the 7.x and even 5.x
+servers with careful setup (beyond the scope of this document -- RTFM).
 
 You do not need to have an Informix database engine on the machine where
 you build or use DBD::Informix.  However, to compile DBD::Informix, or to
@@ -210,6 +234,9 @@ compiler, which doesn't provide the features needed by DBD::Informix.
 Using LiveWire Pro from Netscape
 ================================
 
+This information dates from 1997.  It is probably irrelevant now (end of
+1999).
+
 When you purchase LiveWire Pro from Netscape, the product comes with certain
 restrictions to the Informix OnLine Workgroup Server (OWS) license that is
 bundled with the product.  Those restrictions are outlined below:
@@ -261,4 +288,4 @@ See also the README file.
 
 Jonathan Leffler (jleffler@informix.com aka j.leffler@acm.org)
 Informix Software Inc
-@(#)$Id: Informix.Licence,v 62.1 1999/08/30 17:49:37 jleffler Exp $
+@(#)$Id: Informix.Licence,v 95.1 1999/12/16 04:09:23 jleffler Exp $

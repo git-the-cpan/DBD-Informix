@@ -1,6 +1,6 @@
 #! /usr/bin/perl -w
 #
-#	@(#)$Id: BugReport,v 62.1 1999/09/19 22:07:43 jleffler Exp $
+#	@(#)$Id: BugReport,v 95.1 1999/11/02 19:19:53 jleffler Exp $
 #
 #	Copyright (C) 1999 Jonathan Leffler
 #
@@ -15,13 +15,24 @@
 # * It is not unreasonable to build DBD::Informix using:
 #   perl BugReport 2>&1 | tee bugreport.out
 
+use Config;
+
 $| = 1;
+
+$id = "id";
+if ($Config{osname} eq 'solaris')
+{
+	# On Solaris, /usr/bin/id only reports on auxilliary groups with
+	# the non-standard, non-POSIX -a option.  Usually, there's a
+	# /usr/xpg4/bin/id which does follow the standards.
+	$id = (-x "/usr/xpg4/bin/id") ? "/usr/xpg4/bin/id" : "/usr/bin/id -a";
+}
 
 system qq{
 	echo "Command:   $0 @ARGV"
 	echo "Date:      `date`"
 	echo "Machine:   `uname -n` (`uname -s -r`)"
-	echo "User:      `id -a`"
+	echo "User:      `$id`"
 	echo "Directory: `pwd`"
 	echo "Umask:     `umask`"
 	echo "Terminal:  `tty 2>/dev/null`"

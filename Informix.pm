@@ -1,36 +1,7 @@
-#	@(#)$Id: Informix.pm.PL,v 62.6 1999/09/19 21:53:02 jleffler Exp $
+#	@(#)$Id: Informix.pm,v 95.6 1999/12/30 23:15:35 jleffler Exp $
 #
 #   Portions Copyright (c) 1994-95 Tim Bunce
-#   Portions Copyright (c) 1996-98 Jonathan Leffler
-#
-#   You may distribute under the terms of either the GNU General Public
-#   License or the Artistic License, as specified in the Perl README file.
-
-use Config;
-my $filename = $0;
-$filename =~ s/\.PL$//;
-
-my $dir = '/usr/informix';
-my $server = 'localhost';
-while (@ARGV and $ARGV[0] =~ /^-d(\w+)=(.*)/)
-	{
-	my ($tag, $value) = ($1, $2);
-	$tag eq 'INFORMIXDIR' and $dir = $value;
-	$tag eq 'INFORMIXSERVER' and $server = $value;
-	shift;
-	}
-
-open OUT,">$filename" or die "Can't create $filename: $!";
-chmod(0755, $filename);
-print "Extracting $filename from $0\n",
-		"\t* setting default INFORMIXDIR to `$dir'\n",
-		"\t* setting default INFORMIXSERVER to `$server'\n";
-
-print OUT <<'EOF';
-#	@(#)$Id: Informix.pm.PL,v 62.6 1999/09/19 21:53:02 jleffler Exp $
-#
-#   Portions Copyright (c) 1994-95 Tim Bunce
-#   Portions Copyright (c) 1996-98 Jonathan Leffler
+#   Portions Copyright (c) 1996-99 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -42,22 +13,15 @@ print OUT <<'EOF';
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.62";
+	$VERSION     = "0.95";
 	$ATTRIBUTION = 'Jonathan Leffler <j.leffler@acm.org>';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm.PL,v $ $Revision: 62.6 $ ($Date: 1999/09/19 21:53:02 $)@, 3);
+	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 95.6 $ ($Date: 1999/12/30 23:15:35 $)@, 3);
 	$Revision    =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
 
 	require_version DBI 1.02;	# Requires features from DBI 1.02 release
 
 	bootstrap DBD::Informix $VERSION;
 
-EOF
-
-print OUT <<"EOF";
-	\$ENV{INFORMIXSERVER} = q($server) unless defined \$ENV{INFORMIXSERVER};
-EOF
-
-print OUT <<'EOF';
 	$err = 0;		# holds error code   for DBI::err
 	$errstr = "";	# holds error string for DBI::errstr
 	$state = "";    # holds error string for DBI::state
@@ -76,18 +40,14 @@ print OUT <<'EOF';
 
 		unless ($ENV{INFORMIXDIR})
 		{
-EOF
-
-print OUT <<"EOF";
-			foreach (qw($dir))
-EOF
-
-print OUT <<'EOF';
+			foreach (qw(/usr/informix /opt/informix))
 			{
-				if (-d "$_/lib")
+				# If Informix-Connect or Informix-ESQL/C is installed,
+				# $INFORMIXDIR must have lib and msg sub-directories.
+				if (-d "$_/lib" && -d "$_/msg")
 				{
 					$ENV{INFORMIXDIR} = $_;
-					### warn "DBD::Informix - INFORMIXDIR set to $_\n";
+					warn "DBD::Informix - INFORMIXDIR set to $_\n";
 					last;
 				}
 			}
@@ -452,7 +412,7 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes DBD::Informix version 0.62.
+This document describes DBD::Informix version 0.95.
 
 You should also read the documentation for DBI as this document
 qualifies what is stated there.
@@ -469,9 +429,9 @@ It covers parts of DBI and most of DBD::Informix.
 Originally (say late 1996), the DBI documentation was in a parless
 state.
 It has improved with each release of DBI, and the DBI document's
-comments about DBI should take precedence over comments in this
-document (but this document may be a better reflection of the actual
-behaviour of DBD::Informix).
+comments about DBI and its drivers are a better indication of what
+should happen, but this document may be a better reflection of the
+actual behaviour of DBD::Informix.
 
 Be aware that on occasion, the description in this document gets
 complex because of differences between different versions of Informix
@@ -479,8 +439,8 @@ software and different types of Informix database.
 The key factor is the version of ESQL/C used when building
 DBD::Informix.
 Basically, there are two groups of versions to worry about, the 5.0x
-family of versions (5.00.UC1 through 5.08.UD1 at the moment), and the
-6.0x and later family of versions (6.00.UE1 through 7.23.UC1 at the
+family of versions (5.00.UC1 through 5.10.UC1 at the moment), and the
+6.0x and later family of versions (6.00.UE1 through 9.21.UC1 at the
 moment).
 All version families acquire extra versions on occasion.
 
@@ -489,8 +449,15 @@ ESQL/C because it uses both SQL descriptors and strings for cursor
 names and statement names, and these features were not available in
 ESQL/C prior to version 5.00.
 
-You should also read the Informix.Licence file which is distributed
-with DBD::Informix for information about Informix software.
+You should also read the Notes/Informix.Licence file which is
+distributed with DBD::Informix for information about Informix
+software.
+
+There is a Japanese translation of a recent version of this
+documentation (maintained by Kawai Takanori <kawai@nippon-rad.co.jp>) at
+the web site:
+
+http://member.nifty.ne.jp/hippo2000/perltips/DBD/informix.htm
 
 =head1 USE OF DBD::Informix
 
@@ -522,8 +489,8 @@ This gives you a reference to the driver, aka the driver handle.
 If the load fails, your program stops immediately (unless, perhaps,
 you eval the statement).
 
-Once you have the driver handle, you can interrogate the driver for some
-basic information:
+Once you have the driver handle, you can interrogate the driver for
+some basic information:
 
     print "Driver Information\n";
     # Type is always 'dr'.
@@ -582,19 +549,22 @@ yields a valid reference or database handle if it is successful.
 If the driver itself cannot be loaded (by the DBI->install_driver()
 method mentioned above), DBI aborts the script (and DBD::Informix can
 do nothing about it because it wasn't loaded successfully).
+Note that you get a warning if INFORMIXDIR is not set in the
+environment.
+If you don't want that warning, set INFORMIXDIR.
 
     $dbh = DBI->connect("dbi:Informix:$database");
     $dbh = DBI->connect("dbi:Informix:$database", $user, $pass);
     $dbh = DBI->connect("dbi:Informix:$database", $user, $pass, %attr);
 
-The DBI connect method strips the 'dbi:' prefix from the
-first argument, loads the DBD module identified by the next
-strin (Informix in this case).
+The DBI connect method strips the 'dbi:' prefix from the first
+argument, loads the DBD module identified by the next string (Informix
+in this case).
 The string following the second colon is all that is passed to the
 DBD::Informix code.
 With this format, you do not have to specify the username or password.
-Note that if you specify the username but not the password, DBD::Informix
-will silently ignore the username.
+Note that if you specify the username but not the password,
+DBD::Informix will silently ignore the username.
 You can also specify certain attributes in the connect call.
 These include:
 
@@ -603,12 +573,13 @@ These include:
     RaiseError
 
 Note that you cannot specify ChopBlanks in this list.
-For the time being, the PrintError attribute is synonymous with the
-ix_AutoErrorReport (see below), except that ix_AutoErrorReport is not
-recognised in the connect call.
-However, ix_AutoErrorReport is now deprecated and you should upgrade
-any code which uses it to use PrintError instead (because PrintError
-is a DBI standard name and ix_AutoErrorReport is not).
+DBD::Informix used to recognize the ix_AutoErrorReport attribute as a
+synonym for the PrintError attribute, except that ix_AutoErrorReport
+was not recognised in the connect call.
+However, ix_AutoErrorReport is no longer functional (it generates a
+warning message and is otherwise ignored) and you should upgrade any
+code which uses it to use the DBI standard PrintError instead.
+DBD::Informix will soon not recognize ix_AutoErrorReport at all.
 Using the new style connect, you could therefore specify that the
 database is not to operate in AutoCommit mode but errors should be
 reported automatically by specifying:
@@ -616,13 +587,13 @@ reported automatically by specifying:
     $dbh = DBI->connect("dbi:Informix:$database", '', '',
                         { AutoCommit => 0, PrintError => 1 });
 
-Using this style of connection, the default value for AutoCommit is
-On (or 1); this is a contrast to the old style where the default is
-Off (or 0).
-Also note that starting with the DBD::Informix 0.56 release, the behaviour
-is not affected by the type of Informix database to which you are connecting,
-except that you may get a warning if you try to set AutoCommit Off when
-you connect to an UnLogged database.
+Using this style of connection, the default value for AutoCommit is On
+(or 1); this is a contrast to the old style where the default is Off
+(or 0).
+Also note that starting with the DBD::Informix 0.56 release, the
+behaviour is not affected by the type of Informix database to which
+you are connecting, except that you may get a warning if you try to
+set AutoCommit Off when you connect to an UnLogged database.
 See also the extensive notes in the TRANSACTION MANAGEMENT section
 later in this document.
 
@@ -630,8 +601,8 @@ later in this document.
 
 The older style of connection does not use the string "dbi:Informix:"
 at the start of the first argument.
-This style is strongly deprecated, notwithstanding the fact that one of
-the tests uses it.
+This style is strongly deprecated, notwithstanding the fact that one
+of the tests uses it.
 
     $dbh = DBI->connect($database, $username, $password, 'Informix');
 
@@ -646,7 +617,6 @@ $username arguments empty and they will be ignored.
     $dbh = DBI->connect($database, $username, $password);
     $dbh = DBI->connect($database, $username);
     $dbh = DBI->connect($database);
-
 
 =head2 "Informix Connection Semantics"
 
@@ -691,10 +661,21 @@ no confusion.
 
 Once you have a database handle, you can interrogate it for some basic
 information about the database, etc.
+The ix_ServerVersion, ix_BlobSupport and ix_StoredProcedures
+attributes are read-only attributes introduced in v0.95, mainly to
+provide support for the XPS servers, which do not necessarily have
+blob and stored procedure support, unlike other versions of Informix
+OnLine.
+Note that to determine these values, DBD::Informix interrogates the
+system catalogue, which represents a (small) performance hit.
 
      print "Database Information\n";
      # Type is always 'db'
      print "    Type:                    $dbh->{Type}\n";
+     # ix_ServerVersion is a number, just like ix_ProductVersion is a number.
+     # Although version 5.10.UC7 SE servers correctly report a
+     # version number, some earlier versions may report 0.
+     print "    Server Version:          $dbh->{ix_ServerVersion}\n";
      # Name is the name of the database specified at connect
      print "    Original Database Name:  $dbh->{Name}\n";
      # ix_DatabaseName is the name of the current database
@@ -710,11 +691,14 @@ information about the database, etc.
      print "    Logged Database:         $dbh->{ix_LoggedDatabase}\n";
      # ix_ModeAnsiDatabase is 1 (true) if the database is MODE ANSI.
      print "    Mode ANSI Database:      $dbh->{ix_ModeAnsiDatabase}\n";
-     # ix_AutoErrorReport is 1 (true) if errors are reported as they
-     # are detected.  This is now deprecated -- use $dbh->{PrintError}.
-     print "    AutoErrorReport:         $dbh->{PrintError}\n";
+     # PrintError is 1 (true) if errors are reported when detected.
+     print "    Print Errors:            $dbh->{PrintError}\n";
      # ix_InTransaction is 1 (true) if the database is in a transaction
      print "    Transaction Active:      $dbh->{ix_InTransaction}\n";
+     # ix_BlobSupport is 1 (true) if the database supports blobs
+     print "    Blob Support:            $dbh->{ix_BlobSupport}\n";
+     # ix_StoredProcedures is 1 (true) if the database has stored procedures
+     print "    Stored Procedures:       $dbh->{ix_StoredProcedures}\n";
      # ix_ConnectionName is the name of the ESQL/C connection.
      # Mainly applicable with Informix ESQL/C 6.00 and later.
      print "    Connection Name:         $dbh->{ix_ConnectionName}\n";
@@ -727,8 +711,8 @@ Note that $DBI::errstr includes the SQL error number and the ISAM
 error number if there is one.
 The message may or may not extend over several lines, and is generally
 formatted so that it will display neatly within 80 columns.
-The last character of the message used be a newline, but (as of
-version 0.62) the trailing new line is omitted to improve the
+The last character of the message used be a newline, but (starting
+with version 0.62) the trailing new line is omitted to improve the
 automatic error reports from Perl.
 
 If $dbh->{PrintError} is false, then DBI does not report any errors
@@ -885,8 +869,7 @@ Note that the alternative assignment below does not work!
 
 You can also prepare a statement for multiple uses, and you can do
 this for SELECT and EXECUTE PROCEDURE statements which return data
-(cursory statements) as well as non-cursory statements which return no
-data.
+(cursory statements) as well as non-cursory statements which return no data.
 You create a statement handle (another reference) using:
 
     $sth = $dbh->prepare($stmt);
@@ -904,25 +887,21 @@ Similarly, you could add {ix_BlobLocation => 'InFile'} to support
 per-statement blob location, and {ix_ScrollCursor => 1} to support
 scroll cursors.
 
-Note: in versions of DBD::Informix prior to 0.25, preparing a statement
-also executed non-cursory statements and opened the cursor for cursory
-statements.
-This no longer occurs.
-
 More typically, you need to do error checking, and this is achieved by
 using:
 
+    # Emphasizing the error handling
     die "Failed to prepare '$stmt'\n"
         unless ($sth = $dbh->prepare($stmt));
 
-=over 4
+    # Emphasizing the SQL action
+    $sth = $dbh->prepare($stmt) or die "Failed to prepare '$stmt'\n"
 
-BUG: There is no way to tell whether the statement is just executable or
-whether it is a cursory (fetchable) statement.  You are assumed to know.
-An attribute such as {ix_IsCursory} could be added to povide this key piece
-of information, and it shouldn't really be Informix-specific.
-
-=back
+You can tell whether the statement is just executable or whether it is
+a cursory (fetchable) statement by testing the (new with v0.95)
+attribute ix_Fetchable.
+It shouldn't really be an Informix-specific attribute; if DBI ever
+adds such an attribute, ix_Fetchable will be deprecated.
 
 Once the statement is prepared, you can execute it:
 
@@ -1085,10 +1064,14 @@ the text of a statement:
 
     $txt = $sth->{ix_StatementText};
 
+The ix_StatementText attribute has been superseded by the DBI
+attribute Statement.
+It will be deprecated, starting with v0.95.
+
 =head2 CURSORS FOR UPDATE
 
-With DBD::Informix v0.51 and later, you can use the attribute
-$sth->{CursorName} to retrieve the name of a cursor.
+You can use the attribute $sth->{CursorName} to retrieve the name of a
+cursor.
 If the statement for $sth is actually a SELECT, and the cursor is in a
 MODE ANSI database or is declared with the 'FOR UPDATE [OF col,...'
 tag, then you can use the cursor name in a 'DELETE...WHERE CURRENT OF'
@@ -1132,7 +1115,6 @@ The sqlerrd array has the following useful columns:
         $sth->{ix_sqlerrd}[3] - estimated cost
         $sth->{ix_sqlerrd}[4] - offset of the error into the SQL statement
         $sth->{ix_sqlerrd}[5] - rowid of the last row processed
-
 
 =head2 OBTAINING THE VALUE INSERTED FOR A SERIAL COLUMN
 
@@ -1292,20 +1274,10 @@ behaves when failures occur, so this is not actually implemented.
 
 =head1 ATTRIBUTE NAME CHANGES
 
-In previous releases, some of the Informix-specific attributes had
-names which did not start 'ix_'.
-Starting with release 0.57, the old-style attribute names are no
-longer recognised and an error message is generated (by DBI).
-
-Note that {ix_AutoErrorReport} will become {PrintError}; the two names
-will be synonymous for a few versions, and then {ix_AutoErrorReport}
-will be deprecated.
-Note that some other Informix-specific attributes may be adopted
-(probably with a name change) by the DBI specification.
-These too will initially be treated as synonyms for the official DBI
-names before being deprecated.
-For those who have been following the attribute renaming saga, the new
-deprecation cycle is likely to be shorter than 5 releases.
+In early releases of DBD::Informix, some of the Informix-specific
+attributes had names which did not start 'ix_', but these old-style
+attribute names are no longer recognised and an error message is
+generated (by DBI).
 
 Unrecognized attributes starting with 'ix_' will generate a warning
 message.
@@ -1357,6 +1329,11 @@ compilation to define DBD_IX_DEBUG_ENVIRONMENT is defined; the code
 in dbdimp.ec will then call the function dbd_ix_printenv() in
 dbd_ix_db_login() which will help you identify what has been changed.
 
+=item *
+
+Blobs cannot yet be updated by DBD::Informix (mainly because ESQL/C does
+not readily provide the information needed for updating blobs).
+
 =back
 
 =head1 AUTHOR
@@ -1399,5 +1376,3 @@ ChangeLog file.
 perl(1), perldoc for DBI.
 
 =cut
-
-EOF

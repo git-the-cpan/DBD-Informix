@@ -1,8 +1,8 @@
 /*
- * @(#)$Id: dbdimp.h,v 62.1 1999/08/30 18:14:23 jleffler Exp $ 
+ * @(#)$Id: dbdimp.h,v 95.2 1999/11/19 03:37:39 jleffler Exp $ 
  *
  * Copyright (c) 1994-95 Tim Bunce
- *           (c) 1996-98 Jonathan Leffler
+ *           (c) 1996-99 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -50,7 +50,8 @@ enum State
 
 typedef enum State State;		/* Cursor/Statement states */
 typedef long ErrNum;			/* Informix Error Number */
-typedef char Name[NAMESIZE];
+typedef char Name[NAMESIZE];	/* ESQL Object Names */
+/* ESQL Object Names covers connection, descriptor, cursor, statement names */
 
 /* Define drh implementor data structure */
 struct imp_drh_st
@@ -73,6 +74,9 @@ struct imp_dbh_st
 	Boolean         is_modeansi;    /* Is MODE ANSI Database */
 	Boolean         is_loggeddb;    /* Has transaction log */
 	Boolean         is_txactive;    /* Is inside transaction */
+	Boolean         has_procs;      /* Has stored procedures (not 8.[012]x) */
+	Boolean         has_blobs;      /* Has blobs (not SE nor 8.[012]x) */
+	int             srvr_vrsn;      /* Server version number (eg 510 or 731) */
 	BlobLocn        blob_bind;      /* Blob binding */
 	Sqlca           ix_sqlca;       /* Last SQLCA record for connection */
 	Link            chain;          /* Link in list of connections */

@@ -1,0 +1,5 @@
+# @(#)$Id: md5.verify,v 95.1 1999/11/11 01:22:41 jleffler Exp $
+#
+# Validate files listed in MANIFEST against MD5-DIGEST
+
+perl md5.chksum `grep -v MD5-DIGEST MANIFEST` | diff MD5-DIGEST -

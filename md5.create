@@ -1,0 +1,6 @@
+# @(#)$Id: md5.create,v 95.1 1999/11/11 01:22:41 jleffler Exp $
+#
+# Generate MD5-DIGEST for files listed in MANIFEST
+
+rm -f MD5-DIGEST
+perl md5.chksum `grep -v MD5-DIGEST MANIFEST` > MD5-DIGEST

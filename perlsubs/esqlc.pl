@@ -1,4 +1,4 @@
-# @(#)$Id: esqlc.pl,v 62.2 1999/09/19 21:34:41 jleffler Exp $ 
+# @(#)$Id: esqlc.pl,v 95.1 1999/11/19 00:36:12 jleffler Exp $ 
 #
 # Copyright (c) 1999 Jonathan Leffler
 #
@@ -70,6 +70,7 @@ sub dbd_informix_version_info
 # Locate $INFORMIXDIR and the ESQL/C compiler
 sub find_informixdir_and_esql
 {
+	my ($NTConfiguration) = @_;
 	my ($esql, $ID);
 	if ($NTConfiguration)
 	{

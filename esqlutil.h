@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlutil.h,v $
-@(#)Version:         $Revision: 2.2 $
-@(#)Last changed:    $Date: 1998/11/11 05:17:40 $
+@(#)Version:         $Revision: 2.4 $
+@(#)Last changed:    $Date: 1999/10/04 04:51:22 $
 @(#)Purpose:         ESQL/C Utility Functions
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1995-98
-@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
+@(#)Copyright:       (C) JLSS 1995-99
+@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
 */
 
 /*TABSTOP=4*/
@@ -15,17 +15,22 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2.2 1998/11/11 05:17:40 jleffler Exp $";
+static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2.4 1999/10/04 04:51:22 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
 #include <stdio.h>
 #include "esqlc.h"
 
-/* Code which depends on ESQL/C version should embed a call to ESQL_VERSION_CHECKER() */
+/*
+** Code which depends on ESQL/C version should embed a call to
+** ESQL_VERSION_CHECKER().  The code assumes an ANSI C Preprocessor.
+** The return value is the actual ESQL/C version (920 for 9.20).
+*/
 #define ESQLC_PASTE2(x, y)	x ## y
 #define ESQLC_PASTE(x, y)	ESQLC_PASTE2(x, y)
 #define ESQLC_VERSION_CHECKER	ESQLC_PASTE(esqlc_version_, ESQLC_VERSION)
+
 extern int ESQLC_VERSION_CHECKER(void);
 
 /*
@@ -56,7 +61,7 @@ extern int sqltypemode(int mode);
 ** information in the Informix compound types onto the specified file.
 ** Each routine identifies its output with the user-specified tag.
 */
-extern void dump_blob(FILE *fp, const char *tag, const loc_t *blob);
+extern void dump_blob(FILE *fp, const char *tag, const Blob *blob);
 extern void dump_datetime(FILE *fp, const char *tag, const dtime_t *dp);
 extern void dump_decimal(FILE *fp, const char *tag, const dec_t *dp);
 extern void dump_interval(FILE *fp, const char *tag, const intrvl_t *ip);
@@ -87,8 +92,11 @@ extern char *sqltoken(char *string, char **end);
 
 /* sql_printerror() -- print error in global sqlca on specified file */
 extern void sql_printerror(FILE *fp);
+/* sql_formaterror() -- format error message based on data in global sqlca */
+extern void sql_formaterror(char *buffer, size_t buflen);
 
-/* sql_tabid -- return tabid of table, regardless of database type, etc.
+/*
+** sql_tabid -- return tabid of table, regardless of database type, etc.
 **
 ** NB: returns -1 on any error; SQL error info is in sqlca record.  The
 ** owner name can be in quotes or not, and the results may differ
@@ -101,9 +109,16 @@ extern void sql_printerror(FILE *fp);
 ** p_sql_tabid_q002 and c_sql_tabid_q002.
 ** The function used functions vstrcpy(), strlower(), strupper() from jlss.h.
 **
-** sql_procid --  return procid of procedure, regardless of database type, etc.
-** This is analogous to sql_tabid() and uses statement IDs p_sql_procid_q002
-** and c_sql_procid_q002.
+** sql_procid -- return procid of procedure, regardless of database
+** type, etc.  This is analogous to sql_tabid() and uses statement IDs
+** p_sql_procid_q002 and c_sql_procid_q002.
+**
+** The sql_mktablename() and sqlmkdbasename() functions format the
+** components of a table and database name into a string.  If the owner,
+** or dbase or server information is not available, pass a null pointer.
+** The functions place the data in the buffer identified by output and
+** outlen, and return a pointer to the output buffer if successful, or a
+** pointer to null if there is not enough room or some other failure.
 */
 
 extern long     sql_tabid(const char *table, const char *owner,

@@ -1,0 +1,35 @@
+Checklist for Releasing a New Version of DBD::Informix
+======================================================
+
+1.  Announce
+    - Up to date email addresses
+    - Up to date summary of ChangeLog
+    - Up to date summary of future directions
+2.  Makefile.PL
+    - Correct pre-requisite version of Perl
+    - Correct pre-requisite version of DBI
+    - Correct latest version of DBI
+3.  Informix.pm.PL
+    - Correct version number
+    - Correct pre-requisite version of DBI
+4.  ChangeLog
+    - All details up to date.
+    - Release date annotated.
+5.  Notes/Working.Versions
+    - Current working versions
+6.  README
+    - Correct information
+    - Correct pre-requisites
+    - Correct cross-references
+7.  MD5 Check Sums
+    - Checkout MD5-DIGEST
+    - Create NMD (version stamped code)
+    - Run md5.create in NMD
+    - Check in MD5-DIGEST
+
+Note: with an Atria-based CM system, you can probably simplify some of
+the versioning stuff.  In fact, we could probably do so with RCS, too.
+
+--
+
+@(#)$Id: Release.Checklist,v 95.2 1999/12/30 23:23:05 jleffler Exp $

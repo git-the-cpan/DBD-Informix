@@ -15,9 +15,13 @@ edited.  Thanks, Jason.
 
 ---------------------------------------------------------------------------
 
-If the esqltest program gives you error -27000, you will need to alter
-your database environment to be able to build (more strictly, to test)
-DBD::Informix.
+If the esqltest program gives you error -27000, you will need to alter your
+database environment to be able to build (more strictly, to test)
+DBD::Informix.  As of version 0.95, you should not see the -27000 error
+message; you will see an assertion that you are using two shared memory
+connections and you will be notified that the multiple connection tests
+will be skipped.  If you want to test multiple connections, you need to
+follow the information in this note.
 
 The Informix finderr utility says:
 
@@ -105,18 +109,20 @@ and SE on your machine.
 
 --
 
+1999-11-27:
 Note that if you really cannot get away from the using shared memory
-connections, then you will have to modify the code in the DBD::Informix
-build area so that it does not try to use multiple connections.  Ensure you
-can recreate the original distribution when necessary (with the original
-tar file or a backup).  You should comment out the code in Makefile.PL
-which tests whether the ESQL/C environment is OK.  You will also need to
-rename the multiconn*.t files in the t directory with a suffix other than
-'.t' so that those tests are not run.  All the other tests use a single
-database.  If you run into any other problems during the testing of
-DBD::Informix, you may be able to get help provided that you state clearly
-that you've had to do this.
+connections, then (as of version 0.95) you no longer have to modify
+anything.  The esqltest program will report that you are using two shared
+memory connections and that the multiple connection tests will be skipped.
+The actual multiple connection tests attempt to detect the use of two
+shared memory connections befor making either connection, and skip the test
+if both connections will use shared memory.  The multiple connection tests
+are t/t2[123]mconn.t.  Note that the code that identifies shared memory
+connections may fail (especially on NT) and therefore the multiple
+connection tests may still fail.  If this happens and the cause of failure
+is error -27000, then you can ignore the failures (and if everything else
+passes, you can install the product).
 
 --
 
-@(#)$Id: olipcshm,v 56.2 1997/07/08 19:20:13 johnl Exp $
+@(#)$Id: olipcshm,v 95.1 1999/11/27 08:16:12 jleffler Exp $

@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: decsci.h,v $
-@(#)Version:         $Revision: 1.5 $
-@(#)Last changed:    $Date: 1998/04/09 21:24:00 $
+@(#)Version:         $Revision: 1.6 $
+@(#)Last changed:    $Date: 1999/05/16 04:53:33 $
 @(#)Purpose:         JLSS Functions to manipulate DECIMAL values
 @(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1996-98
-@(#)Product:         $Product: DBD::Informix Version 0.62 (1999-09-19) $
+@(#)Copyright:       (C) JLSS 1996-99
+@(#)Product:         $Product: DBD::Informix Version 0.95b2 (1999-12-30) $
 */
 
 /*TABSTOP=4*/
@@ -15,10 +15,11 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char decsci_h[] = "@(#)$Id: decsci.h,v 1.5 1998/04/09 21:24:00 jleffler Exp $";
+static const char decsci_h[] = "@(#)$Id: decsci.h,v 1.6 1999/05/16 04:53:33 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
+#include <stddef.h>
 #include "decimal.h"
 
 extern int decabs(const dec_t *x, dec_t *r1);
@@ -30,5 +31,9 @@ extern int decsqrt(dec_t *x, dec_t *r1);
 extern char *decfix(const dec_t *d, int ndigit, int plus);
 extern char *decsci(const dec_t *d, int ndigit, int plus);
 extern char *deceng(const dec_t *d, int ndigit, int plus, int cw);
+
+extern int decfmt(const dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen); 
+extern int decchk(dec_t *d, int sqllen);
+extern int decset(dec_t *d, int sqllen);
 
 #endif	/* DECSCI_H */

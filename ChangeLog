@@ -1,10 +1,82 @@
-Change Log for DBD::Informix for DBI
+Change Log for DBD::Informix, the Informix driver for Perl DBI
 
-- Written by Alligator Descartes <descarte@arcana.co.uk>
-- Rewritten by Jonathan Leffler <j.leffler@acm.org>
+0.95 Release
+------------
+1999-12-30: Create ItWorks script to report on working versions.  Update
+            README; annotate DELIMIDENT as a source of test failures on NT
+            in particular, and probably in general.  Fix esqltest.ec and
+            esqlbasic.ec to accomodate error +25507, as reported by Carrie
+            Coy <carriec@doc.state.vt.us>.  Note that all other ESQL/C
+            error messages are negative, but it only takes one exception to
+            cause problems.  Set version to 0.95 and dispatch to PAUSE and
+            CPAN.  With luck, DBD::Informix gets handed over to Michael
+            Kopchenov <myk@informix.com> from now on.  Jonathan Leffler
+            remains in place as 'product manager'.
+            Wishing everybody a Happy New Millenium (unless you want to
+            wait an extra 367 days for the next millenium to begin).
+1999-12-30: Create 0.95b2 with more NT-inspired changes from MYK.
+1999-12-29: Create 0.95b1 for testing at Informix.  Final release of
+            version 0.95 scheduled for 1999-12-31.  Includes some NT build
+            fixes from Michael Kopchenov <myk@informix.com>.
+1999-12-28: Reorganization of Makefile.PL with subroutines at end was
+            suggested by Medi Montaseri <medi@CyberShell.com> on
+            1998-05-20.  Changes were made for the 0.61 release.
+1999-12-21: Added '-qlanglvl=ansi' change to Makefile.PL for AIX suggested
+            by Joachim Schrod <jscrod@acm.org> in January 1998, and added
+            note about SITEARCHEXP as an alternative to INSTALLSITEARCH.
+            Long overdue -- sorry Joachim.
+1999-12-04: Add notes on URL of Japanese translation of DBD::Informix POD
+            by Kawai Takanori <kawai@nippon-rad.co.jp>.  Modify more tests
+            to skip when appropriate.
+1999-11-27: Modify esqltest to allow shared memory connections.  Modify the
+            multiple connection tests so that they are skipped.  Update notes
+            to match.
+1999-11-18: Remove the 'record INFORMIXDIR and INFORMIXSERVER' code and
+            reinstate Informix.pm (instead of Informix.pm.PL) because PAUSE
+            and CPAN get confused when there is no Informix.pm file.  Use
+            SQL_COLNAMELEN instead of NAMESIZE for the column names in
+            dbdimp.ec and dbdattr.ec after bug report and proposed (but
+            different) patch from Nick Osborn <nick@bibliotech.net>.  Pass
+            $NTConfiguration as argument to find_informixdir_and_esql(), a
+            problem afflicting NT builds first reported by Ti Lian Hwang
+            <tilh@sin-co.sg.dhl.com>.  Add ix_ServerVersion, ix_BlobSupport
+            and ix_StoredProcedure attributes to help with XPS support
+            (Robert Wyrick <rob@wyrick.org> helped with XPS testing).
+            Amend tests and documentation.
+1999-11-16: Add Notes/environment.variables after a report from Claude
+            Chartier <cbos@pophost.eunet.lu> that it would be helpful to
+            have INFORMIXCONTIME etc documented.  Add Notes/web.servers for
+            same reason; the notes need to be upgraded to discuss mod_perl
+            for Apache.  Reinstate Bundle::DBD::Informix based on what is
+            in the DBI 1.13 bundle, which seems to work (unlike the attempt
+            at distributing Bundle::DBD::Informix 0.62 as a separate item,
+            which fails).
+1999-11-10: Add MD5 check sums for source code in MD5-DIGEST.  This will
+            allow the DBD::Informix maintenance team to identify any
+            changed source files.  Use the md5.verify script to ensure
+            that the individual files are OK.  To check that MD5-DIGEST
+            itself has not been modified, you run "perl md5.chksum
+            MD5-DIGEST" and compare the output with the official value,
+            which has to be stored somewhere.  In the short term, it
+            will go on a web site (URL to be decided).  All this assumes
+            you have the optional Digest::MD5 module on your machine,
+            so it is listed in the Bundle::DBD::Informix pre-requisites.
+1999-11-02: BugReport needs to be careful of 'id -a' which is an SVR4
+            variation on the POSIX.2 standard.  On Solaris, use
+            /usr/xpg4/bin/id if available, else '/usr/bin/id -a'; on
+            other platforms, assume 'id' lists the auxilliary groups.
+            Probably won't be accurate for some SVR4 systems other than
+            Solaris, but probably won't matter either.  Problem
+            highlighted by Marc Esser <esserma@cerf.net>.
+1999-09-23: Decide that next release will be 0.95.  Create the release
+            checklist file to help ensure that things are done properly.
+            Modify esqlld so that Informix shared libaries are linked with
+            absolute pathnames unless DBD_INFORMIX_RELOCATABLE_INFORMIXDIR
+            is set in the environment.  Won't help if esqlld is not used,
+            as on some machines (eg AIX).
 
 0.62 Release
----------------
+------------
 1999-09-19: Change all dates in this file to use 1999 instead of 99.  Add
             BugReport script to generate information for failure reports,
             and document accordingly.  Uses "perlsubs/esqlc.pl" for common
@@ -648,5 +720,5 @@ Pre-Release
 
 --------------
 
-Jonathan Leffler <johnl@informix.com>
-@(#)$Id: ChangeLog,v 62.7 1999/09/19 21:46:58 jleffler Exp $
+Jonathan Leffler <jleffler@informix.com>
+@(#)$Id: ChangeLog,v 95.9 1999/12/30 23:17:09 jleffler Exp $

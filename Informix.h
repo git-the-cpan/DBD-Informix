@@ -1,9 +1,9 @@
 /*
- *	@(#)$Id: Informix.h,v 57.2 1997/07/30 03:13:26 johnl Exp $ 
+ *	@(#)$Id: Informix.h,v 95.1 1999/12/23 18:42:00 jleffler Exp $ 
  *
  * Portions Copyright (c) 1994,1995 Tim Bunce
  * Portions Copyright (c) 1995,1996 Alligator Descartes
- * Portions Copyright (c) 1996,1997 Jonathan Leffler
+ * Portions Copyright (c) 1996,1997,1999 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -15,6 +15,14 @@
 #define INFORMIX_H
 
 #define NEED_DBIXS_VERSION 9
+
+/* For ActiveState Perl on NT */
+/* Change from Michael Kopchenov <myk@informix.com> */
+#ifdef PERL_OBJECT
+#define NO_XSLOCKS
+class CPerlObj;
+extern CPerlObj* pPerl;
+#endif
 
 #include <DBIXS.h>		/* Installed by the DBI module */
 #include "dbdimp.h"		/* Informix implementation details */
