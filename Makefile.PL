@@ -1,8 +1,8 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL version /main/125 2000-02-10 14:43:21 $
+# @(#)$Id: Makefile.PL version /main/126 2000-02-10 17:14:27 $
 #
-# Configuration script for Informix Database Driver for Perl Version 0.97004 (2000-02-10) (aka DBD::Informix)
+# Configuration script for Informix Database Driver for Perl Version 0.97005 (2000-02-10) (aka DBD::Informix)
 #
 # Portions Copyright 1996-99 Jonathan Leffler
 # Portions Copyright 1996    Alligator Descartes
@@ -46,7 +46,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "0.97004";
+my $dbd_ix = "0.97005";
 # Hack for handling builds directly in Atria Clearcase view.
 $dbd_ix = "0.97002" unless $dbd_ix =~ /^\d+\.\d+/;
 
@@ -72,7 +72,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring Informix Database Driver for Perl Version 0.97004 (2000-02-10) (aka $opts{NAME})
+Configuring Informix Database Driver for Perl Version 0.97005 (2000-02-10) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -618,65 +618,10 @@ elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
 		$libs =~ s% -L *$ID/lib % %;
 		$libs =~ s% -L *$ID/lib/esql % %;
 		$libs =~ s/-threads// if ($Config{osname} eq 'dec_osf');
-		if ($Config{osname} eq "aix" and $libs =~ /-lnetstub/)
-		{
-			# JL 2000-01-28: ESQL/C 9.15.UC1 (CSDK 2.01.UC1) includes
-			# -lnetstub but $INFORMIXDIR/lib/libnetstub.so is rejected
-			# by the linker on AIX 4.2, so use libnetstubshr.a, instead.
-			if ($ENV{DBD_INFORMIX_AIX_USENETSTUB})
-			{
-				print "!!! Retaining reference to -lnetstub because of DBD_INFORMIX_AIX_USENETSTUB\n";
-			}
-			else
-			{
-				if (-f "$ID/lib/libnetstubshr.a")
-				{
-					print "... Replacing reference to -lnetstub with -lnetstubshr (override with DBD_INFORMIX_AIX_USENETSTUB)\n";
-					$libs =~ s%-lnetstub%-lnetstubshr%;
-				}
-				elsif (-f "$ID/lib/netstub.a")
-				{
-					print "... Replacing reference to -lnetstub with $ID/lib/netstub.a (override with DBD_INFORMIX_AIX_USENETSTUB)\n";
-					$libs =~ s%-lnetstub%$ID/lib/netstub.a%;
-				}
-				else
-				{
-					print "!!! Retaining reference to -lnetstub (no alternatives available?!)\n";
-				}
-			}
-		}
-		if ($Config{osname} eq "hpux" and $libs =~ /-l(V3|cl|:libcl.1)/)
-		{
-			# JL 2000-01-28: including -lcl and -l:libcl.1 on the link line
-			# causes HP-UX 11.0 to barf with thread-local storage in the shared library.
-			# As far as can be detected, libV3.{a,sl} is unneeded.
-			# Provide escape routes to override the behaviour which removes them.
-			if ($libs =~ /-lV3/)
-			{
-				if ($ENV{DBD_INFORMIX_HPUX_USELIBV3})
-				{
-					print "!!! Retaining reference to -lV3 because of DBD_INFORMIX_HPUX_USELIBV3\n";
-				}
-				else
-				{
-					print "... Removing reference to -lV3 (override with DBD_INFORMIX_HPUX_USELIBV3)\n";
-					$libs =~ s/-lV3//;
-				}
-			}
-			if ($libs =~ /-lcl/)
-			{
-				if ($ENV{DBD_INFORMIX_HPUX_USELIBCL})
-				{
-					print "!!! Retaining reference to -lcl because of DBD_INFORMIX_HPUX_USELIBCL\n";
-				}
-				else
-				{
-					print "... Removing reference to -lcl (override with DBD_INFORMIX_HPUX_USELIBCL)\n";
-					$libs =~ s/-lcl//;
-					$libs =~ s/-l:libcl.1//;
-				}
-			}
-		}
+		$libs = &fix_aix_netstub($libs)
+			if ($Config{osname} eq "aix" and $libs =~ /-lnetstub/);
+		$libs = &fix_hpux_syslibs($libs)
+			if ($Config{osname} eq "hpux" and $libs =~ /-l(V3|cl|:libcl.1)/);
 		if ($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR})
 		{
 			# Specify that SHLIB_PATH is OK at runtime
@@ -958,17 +903,84 @@ sub fix_b102265
 {
 	my ($epp, $esql, $name) = @_;
 	warn &nlt(qq%
-		Your version of ESQL/C is crippled and will not link with
-		shared libraries even if you tell the script to use them
-		(PTS Bug 102265).  We're going to make a hacked copy of the
-		script and we'll use it.  If this doesn't work, then you
-		will probably have to make a static version of Perl with
-		DBD::Informix and the ESQL/C, which is not pretty.
+		Your version of ESQL/C is crippled and will not link with shared
+		libraries even if you tell the script to use them (PTS Bug
+		102265).  We're going to make a hacked copy of the script and
+		we'll use it.
 
-		If you need to do this, read the Notes/static.build file.
+		If the hacked ESQL/C script doesn't work, then you will probably
+		have to make a static version of Perl with DBD::Informix and the
+		ESQL/C.  Read the Notes/static.build file for more information.
+
 		Or (a much better idea) upgrade to Client SDK 2.40 or later!
 		%);
 	&customize_esql($epp, $esql, $name);
+}
+
+# JL 2000-01-28: ESQL/C 9.15.UC1 (CSDK 2.01.UC1) on AIX 4.2 includes
+# -lnetstub but $INFORMIXDIR/lib/libnetstub.so is rejected by the
+# linker.  Option 1: use libnetstubshr.a, instead.  Option 2: not all
+# versions have libnetstubshr.a, so look for netstub.a instead.
+sub fix_aix_netstub
+{
+	my ($libs) = @_;
+	if ($ENV{DBD_INFORMIX_AIX_USENETSTUB})
+	{
+		print "!!! Retaining reference to -lnetstub because of DBD_INFORMIX_AIX_USENETSTUB\n";
+	}
+	else
+	{
+		if (-f "$ID/lib/libnetstubshr.a")
+		{
+			print "... Replacing reference to -lnetstub with -lnetstubshr (override with DBD_INFORMIX_AIX_USENETSTUB)\n";
+			$libs =~ s%-lnetstub%-lnetstubshr%;
+		}
+		elsif (-f "$ID/lib/netstub.a")
+		{
+			print "... Replacing reference to -lnetstub with $ID/lib/netstub.a (override with DBD_INFORMIX_AIX_USENETSTUB)\n";
+			$libs =~ s%-lnetstub%$ID/lib/netstub.a%;
+		}
+		else
+		{
+			print "!!! Retaining reference to -lnetstub (no alternatives available?!)\n";
+		}
+	}
+	return $libs;
+}
+
+# JL 2000-01-28: including -lcl and -l:libcl.1 on the link line causes
+# HP-UX 11.0 to barf with thread-local storage in the shared library.
+# As far as can be detected, libV3.{a,sl} is unneeded.  Provide escape
+# routes to override the behaviour which removes them.
+sub fix_hpux_syslibs
+{
+	my ($libs) = @_;
+	if ($libs =~ /-lV3/)
+	{
+		if ($ENV{DBD_INFORMIX_HPUX_USELIBV3})
+		{
+			print "!!! Retaining reference to -lV3 because of DBD_INFORMIX_HPUX_USELIBV3\n";
+		}
+		else
+		{
+			print "... Removing reference to -lV3 (override with DBD_INFORMIX_HPUX_USELIBV3)\n";
+			$libs =~ s/-lV3//;
+		}
+	}
+	if ($libs =~ /-lcl/)
+	{
+		if ($ENV{DBD_INFORMIX_HPUX_USELIBCL})
+		{
+			print "!!! Retaining reference to -lcl because of DBD_INFORMIX_HPUX_USELIBCL\n";
+		}
+		else
+		{
+			print "... Removing reference to -lcl (override with DBD_INFORMIX_HPUX_USELIBCL)\n";
+			$libs =~ s/-lcl//;
+			$libs =~ s/-l:libcl.1//;
+		}
+	}
+	return $libs;
 }
 
 __END__

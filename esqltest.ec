@@ -1,7 +1,7 @@
 /*
  * @(#)$Id: esqltest.ec version /main/20 2000-02-08 16:57:02 $
  *
- * Informix Database Driver for Perl Version 0.97004 (2000-02-10)
+ * Informix Database Driver for Perl Version 0.97005 (2000-02-10)
  *
  * Test Informix-ESQL/C environment
  *

@@ -1,4 +1,4 @@
-Frequently Asked Questions for Informix Database Driver for Perl Version 0.97004 (2000-02-10)
+Frequently Asked Questions for Informix Database Driver for Perl Version 0.97005 (2000-02-10)
 
 1.  My program works OK when I run it from the command line but fails when
     I run it via a web server (CGI, mod_perl, etc).

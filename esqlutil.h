@@ -5,7 +5,7 @@
 @(#)Purpose:         ESQL/C Utility Functions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1995-99
-@(#)Product:         Informix Database Driver for Perl Version 0.97004 (2000-02-10)
+@(#)Product:         Informix Database Driver for Perl Version 0.97005 (2000-02-10)
 */
 
 /*TABSTOP=4*/

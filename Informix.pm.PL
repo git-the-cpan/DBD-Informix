@@ -2,7 +2,7 @@
 #
 #   @(#)$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $
 #
-#   Generate configured Informix.pm file for Informix Database Driver for Perl Version 0.97004 (2000-02-10)
+#   Generate configured Informix.pm file for Informix Database Driver for Perl Version 0.97005 (2000-02-10)
 #
 #   Script to create annotated version of Informix.pm recording
 #   default values of INFORMIXDIR and INFORMIXSERVER during build.
@@ -67,7 +67,7 @@ __END__
 
 #	@(#)$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $
 #
-#   @(#)Informix Database Driver for Perl Version 0.97004 (2000-02-10)
+#   @(#)Informix Database Driver for Perl Version 0.97005 (2000-02-10)
 #
 #   Portions Copyright 1994-95   Tim Bunce
 #   Portions Copyright 1996-1999 Jonathan Leffler
@@ -88,7 +88,7 @@ __END__
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION          = "0.97004";
+	$VERSION          = "0.97005";
 	$ATTRIBUTION      = 'Jonathan Leffler <j.leffler@acm.org>';
 	$Revision         = '$Id: Informix.pm.PL version /main/6 2000-02-08 17:48:03 $';
 	$INFORMIX_LICENCE = ":INFORMIX_LICENCE:";
@@ -504,7 +504,7 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes Informix Database Driver for Perl Version 0.97004 (2000-02-10).
+This document describes Informix Database Driver for Perl Version 0.97005 (2000-02-10).
 
 You should also read the documentation for DBI C<perldoc DBI> as this document
 qualifies what is stated there.

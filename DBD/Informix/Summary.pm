@@ -1,6 +1,6 @@
 # $Id: DBD/Informix/Summary.pm version /main/3 2000-02-10 14:26:14 $
 #
-# Informix Database Driver for Perl Version 0.97004 (2000-02-10)
+# Informix Database Driver for Perl Version 0.97005 (2000-02-10)
 #
 # This driver summary is for DBD::Informix
 #
@@ -13,7 +13,7 @@
 {
 	package DBD::Informix::Summary;
 
-	$VERSION = "0.97004";
+	$VERSION = "0.97005";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	1;
@@ -37,7 +37,7 @@ This file is an updated version of the information about DBD::Informix in the DB
 
 =head2 Driver Version
 
-C<DBD::Informix> version 0.97004.
+C<DBD::Informix> version 0.97005.
 
 =head2 Feature Summary
 
