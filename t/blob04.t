@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: blob04.t,v 53.1 1997/03/06 20:37:27 johnl Exp $ 
+#	@(#)$Id: blob04.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Self-contained Test for Blobs (INSERT & SELECT) for DBD::Informix
 #
@@ -9,7 +9,7 @@
 use DBD::InformixTest;
 
 # Test install...
-$dbh = connect_to_test_database();
+$dbh = connect_to_test_database(1);
 
 if (!$dbh->{ix_InformixOnLine})
 {

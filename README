@@ -1,115 +1,32 @@
 README for DBD::Informix -- an Informix interface for Perl 5 using DBI.
 
    Portions Copyright (c) 1994,1995,1996  Alligator Descartes
-   Portions Copyright (c) 1996,1997       Jonathan Leffler
+   Portions Copyright (c) 1996            Jonathan Leffler
 
    You may distribute under the terms of either the GNU General Public
    License or the Artistic License, as specified in the Perl README file.
 
 -- The following is a standard warning for all DBI and DBD::* software --
-       WARNING: THIS IS ALPHA SOFTWARE. IT IS POSSIBLY UNRELIABLE!
+WARNING: THIS IS ALPHA SOFTWARE. IT IS POSSIBLY UNRELIABLE!
 
 ---------------------------------------------------------------------------
 
-PREREQUISITES
-
-    If you do not have Perl version 5.003 or later, then build, test and
-    install it before doing anything else!  And please ensure that you
-    compile it with whatever options are necessary to get __STDC__ defined.
-
-    If you do not have DBI version 0.85 or later installed, then build,
-    test and install it.  Note that previous versions of DBD::Informix
-    allowed you to use older versions of DBI than the version it was built
-    with.  This policy changed with DBD::Informix v0.54.  In addition, the
-    code in DBD::Informix v0.56 requires bug fixes present in DBI 0.85
-    which were not in DBI 0.84.
-
-    To build DBD::Informix, the C compiler must accept function prototypes.
-    This is not a problem on any machine to which Informix is currently
-    ported (though the HP-UX compiler does not accept prototypes unless
-    told to do so).
-
-    You must have a version of Informix-ESQL/C available to you.  You
-    should read the Informix.Licence file for information about what you
-    need.  At the moment, ESQL/C Versions 4.0x or 4.1x are not supported,
-    nor are any earlier versions.  ESQL/C Versions 5.00 upwards should be
-    OK.
-
-    *** BEWARE ***
-
-    DBD::Informix version 0.56 has been tested on Informix-Universal Server
-    version 9.11.UC1 (on a Sparc 20 running Solaris 2.5.1).  Where the IUS
-    database uses the same types as were available in earlier versions of
-    Informix products, there doesn't seem to be any problem.  However, it
-    is known to fail badly (usually with an assert firing and a core dump,
-    but also with error -402 'Address of a host variable is NULL') if it
-    encounters one of the IUS-specific data types.
-
-    The IUS SysProcedures table in the system catalog has a ParamTypes
-    column which is of the type RtnParamTypes, and therefore DBD::Informix
-    will not work if you try to select all the columns from this table.
-    There are probably other columns in the system catalog for which this
-    is true.  And there may be other tables which won't work for the same
-    reason.
-
-    *** YOU WERE WARNED ***
-
-    DBD::Informix has never been tested with a version 8.x (OnLine XPS)
-    version of ESQL/C and database.
-
-    *** YOU WERE WARNED ABOUT THIS TOO ***
-
-    You need to have a fully working Informix environment before you try to
-    build and test DBD::Informix.  This means you need to have access to at
-    least one database where you have at least RESOURCE level privileges.
-    (If you don't understand what this means, read the "Informix Guide to
-    SQL: Syntax" manual, and especially the GRANT section).  If you don't
-    have DBA privileges on any databases, you should consider creating the
-    'stores' database using the dbaccessdemoN program (where N is a version
-    number, such as 7) which comes with your server.  The multiple
-    connection tests use two databases for preference (though the tests
-    will use the same database twice if you do not specify two separate
-    databases), and the test will fail if you use olipcshm or onipcshm
-    (shared memory) connections to both databases.  If you run into
-    problems with shared memory connections (for example, error -27000 from
-    the esqltest program), then read README.olipcshm.  If your databases
-    are not on the machine where you are building DBD::Informix, you will
-    need to ensure that you have the necessary privileges to connect to the
-    machine where the databases are.  This may be as simple as setting
-    DBD_INFORMIX_PASSWORD (see below); it may be require you to get your
-    systems administrators to set you up with a login account on the
-    machine.
-
-    Please ensure that you have $INFORMIXDIR set unless the software is
-    installed in /usr/informix, and that $INFORMIXDIR/bin is on your PATH.
-    The build no longer works unless these environment variables are set.
-    Also, if you are using ESQL/C version 6.x or later, you may be using
-    ESQL/C shared libraries which are found in $INFORMIXDIR/lib and
-    $INFORMIXDIR/lib/esql.  You need to ensure that these will be found
-    when you run Perl with DBD::Informix.  On SVR4 machines, this means
-    adding these directories to LD_LIBRARY_PATH; on HP-UX, the variable is
-    SHLIB_PATH; other systems may have other variable names.  You need to
-    set INFORMIXSERVER correctly if you are using version 6.0x or later.
-    You may need to set other environment variables too -- consult the
-    Informix manuals for more information.
-
-    You should take a look at the documentation in InformixTest.pm, and set
-    the DBD_INFORMIX_DATABASE, DBD_INFORMIX_USERNAME, DBD_INFORMIX_PASSWORD
-    and DBD_INFORMIX_SERVER environment variables as appropriate for your
-    system.  Although the testing does as little damage as possible, it is
-    not a good idea to use your prize database for this.  The stores
-    database is a good bet (unless you are using an old version of Fourgen
-    software and it is using the stores database for its data dictionary).
-    Note that these variables only have significance when running the
-    DBD::Informix tests.  They are not used by DBD::Informix itself, only
-    by DBD::InformixTest.
-
-    One step in the setup process tests that you have permissions on the
-    databases which will be used by the testing.  It does this by compiling
-    and running a relatively simple ESQL/C program which simply opens a few
-    databases, creates and drops some tables, and exits.
-
 BUILDING DBD::Informix
+
+    If Perl 5.003 or later is NOT installed, then build, test and install it!
+
+    If the DBI module (version 0.73 or later preferred; 0.69 or later is
+    mandatory) is not installed, then build, test and install it.
+
+    You must have a version of ESQL/C available to you.  At the moment,
+    version 4.0x or 4.1x are not supported.  Versions 5.00 and 5.01 have a
+    bug in them which makes them unsupported too.  If someone wants to code
+    up the fix necessary to get versions 4 or 5.0[01] to work, then contact
+    the DBD::Informix Maintenance Team.  ESQL/C Versions 5.02 upwards
+    should be OK.  Please ensure that you have $INFORMIXDIR set, and that
+    $INFORMIXDIR/bin is on your PATH.  The build may work without these
+    environment variables being set, but it will be more reliable if they
+    are.
 
     When Perl, DBI and ESQL/C are all installed do:
 
@@ -131,80 +48,31 @@ BUILDING DBD::Informix
     should also read the section on ExtUtils::MakeMaker in the 2nd Edition
     of 'Programming Perl'.
 
-    You should never need to make any changes to the generated Makefile,
-    nor to Makefile.PL.  If you do *please* let me know so that I can try
-    to make it automatic in a later release.
+    You should never need to make any changes.  If you do *please* let me
+    know so that I can try to make it automatic in a later release.
 
+    You should then take a look at the documentation in InformixTest.pm,
+    and set the DBD_INFORMIX_* environment variables as appropriate for
+    your system.  Although the testing does as little damage as possible,
+    it is not a good idea to use your prize database for this.  The stores
+    database is a good bet (unless you are using an old version of Fourgen
+    software and it is using the stores database for its data dictionary).
     Then run:
 
         make test
 
-    Note that testing DBD::Informix does create some tables and databases.
-    The database is normally called 'dbd_ix_db', and the table names start
-    with 'dbd_ix_'.  Some of the tables are permanent; most are temporary.
-    The tests are designed to work whether the tables and database are
-    present when the tests start or not; that means they get dropped.  Do
-    not run the tests if you have precious tables or databases that begin
-    'dbd_ix_'!
-
-    On the reference system (Sun Sparc 20 running Solaris 2.5.1, compiling
-    with GCC 2.7.0 or SUNWspro SC4.0.1, using either Perl 5.003 or 5.004),
-    all the tests pass when DBD::Informix is built with ESQL/C versions
-    5.08.UD1, 6.00.UE1, 7.13.UC1 7.23.UC1 and 9.11.UC1.
-
-    It is a good idea to run:
+    On the reference system (Sun Sparc 10 running Solaris 2.4, compiling
+    with GCC 2.7.0 or SUNWspro SC3.0.1), all the tests pass for ESQL/C
+    versions 5.03.UC1, 5.07.UC1, 6.00.UC1, 7.13.UC1 and 7.21.UC1.
+    Nevertheless, it is a good idea to run:
 
         make test TEST_VERBOSE=1
 
     You should inspect the results as not every test compares the actual
-    data returned with the data that should be returned (though many of
-    them do check the data which is returned).  Note that the blob tests
-    pass on SE, because the test scripts detect that the engine is SE and
-    do not try to test blob handling.
-
-    Additionally, for a really thorough scrutiny of DBD::Informix, you need
-    to test with at least 3 different databases: one created MODE ANSI, one
-    created with a transaction log but not MODE ANSI, and one created
-    without any transaction logs at all.
-
-        DBD_INFORMIX_DATABASE=mode_ansi make test
-        DBD_INFORMIX_DATABASE=logged    make test
-        DBD_INFORMIX_DATABASE=unlogged  make test
-
-    If you are concerned about both OnLine and SE, then you need these
-    databases for both environments.  Also note that the multiple
-    connection tests will use two different databases if you set the
-    environment variable DBD_INFORMIX_DATABASE2, but the tests assume that
-    you don't need to specify the user and password.  This could be fixed,
-    but hasn't happened yet.  You can use one SE and one OnLine database
-    for the multiple connection testing.  You can also test with different
-    server versions (eg using 7.2x ESQL/C to connect to a 5.0x OnLine) if
-    you have the software available.
-
-    Once you are satisfied that DBD::Informix is working correctly, you
-    should install it:
-
-        make install
-
-    If you ever need to remove it, possibly as a preamble to installing a
-    new version, you should use the old version's makefile and run:
-
-        make uninstall
-
-    You can then install using the new version's makefile.  It is important
-    to use the correct (old or new) makefiles because the installed files
-    may be different, and if some file is made obsolete by the new version
-    (is not used by the new version), its makefile will not uninstall the
-    obsolete file; over time and multiple versions, this could, eventually,
-    lead to 'coronary thrombosis' on your disk drive -- or disk full.
-
-    If you run into problems which suggest that the ESQL/C you have won't
-    work as dynamically loaded libraries (eg on HP-UX or SCO), then you
-    should create a statically linked version of Perl with DBD::Informix
-    linked to it.  Use:
-
-        make perl
-        make test_static
+    data returned with the data that should be returned (though t/basic00.t
+    does do this).  Note that the blob tests pass on SE, because the test
+    scripts detect that the engine is SE and do not try to test blob
+    handling.
 
 KNOWN PROBLEMS:
 
@@ -213,26 +81,56 @@ KNOWN PROBLEMS:
       statements, which are likewise not supported in 4.0x or 4.1x (or
       earlier) versions.
 
+    * A bug in the 5.00 and 5.01 implementation of SQL DESCRIPTORS means
+      that these versions are not suitable either.
+
+    * Some desirable features are not implemented.  A number of these are
+      listed in the POD file.
+	  
+    * Some Oracle-inspired functions which are listed as part of DBI are
+      not implemented for lack of sufficient definition of what is actually
+      required.
+
     * Some problems have been encountered on HP-UX 9.x when building shared
-      libraries using 5.0x and 6.0x ESQL/C.  This seems to be because the
-      HP-UX compilers and loader do not accept code not compiled for shared
-      libraries inside a shared library.  Help (or reassurance) is needed on
-      this.
+      libraries using 5.0x ESQL/C.  This seems to be because the HP-UX
+      compilers and loader do not accept code not compiled for shared
+      libraries inside a shared library.  Help (or reassurance) is needed
+      on this.
 
     * Some problems have been encountered on SCO which seems to be related
       to the equivalent of LD_LIBRARY_PATH on System V Release 4 machines.
       Again, help or reassurance is needed on this.
 
-    * If you are using GCC to compile the software on Solaris, ensure that
-      you also use GCC to build the shared libraries, rather than trying to
-      use 'ld'.  If you use ld instead, you are likely to run into problems
-      with an undefined symbol __eprintf.  If you have this problem, the
-      fix is usually to reconfigure (and therefore rebuild) Perl to use GCC
-      to create the shared libraries.  It is not clear why using GCC gives
-      this problem.  Also, do not use the GNU assembler or loader with GCC
-      on Solaris; they don't work properly with shared libraries.
+-------------------------------------------------------------------------------
 
-IF YOU HAVE PROBLEMS BUILDING DBD::INFORMIX
+Error: Undefined symbols __cg92_used at link time.
+Environment:  Solaris, GCC
+
+If you compile with the SparcWorks SPARCompiler, you need to add the
+command line option on -xcg92 to resolve these symbol problems cleanly.
+
+Alligator Descartes <descarte@hermetica.com>
+
+JL notes: the detailed compiler versions are not known, but SC3.0.1 has not
+shown any problems on Solaris 2.4.
+
+This was originally reported for DBD::Oracle; may be relevant to some
+versions of Informix-ESQLC on Solaris.  Versions 5.00 through 5.03 of
+ESQL/C on Solaris 2.3 used libraries with names of the form libsql_cg92.a
+and you may run into problems with these.  (Notably, Makefile.PL will warn
+you that your ESQL/C may not be properly installed, even though it actually
+is OK.)
+
+Separately, for some reason, the STMT_START and STMT_END macros are not
+being created using the 'if (1) ... else (void)0' version of the macros on
+Solaris 2.4 with SPARCompiler version 3.0.1, even when -Dsun=1 or -D__sun__
+is used on the command line.  I have not managed to figure out why.  This
+leads to unwanted warnings about loop termination code not being reached.
+JL 96-11-19
+
+-------------------------------------------------------------------------------
+
+IF YOU HAVE PROBLEMS:
 
 Firstly, check the Frequently Asked Questions, Known Bugs and any other
 pertinent documents at:
@@ -241,74 +139,28 @@ pertinent documents at:
 
 If this does *not* resolve your problem, please post the details of your
 problem to dbi-users@fugue.com and CC them to me at johnl@informix.com.
-
-There are 4 types of failures which you might encounter:
-    A.  A configuration failure (perl Makefile.PL does not work)
-    B.  A build failure (the Makefile was generated but there were problems
-        during the build proper so that no test worked at all)
-    C.  A general test failure (although the build appeared OK, every
-        single test fails, or almost all of them fail).
-    D.  A selective test failure (the build appeared OK and most of the
-        tests pass, but a few (say 1 to 5) of them fail).
-Please classify your problem and follow the relevant steps below.
-
 Please include:
 
-1. A log of a complete build:
+1. A complete log of a complete build, e.g.:
 
-    # Before doing anything, please either re-extract the source from the
-    # compressed tar file you retrieved from CPAN into an empty directory
-    # or make sure that the build area is really clean:
-    [ -f Makefile ] && make realclean
-    rm -f esql esqlvrsn.h
-
-    # Send this output for all failure types (A, B, C, D)
-    perl Makefile.PL
-
-    # Send this output for failure types B, C, D.
+    perl Makefile.PL           (do a make realclean first)
     make
-
-    # Send this output for failure types C, D
-    # If the output is more than about 30 lines, then just send the first
-    # 30 lines or so of the output -- anything more is unlikely to give any
-    # extra information.
-    make test
-
-    # Send this output for failure types C, D
-    # Then, taking the first test which fails (typically basic00.t) send
-    # the output from:
-    test.one t/basic00.t
-
-    # Send this output for failure type D
-    # If the failing tests are failing in distinctly different ways
-    # (different error messages, or one is a core dump, or ...) then send
-    # the test output for each of the different outputs, but do not send
-    # more than 5 sets of test results unless requested to do so.
-    test.one t/dbase.t
-
-    If you use a Bourne or Korn Shell (or any work-alikes), you can also
-    use the following command to get a lot more debug information, but
-    don't send this unless asked to do so:
-
-    PERL_DBI_DEBUG=2 test.one t/basic00.t
-
-    Use this to verify that the problems you are reporting as different for
-    failure type D really are different, but still don't send the output
-    unless asked to do so.
+    ./test.pl
+    PERL_DBI_DEBUG=2 ./test.pl
 
 2. A complete, sorted dump of your environment:
 
     env | sort
 
 3. Full details of which version of Informix-ESQL/C and Perl you're using.
-   The output of "perl -V" gives the Perl information; running "esql -V"
-   gives the Informix-ESQL/C information.
+
+4. The output of:
+    perl -e 'use Config; print Config::myconfig()'
 
 5. If you get a core dump, try to include a stack trace from it.  If the
    stack trace mentions XS_DynaLoader_dl_load_file then rerun make test
    after setting the environment variable PERL_DL_DEBUG to 2.  Similarly,
-   get the Devel::CoreStack module and use it.  Do not send a stack trace
-   if it does not contain function names.
+   get the Devel::CoreStack module and use it.
 
 6. Please don't post problems to comp.lang.perl.misc or perl5-porters.
 
@@ -317,38 +169,10 @@ Please include:
    email to dbi-request@fugue.com.  There are 3 mailing lists:
    dbi-announce@fugue.com, dbi-users@fugue.com and dbi-dev@fugue.com.
 
-IF YOU HAVE PROBLEMS USING DBD::INFORMIX
-
-If your problem is with your own code and the DBD::Informix tests all pass,
-then the initial message should give the version information (see point 3
-above, plus the version of the Informix database engine you are using), a
-description of the problem, a minimal test script, and the results of
-running the test script on your machine (along with an explanation of why
-the result is wrong -- it may not be obvious to me -- and what the correct
-result should be).
-
-The minimal test script should preferably:
-
-(1) Use the stores database, with empty username and password fields.  If
-    the test needs a particular type of database (eg with transactions) to
-    demonstrate the problem, alternative convenient names are 'logged',
-    'unlogged' and 'mode_ansi'.
-(2) Use temporary tables rather than permanent ones.
-(3) Load just enough data to show the problem.
-(4) Test every statement using DBI functions for success.
-(5) Clearly indicate when it fails.
-(6) Clearly indicate when it passes.
-(7) It had better not use DBI->install_driver() without an extremely good
-    reason, and I can't immediately think of a reason which would be good
-    enough.
-
-If your test is failing with a core dump, the stack trace for it is useful
-if it lists function names -- it is not useful if it does not.
-
 Regards,
-Jonathan Leffler (johnl@informix.com)
+Tim & Al & Jonathan
 
-@(#)$Id: README,v 56.6 1997/07/13 01:18:24 johnl Exp $
+@(#)$Id: README,v 25.3 1996/12/09 21:03:25 johnl Exp $ 
 
 ---------------------------------------------------------------------------
 

@@ -1,0 +1,52 @@
+Working Versions of DBD::Informix
+=================================
+
+@(#)$Id: Working.Versions,v 57.5 1997/11/18 04:11:43 johnl Exp $
+
+This file documents combinations of machine, operating system, Perl, DBI,
+DBD::Informix and Informix-ESQL/C which have been reported as working,
+along with the date, name and email address of the person notifying me of
+the successful installation.  That means that the lines are longer than 80
+characters (more like 140) -- sorry.  Any known non-working configurations
+(which might otherwise be expected to work) will be documented too...
+There will always be eccentric combinations of extremely old DBI and new
+DBD::Informix (or vice versa) which won't work.
+
+Working Versions of DBD::Informix
+
+Machine     O/S                 Perl        DBI     DBD::Informix   ESQL/C      Date        Who
+-------     ---                 ----        ---     -------------   ------      ----        ---
+HP          HP-UX 10.01         5.004_01    0.90    0.56            7.22.UC1    1997-10-03  Nuno Carneiro de Moura <ncmoura@net.mailcom.pt>
+I486/33     SCO Unixware 2.03   5.004_02    0.85    0.56            7.13.UC1    1997-10-07  Curtis K Wong <curtis@crl.com>
+I486/33     SCO Unixware 2.03   5.004_02    0.90    0.56            7.13.UC1    1997-10-07  Curtis K Wong <curtis@crl.com>
+Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.56            7.23.UC1    1997-07-10  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            5.08.UD1    1997-11-17  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            6.00.UE1    1997-11-17  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            7.23.UC1    1997-11-17  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            7.24.UC1    1997-11-17  Jonathan Leffler <johnl@informix.com>
+Sun Sparc   Solaris 2.5.1       5.004_03    0.90    0.57            9.12.UC2    1997-11-17  Jonathan Leffler <johnl@informix.com>
+
+Known Non-Working Versions of DBD::Informix
+
+Machine     O/S                 Perl        DBI     DBD::Informix   ESQL/C      Date        Who
+-------     ---                 ----        ---     -------------   ------      ----        ---
+Any         Any                 Any         Any     Any             4.xy        1997-07-10  Jonathan Leffler <johnl@informix.com>
+        Consider using DBD::Informix4 by Göran Thyni <goran@bildbasen.se>
+Any         Any                 Any         Any     0.56            9.12.UC2    1997-07-10  Jonathan Leffler <johnl@informix.com>
+        Patches available to fix this
+
+Obsolete (Unsupported) Versions of DBD::Informix
+
+                Version     Release Date        Obsolete
+DBD::Informix   v0.23       1996-09-10          1996-12-09
+DBD::Informix   v0.24       1996-09-26          1997-01-24
+DBD::Informix   v0.25       1996-12-09          1997-06-09
+DBD::Informix   v0.26       1997-01-06          1997-01-24  Never on CPAN
+DBD::Informix   v0.50       1997-01-24          1997-07-06
+DBD::Informix   v0.51       1997-02-26          1997-02-28  Buggy
+DBD::Informix   v0.52       1997-02-28          1997-07-12
+DBD::Informix   v0.53       1997-03-12          1997-07-12
+DBD::Informix   v0.54       1997-05-14          1997-07-12
+DBD::Informix   v0.55       1997-05-20          Supported but upgrade recommended
+DBD::Informix   v0.56       1997-07-12          Supported
+DBD::Informix   v0.57       1997-11-14          Current

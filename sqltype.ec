@@ -4,7 +4,7 @@
 @(#)Last changed:    $Date: 1997/07/08 21:56:43 $
 @(#)Purpose:         Convert type and length from Syscolumns to string
 @(#)Author:          J Leffler
-@(#)Product:         :PRODUCT:
+@(#)Product:         $Product: DBD::Informix Version 0.57 (1997-11-13) $
 */
 
 /*TABSTOP=4*/

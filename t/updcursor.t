@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: updcursor.t,v 56.1 1997/07/11 04:51:24 johnl Exp $ 
+#	@(#)$Id: updcursor.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test $sth->{CursorName} and cursors FOR UPDATE for DBD::Informix
 #
@@ -9,7 +9,7 @@
 use DBD::InformixTest;
 
 # Test install...
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 
 &stmt_note("1..13\n");
 &stmt_ok();

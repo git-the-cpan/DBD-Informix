@@ -5,7 +5,7 @@
 @(#)Purpose:         Surrogate ODBC header for DBD::Informix
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1997
-@(#)Product:         $Product: DBD::Informix Version 0.56 (1997-07-08) $
+@(#)Product:         $Product: DBD::Informix Version 0.57 (1997-11-13) $
 */
 
 /*TABSTOP=4*/

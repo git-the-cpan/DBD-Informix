@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: primitives.t,v 53.1 1997/03/06 20:37:40 johnl Exp $ 
+# @(#)$Id: primitives.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -14,7 +14,7 @@ use DBD::InformixTest;
 my ($drh, $dbh, $cursor, @row ) ;
 
 print("1..8\n");
-$dbh = connect_to_test_database();
+$dbh = connect_to_test_database(1);
 stmt_ok;
 print "# Installed and connected\n" ;
 

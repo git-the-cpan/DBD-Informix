@@ -1,11 +1,11 @@
 /*
 @(#)File:            $RCSfile: esqlc.h,v $
-@(#)Version:         $Revision: 1.13 $
-@(#)Last changed:    $Date: 1997/06/05 23:52:43 $
+@(#)Version:         $Revision: 1.14 $
+@(#)Last changed:    $Date: 1997/10/09 02:57:34 $
 @(#)Purpose:         Include all relevant ESQL/C type definitions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 1992-93,1995-97
-@(#)Product:         $Product: DBD::Informix Version 0.56 (1997-07-08) $
+@(#)Product:         $Product: DBD::Informix Version 0.57 (1997-11-13) $
 */
 
 #ifndef ESQLC_H
@@ -13,7 +13,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 1.13 1997/06/05 23:52:43 johnl Exp $";
+static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 1.14 1997/10/09 02:57:34 johnl Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -74,6 +74,8 @@ extern "C" {
 #include <varchar.h>
 #endif /* ESQLC_VERSION >= 400 */
 
+/* _WIN32 (Windows 95/NT code from Harald Ums <Harald.Ums@sevensys.de> */
+
 #if ESQLC_VERSION < 400
 /* No prototypes available -- for earlier versions, you are on your own! */
 #elif ESQLC_VERSION < 410
@@ -83,8 +85,14 @@ extern "C" {
 #include "esql4_10.h"
 #include "esqllib.h"
 #elif ESQLC_VERSION < 600
+#ifdef _WIN32
+#include <windows.h>
+#include <sqlhdr.h>
+#include <sqlproto.h>
+#else
 #include "esql5_00.h"
 #include "esqllib.h"
+#endif /* _WIN32 */
 #else
 /* For later versions, sqlhdr.h contains the requisite declarations. */
 /* However, these declarations are protected by __STDC__ so you need */
@@ -92,6 +100,9 @@ extern "C" {
 /* on some machines do complain if you try to define __STDC__.       */
 #include <sqlhdr.h>
 
+#ifdef _WIN32
+#include <sqlproto.h>
+#else
 #if ESQLC_VERSION >= 720 && ESQLC_VERSION < 800
 #include "esql7_20.h"
 #endif /* ESQLC_VERSION is 7.2x */
@@ -101,6 +112,7 @@ extern int      sqgetdbs(int *ret_fcnt,
                          int fnsize,
                          char *farea,
                          int fasize);
+#endif /* _WIN32 */
 
 #endif /* ESQLC_VERSION */
 

@@ -1,60 +1,45 @@
 To: dbi-announce@fugue.com, dbi-dev@fugue.com, dbi-users@fugue.com,
-        informix-list@rmy.emory.edu, descarte@hermetica.com
-Subject: ANNOUNCE: DBD::Informix Version 0.56 released
+        informix-list@rmy.emory.edu, descarte@arcana.co.uk
+Subject: ANNOUNCE: DBD::Informix Version 0.57 released
 
-The next release of DBD::Informix, version 0.56, has been uploaded to CPAN.
+The next release of DBD::Informix, version 0.57, has been uploaded to CPAN.
 It will be available worldwide in a day or three.
 
 DBD::Informix is the driver code that enables Perl 5.003 or 5.004 to access
 Informix databases via the DBI module (you'll need the code for both DBI
-version 0.85 and DBD::Informix).  The code is available for download via:
+version 0.90 and DBD::Informix).  The code is available for download via:
 
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
-http://www.hermetica.com/technologia/perl/DBI
+http://www.arcana.co.uk/technologia/perl/DBI
 
 New in this release:
-* Changes in Informix-specific attribute names as forecast.
-* Fix esqltest to work when run against a MODE ANSI database.
-* Add support for DBI->data_sources(); drop support for _List_DBs().
-* Add support for $sth->rows().
-* Fix memory leak when using any of the attributes which return arrays.
-* Provide workaround for bug B42204 (error -1800 on disconnect) when a 7.x
-  ESQL/C program (ie DBD::Informix) talks to a 5.0x server (OnLine or SE).
-* Convert from SCCS to RCS.  It grieves me to do this -- I dislike the lack
-  of control over RCS identifier strings embedded into object files (I hate
-  the Author, State and Locker components in the Id string, for example),
-  but SCCS doesn't have year 2000 support in it so I upgraded to avoid
-  problems in the not too distant future.  Damn!
-* Drop SCCS.Log after an underwhelming number of requests (zero) to retain
-  it and an overwhelming number of suggestions (one) to remove it, and in
-  any case, the change to RCS means it would have to have been renamed.
-* Make $dbh->{ix_AutoErrorReport} a synonym for the DBI provided
-  $h->{PrintError} attribute.
-* Important changes to AutoCommit handling.
-  -- DBI defines the default as On (because all databases can handle it),
-     so DBD::Informix will always connect by default with AutoCommit on.
-  -- The new-style DBI->connect() notation allows you to override this
-     behaviour with an attribute.
-  -- This may cause problems for MODE ANSI database scripts.
-  -- Note that executing a BEGIN WORK command does not change the
-     AutoCommit behaviour or the value of the attribute, which makes BEGIN
-     WORK irrelevant because the new transaction will be committed if
-     AutoCommit is on and will fail if AutoCommit is off.
-  -- You can (only) start a transaction by setting AutoCommit off.
-  -- Ideally, if you attempt to connect to an unlogged database with
-     AutoCommit off, the connection will be rejected with error -256
-     'Transaction not available'.  However, because the attribute is not
-     set by DBI until after the basic connect operation is complete, this
-     does not happen.
+* Old-style Informix-specific attributes without the 'ix_' prefix are no
+  longer supported at all.
+* Based on the DBI driver template introduced with DBI 0.86, but actually
+  requires DBI 0.90.
+* Add _tables and _columns metadata methods (previously advertised as
+  info_cols and info_tables).
+* Add support for NT, thanks to Harald Ums <Harald.Ums@sevensys.de>.  It
+  isn't his fault that it isn't tested, and that I had to botch the system
+  with Makefile.NT.  I just needed to get this release out, and I'm left
+  hoping that what I've assembled will work.
+* Add Working.Versions file which documents known working versions.
+  Contributions are sought from you, the user, and will be added as the
+  information becomes available.
 
 Still to do:
+* Try to reproduce the problems reported by Kenji Hino <kenji@alcatraz.net>
+  and then fix them.  It is related null blobs and SQL error -608.
+* Get rid of Makefile.NT by integrating it into Makefile.PL.
+* Resolve -R option on Solaris and equivalents for getting path name of
+  Informix shared libraries into DBD::Informix shared library, so you don't
+  need as much environment set at run-time.
 * Investigate whether using sqlda structures in place of SQL descriptors
   makes a significant difference to the performance of DBD::Informix.
 * Integrate sqlcmd.sh into the build more thoroughly.  Document it.  Make
   it bomb-proof (for example, it fails horribly if you don't have a '-d'
   option on the command line because there isn't a way to connect to a
   database.
-* Add info_cols and info_tables methods somewhere.
 
 Let me know of problems, as usual, and solutions too when you have them.
 
@@ -64,4 +49,4 @@ Jonathan Leffler (johnl@informix.com) #include <disclaimer.h>
 
 PS: Read the README file.  Also read the Informix.Licence file.
 
-@(#)$Id: Announce,v 56.2 1997/07/09 17:45:20 johnl Exp $
+@(#)$Id: Announce,v 57.5 1997/11/14 05:08:40 johnl Exp $

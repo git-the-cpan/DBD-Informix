@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: basic00.t,v 56.1 1997/06/12 18:58:14 johnl Exp $ 
+#	@(#)$Id: basic00.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Primary test script for DBD::Informix
 #
@@ -36,7 +36,7 @@ print "#     Active Connections:    $drh->{ix_ActiveConnections}\n";
 print "#     Current Connection:    $drh->{ix_CurrentConnection}\n";
 print "# \n";
 
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 &stmt_ok(0);
 $dbname = $dbh->{Name};
 

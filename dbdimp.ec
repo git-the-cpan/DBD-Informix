@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.ec,v 56.11 1997/07/13 01:09:22 johnl Exp $ 
+ * @(#)$Id: dbdimp.ec,v 57.10 1997/11/18 06:03:42 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 56.11 1997/07/13 01:09:22 johnl Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 57.10 1997/11/18 06:03:42 johnl Exp $";
 #endif
 
 #include <stdio.h>
@@ -27,11 +27,14 @@ static const char rcs[] = "@(#)$Id: dbdimp.ec,v 56.11 1997/07/13 01:09:22 johnl 
 #include "Informix.h"
 #include "decsci.h"
 
+#define L_CURLY	'{'
+#define R_CURLY	'}'
+
 DBISTATE_DECLARE;
 
-static SV *dbd_errnum = NULL;
-static SV *dbd_errstr = NULL;
-static SV *dbd_state = NULL;
+static SV *ix_errnum = NULL;
+static SV *ix_errstr = NULL;
+static SV *ix_state = NULL;
 
 /*
 ** SQLSTATE is only supported in version 6.00 and later.
@@ -53,23 +56,68 @@ static dbd_ix_begin(imp_dbh_t *dbh);
 /* Official name for DBD::Informix module */
 const char *dbd_ix_module(void)
 {
-	return("DBD::Informix");
+	return(DBD_IX_MODULE);
+}
+
+/* Print message with string argument if debug level set high enough */
+void
+dbd_ix_debug(int n, char *fmt, const char *arg)
+{
+	fflush(stdout);
+	if (DBIS->debug >= n)
+		warn(fmt, arg);
+}
+
+/* Print message with long argument if debug level set high enough */
+void
+dbd_ix_debug_l(int n, char *fmt, long arg)
+{
+	fflush(stdout);
+	if (DBIS->debug >= n)
+		warn(fmt, arg);
+}
+
+#ifdef DBD_IX_DEBUG_ENVIRONMENT
+static void dbd_ix_printenv(const char *s1, const char *s2)
+{
+	extern char **environ;
+	char **envp = environ;
+	char *env;
+
+	fprintf(stderr, "ENV: %s %s - environ = 0x%08X\n", s1, s2, environ);
+	while ((env = *envp++) != 0)
+		fprintf(stderr, "0x%08X: %s\n", env, env);
+}
+#endif /* DBD_IX_DEBUG_ENVIRONMENT */
+
+/* Print message on entry to function */
+static void
+dbd_ix_enter(const char *function)
+{
+	dbd_ix_debug(1, "Enter %s()\n", function);
+}
+
+/* Print message on exit from function */
+static void
+dbd_ix_exit(const char *function)
+{
+	dbd_ix_debug(1, "Exit %s()\n", function);
 }
 
 /* Do some semi-standard initialization */
 void
-dbd_dr_init(dbistate)
+dbd_ix_dr_init(dbistate)
 dbistate_t     *dbistate;
 {
 	DBIS = dbistate;
-	dbd_errnum = GvSV(gv_fetchpv("DBD::Informix::err", 1, SVt_IV));
-	dbd_errstr = GvSV(gv_fetchpv("DBD::Informix::errstr", 1, SVt_PV));
-	dbd_state  = GvSV(gv_fetchpv("DBD::Informix::state", 1, SVt_PV));
+	ix_errnum = GvSV(gv_fetchpv("DBD::Informix::err", 1, SVt_IV));
+	ix_errstr = GvSV(gv_fetchpv("DBD::Informix::errstr", 1, SVt_PV));
+	ix_state  = GvSV(gv_fetchpv("DBD::Informix::state", 1, SVt_PV));
 }
 
 /* Formally initialize the DBD::Informix driver structure */
 int
-dbd_dr_driver(SV *drh)
+dbd_ix_dr_driver(SV *drh)
 {
 	D_imp_drh(drh);
 
@@ -89,53 +137,39 @@ dbd_dr_driver(SV *drh)
 /* Destroys a statement when a database connection is destroyed */
 static void dbd_st_destroyer(void *data)
 {
-	dbd_ix_debug(1, "Enter %s::dbd_st_destroyer()\n", dbd_ix_module());
+	static const char function[] = DBD_IX_MODULE "::dbd_st_destroyer";
+	dbd_ix_enter(function);
 	del_statement((imp_sth_t *)data);
-	dbd_ix_debug(1, "Exit %s::dbd_st_destroyer()\n", dbd_ix_module());
+	dbd_ix_exit(function);
 }
 
 /* Delete all the statements (and other data) associated with a connection */
 static void del_connection(imp_dbh_t *imp_dbh)
 {
-	dbd_ix_debug(1, "Enter %s::del_connection()\n", dbd_ix_module());
+	static const char function[] = DBD_IX_MODULE "::dbd_st_destroyer";
+	dbd_ix_enter(function);
 	destroy_chain(&imp_dbh->head, dbd_st_destroyer);
-	dbd_ix_debug(1, "Exit %s::del_connection()\n", dbd_ix_module());
+	dbd_ix_exit(function);
 }
 
 /* Relay (interface) function for use by destroy_chain() */
 /* Destroys a database connection when a driver is destroyed */
 static void dbd_db_destroyer(void *data)
 {
-	dbd_ix_debug(1, "Enter %s::dbd_db_destroyer()\n", dbd_ix_module());
+	static const char function[] = DBD_IX_MODULE "::dbd_db_destroyer";
+	dbd_ix_enter(function);
 	del_connection((imp_dbh_t *)data);
-	dbd_ix_debug(1, "Exit %s::dbd_db_destroyer()\n", dbd_ix_module());
+	dbd_ix_exit(function);
 }
 
 /* Disconnect all connections (cleanly) */
-int dbd_dr_disconnectall(imp_drh_t *imp_drh)
+int dbd_ix_dr_discon_all(SV *drh, imp_drh_t *imp_drh)
 {
-	dbd_ix_debug(1, "Enter %s::dbd_dr_disconnectall()\n", dbd_ix_module());
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_dr_discon_all";
+	dbd_ix_enter(function);
 	destroy_chain(&imp_drh->head, dbd_db_destroyer);
-	dbd_ix_debug(1, "Exit %s::dbd_dr_disconnectall()\n", dbd_ix_module());
+	dbd_ix_exit(function);
 	return(1);
-}
-
-/* Print message if debug level set high enough */
-void
-dbd_ix_debug(int n, char *fmt, const char *arg)
-{
-	fflush(stdout);
-	if (DBIS->debug >= n)
-		warn(fmt, arg);
-}
-
-/* Format a Informix error message (both SQL and ISAM parts) */
-void
-dbd_ix_debug_l(int n, char *fmt, long arg)
-{
-	fflush(stdout);
-	if (DBIS->debug >= n)
-		warn(fmt, arg);
 }
 
 /* Format a Informix error message (both SQL and ISAM parts) */
@@ -172,16 +206,16 @@ void            dbd_ix_seterror(ErrNum rc)
 		strcat(msgbuf, isambuf);
 
 		/* Record error number, error message, and error state */
-		sv_setiv(dbd_errnum, (IV)rc);
-		sv_setpv(dbd_errstr, msgbuf);
-		sv_setpv(dbd_state, SQLSTATE);
+		sv_setiv(ix_errnum, (IV)rc);
+		sv_setpv(ix_errstr, msgbuf);
+		sv_setpv(ix_state, SQLSTATE);
 	}
 }
 
 /* Save the current sqlca record */
 static void dbd_ix_savesqlca(imp_dbh_t *imp_dbh)
 {
-	imp_dbh->sqlca = sqlca;
+	imp_dbh->ix_sqlca = sqlca;
 }
 
 /* Record (and report) and SQL error, saving SQLCA information */
@@ -200,8 +234,7 @@ static void dbd_ix_sqlcode(imp_dbh_t *imp_dbh)
 /* ================================================================= */
 
 /* Initialize a connection structure, allocating names */
-static void     new_connection(imp_dbh)
-imp_dbh_t      *imp_dbh;
+static void     new_connection(imp_dbh_t *imp_dbh)
 {
 	static long     connection_num = 0;
 	sprintf(imp_dbh->nm_connection, "x_%09ld", connection_num);
@@ -214,22 +247,20 @@ imp_dbh_t      *imp_dbh;
 }
 
 int
-dbd_db_connect(imp_dbh, name, user, pass)
-imp_dbh_t      *imp_dbh;
-char           *name;			/* Database name */
-char           *user;			/* User name */
-char           *pass;			/* Password */
+dbd_ix_db_login(SV *dbh, imp_dbh_t *imp_dbh, char *name, char *user, char *pass)
 {
 	D_imp_drh_from_dbh;
 	Boolean conn_ok;
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_login";
 
-	dbd_ix_debug(1, "Enter %s::dbd_db_connect\n", dbd_ix_module());
+	dbd_ix_enter(function);
 	new_connection(imp_dbh);
 	if (name != 0 && *name == '\0')
 		name = 0;
 	if (name != 0 && strcmp(name, DEFAULT_DATABASE) == 0)
 		name = 0;
 
+	/*dbd_ix_printenv("pre-connect", function);*/
 #if ESQLC_VERSION >= 600
 	if (user != 0 && *user == '\0')
 		user = 0;
@@ -242,12 +273,13 @@ char           *pass;			/* Password */
 	/* Use DATABASE statement */
 	conn_ok = dbd_ix_opendatabase(name);
 #endif	/* ESQLC_VERSION >= 600 */
+	/*dbd_ix_printenv("post-connect", function);*/
 
 	if (sqlca.sqlcode < 0)
 	{
 		/* Failure of some sort */
 		dbd_ix_seterror(sqlca.sqlcode);
-		dbd_ix_debug(1, "Exit %s::dbd_db_connect (**ERROR**)\n", dbd_ix_module());
+		dbd_ix_debug(1, "Exit %s (**ERROR-1**)\n", function);
 		return 0;
 	}
 
@@ -259,25 +291,6 @@ char           *pass;			/* Password */
 	imp_dbh->is_loggeddb = (sqlca.sqlwarn.sqlwarn1 == 'W');
 	imp_dbh->is_connected = conn_ok;
 
-#ifdef NO_BUGS_IN_DBI
-	/**
-	** Unlogged databases are deemed to be in AutoCommit mode.  They cannot
-	** be switched out of AutoCommit mode, so an attempt to connect to one
-	** with AutoCommit Off causes a failure with error -256 'Transaction
-	** not available'.  To comply with the DBI 0.85 standard, all
-	** databases, including MODE ANSI databases, run with AutoCommit On by
-	** default.  However, this can be overridden by the user as required.
-	*/
-	if (imp_dbh->is_loggeddb == False && DBI_AutoCommit(imp_dbh) == False)
-	{
-		/* Simulate connection failure */
-		sqlca.sqlcode = -256;
-		dbd_ix_seterror(sqlca.sqlcode);
-		dbd_ix_debug(1, "Exit %s::dbd_db_connect (**ERROR**)\n", dbd_ix_module());
-		return 0;
-	}
-#endif /* NO_BUGS_IN_DBI */
-
 	/* Record extra active connection and name of current connection */
 	imp_drh->n_connections++;
 	imp_drh->current_connection = imp_dbh->nm_connection;
@@ -285,6 +298,27 @@ char           *pass;			/* Password */
 	add_link(&imp_drh->head, &imp_dbh->chain);
 	imp_dbh->chain.data = (void *)imp_dbh;
 	new_headlink(&imp_dbh->head);
+
+	/**
+	** Unlogged databases are in AutoCommit mode at all times and cannot be
+	** switched out of AutoCommit mode.  Ideally, an attempt to connect to
+	** one with AutoCommit Off would cause a failure with error -256
+	** 'Transaction not available'.  However, since the default attribute
+	** is only set after the connection itself is complete, it is not
+	** possible.  You can only give the warning.  To comply with the DBI
+	** 0.85 standard, all databases, including MODE ANSI databases, run
+	** with AutoCommit On by default.  However, this can be overridden by
+	** the user as required.
+	*/
+	if (imp_dbh->is_loggeddb == False && DBI_AutoCommit(imp_dbh) == False)
+	{
+		/* Simulate connection failure */
+		dbd_ix_db_disconnect(dbh, imp_dbh);
+		sqlca.sqlcode = -256;
+		dbd_ix_seterror(sqlca.sqlcode);
+		dbd_ix_debug(1, "Exit %s (**ERROR-2**)\n", function);
+		return 0;
+	}
 
 	DBIc_IMPSET_on(imp_dbh);	/* imp_dbh set up now                   */
 	DBIc_ACTIVE_on(imp_dbh);	/* call disconnect before freeing       */
@@ -297,13 +331,14 @@ char           *pass;			/* Password */
 		{
 			if (dbd_ix_begin(imp_dbh) == 0)
 			{
-				dbd_db_disconnect(imp_dbh);
-		dbd_ix_debug(1, "Exit %s::dbd_db_connect (**ERROR**)\n", dbd_ix_module());
+				dbd_ix_db_disconnect(dbh, imp_dbh);
+				dbd_ix_debug(1, "Exit %s (**ERROR-3**)\n", function);
 				return 0;
 			}
 		}
 	}
 
+	dbd_ix_exit(function);
 	return 1;
 }
 
@@ -384,7 +419,7 @@ static int      dbd_ix_rollback(imp_dbh_t *dbh)
 
 /* External interface for BEGIN WORK */
 int
-dbd_db_begin(imp_dbh_t *imp_dbh)
+dbd_ix_db_begin(imp_dbh_t *imp_dbh)
 {
 	int             rc = 1;
 
@@ -402,7 +437,7 @@ dbd_db_begin(imp_dbh_t *imp_dbh)
 
 /* External interface for COMMIT WORK */
 int
-dbd_db_commit(imp_dbh_t *imp_dbh)
+dbd_ix_db_commit(SV *dbh, imp_dbh_t *imp_dbh)
 {
 	int             rc = 1;
 
@@ -425,7 +460,7 @@ dbd_db_commit(imp_dbh_t *imp_dbh)
 
 /* External interface for ROLLBACK WORK */
 int
-dbd_db_rollback(imp_dbh_t *imp_dbh)
+dbd_ix_db_rollback(SV *dbh, imp_dbh_t *imp_dbh)
 {
 	int             rc = 1;
 
@@ -451,25 +486,56 @@ static void noop(void *data)
 {
 }
 
+/* Preset AutoCommit value */
+int
+dbd_ix_db_preset(imp_dbh_t *imp_dbh, SV *dbattr)
+{
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_preset";
+	static const char ac[] = "AutoCommit";
+	U32 ac_len = sizeof(ac) - 1;
+	I32 is_store = 0;
+
+	dbd_ix_enter(function);
+	if (SvROK(dbattr) && SvTYPE(SvRV(dbattr)) == SVt_PVHV)
+	{
+		/* const_cast<char *>(ac) */
+		SV **svpp;
+		svpp = hv_fetch((HV *)SvRV(dbattr), (char *)ac, ac_len, is_store);
+		if (svpp != NULL)
+		{
+			dbd_ix_debug_l(1, "AutoCommit set to %ld\n", SvTRUE(*svpp));
+			DBIc_set(imp_dbh, DBIcf_AutoCommit, SvTRUE(*svpp));
+		}
+	}
+	else
+	{
+		printf("SvROK = %d, SvTYPE = %d\n", SvROK(dbattr),
+			SvTYPE(SvRV(dbattr)));
+	}
+	dbd_ix_exit(function);
+	return 1;
+}
+
 /* Close a connection, destroying any dependent statements */
 int
-dbd_db_disconnect(imp_dbh_t *imp_dbh)
+dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_disconnect";
 	D_imp_drh_from_dbh;
 	int junk;
 
-	dbd_ix_debug(1, "Enter %s::dbd_db_disconnect\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	if (dbd_db_setconnection(imp_dbh) == 0)
 	{
 		dbd_ix_savesqlca(imp_dbh);
-		dbd_ix_debug(1, "dbd_db_disconnect -- %s\n", "set connection failed");
+		dbd_ix_debug(1, "%s -- set connection failed", function);
 		return(0);
 	}
 
-	dbd_ix_debug(1, "%s::dbd_db_disconnect -- delete statements\n", dbd_ix_module());
+	dbd_ix_debug(1, "%s -- delete statements\n", function);
 	destroy_chain(&imp_dbh->head, dbd_st_destroyer);
-	dbd_ix_debug(1, "%s::dbd_db_disconnect -- statements deleted\n", dbd_ix_module());
+	dbd_ix_debug(1, "%s -- statements deleted\n", function);
 
 	/* Rollback transaction before disconnecting */
 	if (imp_dbh->is_loggeddb == True && imp_dbh->is_txactive == True)
@@ -497,16 +563,18 @@ dbd_db_disconnect(imp_dbh_t *imp_dbh)
 
 	/* We don't free imp_dbh since a reference still exists	 */
 	/* The DESTROY method is the only one to 'free' memory.	 */
-	dbd_ix_debug(1, "Exit %s::dbd_db_disconnect\n", dbd_ix_module());
+	dbd_ix_exit(function);
 	return 1;
 }
 
-void dbd_db_destroy(imp_dbh_t *imp_dbh)
+void dbd_ix_db_destroy(SV *dbh, imp_dbh_t *imp_dbh)
 {
-	dbd_ix_debug(1, "%s::dbd_db_destroy()\n", dbd_ix_module());
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_db_destroy";
+	dbd_ix_enter(function);
 	if (DBIc_is(imp_dbh, DBIcf_ACTIVE))
-		dbd_db_disconnect(imp_dbh);
+		dbd_ix_db_disconnect(dbh, imp_dbh);
 	DBIc_off(imp_dbh, DBIcf_IMPSET);
+	dbd_ix_exit(function);
 }
 
 /* ================================================================== */
@@ -581,22 +649,37 @@ static void del_statement(imp_sth_t *imp_sth)
 	{
 	case Finished:
 		/*FALLTHROUGH*/
+
 	case Opened:
 		dbd_ix_debug(3, "del_statement() %s\n", "CLOSE cursor");
 		name = imp_sth->nm_cursor;
 		EXEC SQL CLOSE :name;
 		/*FALLTHROUGH*/
+
 	case Declared:
 		dbd_ix_debug(3, "del_statement() %s\n", "FREE cursor");
 		name = imp_sth->nm_cursor;
 		EXEC SQL FREE :name;
 		/*FALLTHROUGH*/
+
 	case Described:
 	case Allocated:
 		name = imp_sth->nm_obind;
 
-		/* ESQL/C does not deallocate blob space automatically */
-		/* Verified for ESQL/C 7.21.UC1 on Solaris 2.4 with Purify */
+		/* ESQL/C does not (always) deallocate blob space automatically */
+		/* Verified unfixed for ESQL/C 6.00.UE1 on Solaris 2.4 */
+		/* Verified unfixed for ESQL/C 7.21.UC1 on Solaris 2.4 with Purify */
+		/* Verified unfixed for ESQL/C 7.23.UC1 on Solaris 2.4 */
+		/* Verified *fixed* in 7.24.UC1 on Solaris 2.5.1 (bad frees reported) */
+		/* Verified as a bad fix on Windows 95/NT by Harald Ums (no version) */
+#if ESQLC_VERSION < 724
+#define DBD_IX_RELEASE_BLOBS
+#endif
+#ifdef _WIN32
+#undef DBD_IX_RELEASE_BLOBS
+#endif /* _WIN32 */
+
+#ifdef DBD_IX_RELEASE_BLOBS
 		if (imp_sth->n_blobs > 0)
 		{
 			for (colno = 1; colno <= imp_sth->n_columns; colno++)
@@ -612,14 +695,18 @@ static void del_statement(imp_sth_t *imp_sth)
 				}
 			}
 		}
+#endif /* DBD_IX_RELEASE_BLOBS */
+
 		dbd_ix_debug(3, "del_statement() %s\n", "DEALLOCATE descriptor");
 		EXEC SQL DEALLOCATE DESCRIPTOR :name;
 		/*FALLTHROUGH*/
+
 	case Prepared:
 		dbd_ix_debug(3, "del_statement() %s\n", "FREE statement");
 		name = imp_sth->nm_stmnt;
 		EXEC SQL FREE :name;
 		/*FALLTHROUGH*/
+
 	case Unused:
 		break;
 	}
@@ -630,17 +717,21 @@ static void del_statement(imp_sth_t *imp_sth)
 }
 
 /* Create the input descriptor for the specified number of items */
-int dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
+static int dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_setbindnum";
 	EXEC SQL BEGIN DECLARE SECTION;
-	long  bind_size = items;
+	int  bind_size = items;
 	char           *nm_ibind = imp_sth->nm_ibind;
 	EXEC SQL END DECLARE SECTION;
 
-	dbd_ix_debug(1, "%s::dbd_ix_setbindnum entered\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	if (dbd_db_setconnection(imp_sth->dbh) == 0)
+	{
+		dbd_ix_exit(function);
 		return 0;
+	}
 
 	if (items > imp_sth->n_bound)
 	{
@@ -651,6 +742,7 @@ int dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 			imp_sth->n_bound = 0;
 			if (sqlca.sqlcode < 0)
 			{
+				dbd_ix_exit(function);
 				return 0;
 			}
 		}
@@ -658,22 +750,25 @@ int dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 		dbd_ix_sqlcode(imp_sth->dbh);
 		if (sqlca.sqlcode < 0)
 		{
+			dbd_ix_exit(function);
 			return 0;
 		}
 		imp_sth->n_bound = items;
 	}
+	dbd_ix_exit(function);
 	return 1;
 }
 
 /* Bind the value to input descriptor entry */
-int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
+static int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 {
 	int rc = 1;
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_bindsv";
 	STRLEN len;
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_ibind = imp_sth->nm_ibind;
 	char *string;
-	long  integer;
+	long  intvar;
 	float numeric;
 	int		type;
 	int     length;
@@ -692,7 +787,7 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	EXEC SQL END DECLARE SECTION;
 #endif /* ESQLC_VERSION in {500, 501} */
 
-	dbd_ix_debug(1, "%s::dbd_ix_bindsv entered\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
@@ -705,7 +800,7 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	if (!SvOK(val))
 	{
 		/* It's a null! */
-		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- null\n", dbd_ix_module());
+		dbd_ix_debug(2, "%s -- null\n", function);
 		type = SQLCHAR;
 #if ESQLC_VERSION >= 600
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
@@ -731,7 +826,7 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	}
 	else if (type == SQLBYTES || type == SQLTEXT)
 	{
-		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- blob\n", dbd_ix_module());
+		dbd_ix_debug(2, "%s -- blob\n", function);
 		/* One day, this will accept SQ_UPDATE and SQ_UPDALL */
 		/* There are no plans to support SQ_UPDCURR */
 		blob_locate(&blob, BLOB_IN_MEMORY);
@@ -742,15 +837,15 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	}
 	else if (SvIOKp(val))
 	{
-		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- integer\n", dbd_ix_module());
+		dbd_ix_debug(2, "%s -- integer\n", function);
 		type = SQLINT;
-		integer = SvIV(val);
+		intvar = SvIV(val);
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
-						TYPE = :type, DATA = :integer;
+						TYPE = :type, DATA = :intvar;
 	}
 	else if (SvNOKp(val))
 	{
-		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- numeric\n", dbd_ix_module());
+		dbd_ix_debug(2, "%s -- numeric\n", function);
 		type = SQLFLOAT;
 		numeric = SvNV(val);
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
@@ -758,7 +853,7 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	}
 	else
 	{
-		dbd_ix_debug(2, "%s::dbd_ix_bindsv -- string\n", dbd_ix_module());
+		dbd_ix_debug(2, "%s -- string\n", function);
 		type = SQLCHAR;
 		string = SvPV(val, len);
 		length = len + 1;
@@ -800,6 +895,7 @@ int dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, SV *val)
 	{
 		rc = 0;
 	}
+	dbd_ix_exit(function);
 	return(rc);
 }
 
@@ -828,6 +924,7 @@ static int count_blobs(char *descname, int ncols)
 static void
 dbd_ix_blobs(imp_sth_t *imp_sth)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_blobs";
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_obind = imp_sth->nm_obind;
 	loc_t		   blob;
@@ -836,10 +933,13 @@ dbd_ix_blobs(imp_sth_t *imp_sth)
 	EXEC SQL END DECLARE SECTION;
 	int             n_columns = imp_sth->n_columns;
 
-	dbd_ix_debug(1, "%s::dbd_ix_blobs\n", dbd_ix_module());
+	dbd_ix_enter(function);
 	imp_sth->n_blobs = count_blobs(nm_obind, n_columns);
 	if (imp_sth->n_blobs == 0)
+	{
+		dbd_ix_exit(function);
 		return;
+	}
 
 	/*warn("dbd_ix_blobs: %d blobs\n", imp_sth->n_blobs);*/
 
@@ -860,6 +960,7 @@ dbd_ix_blobs(imp_sth_t *imp_sth)
 			dbd_ix_sqlcode(imp_sth->dbh);
 		}
 	}
+	dbd_ix_exit(function);
 }
 
 /* Declare cursor for SELECT or EXECUTE PROCEDURE */
@@ -897,9 +998,116 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 	return 1;
 }
 
-int
-dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
+/*
+** dbd_ix_preparse() -- based on dbd_preparse() in DBD::ODBC 0.15
+**
+** Edit string in situ (because the output will never be longer than the
+** input) so that ? parameters are counted and :xx positional parameters
+** are converted to ?.  Handles single-quoted literals and double-quoted
+** delimited identifiers and ANSI SQL "--.*\n" comments and Informix
+** "{.*}" comments.  Note that it does nothing with "#.*\n" Perl/Shell
+** comments.  Also note that it does not handle ODBC-style extensions.
+** The shorthand notation for these is identical to an Informix {}
+** comment; longhand notation looks like "--*(details*)--" without the
+** quotes.  Returns the number of input parameters.
+*/
+
+static int dbd_ix_preparse(char *statement)
 {
+	char            end_quote = '\0';
+	char           *src;
+	char           *start;
+	char           *dst;
+	int             idx = 0;
+	int             style = 0;
+	int             laststyle = 0;
+	int             param = 0;
+	char            ch;
+
+	src = statement;
+	dst = statement;
+	while ((ch = *src++) != '\0')
+	{
+		if (ch == end_quote)
+			end_quote = '\0';
+		else if (end_quote != '\0')
+		{
+			*dst++ = ch;
+			continue;
+		}
+		else if (ch == '\'' || ch == '\"')
+			end_quote = ch;
+		else if (ch == L_CURLY)
+			end_quote = R_CURLY;
+		else if (ch == '-' && *src == '-')
+		{
+			end_quote = '\n';
+		}
+		if (ch != ':' && ch != '?')
+		{
+			*dst++ = ch;
+			continue;
+		}
+		if (ch == '?')
+		{						/* X/Open standard	 */
+			*dst++ = '?';
+			idx++;
+			style = 3;
+		}
+		else if (isDIGIT(*src))
+		{						/* ':1'		 */
+			*dst++ = '?';
+			while (isDIGIT(*src))
+				src++;
+			idx++;
+			style = 1;
+		}
+		else if (isALNUM(*src))
+		{						/* ':foo'	 */
+			*dst++ = '?';
+			while (isALNUM(*src))	/* includes '_'	 */
+				src++;
+			idx++;
+			style = 2;
+		}
+		else
+		{						/* perhaps ':=' PL/SQL construct */
+			*dst++ = ch;
+			continue;
+		}
+		if (laststyle && style != laststyle)
+			croak("Can't mix placeholder styles (%d/%d)", style, laststyle);
+		laststyle = style;
+	}
+	if (end_quote != '\0')
+	{
+		switch (end_quote)
+		{
+		case '\'':
+			warn("Incomplete single-quoted string\n");
+			break;
+		case '\"':
+			warn("Incomplete double-quoted string (delimited identifier)\n");
+			break;
+		case R_CURLY:
+			warn("Incomplete bracketed {...} comment\n");
+			break;
+		case '\n':
+			warn("Incomplete double-dash comment\n");
+			break;
+		default:
+			assert(0);
+			break;
+		}
+	}
+	*dst = '\0';
+	return(idx);
+}
+
+int
+dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
+{
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_prepare";
 	D_imp_dbh_from_sth;
 	int  rc = 1;
 	EXEC SQL BEGIN DECLARE SECTION;
@@ -910,11 +1118,12 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	char           *nm_cursor;
 	EXEC SQL END DECLARE SECTION;
 
-	dbd_ix_debug(1, "%s::dbd_st_prepare()\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	if ((rc = dbd_db_setconnection(imp_dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_dbh);
+		dbd_ix_exit(function);
 		return(rc);
 	}
 
@@ -923,11 +1132,22 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	nm_obind = imp_sth->nm_obind;
 	nm_cursor = imp_sth->nm_cursor;
 
+	/* Record the number of input parameters in the statement */
+	DBIc_NUM_PARAMS(imp_sth) = dbd_ix_preparse(statement);
+
+	/* Allocate space for that many parameters */
+	if (dbd_ix_setbindnum(imp_sth, DBIc_NUM_PARAMS(imp_sth)) == 0)
+	{
+		dbd_ix_exit(function);
+		return 0;
+	}
+
 	EXEC SQL PREPARE :nm_stmnt FROM :statement;
 	dbd_ix_savesqlca(imp_dbh);
 	dbd_ix_sqlcode(imp_dbh);
 	if (sqlca.sqlcode < 0)
 	{
+		dbd_ix_exit(function);
 		return 0;
 	}
 	imp_sth->st_state = Prepared;
@@ -937,6 +1157,7 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	if (sqlca.sqlcode < 0)
 	{
 		del_statement(imp_sth);
+		dbd_ix_exit(function);
 		return 0;
 	}
 	imp_sth->st_state = Allocated;
@@ -946,6 +1167,7 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	if (sqlca.sqlcode < 0)
 	{
 		del_statement(imp_sth);
+		dbd_ix_exit(function);
 		return 0;
 	}
 	imp_sth->st_state = Described;
@@ -958,6 +1180,7 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 	if (sqlca.sqlcode < 0)
 	{
 		del_statement(imp_sth);
+		dbd_ix_exit(function);
 		return 0;
 	}
 
@@ -1004,36 +1227,42 @@ dbd_st_prepare(imp_sth_t *imp_sth, char *stmt, SV *attribs)
 
 	/* Get number of fields and space needed for field names      */
 	if (DBIS->debug >= 2)
-		printf("%s::dbd_st_prepare'imp_sth->n_columns: %d\n", dbd_ix_module(),
-		    imp_sth->n_columns);
+		printf("%s'imp_sth->n_columns: %d\n", function, imp_sth->n_columns);
 
+	dbd_ix_exit(function);
 	return rc;
 }
 
 int
-dbd_st_finish(imp_sth_t *imp_sth)
+dbd_ix_st_finish(SV *sth, imp_sth_t *imp_sth)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_finish";
 	int rc;
 
-	dbd_ix_debug(1, "%s::dbd_st_finish()\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
-		return(rc);
+	}
+	else
+	{
+		rc = dbd_ix_close(imp_sth);
+		DBIc_ACTIVE_off(imp_sth);
 	}
 
-	rc = dbd_ix_close(imp_sth);
-	DBIc_ACTIVE_off(imp_sth);
+	dbd_ix_enter(function);
 	return rc;
 }
 
 /* Free up resources used by the cursor or statement */
 void
-dbd_st_destroy(imp_sth_t *imp_sth)
+dbd_ix_st_destroy(SV *sth, imp_sth_t *imp_sth)
 {
-	dbd_ix_debug(1, "%s::dbd_st_destroy()\n", dbd_ix_module());
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_destroy";
+	dbd_ix_enter(function);
 	del_statement(imp_sth);
+	dbd_ix_exit(function);
 }
 
 /* Convert DECIMAL to convenient string */
@@ -1098,8 +1327,9 @@ static char *decgen(dec_t *val, int plus)
 ** and to the length of the inserted data in a VARCHAR column.
 */
 AV *
-dbd_st_fetch(imp_sth_t *imp_sth)
+dbd_ix_st_fetch(SV *sth, imp_sth_t *imp_sth)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_fetch";
 	AV	*av;
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_cursor = imp_sth->nm_cursor;
@@ -1126,11 +1356,12 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 	EXEC SQL END DECLARE SECTION;
 #endif /* ESQLC_VERSION in {500, 501} */
 
-	dbd_ix_debug(1, "Enter %s::dbd_st_fetch()\n", dbd_ix_module());
+	dbd_ix_enter(function);
 
 	if (dbd_db_setconnection(imp_sth->dbh) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
+		dbd_ix_exit(function);
 		return Nullav;
 	}
 
@@ -1141,13 +1372,14 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 	{
 		if (sqlca.sqlcode != SQLNOTFOUND)
 		{
-			dbd_ix_debug(1, "Exit %s::dbd_st_fetch() -- fetch failed\n", dbd_ix_module());
+			dbd_ix_debug(1, "Exit %s -- fetch failed\n", function);
 		}
 		else
 		{
 			imp_sth->st_state = Finished;
-			dbd_ix_debug(1, "Exit %s::dbd_st_fetch() -- SQLNOTFOUND\n", dbd_ix_module());
+			dbd_ix_debug(1, "Exit %s -- SQLNOTFOUND\n", function);
 		}
+		dbd_ix_exit(function);
 		return Nullav;
 	}
 	imp_sth->n_rows++;
@@ -1253,7 +1485,7 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 				{
 					result = malloc(collength+1);
 					if (result == 0)
-						die("%s::st::dbd_st_fetch: malloc failed\n", dbd_ix_module());
+						die("%s::st::dbd_ix_st_fetch: malloc failed\n", dbd_ix_module());
 				}
 				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
 						:result = DATA;
@@ -1279,8 +1511,9 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 				break;
 
 			default:
-				warn("%s::st::dbd_st_fetch: Unknown type code: %ld (treated as NULL)\n",
-					dbd_ix_module(), coltype);
+				croak("%s - Unknown type code: %ld (no IUS support)\n",
+					function, coltype);
+				/*NOTREACHED*/
 				length = 0;
 				result = coldata;
 				result[length] = '\0';
@@ -1302,18 +1535,19 @@ dbd_st_fetch(imp_sth_t *imp_sth)
 			}
 		}
 	}
-	dbd_ix_debug(1, "Exit %s::dbd_st_fetch()\n", dbd_ix_module());
+	dbd_ix_exit(function);
 	return(av);
 }
 
 static int dbd_ix_open(imp_sth_t *imp_sth)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_open";
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_cursor = imp_sth->nm_cursor;
 	char           *nm_ibind = imp_sth->nm_ibind;
 	EXEC SQL END DECLARE SECTION;
 
-	dbd_ix_debug(1, "%s::dbd_ix_open\n", dbd_ix_module());
+	dbd_ix_enter(function);
 	if (imp_sth->st_state == Opened || imp_sth->st_state == Finished)
 		dbd_ix_close(imp_sth);
 	assert(imp_sth->st_state == Declared);
@@ -1325,17 +1559,20 @@ static int dbd_ix_open(imp_sth_t *imp_sth)
 	dbd_ix_savesqlca(imp_sth->dbh);
 	if (sqlca.sqlcode < 0)
 	{
+		dbd_ix_exit(function);
 		return 0;
 	}
 	imp_sth->st_state = Opened;
 	if (imp_sth->dbh->is_modeansi == True)
 		imp_sth->dbh->is_txactive = True;
 	imp_sth->n_rows = 0;
+	dbd_ix_exit(function);
 	return 1;
 }
 
 static int dbd_ix_exec(imp_sth_t *imp_sth)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_exec";
 	EXEC SQL BEGIN DECLARE SECTION;
 	char           *nm_stmnt = imp_sth->nm_stmnt;
 	char           *nm_ibind = imp_sth->nm_ibind;
@@ -1343,7 +1580,7 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 	imp_dbh_t *dbh = imp_sth->dbh;
 	int rc = 1;
 
-	dbd_ix_debug(1, "%s::dbd_ix_exec\n", dbd_ix_module());
+	dbd_ix_enter(function);
 	if (imp_sth->n_bound > 0)
 	{
 		EXEC SQL EXECUTE :nm_stmnt USING SQL DESCRIPTOR :nm_ibind;
@@ -1356,6 +1593,7 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 	dbd_ix_savesqlca(dbh);
 	if (sqlca.sqlcode < 0)
 	{
+		dbd_ix_exit(function);
 		return 0;
 	}
 
@@ -1428,6 +1666,7 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 	}
 
 	DBIc_on(imp_sth, DBIcf_IMPSET);	/* Qu'est que c'est? */
+	dbd_ix_exit(function);
 	return rc;
 }
 
@@ -1443,15 +1682,18 @@ static int dbd_ix_exec(imp_sth_t *imp_sth)
 ** argument for returning -1 after dbd_ix_open() is called.
 */
 int
-dbd_st_execute(imp_sth_t *imp_sth)
+dbd_ix_st_execute(SV *sth, imp_sth_t *imp_sth)
 {
+	static const char function[] = DBD_IX_MODULE "::dbd_ix_st_execute";
 	int rv;
 	int rc;
 
+	dbd_ix_enter(function);
 	if ((rc = dbd_db_setconnection(imp_sth->dbh)) == 0)
 	{
 		dbd_ix_savesqlca(imp_sth->dbh);
 		assert(sqlca.sqlcode < 0);
+		dbd_ix_exit(function);
 		return(sqlca.sqlcode);
 	}
 
@@ -1476,58 +1718,33 @@ dbd_st_execute(imp_sth_t *imp_sth)
 		assert(sqlca.sqlcode == 0 && rv >= 0);
 	}
 
+	dbd_ix_exit(function);
 	return(rv);
 }
 
-#if ONLY
-int dbd_db_immediate(imp_dbh_t *imp_dbh, char *stmt)
+int dbd_ix_st_rows(SV *sth, imp_sth_t *imp_sth)
 {
-	EXEC SQL BEGIN DECLARE SECTION;
-	char           *statement = stmt;
-	EXEC SQL END DECLARE SECTION;
-
-	dbd_ix_debug(1, "%s::dbd_db_immediate() called\n", dbd_ix_module());
-	if (dbd_db_setconnection(imp_dbh) == 0)
-	{
-		dbd_ix_savesqlca(imp_dbh);
-		return(0);
-	}
-	EXEC SQL EXECUTE IMMEDIATE :statement;
-	dbd_ix_seterror(sqlca.sqlcode);
-	dbd_ix_savesqlca(imp_dbh);
-	if (sqlca.sqlcode < 0)
-		return(0);
-	if (DBI_AutoCommit(imp_dbh) == True && imp_dbh->is_modeansi == True)
-		dbd_ix_commit(imp_dbh);
-	dbd_ix_debug(1, "%s::dbd_db_immediate() exiting\n", dbd_ix_module());
-	return(sqlca.sqlcode == 0);
+	return(imp_sth->n_rows);
 }
-#endif /* ONLY */
 
-#if ONLY
-int dbd_db_createprocfrom(imp_dbh_t *imp_dbh, char *file)
+int dbd_ix_st_bind_ph(SV *sth, imp_sth_t *imp_sth, SV *param, SV *value,
+	IV sql_type, SV *attribs, int is_inout, IV maxlen)
 {
-	EXEC SQL BEGIN DECLARE SECTION;
-	char           *filename = file;
-	EXEC SQL END DECLARE SECTION;
+	static const char function[] = DBD_IX_MODULE "::st::dbd_ix_st_bind_ph";
+	int rc;
 
-	dbd_ix_debug(1, "%s::dbd_createprocfrom() called\n", dbd_ix_module());
-	if (dbd_db_setconnection(imp_dbh) == 0)
-	{
-		dbd_ix_savesqlca(imp_dbh);
-		return(0);
-	}
-	EXEC SQL CREATE PROCEDURE FROM :filename;
-	dbd_ix_seterror(sqlca.sqlcode);
-	dbd_ix_savesqlca(imp_dbh);
-	if (sqlca.sqlcode < 0)
-		return(0);
-	if (DBI_AutoCommit(imp_dbh) == True && imp_dbh->is_modeansi == True)
-		dbd_ix_commit(imp_dbh);
-	dbd_ix_debug(1, "%s::dbd_createprocfrom() exiting\n", dbd_ix_module());
-	return(sqlca.sqlcode == 0);
+	dbd_ix_enter(function);
+	if (is_inout)
+		croak("%s() - inout parameters not implemented\n", function);
+	rc = dbd_ix_bindsv(imp_sth, SvIV(param), value);
+	dbd_ix_exit(function);
+	return(rc);
 }
-#endif /* ONLY */
 
+int dbd_ix_st_blob_read(SV *sth, imp_sth_t *imp_sth, int field, long offset,
+long len, SV *destrv, long destoffset)
+{
+	croak("%s::st::dbd_ix_st_blob_read() - not implemented\n", dbd_ix_module());
+}
 
 /* -------------- End of $RCSfile: dbdimp.ec,v $ -------------- */

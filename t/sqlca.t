@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: sqlca.t,v 52.1 1997/03/05 15:52:40 johnl Exp $ 
+#	@(#)$Id: sqlca.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test SQLCA Record Handling for DBD::Informix
 #
@@ -9,7 +9,7 @@
 use DBD::InformixTest;
 
 # Test install...
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 print_sqlca($dbh);
 
 &stmt_note("1..7\n");

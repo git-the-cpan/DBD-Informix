@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: error01.t,v 56.2 1997/07/07 23:38:17 johnl Exp $ 
+#	@(#)$Id: error01.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test error on EXECUTE for DBD::Informix
 #
@@ -9,7 +9,7 @@
 use DBD::InformixTest;
 
 # Test install...
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 
 $tabname = "dbd_ix_err01";
 

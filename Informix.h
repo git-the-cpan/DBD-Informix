@@ -1,7 +1,5 @@
 /*
- *	@(#)$Id: Informix.h,v 50.1 1997/01/12 17:54:43 johnl Exp $ 
- *
- *	$Derived-From: Informix.h,v 1.3 1995/05/25 21:18:56 timbo Archaic $
+ *	@(#)$Id: Informix.h,v 57.2 1997/07/30 03:13:26 johnl Exp $ 
  *
  * Portions Copyright (c) 1994,1995 Tim Bunce
  * Portions Copyright (c) 1995,1996 Alligator Descartes
@@ -11,13 +9,15 @@
  * License or the Artistic License, as specified in the Perl README file.
  */
 
+/*TABSTOP=4*/
+
 #ifndef INFORMIX_H
 #define INFORMIX_H
 
-#include <DBIXS.h>		/* installed by the DBI module	*/
-#include "esqlc.h"		/* Prototypes for ESQL/C version 5.0x etc */
-#include "esqlperl.h"
-#include "esqlvrsn.h"	/* Defines ESQLC_VERSION_STRING */
+#define NEED_DBIXS_VERSION 9
+
+#include <DBIXS.h>		/* Installed by the DBI module */
 #include "dbdimp.h"		/* Informix implementation details */
+#include <dbd_xsh.h>	/* Installed by the DBI module */
 
 #endif /* INFORMIX_H */

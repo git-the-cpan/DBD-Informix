@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: esqlld,v 56.1 1997/06/17 17:54:59 johnl Exp $ 
+# @(#)$Id: esqlld,v 57.1 1997/07/30 18:19:08 johnl Exp $ 
 #
 # DBD::Informix for Perl Version 5
 #
@@ -26,5 +26,5 @@ $cmd = $ENV{ESQLLD};
 $cmd = 'cc' unless ($cmd);
 @cmd = split /\s+/, $cmd;
 
-# print STDERR "@cmd @ARGS -lc\n";
+print STDERR "@cmd @ARGS -lc\n" if $ENV{DBD_INFORMIX_DEBUG_ESQLLD};
 exec @cmd, @ARGS, "-lc";

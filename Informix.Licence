@@ -157,13 +157,22 @@ ESQL/C Version 4.1x or earlier, then DBD::Informix is known not to work
 because it relies on features introduced in Version 5.00 ESQL/C.  The code
 can probably be modified to work, but it will take considerable effort.  If
 someone wants to do the coding which is necessary to get versions 4.0x or
-4.1x to work, then contact the DBD::Informix Maintenance Team.  If you have
-Informix-4GL (C-code) for version 6.0x, then you can probably use it in
-lieu of 6.0x ESQL/C (use the c4gl script in place of the esql script), but
-the resulting executable code is likely to be much larger than it would be
-using a pure ESQL/C version, and it has not been proven to work.  You
-cannot use 4.1x I4GL because it uses the 4.1x ESQL/C compiler, which
-doesn't provide the features needed by DBD::Informix.
+4.1x to work, then contact the DBD::Informix Maintenance Team.
+
+If you have Informix-4GL (C-code) for version 6.0x, then you can probably
+use it in lieu of 6.0x ESQL/C (use the c4gl script in place of the esql
+script), but the resulting executable code is likely to be much larger than
+it would be using a pure ESQL/C version.  It was shown to work using
+DBD::Informix v0.56 (Perl 5.004 and DBI v0.90) with Informix-4GL 6.05.UC1
+on a Sun Sparc 20 running Solaris 2.5.1.  The necessary steps are (in
+Bourne or Korn shell notation):
+
+    ESQL=c4gl perl Makefile.PL
+    make
+    make test
+
+Note that you cannot use 4.1x I4GL because it uses the 4.1x ESQL/C
+compiler, which doesn't provide the features needed by DBD::Informix.
 
 ---------------------------------------------------------------------------
 
@@ -221,4 +230,4 @@ See also the README file.
 
 Jonathan Leffler (johnl@informix.com)
 Informix Software Inc
-@(#)$Id: Informix.Licence,v 56.1 1997/07/09 20:44:52 johnl Exp $
+@(#)$Id: Informix.Licence,v 57.2 1997/10/30 03:06:36 johnl Exp $

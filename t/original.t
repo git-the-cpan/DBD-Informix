@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: original.t,v 51.1 1997/02/25 19:43:04 johnl Exp $ 
+# @(#)$Id: original.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -12,7 +12,7 @@ use DBD::InformixTest;
 
 print("1..11\n");
 
-$dbh = connect_to_test_database();
+$dbh = connect_to_test_database(1);
 &stmt_ok;
 
 print "# Preparing SELECT * from 'informix'.SysTables ***\n";

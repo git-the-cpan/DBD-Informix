@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: transact02.t,v 53.1 1997/03/06 20:37:45 johnl Exp $ 
+#	@(#)$Id: transact02.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test AutoCommit On for DBD::Informix
 #
@@ -11,7 +11,7 @@
 use DBD::InformixTest;
 
 # Test install...
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 
 if ($dbh->{ix_LoggedDatabase} == 0)
 {

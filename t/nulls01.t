@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: nulls01.t,v 55.1 1997/05/20 11:05:15 johnl Exp $ 
+#	@(#)$Id: nulls01.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test Null Handling for DBD::Informix
 #
@@ -47,7 +47,7 @@ sub select_null_data
 
 
 # Test install...
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 
 &stmt_note("1..7\n");
 &stmt_ok();

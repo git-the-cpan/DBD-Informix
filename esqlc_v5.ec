@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlc_v5.ec,v 56.2 1997/07/13 01:09:22 johnl Exp $ 
+ * @(#)$Id: esqlc_v5.ec,v 56.3 1997/11/18 06:03:12 johnl Exp $ 
  *
  * DBD::Informix for Perl Version 5 -- implementation details
  *
@@ -17,7 +17,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v5.ec,v 56.2 1997/07/13 01:09:22 johnl Exp $";
+static const char rcs[] = "@(#)$Id: esqlc_v5.ec,v 56.3 1997/11/18 06:03:12 johnl Exp $";
 #endif
 
 /* ================================================================= */
@@ -36,6 +36,7 @@ dbd_ix_opendatabase(char *dbase)
 	if (dbase == (char *)0 || *dbase == '\0')
 	{
 		dbd_ix_debug(1, "ESQL/C 5.0x 'implicit' DATABASE - %s\n", "no-op");
+		sqlca.sqlcode = 0;
 		conn_ok = True;
 	}
 	else
@@ -51,7 +52,7 @@ dbd_ix_opendatabase(char *dbase)
 void
 dbd_ix_closedatabase(char *dbname)
 {
-	dbd_ix_debug(1, "CLOSE DATABASE%s\n", (dbname ? dbname : ""));
+	dbd_ix_debug(1, "CLOSE DATABASE %s\n", (dbname ? dbname : ""));
 	EXEC SQL CLOSE DATABASE;
 	if ((dbname == 0 || *dbname == '\0') && sqlca.sqlcode == -349)
 	{
@@ -65,4 +66,5 @@ dbd_ix_closedatabase(char *dbname)
 void dbd_ix_setconnection(char *conn)
 {
 	dbd_ix_debug(1, "SET CONNECTION - %s (NO-OP)\n", conn);
+	sqlca.sqlcode = 0;
 }

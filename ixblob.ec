@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: ixblob.ec,v $
-@(#)Version:        $Revision: 50.4 $
-@(#)Last changed:   $Date: 1997/07/08 19:52:44 $
+@(#)Version:        $Revision: 50.5 $
+@(#)Last changed:   $Date: 1997/10/09 02:51:49 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) Jonathan Leffler 1996-97
-@(#)Product:        :PRODUCT:
+@(#)Product:        $Product: DBD::Informix Version 0.57 (1997-11-13) $
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,12 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+/* Windows 95 and Windows NT fix from Harald Ums <Harald.Ums@sevensys.de> */
+#ifdef _WIN32
+#include <io.h>
+#else
 #include <unistd.h>
+#endif /* _WIN32 */
 #include "ixblob.h"
 
 #define FILENAMESIZE	128
@@ -27,7 +32,7 @@
 static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec,v 50.4 1997/07/08 19:52:44 johnl Exp $";
+static const char rcs[] = "@(#)$Id: ixblob.ec,v 50.5 1997/10/09 02:51:49 johnl Exp $";
 #endif
 
 BlobLocn blob_getlocmode(void)

@@ -1,7 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 56.5 1997/07/09 17:41:44 johnl Exp $ 
- *
- * $Derived-From: dbdimp.h,v 1.5 1995/06/22 00:37:04 timbo Archaic $
+ * @(#)$Id: dbdimp.h,v 57.4 1997/10/09 03:04:22 johnl Exp $ 
  *
  * Copyright (c) 1994,1995 Tim Bunce
  *           (c) 1996,1997 Jonathan Leffler
@@ -12,6 +10,16 @@
 
 #ifndef DBDIMP_H
 #define DBDIMP_H
+
+#include "dbdixmap.h"	/* Defines for functions called in Informix.xs */
+#include "esqlc.h"		/* Prototypes for ESQL/C version 5.0x etc */
+#include "esqlperl.h"	/* Declarations for code used in esqltest.ec */
+#include "esqlvrsn.h"	/* Defines ESQLC_VERSION_STRING */
+
+#ifndef DBD_INFORMIX_NO_ASSERTS
+#undef NDEBUG
+#include <assert.h>
+#endif /* DBD_INFORMIX_NO_ASSERTS */
 
 #define NAMESIZE 19				/* 18 character name plus '\0' */
 #define DEFAULT_DATABASE	".DEFAULT."
@@ -49,18 +57,18 @@ struct imp_drh_st
 /* Define dbh implementor data structure */
 struct imp_dbh_st
 {
-	dbih_dbc_t      com;		/* MUST be first element in structure */
-	char           *database;	/* Name of database */
-	Name            nm_connection;	/* Name of connection */
+	dbih_dbc_t      com;            /* MUST be first element in structure */
+	char           *database;       /* Name of database */
+	Name            nm_connection;  /* Name of connection */
 	Boolean         is_connected;   /* Is connection open */
-	Boolean         is_onlinedb;	/* Is OnLine Engine */
-	Boolean         is_modeansi;	/* Is MODE ANSI Database */
-	Boolean         is_loggeddb;	/* Has transaction log */
-	Boolean         is_txactive;	/* Is inside transaction */
-	BlobLocn        blob_bind;	/* Blob binding */
-	Sqlca           sqlca;      /* Last SQLCA record for connection */
-	Link            chain;      /* Link in list of connections */
-	Link            head;       /* Head of list of statements */
+	Boolean         is_onlinedb;    /* Is OnLine Engine */
+	Boolean         is_modeansi;    /* Is MODE ANSI Database */
+	Boolean         is_loggeddb;    /* Has transaction log */
+	Boolean         is_txactive;    /* Is inside transaction */
+	BlobLocn        blob_bind;      /* Blob binding */
+	Sqlca           ix_sqlca;       /* Last SQLCA record for connection */
+	Link            chain;          /* Link in list of connections */
+	Link            head;           /* Head of list of statements */
 };
 
 /* Define sth implementor data structure */
@@ -84,38 +92,46 @@ struct imp_sth_st
 
 #define DBI_AutoCommit(dbh)	(DBIc_is(dbh, DBIcf_AutoCommit) ? True : False)
 
-extern void dbd_ix_seterror(ErrNum rc);
+#ifndef DBD_IX_MODULE
+#define DBD_IX_MODULE "DBD::Informix"
+#endif /* DBD_IX_MODULE */
 
-extern SV *dbd_dr_FETCH_attrib(imp_drh_t *drh, SV *keysv);
-extern int dbd_dr_disconnectall(imp_drh_t *);
-extern int dbd_dr_driver(SV *drh);
-extern void dbd_dr_init(dbistate_t *dbistate);
+/* Standard driver entry points */
+extern int dbd_ix_dr_discon_all(SV *, imp_drh_t *);
+extern void dbd_ix_dr_init(dbistate_t *);
 
-extern SV *dbd_db_FETCH_attrib(imp_dbh_t *dbh, SV *keysv);
-extern int dbd_db_STORE_attrib(imp_dbh_t *dbh, SV *keysv, SV *valuesv);
-extern int dbd_db_begin(imp_dbh_t *sth);
-extern int dbd_db_commit(imp_dbh_t *sth);
-extern int dbd_db_connect(imp_dbh_t *dbh, char *dbs, char *uid, char *pwd);
-extern int dbd_db_createprocfrom(imp_dbh_t *imp_dbh, char *file);
-extern int dbd_db_disconnect(imp_dbh_t *dbh);
-extern int dbd_db_immediate(imp_dbh_t *dbh, char *stmt);
-extern int dbd_db_rollback(imp_dbh_t *sth);
-extern void dbd_db_destroy(imp_dbh_t *dbh);
+/* Non-standard driver entry points */
+extern SV *dbd_ix_dr_FETCH_attrib(imp_drh_t *drh, SV *keysv);
+extern int dbd_ix_dr_driver(SV *drh);
 
-extern AV *dbd_st_fetch(imp_sth_t *sth);
-extern SV *dbd_st_FETCH_attrib(imp_sth_t *sth, SV *keysv);
-extern int dbd_st_STORE_attrib(imp_sth_t *sth, SV *keysv, SV *valuesv);
-extern int dbd_st_bind_ph(SV *sth, SV *param, SV *value, SV *attribs, int boolean, int len);
-extern int dbd_st_blob_read(SV *sth, int field, long offset, long len, SV *destsv, int destoffset);
-extern int dbd_st_execute(imp_sth_t *sth);
-extern int dbd_st_finish(imp_sth_t *sth);
-extern int dbd_st_prepare(imp_sth_t *sth, char *statement, SV *attribs);
-extern void dbd_st_destroy(imp_sth_t *sth);
+/* Standard database entry points */
+extern SV *dbd_ix_db_FETCH_attrib(SV *, imp_dbh_t *, SV *);
+extern int dbd_ix_db_STORE_attrib(SV *, imp_dbh_t *, SV *, SV *);
+extern int dbd_ix_db_commit(SV *, imp_dbh_t *);
+extern int dbd_ix_db_disconnect(SV *, imp_dbh_t *imp_dbh);
+extern int dbd_ix_db_login(SV *, imp_dbh_t *, char *, char *, char *);
+extern int dbd_ix_db_rollback(SV *, imp_dbh_t *imp_dbh);
+extern void dbd_ix_db_destroy(SV *, imp_dbh_t *imp_dbh);
 
-extern int dbd_ix_setbindnum(imp_sth_t *sth, int items);
-extern int dbd_ix_bindsv(imp_sth_t *sth, int idx, SV *val);
+/* Non-standard database entry points */
+extern int dbd_ix_db_begin(imp_dbh_t *);
+extern int dbd_ix_db_preset(imp_dbh_t *, SV *);
+
+/* Standard statement entry points */
+extern AV *dbd_ix_st_fetch(SV *, imp_sth_t *);
+extern SV *dbd_ix_st_FETCH_attrib(SV *, imp_sth_t *, SV *);
+extern int dbd_ix_st_STORE_attrib(SV *, imp_sth_t *, SV *, SV *);
+extern int dbd_ix_st_bind_ph(SV *, imp_sth_t *, SV *, SV *, IV, SV *, int, IV);
+extern int dbd_ix_st_blob_read(SV *, imp_sth_t *, int, long, long, SV *, long);
+extern int dbd_ix_st_execute(SV *, imp_sth_t *);
+extern int dbd_ix_st_finish(SV *, imp_sth_t *);
+extern int dbd_ix_st_prepare(SV *, imp_sth_t *, char *, SV *);
+extern int dbd_ix_st_rows(SV *, imp_sth_t *);
+extern void dbd_ix_st_destroy(SV *, imp_sth_t *);
+
+/* Other non-standard entry points */
 extern const char *dbd_ix_module(void);
-
+extern void dbd_ix_seterror(ErrNum rc);
 extern void add_link(Link *link_1, Link *link_n);
 extern void delete_link(Link *link_d, void (*function)(void *));
 extern void destroy_chain(Link *head, void (*function)(void *));

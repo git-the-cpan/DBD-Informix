@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: dratt01.t,v 54.1 1997/05/13 15:38:37 johnl Exp $ 
+#	@(#)$Id: dratt01.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Driver Attribute test script for DBD::Informix
 #
@@ -29,7 +29,7 @@ print "#     Active Connections:    $drh->{ix_ActiveConnections}\n";
 print "#     Current Connection:    $drh->{ix_CurrentConnection}\n";
 print "# \n";
 
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 &stmt_ok(0);
 $dbname = $dbh->{Name};
 

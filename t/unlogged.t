@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: unlogged.t,v 56.3 1997/07/11 04:16:57 johnl Exp $ 
+# @(#)$Id: unlogged.t,v 56.4 1997/11/18 06:04:21 johnl Exp $ 
 #
 # Copyright (C) 1997 Jonathan Leffler (johnl@informix.com)
 #
@@ -35,11 +35,9 @@ undef $dbh;
 &stmt_note("# Test DBI->connect('dbi:Informix:$dbname',...,{AutoCommit=>0})\n");
 $dbh = DBI->connect("dbi:Informix:$dbname",'','',
 					{ AutoCommit => 0, PrintError => 1 });
-# Under DBI 0.85, this connection works.  Ideally it should fail.
-&stmt_ok if (defined $dbh);
+# Under DBI 0.85, this connection worked.  Ideally it should have failed.
+# Under DBI 0.90, this connection fails, as it is supposed to!
 &stmt_ok if (!defined $dbh);
-$dbh->disconnect() if (defined $dbh);
-undef $dbh;
 
 # Remove test database
 stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.'));

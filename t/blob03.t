@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: blob03.t,v 53.1 1997/03/06 20:37:25 johnl Exp $ 
+#	@(#)$Id: blob03.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test Basic Blobs (SELECT) for DBD::Informix
 #
@@ -8,7 +8,7 @@
 
 use DBD::InformixTest;
 
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 
 if (!$dbh->{ix_InformixOnLine})
 {

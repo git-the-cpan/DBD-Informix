@@ -1,4 +1,4 @@
-#	@(#)$Id: Informix.pm,v 56.6 1997/07/13 01:15:39 johnl Exp $ 
+#	@(#)$Id: Informix.pm,v 57.10 1997/11/14 03:13:45 johnl Exp $ 
 #
 #   Portions Copyright (c) 1994,1995 Tim Bunce
 #   Portions Copyright (c) 1996,1997 Jonathan Leffler
@@ -13,12 +13,12 @@
 	use DynaLoader;
 	@ISA = qw(DynaLoader);
 
-	$VERSION     = "0.56";
+	$VERSION     = "0.57";
 	$ATTRIBUTION = 'By Jonathan Leffler';
-	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 56.6 $ ($Date: 1997/07/13 01:15:39 $)@, 3);
+	$Revision    = substr(q@(#)$RCSfile: Informix.pm,v $ $Revision: 57.10 $ ($Date: 1997/11/14 03:13:45 $)@, 3);
 	$Revision =~ s/\$[A-Z][A-Za-z]*: ([^\$]+) \$/$1/g;	# Remove RCS!
 
-	require_version DBI 0.85;	# Requires fixes from DBI 0.85 release
+	require_version DBI 0.89;	# Requires features from DBI 0.89 release
 
 	bootstrap DBD::Informix $VERSION;
 
@@ -40,12 +40,12 @@
 
 		unless ($ENV{INFORMIXDIR})
 		{
-			foreach(qw(/usr/informix))
+			foreach (qw(/usr/informix))
 			{
 				if (-d "$_/lib")
 				{
 					$ENV{INFORMIXDIR} = $_;
-					warn "INFORMIXDIR set to $_\n";
+					warn "DBD::Informix - INFORMIXDIR set to $_\n";
 					last;
 				}
 			}
@@ -80,14 +80,19 @@
 	package DBD::Informix::dr; # ====== DRIVER ======
 	use strict;
 
-	sub errstr
-	{
-		DBD::Informix::errstr(@_);
-	}
-
 	sub connect
 	{
-		my ($drh, $dbname, $dbuser, $dbpass) = @_;
+		my ($drh, $dbname, $dbuser, $dbpass, $dbattr) = @_;
+
+		if ($ENV{DBD_INFORMIX_DEBUG_CONNATTR} && defined $dbattr)
+		{
+			my $attr;
+			foreach $attr (keys %$dbattr)
+			{
+				print "# DBD::Informix::dr::connect",
+						" - attribute: $attr => ${$dbattr}{$attr}\n";
+			}
+		}
 
 		$dbname = "" unless(defined $dbname);
 		$dbuser = "" unless(defined $dbuser);
@@ -100,8 +105,13 @@
 				'Pass' => $dbpass
 			});
 
+		# Preset AutoCommit mode on $dbh.
+		$dbattr = { AutoCommit => 1 } if (!defined $dbattr);
+		${$dbattr}{AutoCommit} = 1 if (!defined ${$dbattr}{AutoCommit});
+		DBD::Informix::db::preset($dbh, $dbattr);
+
 		# Initialize database connection
-		DBD::Informix::db::connect($dbh, $dbname, $dbuser, $dbpass)
+		DBD::Informix::db::_login($dbh, $dbname, $dbuser, $dbpass)
 			or return undef;
 
 		$dbh;
@@ -113,11 +123,6 @@
 	package DBD::Informix::db; # ====== DATABASE ======
 	use strict;
 
-	sub errstr
-	{
-		DBD::Informix::errstr(@_);
-	}
-
 	sub prepare
 	{
 		my($dbh, $statement)= @_;
@@ -126,12 +131,13 @@
 			'Statement' => $statement,
 			});
 
-		DBD::Informix::st::prepare($sth, $statement)
+		DBD::Informix::st::_prepare($sth, $statement)
 			or return undef;
 
 		$sth;
 	}
 
+	# -----------------------------------------------------------------
 	# Use default implementation of do (which is DBD::_::db::do).  Although
 	# EXECUTE IMMEDIATE was introduced in version 5.00 ESQL/C, allowing it
 	# to be used means that we lose track of key operations such as BEGIN
@@ -139,18 +145,174 @@
 	# So, DBD::Informix needs to use the full prepare, execute, finish
 	# functions under all circumstances.  The default routine does that.
 	# So use the default routine.
+	# -----------------------------------------------------------------
+
+	# -----------------------------------------------------------------
+	# Utility functions: _tables and _columns
+	# -----------------------------------------------------------------
+	# SQL fragments to list tables, views and synonyms
+
+	my %tables;
+	$tables{'tables'}  =
+		q{ SELECT T.Owner, T.TabName FROM 'informix'.SysTables T
+			WHERE T.TabName NOT LIKE " %" };
+	$tables{'user'}    = q{ AND T.Tabid >= 100 };
+	$tables{'system'}  = q{ AND T.Tabid <  100 };
+	$tables{'base'}    = q{ AND T.TabType = 'T' };
+	$tables{'view'}    = q{ AND T.TabType = 'V' };
+	$tables{'synonym'} =
+		q{ AND (T.TabType = 'S' OR (T.TabType = 'P' AND T.Owner = USER)) };
+	$tables{'order'}   = q{ ORDER BY T.Owner, T.TabName };
+
+	sub _tables
+	{
+		my ($dbh, @info) = @_;
+		my @result = ();
+		my $i;
+		# Build query string
+		my $stmt = $tables{'tables'};
+		for ($i = 0; $i <= $#info; $i++)
+		{
+			$i=~ tr/A-Z/a-z/;
+			$stmt .= $tables{$info[$i]} unless $info[$i] eq 'tables';
+		}
+		$stmt .= $tables{'order'};
+		# Only tidy the statement up if you're going to print it!
+		# $stmt =~ s/^ //;
+		# $stmt =~ s/ $//;
+		# $stmt =~ s/  +/ /g;
+		# print "$stmt\n";
+		my $sth = $dbh->prepare($stmt);
+		if (defined $sth)
+		{
+			return @result unless $sth->execute;
+			my ($ref) = $sth->fetchall_arrayref;
+			my (@arr) = @{$ref};
+			my $i;
+			my @row;
+			for ($i = 0; $i <= $#arr; $i++)
+			{
+				@row = @{$arr[$i]};
+				$result[$i] = qq('$row[0]'.$row[1]);
+			}
+			$sth->finish;
+		}
+		@result;
+	}
+
+	# -----------------------------------------------------------------
+	#
+	# Generating complete lists of columns for local tables, views, and
+	# synonyms is hard!  For example, you need to do:
+	#
+	#-- Base Table Information 
+	# SELECT T.Owner, T.TabName, C.ColNo, C.ColName, C.ColType, C.ColLength
+	#     FROM 'informix'.SysTables T, 'informix'.SysColumns C
+	#     WHERE T.Tabid = C.Tabid
+	#       AND T.TabType IN ('T', 'V')
+	#       AND (T.TabName IN ('privsyn', 'pubsyn', 'tabcol') OR
+	# 	 	     ((T.TabName = 'syscolumns' AND T.Owner = 'informix')))
+	# UNION
+	# -- Local Synonyms (PUBLIC and PRIVATE)   
+	# SELECT T.Owner, T.TabName, C.ColNo, C.ColName, C.ColType, C.ColLength
+	#     FROM 'informix'.SysTables T, 'informix'.SysColumns C,
+	#          'informix'.SysSynTable S
+	#     WHERE T.Tabid = S.Tabid
+	#       AND S.BTabid = C.Tabid
+	#       AND ((T.TabType = 'P' AND T.Owner = USER) OR T.TabType =  'S')
+	#       AND (T.TabName IN ('privsyn', 'pubsyn', 'tabcol') OR
+	# 		     ((T.TabName = 'syscolumns' AND T.Owner = 'informix')))
+	# -- Remote Synonyms are not handled! 
+	# ORDER BY 1, 2, 3;
+	#
+	# Mercifully, local synonyms cannot be built on top of other local
+	# synonyms.  Adding support for remote synonyms doesn't bear thinking
+	# about, as they can be chained through an arbitrary number of remote
+	# sites.
+	#
+	# -----------------------------------------------------------------
+	# SQL fragments to list columns
+	# Note the re-use of $tables{'synonym'} from above!
+
+	my %columns;
+	$columns{'columns'}  =
+		q{
+	SELECT T.Owner, T.TabName, C.ColNo, C.ColName, C.ColType, C.ColLength
+		FROM 'informix'.SysTables T, 'informix'.SysColumns C
+		};
+	$columns{'direct'}  =
+		q{ WHERE T.Tabid = C.Tabid AND T.TabType IN ('T', 'V') };
+	$columns{'synonym'} = qq{ , 'informix'.SysSynTable S
+	WHERE T.Tabid = S.Tabid AND S.BTabid = C.Tabid 
+	$tables{'synonym'}
+		};
+	$columns{'order'}   = q{ ORDER BY 1, 2, 3 };
+
+	sub _columns
+	{
+		my ($dbh, @tables) = @_;
+		my @result = ();
+		my $i;
+		# Build query string
+		my $s_list = "";
+		my $s_pad = "";
+		my $d_list = "";
+		my $d_pad = "";
+		for ($i = 0; $i <= $#tables; $i++)
+		{
+			my $tab = $tables[$i];
+			if ($tab =~ /["'](.+)["']\.(.*)/)
+			{
+				$d_list .= "$d_pad (T.TabName = '$2' AND T.Owner = '$1') ";
+				$d_pad = "OR";
+			}
+			else
+			{
+				$s_list .= "$s_pad '$tab'";
+				$s_pad = ", ";
+			}
+		}
+		$s_list = "T.TabName IN ($s_list)" if $s_list;
+		my $cond = "";
+		if ($d_list && $s_list)
+		{
+			$cond = " AND (($s_list) OR ($d_list))"
+		}
+		elsif ($s_list)
+		{
+			$cond = " AND ($s_list)" if $s_list;
+		}
+		elsif ($d_list)
+		{
+			$cond = " AND ($d_list)" if $d_list;
+		}
+		my $stmt  = "$columns{'columns'} $columns{'direct'} $cond";
+		$stmt .= "UNION $columns{'columns'} $columns{'synonym'} $cond";
+		$stmt .= " $columns{'order'}";
+		# Only tidy the statement up if you're going to print it!
+		#$stmt =~ s/^ //;
+		#$stmt =~ s/ $//;
+		#$stmt =~ s/  +/ /g;
+		#print "$stmt\n";
+		my $sth = $dbh->prepare($stmt);
+		if (defined $sth)
+		{
+			return @result unless $sth->execute;
+			my ($ref) = $sth->fetchall_arrayref;
+			@result = @{$ref};
+			$sth->finish;
+		}
+		@result;
+	}
+
+	# -----------------------------------------------------------------
 
 	1;
 }
 
 {
 	package DBD::Informix::st; # ====== STATEMENT ======
-	use strict;
 
-	sub errstr
-	{
-		DBD::Informix::errstr(@_);
-	}
 	1;
 }
 
@@ -171,12 +333,13 @@ DBD::Informix - Access to Informix Databases
 
 =head1 DESCRIPTION
 
-This document describes DBD::Informix version 0.56.
+This document describes DBD::Informix version 0.57.
 
 You should also read the documentation for DBI as this document
 qualifies what is stated there.
 Note that this document was last updated for the DBI 0.85
-specification.
+specification, but the code requires features from the DBI 0.89
+release.
 The DBI specification is particularly volatile at the moment
 (mid-1997), and using newer versions of DBI with this version of
 DBD::Informix may lead to problems (but shouldn't).
@@ -192,7 +355,7 @@ DBD::Informix).
 
 Be aware that on occasion, the description in this document gets
 complex because of differences between different versions of Informix
-software.
+software and different types of Informix database.
 The key factor is the version of ESQL/C used when building
 DBD::Informix.
 Basically, there are two groups of versions to worry about, the 5.0x
@@ -467,6 +630,43 @@ to be tracked.
 
 =back
 
+=head2 METADATA
+
+There are two methods which can be called using the DBI func() to get
+at some basic Informix metadata relatively conveniently.
+
+	@list = $dbh->func('_tables');
+	@list = $dbh->func('user', '_tables');
+	@list = $dbh->func('base', '_tables');
+	@list = $dbh->func('user', 'base', '_tables');
+	@list = $dbh->func('system', '_tables');
+	@list = $dbh->func('view', '_tables');
+	@list = $dbh->func('synonym', '_tables');
+
+The lists of tables are all qualified as 'owner'.tablename, and may be
+used in SQL statements without fear that the table is not present in
+the database (unless someone deletes it behind your back).
+The leading arguments qualify the list of names returned.
+Private synonyms are only reported for the current user.
+
+	@list = $dbh->func('_columns');
+	@list = $dbh->func(@tables, '_columns');
+
+The lists are each references to an array of values corresponding to
+the owner name, table name, the column number, the column name, the
+basic data type (ix_ColType value - see below) and data length
+(ix_ColLength - see below).
+If no tables are listed, then all columns in the database are listed.
+This can be quite slow because handling synonyms properly requires a
+UNION operation.
+Further, although the '_tables' method report the names of remote
+synonyms, the '_columns' method does not expand them (mainly because
+it is very hard t do it properly).
+See the examples in t/metadata.t for how these can be used.
+Exercise for the reader: extend '_columns' so that it reports on the
+columns in remote synonyms, including relocated remote synonyms where
+the original referenced site now forwards the name to a third site!
+
 =head2 DISCONNECTING FROM A DATABASE
 
 You can also disconnect from the database:
@@ -518,9 +718,13 @@ TEMP) or EXECUTE PROCEDURE where the procedure returns data.
 
 You can execute an arbitrary statement with parameters using:
 
-    $dbh->do($stmt, @parameters);
-    $dbh->do($stmt, $param1, $param2);
+    $dbh->do($stmt, undef, @parameters);
+    $dbh->do($stmt, undef, $param1, $param2);
 
+The 'undef' represents an undefined reference to a hash of attributes
+(\%attr) which is documented in the DBI specification.
+The 0.56 edition of this documentation omitted this argument, which
+caused confusion.
 Again, the statement must not be a SELECT or EXECUTE PROCEDURE which
 returns data.
 The values in @parameters (or the separate values) are bound to the
@@ -929,14 +1133,10 @@ behaves when failures occur, so this is not actually implemented.
 
 =head1 ATTRIBUTE NAME CHANGES
 
-In this release (0.56), the old-style attribute names (like the ones
-documented above but without the 'ix_' prefix) are still recognised
-and generate a non-fatal error message, as does the {ix_Deprecated}
-attribute which was originally introduced to provide control over the
-error behaviour.
-In the next release (0.57) and all future releases, the old-style
-attribute names and {ix_Deprecated} will not be recognized at all and
-an error will be generated.
+In previous releases, some of the Informix-specific attributes had
+names which did not start 'ix_'.
+Starting with release 0.57, the old-style attribute names are no
+longer recognised and an error message is generated (by DBI).
 
 Note that {ix_AutoErrorReport} will become {PrintError}; the two names
 will be synonymous for a few versions, and then {ix_AutoErrorReport}
@@ -947,6 +1147,9 @@ These too will initially be treated as synonyms for the official DBI
 names before being deprecated.
 For those who have been following the attribute renaming saga, the new
 deprecation cycle is likely to be shorter than 5 releases.
+
+Unrecognized attributes starting with 'ix_' will generate a warning
+message.
 
 =head1 MAPPING BETWEEN ESQL/C AND DBD::INFORMIX
 
@@ -980,6 +1183,21 @@ most purposes.
 =item *
 Blobs can only be located in memory (reliably).
 
+=item *
+
+If you use a 6.00 (or, maybe, 7.20) or later version of Informix
+ESQL/C and do not have both the environment variables CLIENT_LOCALE
+and DB_LOCALE set, then ESQL/C may set one or both of them during the
+connect operation.
+When it does so, it makes Perl emit a "Bad free()" error if you
+subsequently modify the %ENV hash in the Perl script.
+This is nasty, but not readily resolvable.
+If you need to establish what values you should set, modify the code
+in dbdimp.ec so that the function dbd_ix_printenv() is called in
+dbd_ix_db_login() and the function itself is compiled (it is protected
+by #ifdef DBD_IX_DEBUG_ENVIRONMENT, unlike the calls which are pure
+comments).
+
 =back
 
 =head1 AUTHOR
@@ -992,7 +1210,7 @@ At various times:
 Tim Bunce (Tim.Bunce@ig.co.uk)
 
 =item *
-Alligator Descartes (descartes@hermetica.com)
+Alligator Descartes (descartes@arcana.co.uk)
 
 =item *
 Jonathan Leffler (johnl@informix.com)

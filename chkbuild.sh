@@ -1,6 +1,6 @@
 #!/bin/ksh
 #
-#	@(#)$Id: chkbuild.sh,v 1.7 1997/07/13 01:09:42 johnl Exp $
+#	@(#)$Id: chkbuild.sh,v 1.8 1997/11/18 03:42:39 johnl Exp $
 #
 #	Test DBD::Informix for compatability with different ESQL/C versions
 
@@ -11,7 +11,11 @@ if [ ! -f Makefile.PL ]
 then ${CO:-co} Makefile.PL
 fi
 
-config_list="${@:-${DBD_INFORMIX_CONFIG_LIST:-508UD1 601UD1 723UC1 911UC1}}"
+if [ ! -f test.all ]
+then ${MAKE} -f /dev/null test.all
+fi
+
+config_list="${@:-${DBD_INFORMIX_CONFIG_LIST:-508UD1 601UD1 724UC1 912UC2}}"
 
 for config in $config_list
 do
@@ -33,7 +37,8 @@ do
 		mv Makefile.old Makefile &&
 		( [ ! -f esql.old ] || mv esql.old esql )
 		${MAKE} &&
-		${MAKE} test
+		${MAKE} test &&
+		test.all
 	then status="PASSED"
 	else status="FAILED"
 	fi

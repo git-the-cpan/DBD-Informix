@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: numerics.t,v 53.1 1997/03/06 20:37:38 johnl Exp $ 
+# @(#)$Id: numerics.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -13,7 +13,7 @@ $tablename = "dbd_ix_test3";
 use DBD::InformixTest;
 
 print("1..10\n");
-$dbh = connect_to_test_database();
+$dbh = connect_to_test_database(1);
 &stmt_ok;
 
 # In Version 7.x and above, MODE ANSI databases interpret DECIMAL as

@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: transact01.t,v 56.2 1997/07/11 05:03:24 johnl Exp $ 
+#	@(#)$Id: transact01.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test Transactions with AutoCommit Off for DBD::Informix
 #
@@ -13,7 +13,7 @@
 use DBD::InformixTest;
 
 # Test connection
-$dbh = &connect_to_test_database(1, { AutoCommit => 1, PrintError => 1 });
+$dbh = &connect_to_test_database(0, { AutoCommit => 1, PrintError => 1 });
 #$dbh = &connect_to_test_database(1);
 #$dbh = &connect_to_test_database(0);
 

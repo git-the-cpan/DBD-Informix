@@ -1,7 +1,52 @@
 Change Log for DBD::Informix for DBI
 
-- Written by Alligator Descartes <descarte@mcqueen.com>
-- Rewritten by Jonathan Leffler (johnl@informix.com)
+- Written by Alligator Descartes <descarte@arcana.co.uk>
+- Rewritten by Jonathan Leffler <johnl@informix.com>
+
+0.57 Release
+------------
+97-10-19: Handle the 'esql -libs' process rather differently, because of
+          the bug in older versions of the esql script which do not echo
+          the name of the netstub library when necessary (a problem found
+          by Rodger Anderson <rodger@hpbs2245.boi.hp.com> in July, but only
+          now resolved).  Record information about compiling with c4gl only
+          in Informix.Licence, after answering questions from Paul Falbe
+          <paul@cassens.com>.
+97-10-08: Change the name of the sqlca element of imp_dbh to ix_sqlca to
+          avoid the macro renaming used in threaded versions of ESQL/C such
+          as on Windows 95 and Windows NT.  This change and success with a
+          Windows 95 and Windows NT port reported by Harald Ums
+          <Harald.Ums@sevensys.de>.  Also a change to esqlc.h, triggered by
+          the need to use sqlproto.h, and use io.h in place of unistd.h in
+          ixblob.ec, and do not release 'unreleased' blobs...  Makefile.PL
+          still to be upgraded.
+97-10-08: Record Informix ESQL/C's ability to change the environment
+          without Perl knowing about it, after the problem found by Jay
+          Ludoviconi <jludovic@paging.mot.com> was tracked down.
+97-10-03: Add Working.Versions file after a suggestion by Nuno Carneiro de
+          Moura <ncmoura@net.mailcom.pt>
+97-08-13: Add file hints/static.build with info about building statically
+          linked Perl executables from Kent S Gordon <kgor@inetspace.com>.
+          Clean up function entry and exit reporting.
+97-08-01: Add _tables and _columns metadata methods.
+97-07-29: Update to use the templates from DBI v0.89, etc.  Amend README
+          after Kent S Gordon <kgor@inetspace.com> noted that the engine
+          version information could be useful.
+97-07-21: Add dbd_ix_preparse() (based on code in DBD::ODBC 0.15) to
+          pre-process an SQL statement, replacing Oracle-style :x notation
+          with question mark place holders.  This allows DBD::Informix to
+          support $sth->{NUM_PARAMS} properly, and reinstates functionality
+          present in DBD::Informix 0.24 but summarily removed in version
+          0.25.  Interestingly, of course, noone has complained, or even
+          commented on this.
+97-07-16: Kenji Hino <kenji@alcatraz.net> found that the test t/blob02.t
+          failed for logged OnLine databases because of the changed
+          AutoCommit handling; alter the criterion for doing $dbh->commit.
+          Jason Bodnar <jcbodnar@mail.utexas.edu> found that the
+          documentation for $dbh->do() was faulty; add the undef parameter
+          for the unused \%attr documented by DBI.
+97-07-14: Deal with the last of the deprecated attributes.  Work around the
+          oddities (changes) introduced by ESQL/C 9.12.
 
 0.56 Release
 ------------
@@ -12,15 +57,18 @@ Change Log for DBD::Informix for DBI
           AutoCommit attribute until after the basic connect operation is
           complete.  DBD::Informix therefore cannot reject connections on
           unlogged databases in the basic connect operation.  Modified
-          Informix.Licence after Raj Goel (frostbit@brainlink.com) needed
+          Informix.Licence after Raj Goel <frostbit@brainlink.com> needed
           to ask questions.  The difficulty with 'newbies' is that they
           quickly cease to be newbies so you need a continuous supply of
           new newbies.  Fix documentation in Informix.pm for AutoCommit,
-          and behaviour of ix_InTransaction attribute.
+          and behaviour of ix_InTransaction attribute.  Many thanks to Hank
+          Robinson <cudau@csv.warwick.ac.uk> for his help clarifying the
+          required behaviour of AutoCommit, and apologies for omitting his
+          name in the original version of the 0.56 release notes.
 97-07-08: Make $dbh->{ix_AutoErrorReport} a synonym for $h->{PrintError}.
-97-07-07: Jason Bodnar (jcbodnar@mail.utexas.edu) pointed out that
+97-07-07: Jason Bodnar <jcbodnar@mail.utexas.edu> pointed out that
           $sth->execute() is not returning undef when an error occurs.
-97-06-25: Roderich Schupp (roderich@nodebonn.muc.bmw.de) found a similar
+97-06-25: Roderich Schupp <roderich@nodebonn.muc.bmw.de> found a similar
           problem using $dbh->do($stmt, undef, $arg1, $arg2), core dumping
           in the link code.  This could be reproduced with the as-released
           0.55 DBD::Informix but appears to be fixed, presumably by the fix
@@ -32,7 +80,7 @@ Change Log for DBD::Informix for DBI
 97-06-24: Found problems in DBI 0.84 where PrintError, RaiseError, ChopBlanks
           as handled by DBI cannot be unset -- Tim confirmed it is a bug in
           DBI and will be fixed in the next release.
-97-06-23: Core dump problem found by Fred Arnold (ftarnol@uswest.com) in the
+97-06-23: Core dump problem found by Fred Arnold <ftarnol@uswest.com> in the
           code in link.c and the way it is used.  One part of the problem
           was that the IMPSET flag for a statement was not being set soon
           enough, so that DBI was not releasing the statement from the
@@ -41,7 +89,7 @@ Change Log for DBD::Informix for DBI
           when it is released again, it doesn't screw things up.  This
           needs to be cleaned up.  A 0.56a1 release was sent to Fred to get
           him over the immediate problem.
-97-06-17: Jason Bodnar (jcbodnar@mail.utexas.edu) pointed out that BEGIN
+97-06-17: Jason Bodnar <jcbodnar@mail.utexas.edu> pointed out that BEGIN
           WORK is not being recognized via $dbh->do().  Testing showed a
           problem during disconnect on 7.1x servers (related to the B42204
           problem fixed on 97-05-30).  Fixing the disconnect was relatively
@@ -53,14 +101,14 @@ Change Log for DBD::Informix for DBI
           inner loop.  Upgrade non-distributed test bug001.t to catch these
           leaks too.
 97-06-12: Fix trailing blanks on $sth->{NAME} attributes after problem
-          reported by Roderich Schupp (roderich@nodebonn.muc.bmw.de).  Also
+          reported by Roderich Schupp <roderich@nodebonn.muc.bmw.de>.  Also
           fix t/chopblanks.t not to create VARCHAR columns in SE.
 97-05-30: Fix memory leak when using the $sth->{ix_sqlerrd} and
           $sth->{ix_sqlwarn} attributes repeatedly, reported by Oyvind
-          Gjerstad (ogj@tglobe1.tollpost.no).  The arrays in newSqlerrd()
+          Gjerstad <ogj@tglobe1.tollpost.no>.  The arrays in newSqlerrd()
           and newSqlwarn() were not being mortalized as they should be.
 97-05-30: Only set -Ae on HP-UX when using cc, as reported by Nathan
-          Neulinger (nneul@umr.edu) who was using gcc.  Also find and
+          Neulinger <nneul@umr.edu> who was using gcc.  Also find and
           implement the CLOSE DATABASE workaround for bugs B42204 and
           B64926 which lead to -1800 errors when a 7.x ESQL/C application
           is talking to a 5.0x engine, also reported by Nathan.
@@ -68,10 +116,10 @@ Change Log for DBD::Informix for DBI
 97-05-26: Add support for DBI->DataSources from DBI v0.82.  Update required
           software accordingly.
 97-05-23: Fix Makefile.PL to recognize $INFORMIXDIR/bin at end of PATH,
-          thanks to Paul Kulchenko (paul@mega.donetsk.ua).
+          thanks to Paul Kulchenko <paul@mega.donetsk.ua>.
 97-05-20: Change the handling of deprecated attributes per Informix.pm.
           Fix esqltest.ec when the same MODE ANSI database is used for both
-          connections (thanks to Kent S Gordon (kgor@inetspace.com) for
+          connections (thanks to Kent S Gordon <kgor@inetspace.com> for
           reporting this).
 
 0.55 Bug-Fix Release
@@ -90,8 +138,8 @@ Change Log for DBD::Informix for DBI
 ------------
 97-05-16: Another major rework on Informix.Licence to make the requirements
           clearer to people with minimal exposure to Informix, after Honza
-          Pazdziora (adelton@fi.muni.cz) had some problems with it.  Add
-          notes from Anibal Jodorcovsky (anibal@nortel.ca) about
+          Pazdziora <adelton@fi.muni.cz> had some problems with it.  Add
+          notes from Anibal Jodorcovsky <anibal@nortel.ca> about
           compilation on Motorola M88K SVR4 machines in README.M88K.SVR4.
           Version 0.54 released.
 97-05-15: ChopBlanks code added and tested.  VARCHAR was bad!  Statement
@@ -104,9 +152,9 @@ Change Log for DBD::Informix for DBI
           Eliminate BLOB_DUMMY_VALUE and BLOB_NULL_VALUE (can't think what
           they were to be used for!).  Consequential changes.
 97-04-24: Add fix in Makefile.PL for DEC OSF/1 and ESQL/C 7.22 from Andrew
-          Hunt (andy@toolshed.com).  Reverse order of updates in ChangeLog.
+          Hunt <andy@toolshed.com>.  Reverse order of updates in ChangeLog.
           DEC OSF/1 changes also reported later by Debbie Ingram
-          (djingram@mindspring.com).
+          <djingram@mindspring.com>.
 97-04-08: Add attribute $sth->{ix_Fetchable} to determine whether the
           statement needs data fetching or not.  Add this to sqlcmd.sh, which
           enables basic simulation of the full SQLCMD program.  Still need
@@ -116,14 +164,14 @@ Change Log for DBD::Informix for DBI
           of the arguments.  Note that the build process does not (yet) do
           anything with the source code of sqlcmd.sh.
 97-04-01: Add '-Ae' for HP-UX unless $Config{ccflags} includes -Aa or -Ae,
-          per information from Oyvind Gjerstad (ogj@tglobe1.tollpost.no).
+          per information from Oyvind Gjerstad <ogj@tglobe1.tollpost.no>.
           Include $Config{ccflags} in the command line when building the
           ESQL/C test program.
 97-03-28: Correct the handling of $dbase2 in multiple connections tests when
           DBD_INFORMIX_DATABASE2 is not set.  Fix required after John C
-          Hossfeld (john@netpub.com) had problems.  Also report which database
+          Hossfeld <john@netpub.com> had problems.  Also report which database
           is being connected to!  Problem (and solution) also subsequently
-          reported by James F Miner (jfm@winternet.com).
+          reported by James F Miner <jfm@winternet.com>.
 97-03-26: Add ODBC type handling.
 97-03-20: Update Makefile.PL to handle relocated DBIXS.h header, again.
 97-03-18: Change the handling of deprecated attributes per Informix.PM.
@@ -145,14 +193,14 @@ Change Log for DBD::Informix for DBI
 97-03-17: Update Informix.Licence to contain more comprehensive information
           on licencing and Netscape's LiveWire Pro.  Update t/updcursor.t so
           it passes on a logged (non-MODE ANSI) database.  Fix the problem
-          with nulls found by Oyvind Gjerstad (ogj@tglobe1.tollpost.no) and
+          with nulls found by Oyvind Gjerstad <ogj@tglobe1.tollpost.no> and
           now immortalized in the test case t/nulls02.t.  Change version to
           0.53 and release.
 
 0.52 Release
 ------------
 97-03-05: Add ESQL/C => DBD::Informix statement mapping to POD in Informix.PM,
-          after suggestion by Bill Mitlyng (Bill.Mitlyng@abnamro.com).
+          after suggestion by Bill Mitlyng <Bill.Mitlyng@abnamro.com>.
 97-03-03: Use $DBI::VERSION to determine where DBIXS.h should be found.
 97-03-02: Split attribute handling code from dbdimp.ec into dbdattr.ec.
           Add dbd_ix_module() function.  Revise the interface to the functions
@@ -176,10 +224,10 @@ Change Log for DBD::Informix for DBI
 97-02-25: Version bumped to 0.51.  Nulls on SELECT handled correctly.  Test
           nulls01.t added.  Notes on access to the SQLCA record added to the
           POD in Informix.PM, after this omission was noted by Torsten Stein
-          (stein@cls.de).
+          <stein@cls.de>.
 97-01-23: Fix InformixTest.pm so it works with perldoc.  It seems that perldoc
           does not like lines which start with a single quote.  Thanks to
-          Jason Bodnar (jcbodnar@mail.utexas.edu) for pointing this problem
+          Jason Bodnar <jcbodnar@mail.utexas.edu> for pointing this problem
           out. Add and use stmt_err to report errors or warnings, and document
           it.
 
@@ -191,7 +239,7 @@ Change Log for DBD::Informix for DBI
           disconnect code needs to know that there is no database so it
           doesn't try to close the current database.  This requires interface
           changes for dbd_ix_database() and dbd_ix_connect().  Add testing.
-          Thanks to Serge Davidov (serge@fcmc.com) for finding the problem.
+          Thanks to Serge Davidov <serge@fcmc.com> for finding the problem.
           You can also use DBI->connect('@server','','','Informix'), which
           actually worked in v0.25.  DBD::Informix is still confused, in
           general, by statements such as CLOSE DATABASE.
@@ -214,7 +262,7 @@ Change Log for DBD::Informix for DBI
           and select_zero_data functions to InformixTest.pm. Etc.  Version
           0.26a1.  Use bug-fixed version of decsci.c (ouch!).
 96-12-19: Add install instructions to README file after Wes Gamble
-          (wgamble@informix.com) pointed out this omission.  Add extensive
+          <wgamble@informix.com> pointed out this omission.  Add extensive
           notes to Informix.PM on transaction management.  Implement most
           of what those notes say (WITH HOLD cursors omitted at the
           moment).
@@ -310,7 +358,7 @@ Serge Davidov - serge@fcmc.com
           still similar to what was there previously.  Nearly ready to go
           into release.  5.0x ESQL/C not linking OK on Solaris; not sure
           why.  7.21 is doing fine.
-96-11-01: Control transferred to Jonathan Leffler (johnl@informix.com).
+96-11-01: Control transferred to Jonathan Leffler <johnl@informix.com>.
 
 0.24 Release
 ------------
@@ -356,5 +404,5 @@ Pre-Release
 
 --------------
 
-Jonathan Leffler (johnl@informix.com)
-@(#)$Id: ChangeLog,v 56.6 1997/07/11 05:08:12 johnl Exp $
+Jonathan Leffler <johnl@informix.com>
+@(#)$Id: ChangeLog,v 57.8 1997/10/28 02:50:37 johnl Exp $

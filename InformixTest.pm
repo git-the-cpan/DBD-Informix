@@ -1,4 +1,4 @@
-#	@(#)$Id: InformixTest.pm,v 56.2 1997/07/11 04:24:54 johnl Exp $ 
+#	@(#)$Id: InformixTest.pm,v 57.3 1997/07/29 01:28:35 johnl Exp $ 
 #
 # Pure Perl Test facilities to help the user/tester of DBD::Informix
 #
@@ -27,10 +27,26 @@
 		);
 
 	use DBI;
-	require_version DBI 0.69;
+	require_version DBI 0.89;
+
+	# Report on the connect command and any attributes being set.
+	sub print_connection
+	{
+		my ($str, $attr) = @_;
+		&stmt_note("# DBI->connect($str);\n");
+		if (defined $attr)
+		{
+			my ($key);
+			foreach $key (keys %$attr)
+			{
+				&stmt_note("#\tConnect Attribute: $key => $$attr{$key}\n");
+			}
+		}
+	}
 
 	sub connect_to_test_database
 	{
+		my ($style, $attr) = @_;
 		# This section may need rigging for some versions of Informix.
 		# It will should be OK for 6.0x and later versions of OnLine.
 		# You may run into problems with SE and 5.00 systems.
@@ -50,9 +66,21 @@
 		$dbhost = $ENV{INFORMIXSERVER} if (!$dbhost);
 		$dbname = $dbname . '@' . $dbhost if ($dbhost && $dbname !~ m%[/@]%);
 
-		my ($str) = "'$dbname', '$dbuser', '$xxpass', 'Informix'";
-		&stmt_note("# DBI->connect($str)\n");
-		my ($dbh) = DBI->connect($dbname, $dbuser, $dbpass, 'Informix');
+		my ($part2) = "'$dbuser', '$xxpass'";
+		my ($dbh) = "";
+		if ($style)
+		{
+			&print_connection("'dbi:Informix:$dbname', $part2", $attr);
+			$dbh = DBI->connect("dbi:Informix:$dbname", $dbuser, $dbpass,
+								$attr);
+		}
+		else
+		{
+			&print_connection("'$dbname', ${part2}, 'Informix'", $attr);
+			$dbh = DBI->connect($dbname, $dbuser, $dbpass, 'Informix',
+								$attr);
+		}
+
 		&stmt_fail() unless (defined $dbh);
 		# Unconditionally chop trailing blanks.
 		# Override in test cases as necessary.
@@ -205,15 +233,24 @@ and then install the Informix driver:
 
 =head2 Connecting to test database
 
-    $dbh = &connect_to_test_database;
+    $dbh = &connect_to_test_database($style, { AutoCommit => 0 });
 
 This gives you a reference to the database connection handle, aka the
-database handle.  If the load fails, your program stops immediately.  The
-functionality available from this handle is documented in the DBD::Informix
-manual page.  This function does not report success when it succeeds
-because the test scripts for blobs, for example, need to know whether they
-are working with an OnLine system before reporting how many tests will be
+database handle.
+If the load fails, your program stops immediately.
+The functionality available from this handle is documented in the
+DBD::Informix manual page.
+This function does not report success when it succeeds because the
+test scripts for blobs, for example, need to know whether they are
+working with an OnLine system before reporting how many tests will be
 run.
+The $style argument should be set if you want to use the newer style
+of DBI->connect() where the prefix "dbi:Informix:" will be used in
+front of the database name you've supplied; the optional hash of
+attributes will be passed to DBI->connect too.
+If $style is omitted or is zero, then the old style connect where
+'Informix' is specified as the fourth argument will be used, and the
+attributes will not be passed to DBI->connect().
 
 This code exploits 4 environment variables:
 

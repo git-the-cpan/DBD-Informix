@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: blob02.t,v 53.1 1997/03/06 20:37:24 johnl Exp $ 
+#	@(#)$Id: blob02.t,v 57.2 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test Basic Blobs (INSERT) for DBD::Informix
 #
@@ -9,7 +9,7 @@
 use DBD::InformixTest;
 
 # Test install...
-$dbh = connect_to_test_database();
+$dbh = connect_to_test_database(1);
 
 if (!$dbh->{ix_InformixOnLine})
 {
@@ -57,7 +57,7 @@ else
 	&stmt_fail() unless ($insert->finish);
 	&stmt_ok(0);
 
-	$dbh->commit if ($dbh->{ix_ModeAnsiDatabase});
+	$dbh->commit if ($dbh->{ix_InTransaction});
 }
 
 &stmt_note("# Testing: \$dbh->disconnect()\n");

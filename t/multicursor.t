@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-# @(#)$Id: multicursor.t,v 53.1 1997/03/06 20:37:36 johnl Exp $ 
+# @(#)$Id: multicursor.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 # (c)1996 Hermetica. Written by Alligator Descartes <descarte@hermetica.com>
 #
@@ -11,7 +11,7 @@
 use DBD::InformixTest;
 
 print "1..17\n";
-$dbh = connect_to_test_database();
+$dbh = connect_to_test_database(1);
 &stmt_ok(0);
 $dbh->{ix_AutoErrorReport} = 0;
 

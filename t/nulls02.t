@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: nulls02.t,v 53.2 1997/03/17 19:08:48 johnl Exp $ 
+#	@(#)$Id: nulls02.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test Null Handling for DBD::Informix
 #
@@ -9,7 +9,7 @@
 use DBD::InformixTest;
 
 # Test install...
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 
 &stmt_note("1..7\n");
 &stmt_ok();

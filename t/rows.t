@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#	@(#)$Id: rows.t,v 56.2 1997/05/29 09:59:17 johnl Exp $ 
+#	@(#)$Id: rows.t,v 57.1 1997/07/29 01:24:32 johnl Exp $ 
 #
 #	Test $sth->rows1 for DBD::Informix
 #
@@ -39,7 +39,7 @@ sub select_row_data
 }
 
 # Test install...
-$dbh = &connect_to_test_database();
+$dbh = &connect_to_test_database(1);
 
 &stmt_note("1..9\n");
 &stmt_ok();
