@@ -7,7 +7,7 @@
 @(#)Copyright:       2001 Jonathan Leffler (JLSS)
 @(#)Copyright:       2001 Informix Software Inc
 @(#)Copyright:       2002 IBM
-@(#)Product:         IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04)
+@(#)Product:         IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
 */
 
 /*TABSTOP=4*/

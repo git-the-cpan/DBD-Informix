@@ -3,7 +3,7 @@
 # @(#)$Id: Makefile.PL,v 2003.6 2003/03/04 18:51:14 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04))
+# (IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -114,7 +114,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "2003.03.0401";
+my $dbd_ix = "2003.04";
 # Hack for handling builds directly in Atria Clearcase view.
 $dbd_ix = "2003.00.0000" unless $dbd_ix =~ /^\d+\.\d+/;
 
@@ -149,7 +149,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -1047,7 +1047,7 @@ sub Write_DBD_Informix_Defaults
 	open DEFAULTS, ">$defaults"
 		or die "Cannot create $defaults ($!)";
 	print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04)
+#   Default Environment Variables for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
 #
 #   Copyright 2002-03 IBM
 #
@@ -1061,7 +1061,7 @@ sub Write_DBD_Informix_Defaults
 	@ISA = qw(Exporter);
 	@EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
 
-	$VERSION = "2003.03.0401";
+	$VERSION = "2003.04";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1085,7 +1085,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04)).
+(IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to.

@@ -2,7 +2,7 @@
 #
 # @(#)$Id: esqlld,v 2003.1 2003/03/03 19:56:32 jleffler Exp $ 
 #
-# IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04)
+# IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
 #
 # Surrogate Linker for Informix ESQL/C versions 4.10.UC1 upwards
 # -- Used to create shared libraries.

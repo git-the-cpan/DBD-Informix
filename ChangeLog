@@ -1,4 +1,13 @@
-Change Log for IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05) (aka DBD::Informix)
+
+2003.04 Release
+---------------
+2003-03-04: Upload to PAUSE and CPAN.  NB: dbdimp.ec, dbdimp.h, dbdattr.ec
+            again based on RCS release 100, not 2003.
+2003-03-04: Unfortunately, neither CPAN nor CPANPLUS really handles 3-part
+            version numbers, so revert to 2-part numbers (year, release
+            number within year).  It is difficult to find these things out
+            without trying.
 
 2003.03.0401 Release
 --------------------
@@ -1012,4 +1021,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2003.5 2003/03/04 22:55:05 jleffler Exp $
+@(#)$Id: ChangeLog,v 2003.6 2003/03/05 19:15:28 jleffler Exp $

@@ -1,6 +1,6 @@
 #   @(#)$Id: TestHarness.pm,v 2003.6 2003/03/04 22:55:05 jleffler Exp $
 #
-#   Pure Perl Test Harness for IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04)
+#   Pure Perl Test Harness for IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05)
 #
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
@@ -53,8 +53,8 @@
 	require_version DBI 1.02;
 
 	my
-	$VERSION = "2003.03.0401";
-	# our $VERSION = "2003.03.0401"; # But 'our' not acceptable to Perl 5.005_03!
+	$VERSION = "2003.04";
+	# our $VERSION = "2003.04"; # But 'our' not acceptable to Perl 5.005_03!
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
@@ -681,7 +681,7 @@ DBD::Informix::TestHarness - Test Harness for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes DBD::Informix::TestHarness distributed with
-IBM Informix Database Driver for Perl Version 2003.03.0401 (2003-03-04).
+IBM Informix Database Driver for Perl Version 2003.04 (2003-03-05).
 This is pure Perl code which exploits DBI and DBD::Informix to make it
 easier to write tests.
 Most notably, it provides a simple mechanism to connect to the user's
