@@ -1,9 +1,9 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2003.5 2003/03/03 19:01:42 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2003.6 2003/03/04 18:51:14 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03))
+# (IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -114,7 +114,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "2003.03.0303";
+my $dbd_ix = "2003.03.0400";
 # Hack for handling builds directly in Atria Clearcase view.
 $dbd_ix = "2003.00.0000" unless $dbd_ix =~ /^\d+\.\d+/;
 
@@ -144,11 +144,12 @@ my %opts = (
 					  "$dbd_ix_pm_dir/TechSupport.pm" => '$(INST_LIBDIR)/Informix/TechSupport.pm',
 					  "$dbd_ix_pm_dir/TestHarness.pm" => '$(INST_LIBDIR)/Informix/TestHarness.pm',
 					  "$dbd_ix_pm_dir/TypeInfo.pm"    => '$(INST_LIBDIR)/Informix/TypeInfo.pm',
+					  "lib/Bundle/DBD/Informix.pm"    => 'blib/lib/Bundle/DBD/Informix.pm',
 					}
 		   );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -1046,7 +1047,7 @@ sub Write_DBD_Informix_Defaults
 	open DEFAULTS, ">$defaults"
 		or die "Cannot create $defaults ($!)";
 	print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
+#   Default Environment Variables for IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04)
 #
 #   Copyright 2002-03 IBM
 #
@@ -1060,7 +1061,7 @@ sub Write_DBD_Informix_Defaults
 	@ISA = qw(Exporter);
 	@EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
 
-	$VERSION = "2003.03.0303";
+	$VERSION = "2003.03.0400";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1084,7 +1085,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)).
+(IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to.

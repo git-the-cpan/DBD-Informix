@@ -2,7 +2,7 @@
 
 package Bundle::DBD::Informix;
 
-$VERSION = '2003.03.0303';
+$VERSION = '2003.03.0400';
 
 1;
 

@@ -1,8 +1,7 @@
-# @(#)$Id: MANIFEST,v 2003.3 2003/02/26 23:03:42 jleffler Exp $
-# MANIFEST for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
+# @(#)$Id: MANIFEST,v 2003.4 2003/03/04 19:39:57 jleffler Exp $
+# MANIFEST for IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04)
 Announce
 BugReport
-Bundle/DBD/Informix.pm
 ChangeLog
 Informix.h
 Informix.pm
@@ -75,6 +74,7 @@ examples/x15cgi_form.pl
 ixblob.ec
 ixblob.h
 kludge.h
+lib/Bundle/DBD/Informix.pm
 lib/DBD/Informix/Configure.pm
 lib/DBD/Informix/GetInfo.pm
 lib/DBD/Informix/Metadata.pm

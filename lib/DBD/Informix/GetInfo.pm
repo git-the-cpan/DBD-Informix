@@ -1,4 +1,4 @@
-#   @(#)$Id: GetInfo.pm,v 2003.5 2003/03/03 20:57:51 jleffler Exp $
+#   @(#)$Id: GetInfo.pm,v 2003.6 2003/03/04 19:41:54 jleffler Exp $
 #
 #   @(#)DBD::Informix::GetInfo
 #
@@ -14,7 +14,7 @@
 #
 #-------------------------------------------------------------------------
 # Code and explanations follow for DBD::Informix
-# (IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03))
+# (IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04))
 #-------------------------------------------------------------------------
 #
 # NB: The Informix CLI (ODBC) driver did not provide a list of keywords.
@@ -29,9 +29,13 @@ use DBD::Informix;
 use DBI::Const::GetInfoType qw(%GetInfoType);
 use DBI::Const::GetInfoReturn qw(%GetInfoReturnTypes %GetInfoReturnValues);
 
+my
+$VERSION = "2003.03.0400";
+$VERSION = "2003.00.0000" if ($VERSION =~ m%[:]VERSION[:]%);
+
 my $sql_driver = 'Informix';
 my $sql_ver_fmt = '%02d.%02d.%04d';   # ODBC version string: ##.##.#####
-my $dbd_ver_str = defined $DBD::Informix::VERSION ? $DBD::Informix::VERSION : "2003.01.00";
+my $dbd_ver_str = defined $DBD::Informix::VERSION ? $DBD::Informix::VERSION : "2003.00.0000";
 my $sql_driver_ver = sprintf $sql_ver_fmt, split(/[.]/, $dbd_ver_str);
 
 sub sql_data_source_name

@@ -1,10 +1,25 @@
-Change Log for IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04) (aka DBD::Informix)
 
-2003.02.2800 Release
+2003.03.0400 Release
 --------------------
-2003-02-28: Upload to PAUSE and CPAN.  NB: dbdimp.c, dbdimp.h, dbdattr.ec
-            based on RCS release 100, not 2003.
-2003-02-28: Improve (fix) formatting of DECIMAL numbers.
+2003-03-04: Upload to PAUSE and CPAN.  NB: dbdimp.ec, dbdimp.h, dbdattr.ec
+            again based on RCS release 100, not 2003.
+2003-03-04: Remove data_sources from Informix.xs now that it is provided by
+            DBI; a problem reported by Boban Acimovic <acim@mbl.is>.
+2003-03-04: Install Bundle::DBD::Informix again as otherwise CPAN/PLUS does
+            not recognize that the install is complete.
+2003-03-03: Add $VERSION to GetInfo.pm so PAUSE can index it.  Note that
+            PAUSE indexes the prior release as 2003.03, so we may have to
+            release this with a unique two-part version number after all.
+2003-03-03: Fix the previous release version and date information from the
+            recorded 2003.02.2800 to the actual 2003.03.0303, and add
+            missing attributions, etc.
+
+2003.03.0303 Release
+--------------------
+2003-03-03: Upload to PAUSE and CPAN.  NB: dbdimp.ec, dbdimp.h, dbdattr.ec
+2003-02-28: Improve (fix) formatting of DECIMAL numbers, prompted by
+            Jeffery Sumler <jsumler@attbi.com>.
 2003-02-27: Do not support ESQL/C versions 5.0x, 6.0x, 7.0x, 7.1x, 7.2x
             before 7.24, 9.0x or 9.1x before 9.16 (CSDK 2.10) any more.
             FUTURE DIRECTION: ESQL/C versions 5.0x, and 8.xy will not be
@@ -991,4 +1006,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2003.3 2003/02/28 21:23:39 jleffler Exp $
+@(#)$Id: ChangeLog,v 2003.4 2003/03/04 19:49:40 jleffler Exp $

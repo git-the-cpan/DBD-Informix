@@ -1,7 +1,7 @@
 /*
  * @(#)$Id: esqltest.ec,v 100.3 2002/02/08 22:49:23 jleffler Exp $
  *
- * IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03)
+ * IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04)
  *
  * Test Informix-ESQL/C environment
  *

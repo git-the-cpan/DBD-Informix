@@ -1,11 +1,11 @@
 /*
- * @(#)$Id: Informix.xs,v 100.9 2002/12/15 00:16:51 jleffler Exp $
+ * @(#)$Id: Informix.xs,v 2003.1 2003/03/04 19:37:44 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1995-96 Alligator Descartes
  * Copyright 1996-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
- * Copyright 2002    IBM
+ * Copyright 2002-03 IBM
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -19,7 +19,7 @@ DBISTATE_DECLARE;
 
 /* Assume string concatenation is available */
 #ifndef lint
-static const char rcs[] = "@(#)$Id: Informix.xs,v 100.9 2002/12/15 00:16:51 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: Informix.xs,v 2003.1 2003/03/04 19:37:44 jleffler Exp $";
 static const char esqlc_ver[] = "@(#)" ESQLC_VERSION_STRING;
 #endif
 
@@ -92,30 +92,6 @@ FETCH(drh, keysv)
 	if (!valuesv)
 		valuesv = DBIc_DBISTATE(imp_drh)->get_attr(drh, keysv);
 	ST(0) = valuesv;    /* dbd_dr_FETCH_attrib did sv_2mortal  */
-
-#ifdef dbd_xx_data_sources
-
-void
-data_sources(drh, attr = Nullsv)
-	SV *drh
-	SV *attr
-	PPCODE:
-	D_imp_drh(drh);
-	AV *av;
-	av = dbd_dr_data_sources(drh, imp_drh, attr);
-    if (av)
-	{
-		int i;
-		int n = AvFILL(av)+1;
-		EXTEND(sp, n);
-		for (i = 0; i < n; ++i)
-		{
-			PUSHs(AvARRAY(av)[i]);
-		}
-	}
-
-#endif
-
 
 MODULE = DBD::Informix    PACKAGE = DBD::Informix::st
 

@@ -1,7 +1,7 @@
 /*
  * @(#)$Id: dbdixmap.h,v 100.6 2002/12/14 02:10:53 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl Version 2003.03.0303 (2003-03-03) $
+ * @(#)$Product: IBM Informix Database Driver for Perl Version 2003.03.0400 (2003-03-04) $
  *
  * Copyright 1997-98 Jonathan Leffler
  * Copyright 2001-02 IBM
