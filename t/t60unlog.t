@@ -1,16 +1,22 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t60unlog.t,v 2004.2 2004/12/03 18:19:28 jleffler Exp $
+#   @(#)$Id: t60unlog.t,v 2005.1 2005/07/25 17:35:12 jleffler Exp $
 #
 #   Test that unlogged databases refuse to connect with AutoCommit => 0
 #
 #   Copyright 1997,1999 Jonathan Leffler
 #   Copyright 2000      Informix Software Inc
 #   Copyright 2002-03   IBM
-#   Copyright 2004      Jonathan Leffler
+#   Copyright 2004-05   Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
+
+if (defined $ENV{DBD_INFORMIX_NO_DBCREATE} && $ENV{DBD_INFORMIX_NO_DBCREATE})
+{
+	stmt_note "1..0 # Skip: requires database create permission but DBD_INFORMIX_NO_DBCREATE set.\n";
+	exit 0;
+}
 
 my ($dbname) = "dbd_ix_db";
 my ($user) = $ENV{DBD_INFORMIX_USERNAME};

@@ -1,15 +1,19 @@
-README file for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+README file for IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 
-   You may distribute under the terms of either the GNU General Public
-   License or the Artistic License, as specified in the Perl README file.
+    You may distribute under the terms of either the GNU General Public
+    License or the Artistic License, as specified in the Perl README file.
 
-   Be aware that URLs and mailing list addresses can change after a product
-   is released but before the next version of the product is made available
-   to the public.
+    Be aware that URLs and mailing list addresses can change after a
+    product is released but before the next version of the product is made
+    available to the public.
 
-   The primary URL for information about Perl, DBI and DBD::Informix is
+    The primary URL for information about Perl, DBI and DBD::Informix is
 
                        http://dbi.perl.org/
+
+    The primary email address for direct assistance with DBD::Informix is
+    dbd.informix@gmail.com, but don't use it until you've read the notes
+    below.
 
 ---------------------------------------------------------------------------
 
@@ -63,6 +67,14 @@ MAILING LIST SUPPORT FOR DBI AND DBD::INFORMIX
     dbi-users mailing list, send a message to dbi-users-help@perl.org.  You
     could also consider using the news groups comp.lang.perl.modules (for
     Perl and DBI) and comp.databases.informix (for DBD::Informix).
+
+    Before sending anything to any of these, you need a very good excuse
+    for not reporting the complete environment via the BugReport script.
+    About 95% of problems can be diagnosed by the information this script
+    provides - do not assume that you are part of the stray 5%.  The script
+    protects the passwords set for testing DBD::Informix.
+
+        perl -Ilib BugReport
 
 ---------------------------------------------------------------------------
 
@@ -187,10 +199,15 @@ STORES DATABASE
 
     You *must* have a fully working Informix environment before you try to
     build and test DBD::Informix.  This means you must have access to at
-    least one database where you have at least RESOURCE level privileges.
-    If you do not understand what this means, refer to the "Informix Guide
-    to SQL: Syntax" manual and read the discussion of the GRANT statement.
-    You can obtain a PDF version of any Informix manual from:
+    least one database.  Ideally, you should have at least RESOURCE level
+    privileges (or DBA privileges) on that database; if you don't and
+    cannot obtain privileges on a database (perhaps by creating one), then
+    set DBD_INFORMIX_NO_RESOURCE=yes in your environment.  Ideally, you
+    should be able to create databases too; if you cannot do so, then set
+    DBD_INFORMIX_NO_DBCREATE=yes in your environment.  If you do not
+    understand what this means, refer to the "Informix Guide to SQL:
+    Syntax" manual and read the discussion of the GRANT statement.  You can
+    obtain a PDF version of any Informix manual from:
 
           http://www.ibm.com/software/data/informix/pubs/library
 
@@ -569,7 +586,7 @@ REMEMBER IT IS SUPPOSED TO BE FUN!
 
 Jonathan Leffler (jleffler@us.ibm.com)
 
-@(#)$Id: README,v 2004.1 2004/12/02 22:35:22 jleffler Exp $
+@(#)$Id: README,v 2005.2 2005/07/27 23:54:30 jleffler Exp $
 
 ---------------------------------------------------------------------------
 

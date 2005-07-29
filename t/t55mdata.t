@@ -1,16 +1,23 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t55mdata.t,v 2003.3 2003/03/11 00:27:12 jleffler Exp $
+#   @(#)$Id: t55mdata.t,v 2005.1 2005/07/27 23:46:45 jleffler Exp $
 #
 #   Test MetaData functions _tables, _columns for DBD::Informix
 #
 #   Copyright 1997,1999 Jonathan Leffler
 #   Copyright 2000      Informix Software Inc
 #   Copyright 2002-03   IBM
+#   Copyright 2005      Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use DBD::Informix::Metadata;
 use strict;
+
+if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
+{
+	stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
+	exit 0;
+}
 
 print "1..4\n";
 

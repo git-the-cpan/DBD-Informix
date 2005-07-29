@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec,v 2004.13 2004/12/01 20:37:10 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2005.6 2005/07/29 00:17:47 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) $
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
@@ -14,7 +14,7 @@
  * Copyright 2000    Paul Palacios, C-Group Inc
  * Copyright 2001-03 IBM
  * Copyright 2002    Bryan Castillo <Bryan_Castillo@eFunds.com>
- * Copyright 2003-04 Jonathan Leffler
+ * Copyright 2003-05 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -23,7 +23,7 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 2004.13 2004/12/01 20:37:10 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 2005.6 2005/07/29 00:17:47 jleffler Exp $";
 #endif
 
 #include <float.h>
@@ -199,7 +199,7 @@ $endif; /* ESQLC_CONNECT */
 static void
 dbd_st_destroyer(void *data)
 {
-	static const char function[] = "::dbd_st_destroyer";
+	static const char function[] = "dbd_st_destroyer";
 	dbd_ix_enter(function);
 	del_statement((imp_sth_t *)data);
 	dbd_ix_exit(function);
@@ -209,7 +209,7 @@ dbd_st_destroyer(void *data)
 static void
 del_connection(imp_dbh_t *imp_dbh)
 {
-	static const char function[] = "::del_connection";
+	static const char function[] = "del_connection";
 	dbd_ix_enter(function);
 	dbd_ix_link_delchain(&imp_dbh->head, dbd_st_destroyer);
 	dbd_ix_exit(function);
@@ -220,7 +220,7 @@ del_connection(imp_dbh_t *imp_dbh)
 static void
 dbd_db_destroyer(void *data)
 {
-	static const char function[] = "::dbd_db_destroyer";
+	static const char function[] = "dbd_db_destroyer";
 	dbd_ix_enter(function);
 	del_connection((imp_dbh_t *)data);
 	dbd_ix_exit(function);
@@ -510,7 +510,7 @@ $endif;	/* ESQLC_CONNECT */
 		** (because imp_dbh is destroyed when the connect fails).
 		*/
 		dbd_ix_dr_seterror(imp_drh, sqlca.sqlcode);
-		dbd_ix_debug(1, "Exit %s (**ERROR-1**)\n", function);
+		dbd_ix_debug(1, "\t<<-- %s (**ERROR-1**)\n", function);
 		dbd_ix_exit(function);
 		return 0;
 	}
@@ -549,7 +549,7 @@ $endif;	/* ESQLC_CONNECT */
 		dbd_ix_db_disconnect(dbh, imp_dbh);
 		sqlca.sqlcode = -256;
 		dbd_ix_dr_seterror(imp_drh, sqlca.sqlcode);
-		dbd_ix_debug(1, "Exit %s (**ERROR-2**)\n", function);
+		dbd_ix_debug(1, "\t<<-- %s (**ERROR-2**)\n", function);
 		dbd_ix_exit(function);
 		return 0;
 	}
@@ -566,7 +566,7 @@ $endif;	/* ESQLC_CONNECT */
 			if (dbd_ix_begin(imp_dbh) == 0)
 			{
 				dbd_ix_db_disconnect(dbh, imp_dbh);
-				dbd_ix_debug(1, "Exit %s (**ERROR-3**)\n", function);
+				dbd_ix_debug(1, "\t<<-- %s (**ERROR-3**)\n", function);
 				dbd_ix_exit(function);
 				return 0;
 			}
@@ -1127,22 +1127,55 @@ dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 	return 1;
 }
 
+static void
+dbd_ix_int8_to_ifx_int8(ifx_int8_t *i8val, long intvar)
+{
+	if (sizeof(long) == sizeof(int4))
+		ifx_int8cvlong(intvar, i8val);
+	else
+	{
+		i8val->sign = +1;	/* sign == 0 ==> NULL */
+		if (intvar < 0)
+		{
+			i8val->sign = -1;
+			intvar = -intvar;
+		}
+		i8val->data[0] = intvar & 0xFFFFFFFF;
+		/* Avoid compiler warnings on 32-bit machines */
+		intvar >>= 16;	/* First shift */
+		intvar >>= 16;	/* Second shift */
+		i8val->data[1] = intvar & 0xFFFFFFFF;
+	}
+#if 0	/* Low-level diagnostic stuff for INT8 handling */
+	{
+	char buffer[32];
+	printf("INT8: sign %d, word0 0x%08lX, word1 0x%08lX\n", i8val->sign, (unsigned long)i8val->data[0], (unsigned long)i8val->data[1]);
+	ifx_int8toasc(i8val, buffer, sizeof(buffer)-1);
+	buffer[sizeof(buffer)-1] = '\0';
+	size_t length = byleng(buffer, strlen(buffer));
+	buffer[length] = '\0';
+	printf("INT8: <<%s>>\n\n", buffer);
+	}
+#endif /* 0 */
+}
+
 /* Bind the value to input descriptor entry */
+
 static int
 dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 {
 	static const char function[] = "dbd_ix_bindsv";
-	int rc = 1;
-	STRLEN len;
+	int        rc = 1;
+	STRLEN     len;
 	EXEC SQL BEGIN DECLARE SECTION;
-	char           *nm_ibind = imp_sth->nm_ibind;
-	char *string;
-	long  intvar;
-	double          numeric;
-	int     length;
-	int index = idx;
-	loc_t blob;
-	int type = p_type;
+	char      *nm_ibind = imp_sth->nm_ibind;
+	char      *string;
+	long       intvar;
+	double     numeric;
+	int        length;
+	int        index = idx;
+	loc_t      blob;
+	int        type = p_type;
 	EXEC SQL END DECLARE SECTION;
 
 	dbd_ix_enter(function);
@@ -1154,8 +1187,8 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		return(rc);
 	}
 
-	dbd_ix_debug_l(2, "---- dbd_ix_bindsv() fld-indx = %ld\n", (long)index);
-	dbd_ix_debug_l(2, "---- dbd_ix_bindsv() inp-type = %ld\n", (long)type);
+	dbd_ix_debug_l(2, "\t---- dbd_ix_bindsv() fld-indx = %ld\n", (long)index);
+	dbd_ix_debug_l(2, "\t---- dbd_ix_bindsv() inp-type = %ld\n", (long)type);
 	if (type == SQLVCHAR)
 	{
 		/**
@@ -1164,8 +1197,8 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		*/
 		EXEC SQL GET DESCRIPTOR :nm_ibind VALUE :index :type = TYPE;
 		/* If there is no info, work on the basis of the type in the SV */
+		dbd_ix_debug_l(2, "\t---- dbd_ix_bindsv() GET DESC type = %ld\n", (long)type);
 	}
-
 
 	/**
 	** JL 2000-09-28:
@@ -1200,21 +1233,6 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		}
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index TYPE = :type, DATA = :blob;
 	}
-	else if (type == SQLINT8 || type == SQLSERIAL8)
-	{
-		/**
-		** JL 2003-07-01: partial fix for handling big INT8 fields for
-		** Steve Vornbrock <stevev@wamnet.com>.  Need to treat this as a
-		** string - in case it is out of range of INTEGER.
-		*/
-		dbd_ix_debug(2, "%s -- INT8 or SERIAL8\n", function);
-		type = SQLCHAR;
-		string = SvPV(val, len);
-		length = len + 1;
-		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
-						TYPE = :type, LENGTH = :length,
-						DATA = :string;
-	}
 	else if (!SvOK(val))
 	{
 		/* It's a null! */
@@ -1244,18 +1262,84 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		}
 #endif /* ESQLC_VERSION */
 	}
-	/**
-	** JL 2003-07-15: SvIOK() and SvNOK() fix problem with float to integer
-	** conversion for Darryl Priest <darryl.priest@piperrudnick.com>, a
-	** change in behaviour between Perl 5.005_03 and 5.8.0.
-	*/
+	else if (type == SQLINT8 || type == SQLSERIAL8)
+	{
+		/**
+		** JL 2003-07-01: partial fix for handling big INT8 fields for
+		** Steve Vornbrock <stevev@wamnet.com>.  Need to treat this as a
+		** string - in case it is out of range of INTEGER.
+		*/
+		dbd_ix_debug(2, "%s -- INT8 or SERIAL8\n", function);
+		type = SQLCHAR;
+		string = SvPV(val, len);
+		length = len + 1;
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, LENGTH = :length,
+						DATA = :string;
+	}
+	else if (type == SQLVCHAR || type == SQLNVCHAR)
+	{
+		/*
+		** JL 2005-05-09: handle zero length, non-null VARCHAR values.
+		** Bug reported by Vaclav Ovcik <vaclav.ovsik@i.cz>.
+		*/
+		dbd_ix_debug(2, "%s -- VARCHAR or NVARCHAR\n", function);
+		type = SQLVCHAR;
+		string = SvPV(val, len);
+		length = len;
+		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+						TYPE = :type, LENGTH = :length,
+						DATA = :string;
+	}
 	else if (SvIOK(val) && SvIOKp(val))
 	{
+		/*
+		** JL 2003-07-15: SvIOK() and SvNOK() fix problem with float to
+		** integer conversion for Darryl Priest
+		** <darryl.priest@piperrudnick.com>, a change in behaviour
+		** between Perl 5.005_03 and 5.8.0.
+		**
+		** JL 2005-07-28: On 64-bit machines, Perl SV has 8-byte
+		** IV, but SQLINT is for 4-byte quantities.
+		** Found by JL and Sam Gentsch <sgentsch@intercall.com>,
+		** and by Darryl Priest <darryl.priest@dlapiper.com> and
+		** by Durga Pullakandam <durga.pullankandam@mci.com>.
+		*/
 		dbd_ix_debug(2, "%s -- integer\n", function);
-		type = SQLINT;
-		intvar = SvIV(val);
-		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
-						TYPE = :type, DATA = :intvar;
+		intvar = SvIV(val);		/* intvar is a long - handles big values on 64-bit machines */
+		if (intvar <= 0x7FFFFFFFL && intvar >= -0x7FFFFFFFL)
+		{
+			/* Value is valid 4-byte integer */
+			type = SQLINT;
+			EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+							TYPE = :type, DATA = :intvar;
+		}
+		else
+		{
+#ifdef SQLINT8
+			/* Value is not a valid 4-byte integer */
+			EXEC SQL BEGIN DECLARE SECTION;
+			ifx_int8_t i8val;
+			EXEC SQL END DECLARE SECTION;
+			type = SQLINT8;
+			/*
+			** JL 2005-07-27: ESQL/C does not support conversion of 8-byte
+			** (long or long long) values to ifx_int8_t?
+			*/
+			dbd_ix_int8_to_ifx_int8(&i8val, intvar);
+			EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+							TYPE = :type, DATA = :i8val;
+#else
+			/* JL 2005-07-27: This is a viable alternative to using ifx_int8_t */
+			EXEC SQL BEGIN DECLARE SECTION;
+			char buffer[32];
+			EXEC SQL END DECLARE SECTION;
+			sprintf(buffer, "%ld", intvar);
+			type = SQLCHAR;
+			EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+							TYPE = :type, DATA = :buffer;
+#endif /* SQLINT8 */
+		}
 	}
 	else if (SvNOK(val) && SvNOKp(val))
 	{
@@ -1333,6 +1417,7 @@ dbd_ix_blobs(imp_sth_t *imp_sth)
 
 	dbd_ix_enter(function);
 	imp_sth->n_oblobs = count_blobs(nm_obind, n_ocols);
+	dbd_ix_debug_l(5, "\t---- dbd_ix_blobs: %ld blobs\n", imp_sth->n_oblobs);
 	if (imp_sth->n_oblobs == 0)
 	{
 		dbd_ix_exit(function);
@@ -2037,14 +2122,14 @@ $endif; -- ESQLC_IUSTYPES
 	{
 		if (sqlca.sqlcode != SQLNOTFOUND)
 		{
-			dbd_ix_debug(1, "Exit %s -- fetch failed\n", function);
+			dbd_ix_debug(1, "\t<<-- %s -- fetch failed\n", function);
 		}
 		else
 		{
 			/* Implicitly CLOSE cursor when no more data available */
 			dbd_ix_close(imp_sth);
 			imp_sth->st_state = NoMoreData;
-			dbd_ix_debug(1, "Exit %s -- SQLNOTFOUND\n", function);
+			dbd_ix_debug(1, "\t<<-- %s -- SQLNOTFOUND\n", function);
 		}
 		dbd_ix_exit(function);
 		return Nullav;
@@ -2098,6 +2183,27 @@ $endif; -- ESQLC_IUSTYPES
 				result[length] = '\0';
 				/* warn("Normal Data: %d <<%s>>\n", length, result); */
 				break;
+
+#if 0
+#ifdef SQLINT8
+			case SQLINT8:
+			case SQLSERIAL8:
+				{
+				EXEC SQL BEGIN DECLARE SECTION;
+				ifx_int8_t i8val;
+				EXEC SQL END DECLARE SECTION;
+				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+						:i8val = DATA;
+				ifx_int8toasc(&i8val, coldata, sizeof(coldata)-1);
+				coldata[sizeof(coldata)-1] = '\0';
+				result = coldata;
+				length = byleng(result, strlen(result));
+				result[length] = '\0';
+				/* warn("INT8 Data: %d <<%s>>\n", length, result); */
+				}
+				break;
+#endif /* SQLINT8 */
+#endif /* 0 */
 
 			case SQLFLOAT:
 				EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
@@ -2156,6 +2262,9 @@ $ifdef ESQLC_IUSTYPES;
 							int             LO_fd;
 							ifx_lo_stat_t  *LO_stat;
 							ifx_int8_t      size;
+							/* JL 2005-07-27: bloblen is a hack for 64-bit platforms */
+							/* ifx_int8tolong() takes an Informix int4* and not a long*! */
+							int4            bloblen;
 
 							EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
 												:bclob = DATA;
@@ -2172,10 +2281,11 @@ $ifdef ESQLC_IUSTYPES;
 							{
 								croak("Error getting %cLOB size", cb);
 							}
-							if (ifx_int8tolong(&size, &length) != 0)
+							if (ifx_int8tolong(&size, &bloblen) != 0)
 							{
-								croak("Error converting %cbLOB size to length", cb);
+								croak("Error converting %cLOB size to length", cb);
 							}
+							length = bloblen;
 							if (ifx_lo_close(LO_fd) != 0)
 							{
 								croak("Error closing %cLOB", cb);
@@ -2192,7 +2302,7 @@ $ifdef ESQLC_IUSTYPES;
 					}
 					break;
 				}
-#endif
+#endif /* SQLUDTFIXED */
 
 #ifdef SQLLVARCHAR
 			case SQLLVARCHAR:
@@ -2462,17 +2572,17 @@ dbd_ix_exec(imp_sth_t *imp_sth)
 	{
 		if (imp_sth->n_icols <= 0)
 		{
-			dbd_ix_debug(2, "---- EXECUTE %s - no parameters\n", nm_stmnt);
+			dbd_ix_debug(2, "\t---- EXECUTE %s - no parameters\n", nm_stmnt);
 			EXEC SQL EXECUTE :nm_stmnt;
 		}
 		else if (imp_sth->st_type == SQ_INSERT && imp_sth->is_insertcursor == True)
 		{
-			dbd_ix_debug_2(2, "---- PUT %s USING %s\n", nm_cursor, nm_ibind);
+			dbd_ix_debug_2(2, "\t---- PUT %s USING %s\n", nm_cursor, nm_ibind);
 			EXEC SQL PUT :nm_cursor USING SQL DESCRIPTOR :nm_ibind;
 		}
 		else
 		{
-			dbd_ix_debug_2(2, "---- EXECUTE %s USING %s\n", nm_stmnt, nm_ibind);
+			dbd_ix_debug_2(2, "\t---- EXECUTE %s USING %s\n", nm_stmnt, nm_ibind);
 			EXEC SQL EXECUTE :nm_stmnt USING SQL DESCRIPTOR :nm_ibind;
 		}
 	}
@@ -2630,7 +2740,7 @@ dbd_ix_st_execute(SV *sth, imp_sth_t *imp_sth)
 			(imp_sth->st_state != Opened))
 			rc = dbd_ix_open(imp_sth);
 		if (rc)
-		    rc = dbd_ix_exec(imp_sth);
+			rc = dbd_ix_exec(imp_sth);
 	}
 
 	/* Map returned values from dbd_ix_exec and dbd_ix_open */
@@ -2703,6 +2813,10 @@ ix_sql_type(int sql_type)
 
 	default:
 		ix_type = SQLCHAR;
+		dbd_ix_debug_l(4, "\t---- ix_sql_type(): defaulted DBI SQL type = %ld\n",
+						(long)sql_type);
+		dbd_ix_debug_l(4, "\t---- ix_sql_type(): Informix type = %ld\n",
+						(long)ix_type);
 		break;
 	}
 	return(ix_type);
@@ -2777,11 +2891,11 @@ valid_ix_type(int val_type)
 static int
 dbd_ix_st_bind_type(IV sql_type, SV *attribs)
 {
-	static const char function[] = "::st::dbd_ix_st_bind_type";
+	static const char function[] = "st::dbd_ix_st_bind_type";
 	int val_type = SQLVCHAR;
 	dbd_ix_enter(function);
 
-	dbd_ix_debug_l(4, "---- dbd_ix_st_bind_type(): sql_type = %ld\n", sql_type);
+	dbd_ix_debug_l(4, "\t---- dbd_ix_st_bind_type(): sql_type = %ld\n", sql_type);
 
 	if (attribs)
 	{
@@ -2789,7 +2903,7 @@ dbd_ix_st_bind_type(IV sql_type, SV *attribs)
 		if (svp != NULL)
 		{
 			val_type = SvIV(*svp);
-			dbd_ix_debug_l(4, "---- dbd_ix_st_bind_type(): val_type = $attribs{ix_type} = %ld\n", val_type);
+			dbd_ix_debug_l(4, "\t---- dbd_ix_st_bind_type(): val_type = $attribs{ix_type} = %ld\n", val_type);
 			if (!valid_ix_type(val_type))
 				croak("Can't bind ix_type %d not supported", val_type);
 			if (sql_type)
@@ -2800,23 +2914,24 @@ dbd_ix_st_bind_type(IV sql_type, SV *attribs)
 	if (sql_type)
 	{
 		val_type = ix_sql_type(sql_type);
-		dbd_ix_debug_l(4, "---- dbd_ix_st_bind_type(): mapped SQL type to val_type = %ld\n", val_type);
+		dbd_ix_debug_l(4, "\t---- dbd_ix_st_bind_type(): mapped SQL type to val_type = %ld\n", val_type);
 	}
+	dbd_ix_debug_l(4, "\t---- dbd_ix_st_bind_type(): return val_type = %ld\n", val_type);
 	dbd_ix_exit(function);
 	return(val_type);
 }
-
 
 /* Called extensively by execute method when it is given parameters! */
 int
 dbd_ix_st_bind_ph(SV *sth, imp_sth_t *imp_sth, SV *param, SV *value,
 	IV sql_type, SV *attribs, int is_inout, IV maxlen)
 {
-	static const char function[] = "::st::dbd_ix_st_bind_ph";
+	static const char function[] = "st::dbd_ix_st_bind_ph";
 	int rc;
 	int val_type;
 
 	dbd_ix_enter(function);
+	dbd_ix_debug_l(4, "\t---- dbd_ix_st_bind_ph(): sql_type = %ld\n", (long)sql_type);
 	if (is_inout)
 		croak("%s() - inout parameters not implemented\n", function);
 	val_type = dbd_ix_st_bind_type(sql_type, attribs);

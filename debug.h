@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: debug.h,v $
-@(#)Version:        $Revision: 3.3 $
-@(#)Last changed:   $Date: 2003/09/08 18:29:12 $
+@(#)Version:        $Revision: 3.4 $
+@(#)Last changed:   $Date: 2005/07/29 00:21:11 $
 @(#)Purpose:        Definitions for the debugging system
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1990-93,1997-99,2003
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)Copyright:      (C) JLSS 1990-93,1997-99,2003,2005
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 #ifndef DEBUG_H
@@ -29,11 +29,11 @@
 
 #ifndef lint
 #ifdef DEBUG
-static const char _debug_enabled[] = "@(#)*** DEBUG ***";
+/* This string can't be made extern - multiple definition in general */
+static const char jlss_id_debug_enabled[] = "@(#)*** DEBUG ***";
 #endif /* DEBUG */
-
 #ifdef MAIN_PROGRAM
-static const char debug_h[] = "@(#)$Id: debug.h,v 3.3 2003/09/08 18:29:12 jleffler Exp $";
+const char jlss_id_debug_h[] = "@(#)$Id: debug.h,v 3.4 2005/07/29 00:21:11 jleffler Exp $";
 #endif /* MAIN_PROGRAM */
 #endif /* lint */
 

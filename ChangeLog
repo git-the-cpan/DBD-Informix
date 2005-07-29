@@ -1,4 +1,29 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29) (aka DBD::Informix)
+
+2005.02 Release
+---------------
+2005-07-29: Upload to PAUSE and CPAN.
+2005-07-28: Logged bug B173776 against ESQL/C - SQL DESCRIPTORS mishandle
+            zero-length non-null VARCHAR values.  This prevents a solution
+            to a problem report from Vàclav Ovsík <vaclav.ovsik@i.cz>.
+2005-07-27: Fix INT8 handling bugs for 64-bit CSDK; fix and extend tests in
+            t/t95int8.t.  Rewrite t/t50update.t - does not create database.
+            Add DBD_INFORMIX_NO_DBCREATE environment variable; set to a
+            Perl true value (eg 'yes') if your test user cannot create
+            databases.  Add DBD_INFORMIX_NO_RESOURCE environment; set to a
+            Perl true value if your test user does not have RESOURCE (or
+            DBA) privileges on the test database.
+2005-07-25: ClientSDK 2.90.FCx on AIX 5.2 using the AIX C compiler sets
+            '-qlanglvl=ansi' but Perl does not.  On similar platforms
+            (possibly older versions of CSDK, possibly 32-bit CSDK,
+            possibly older versions of AIX), you need to manually set
+            DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX="-qlanglvl=ansi".
+            Problem found by Darryl Priest <darryl.priest@dlapiper.com> and
+            Durga Pullakandam <durga.pullakandam@mci.com> at the same time.
+            Add warning to esqlcc.
+2005-07-25: Various build problems with new versions of CSDK on new
+            platforms, and some older ones.  Improve the debugging in
+            esqlcc, esqlld, and the ESQL/C test code in Makefile.PL.
 
 2005.01 Release
 ---------------
@@ -1084,4 +1109,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2005.1 2005/03/14 23:24:48 jleffler Exp $
+@(#)$Id: ChangeLog,v 2005.3 2005/07/29 00:16:45 jleffler Exp $

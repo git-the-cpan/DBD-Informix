@@ -1,72 +1,45 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t50update.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
+#   @(#)$Id: t50update.t,v 2005.2 2005/07/27 22:43:04 jleffler Exp $
 #
 #   Test for UPDATE on zero rows in MODE ANSI database.
 #
 #   Copyright 1998-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
-#
-# Note that database statements cannot be used with an explicit connection
-# with ESQL/C 6.0x and up.
+#   Copyright 2005    Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
 
-my ($dbname) = "dbd_ix_db";
-my ($user) = $ENV{DBD_INFORMIX_USERNAME};
-my ($pass) = $ENV{DBD_INFORMIX_PASSWORD};
-my ($dbh);
+my $dbh = &connect_to_test_database;
 
-stmt_note("1..10\n");
+if (!$dbh->{ix_ModeAnsiDatabase})
+{
+	&stmt_note("1..0 # Skip: MODE ANSI test - database '$dbh->{Name}' is not MODE ANSI\n");
+	$dbh->disconnect;
+	exit(0);
+}
 
-&stmt_note("# Use explicit default connection, new connect syntax\n");
-stmt_fail unless ($dbh = DBI->connect('dbi:Informix:.DEFAULT.',$user,$pass));
+stmt_note("1..7\n");
 stmt_ok;
 
-# Do not report non-existent database
-$dbh->{PrintError} = 0;
-$dbh->do("drop database $dbname");
-
+my $table = "dbd_ix_empty";
 my $selver = "SELECT TabName, Owner FROM 'informix'.SysTables WHERE TabID = 1";
-
-my($create);
-if ($dbh->{ix_InformixOnLine})
-{
-	$create = "create database $dbname with log mode ansi";
-}
-else
-{
-	$create = "create database $dbname with log in '/tmp/$dbname.log' mode ansi";
-}
 
 my $result = { 'systables' => { 'owner' => 'informix', 'tabname' => 'systables' } };
 
 $dbh->{PrintError} = 1;
 $dbh->{ChopBlanks} = 1;
-stmt_test($dbh, $create);
 my $sth = $dbh->prepare($selver) or stmt_fail;
 stmt_ok;
 $sth->execute ? validate_unordered_unique_data($sth, 'tabname', $result) : &stmt_nok;
 
-if ($dbname ne $dbh->{ix_DatabaseName})
-{
-	stmt_err("Incorrect database name recorded ('$dbh->{ix_DatabaseName}' should be '$dbname')\n");
-	stmt_fail;
-}
-stmt_test($dbh, "create table empty (col integer not null)");
-stmt_test($dbh, "update empty set col = col * 2 where 1 = 0");
+stmt_test($dbh, "create table dbd_ix_empty (col integer not null)");
+stmt_test($dbh, "update dbd_ix_empty set col = col * 2 where 1 = 0");
 stmt_fail unless $dbh->{ix_sqlcode} == 100;
 print_sqlca($dbh);
-stmt_test($dbh, "commit work");
-stmt_test($dbh, "close database");
-if ($dbh->{ix_DatabaseName})
-{
-	stmt_err("Incorrect database name recorded ('$dbh->{ix_DatabaseName}' should be an empty string)\n");
-	stmt_fail;
-}
-stmt_test($dbh, "drop database $dbname");
+stmt_test($dbh, "rollback work");
 stmt_note("# Disconnect\n");
 $dbh->disconnect ? &stmt_ok : &stmt_fail;
 

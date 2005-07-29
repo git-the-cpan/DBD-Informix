@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: kludge.h,v $
-@(#)Version:        $Revision: 1.9 $
-@(#)Last changed:   $Date: 2003/09/08 18:29:12 $
+@(#)Version:        $Revision: 1.10 $
+@(#)Last changed:   $Date: 2005/07/29 00:23:29 $
 @(#)Purpose:        Provide support for KLUDGE macro
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1995,1997-2000,2003
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)Copyright:      (C) JLSS 1995,1997-2000,2003,2005
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 /*TABSTOP=4*/
@@ -15,8 +15,9 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char kludge_h[] = "@(#)$Id: kludge.h,v 1.9 2003/09/08 18:29:12 jleffler Exp $";
-#endif	/* lint */
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_kludge_h[] = "$(#)$Id: kludge.h,v 1.10 2005/07/29 00:23:29 jleffler Exp $";
+#endif /* lint */
 #endif	/* MAIN_PROGRAM */
 
 /*

@@ -1,11 +1,11 @@
 /*
-@(#)File:            $RCSfile: decsci.h,v $
-@(#)Version:         $Revision: 3.3 $
-@(#)Last changed:    $Date: 2003/04/24 18:04:01 $
-@(#)Purpose:         JLSS Functions to manipulate DECIMAL values
-@(#)Author:          J Leffler
-@(#)Copyright:       (C) JLSS 1996-99,2001-03
-@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)File:           $RCSfile: decsci.h,v $
+@(#)Version:        $Revision: 3.5 $
+@(#)Last changed:   $Date: 2005/03/20 07:40:53 $
+@(#)Purpose:        JLSS Functions to manipulate DECIMAL values
+@(#)Author:         J Leffler
+@(#)Copyright:      (C) JLSS 1996-99,2001-03,2005
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 /*TABSTOP=4*/
@@ -15,12 +15,13 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char decsci_h[] = "@(#)$Id: decsci.h,v 3.3 2003/04/24 18:04:01 jleffler Exp $";
+static const char decsci_h[] = "@(#)$Id: decsci.h,v 3.5 2005/03/20 07:40:53 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
 #include <stddef.h>
 #include "decimal.h"
+#include "decifmx.h"
 
 #define DECEXPZERO	-64		/* Exponent used in zero; dec_ndgts == 0 too */
 #define DECEXPMIN	-64		/* Minimum permissible exponent */
@@ -33,10 +34,10 @@ static const char decsci_h[] = "@(#)$Id: decsci.h,v 3.3 2003/04/24 18:04:01 jlef
 #define DECNULL_INITIALIZER	{ 0, DECPOSNULL, 0, { 0 /* 16 zeroes */ } }
 #define DECZERO_INITIALIZER	{ DECEXPZERO, DECPOSPOS, 0, { 0 /* 16 zeroes */ } }
 
-extern int decabs(const dec_t *x, dec_t *r1);
-extern int decneg(const dec_t *x, dec_t *r1);
-extern int decpower(const dec_t *x, int n, dec_t *r1);
-extern int decsqrt(dec_t *x, dec_t *r1);
+extern int decabs(const ifx_dec_t *x, ifx_dec_t *r1);
+extern int decneg(const ifx_dec_t *x, ifx_dec_t *r1);
+extern int decpower(const ifx_dec_t *x, int n, ifx_dec_t *r1);
+extern int decsqrt(const ifx_dec_t *x, ifx_dec_t *r1);
 
 #ifdef USE_DEPRECATED_DECSCI_FUNCTIONS
 /*
@@ -44,30 +45,21 @@ extern int decsqrt(dec_t *x, dec_t *r1);
 ** and share common return storage.  Their use is totally deprecated.
 ** Use the alternatives: dec_fix(), dec_sci(), dec_eng().
 */
-extern char *decfix(const dec_t *d, int ndigit, int plus);
-extern char *decsci(const dec_t *d, int ndigit, int plus);
-extern char *deceng(const dec_t *d, int ndigit, int plus, int cw);
+extern char *decfix(const ifx_dec_t *d, int ndigit, int plus);
+extern char *decsci(const ifx_dec_t *d, int ndigit, int plus);
+extern char *deceng(const ifx_dec_t *d, int ndigit, int plus, int cw);
 #endif /* USE_DEPRECATED_DECSCI_FUNCTIONS */
 
-extern int dec_fix(const dec_t *d, int ndigit, int plus, char *buffer, size_t buflen);
-extern int dec_sci(const dec_t *d, int ndigit, int plus, char *buffer, size_t buflen);
-extern int dec_eng(const dec_t *d, int ndigit, int plus, int cw, char *buffer, size_t buflen);
+extern int dec_fix(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_t buflen);
+extern int dec_sci(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_t buflen);
+extern int dec_eng(const ifx_dec_t *d, int ndigit, int plus, int cw, char *buffer, size_t buflen);
 
-extern int dec_fmt(const dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen); 
-extern int decfmt(const dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen); 
+extern int dec_fmt(const ifx_dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen); 
+extern int decfmt(const ifx_dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen); 
 
-extern int dec_chk(dec_t *d, int sqllen);
-extern int dec_set(dec_t *d, int sqllen);
+extern int dec_chk(const ifx_dec_t *d, int sqllen);
+extern int dec_set(ifx_dec_t *d, int sqllen);
 
-extern int dec_is_zero(dec_t *d);
-extern int dec_is_null(dec_t *d);
-
-extern void dec_setzero(dec_t *d);
-extern void dec_setnull(dec_t *d);
-extern void dec_verify(dec_t *d);
-
-/* Macro overrides for functions */
-#define dec_setnull(d)	((void)((d)->dec_pos = DECPOSNULL))
-#define dec_is_null(d)	((d)->dec_pos == DECPOSNULL)
+extern void dec_verify(const ifx_dec_t *d);
 
 #endif	/* DECSCI_H */

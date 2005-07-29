@@ -5,7 +5,7 @@
 @(#)Purpose:         Convert between SQL quoted string and unquoted string
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) JLSS 2004
-@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 /*TABSTOP=4*/

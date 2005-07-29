@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t92rows.t,v 2005.1 2005/03/14 23:16:45 jleffler Exp $
+#   @(#)$Id: t92rows.t,v 2005.2 2005/07/27 23:59:50 jleffler Exp $
 #
 #   Test basic handling of ROW types
 #
@@ -12,6 +12,12 @@
 
 use strict;
 use DBD::Informix::TestHarness;
+
+if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
+{
+	stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
+	exit 0;
+}
 
 my ($dbh) = &test_for_ius;
 

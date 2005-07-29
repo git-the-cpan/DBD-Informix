@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: ixblob.ec,v $
-@(#)Version:        $Revision: 2003.1 $
-@(#)Last changed:   $Date: 2003/04/22 18:02:48 $
+@(#)Version:        $Revision: 2005.1 $
+@(#)Last changed:   $Date: 2005/07/25 22:03:56 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1996-98,2000-01,2003
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)Copyright:      (C) JLSS 1996-98,2000-01,2003,2005
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,10 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#ifndef _XOPEN_SOURCE
+/* JL 2005-07-25: Some systems (eg AIX 5.2) define _XOPEN_SOURCE 600 */
 #define _XOPEN_SOURCE	500
+#endif /* _XOPEN_SOURCE */
 
 #include <assert.h>
 #include <fcntl.h>
@@ -44,7 +47,7 @@ static Blob zero_blob = { 0 };
 static char *blob_dir = 0;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec,v 2003.1 2003/04/22 18:02:48 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: ixblob.ec,v 2005.1 2005/07/25 22:03:56 jleffler Exp $";
 #endif
 
 BlobLocn blob_getlocmode(void)

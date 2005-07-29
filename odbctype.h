@@ -3,7 +3,7 @@
 @(#)Author:          J Leffler
 @(#)Copyright:       1997 Jonathan Leffler (JLSS)
 @(#)Copyright:       2002 IBM
-@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 /*TABSTOP=4*/

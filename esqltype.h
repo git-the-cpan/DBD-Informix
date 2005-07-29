@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqltype.h,v $
-@(#)Version:        $Revision: 2004.1 $
-@(#)Last changed:   $Date: 2004/02/07 01:02:48 $
+@(#)Version:        $Revision: 2005.2 $
+@(#)Last changed:   $Date: 2005/06/23 00:17:04 $
 @(#)Purpose:        Platform and Version Independent Types for ESQL/C
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 2001-03
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)Copyright:      (C) JLSS 1992-93,1995-97,2003-05
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 /*TABSTOP=4*/
@@ -15,7 +15,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqltype_h[] = "@(#)$Id: esqltype.h,v 2004.1 2004/02/07 01:02:48 jleffler Exp $";
+static const char esqltype_h[] = "@(#)$Id: esqltype.h,v 2005.2 2005/06/23 00:17:04 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -40,9 +40,11 @@ static const char esqltype_h[] = "@(#)$Id: esqltype.h,v 2004.1 2004/02/07 01:02:
 ** the ifxtypes.h header does define macros MI_LONG_SIZE and MI_PTR_SIZE
 ** which define the number of bits in a long and a pointer respectively.
 ** These values can be used to to decide the mapping.
+**
+** JL 2005-06-22: Note ESQL/C 2.90 is more recent than ESQL/C 9.53.
 */
 
-#if ESQLC_VERSION < 921
+#if ESQLC_VERSION >= 700 && ESQLC_VERSION < 921 
 
 #include <limits.h>
 
@@ -105,7 +107,7 @@ typedef uint4	ixUint4;
 typedef muint	ixMuint;
 typedef mulong	ixMulong;
 
-#endif	/* ESQLC_VERSION < 921 */
+#endif	/* ESQLC_VERSION 700..921 */
 
 #if MI_LONG_SIZE == 32
 

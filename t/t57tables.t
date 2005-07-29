@@ -1,15 +1,22 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t57tables.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t57tables.t,v 2005.1 2005/07/27 23:46:45 jleffler Exp $
 #
 #   Test tables
 #
 #   Copyright 1999    Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
+#   Copyright 2005    Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
+
+if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
+{
+	stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
+	exit 0;
+}
 
 &stmt_note("1..5\n");
 

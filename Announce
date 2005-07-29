@@ -1,8 +1,8 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, dbd.informix@gmail.com
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) released
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29) released
 
-IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
 the driver code that enables Perl 5.6.1 or later to access Informix
@@ -17,8 +17,25 @@ http://dbi.perl.org/
 ** When you successfully build this module, use the ItWorks (Perl)
 ** script to report your configuration to the maintenance team (meaning
 ** Jonathan Leffler) at dbd.informix@gmail.com.
-** Note that ItWorks does not send email to anybody; you have to do that
-** yourself.
+** The ItWorks script does not send email to anybody; you have to do
+** that yourself.
+
+New in release 2005.02:
+* The changes here are all related to improved diagnostics during the
+  build process.  For example, esqlcc works in debug mode once more.
+* Fix bug with INT8 handling on 64-bit platforms.
+* Identify dubious Solaris linker flags (-z ignore is the trouble maker;
+  -z lazyload is the memorable one; -z combreloc usually occurs with
+  them and might or might not be damaging).
+* Identify dubious AIX compiler flags (-qlanglvl=ansi).
+* Add DBD_INFORMIX_NO_RESOURCE environment variable for under-privileged
+  Informix users (those with CONNECT privilege only).
+* Add DBD_INFORMIX_NO_DBCREATE environment variable for a different
+  class of under-privileged users (those not permitted to create
+  databases because of ONCONFIG parameter DBCREATE_PERMISSION).
+* These mean that if there is a database to which you can connect, you
+  can test DBD::Informix and have good (though not perfect) confidence
+  that all is OK.
 
 New in release 2005.01:
 * Various minor bug fixes made as reported - see ChangeLog.
@@ -29,7 +46,8 @@ New in release 2005.01:
 * Note that a number of obsolete versions of ESQL/C are no longer supported.
 
 Known problem:
-* t/t91udts.t warns about an uninitialized variable on subroutine entry.
+* t/t91udts.t sometimes warns about an uninitialized variable on
+  subroutine entry.  It seems to be harmless - but it is very irksome.
 
 Support email address:
 * This release is supported by Jonathan Leffler <dbd.informix@gmail.com>.
@@ -42,4 +60,4 @@ As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce,v 2005.1 2005/03/14 23:23:15 jleffler Exp $
+@(#)$Id: Announce,v 2005.3 2005/07/29 00:19:34 jleffler Exp $

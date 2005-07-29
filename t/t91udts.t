@@ -1,15 +1,21 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t91udts.t,v 2004.1 2004/12/03 20:31:14 jleffler Exp $
+#   @(#)$Id: t91udts.t,v 2005.1 2005/07/27 23:46:45 jleffler Exp $
 #
 #   Test basic handling of user-defined data types
 #
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
-#   Copyright 2004    Jonathan Leffler
+#   Copyright 2004-05 Jonathan Leffler
 
 use strict;
 use DBD::Informix::TestHarness;
+
+if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
+{
+	stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
+	exit 0;
+}
 
 my ($dbh) = &test_for_ius;
 

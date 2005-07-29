@@ -1,6 +1,6 @@
-#   @(#)$Id: TestHarness.pm,v 2004.3 2004/12/03 18:06:43 jleffler Exp $
+#   @(#)$Id: TestHarness.pm,v 2005.3 2005/07/27 22:46:44 jleffler Exp $
 #
-#   Pure Perl Test Harness for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+#   Pure Perl Test Harness for IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 #
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
@@ -55,8 +55,8 @@
 	require_version DBI 1.02;
 
 	my
-	$VERSION = "2005.01";
-	# our $VERSION = "2005.01"; # But 'our' not acceptable to Perl 5.005_03!
+	$VERSION = "2005.02";
+	# our $VERSION = "2005.02"; # But 'our' not acceptable to Perl 5.005_03!
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
@@ -609,7 +609,7 @@
 
 		# Collect the data
 		my ($ref);
-		my (%state) = ('fail' => 0, 'pass' => 0);
+		my (%state) = ('fail' => 0, 'pass' => 0, 'xtra' => 0, 'miss' => 0);
 		my $rownum = 0;
 		while ($ref = $sth->fetchrow_hashref)
 		{
@@ -617,7 +617,7 @@
 			my %row = %{$ref};
 			if (defined $row{$key} && defined $values{$row{$key}})
 			{
-				my $ok = 0;
+				my $pass = 0;
 				my $fail = 0;
 				my %expect = %{$values{$row{$key}}};
 
@@ -629,20 +629,20 @@
 					{
 						if ($got ne $want)
 						{
-							print "# Row $rownum: Got unexpected value $got for $col (key value = $row{$key}) when $want expected!\n";
+							print "# Row $rownum: Got unexpected value <<$got>> for $col (key value = $row{$key}) when <<$want>> expected!\n";
 							$fail++;
 						}
 						else
 						{
 							print "# Row $rownum: Got expected value $got for $col (key value = $row{$key})\n" if ($verbose >= 2);
-							$ok++;
+							$pass++;
 						}
 					}
 					elsif (!defined $got && !defined $want)
 					{
 						# Both values NULL - OK.
 						print "# Row $rownum: Got NULL which was wanted for $col\n" if ($verbose >= 2);
-						$ok++;
+						$pass++;
 					}
 					elsif (!defined $got)
 					{
@@ -670,7 +670,7 @@
 					# The 'else' clause "cannot happen".
 				}
 
-				if ($ok > 0 && $fail == 0)
+				if ($pass > 0 && $fail == 0)
 				{
 					$state{pass}++;
 					print "# Row $rownum: PASS\n" if ($verbose >= 1);
@@ -681,7 +681,7 @@
 					$state{fail}++;
 					print "# Row $rownum: FAIL (erroneous content)\n" if ($verbose >= 1);
 					# Since the key was found (hence $ok > 0), it is OK to undef this row.
-					delete $values{$row{$key}} if $ok > 0;
+					delete $values{$row{$key}} if $pass > 0;
 				}
 			}
 			else
@@ -691,7 +691,7 @@
 				{
 					printf "#     %-20s = %s\n", "$col:", $row{$col};
 				}
-				$state{fail}++;
+				$state{xtra}++;
 				print "# Row $rownum: FAIL (unexpected key value)\n" if ($verbose >= 1);
 			}
 		}
@@ -700,18 +700,23 @@
 		foreach my $val (sort keys %values)
 		{
 			print "# Did not get a row corresponding to expected key $val\n";
-			$state{fail}++;
+			$state{miss}++;
 		}
 
 		# Determine whether test passed or failed overall.
-		if ($state{fail} == 0 && $state{pass} == $numexp)
+		if ($state{fail} == 0 && $state{miss} == 0 && $state{xtra} == 0 && $state{pass} == $numexp)
 		{
-			stmt_note "# Passed $state{pass} row(s) as expected with no failures\n";
+			stmt_note "# PASSED: $state{pass} row(s) found with expected values\n";
 			stmt_ok;
 		}
 		else
 		{
-			stmt_nok "# Passed $state{pass} row(s) out of $numexp expected; failed $state{fail}\n";
+			my($msg) = "# FAILED";
+			$msg .= ": $state{pass} rows were correct";
+			$msg .= "; $state{fail} rows had faulty data" if ($state{fail} != 0);
+			$msg .= "; $state{miss} rows did not get selected" if ($state{miss} != 0);
+			$msg .= "; $state{xtra} rows were selected unexpectedly" if ($state{xtra} != 0);
+			stmt_nok "$msg\n";
 		}
 	}
 
@@ -731,7 +736,7 @@ DBD::Informix::TestHarness - Test Harness for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes DBD::Informix::TestHarness distributed with
-IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14).
+IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29).
 This is pure Perl code which exploits DBI and DBD::Informix to make it
 easier to write tests.
 Most notably, it provides a simple mechanism to connect to the user's

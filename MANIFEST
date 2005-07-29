@@ -1,5 +1,5 @@
-# @(#)$Id: MANIFEST,v 2005.1 2005/03/14 23:44:30 jleffler Exp $
-# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+# @(#)$Id: MANIFEST,v 2005.4 2005/07/29 17:10:08 jleffler Exp $
+# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 Announce
 BugReport
 ChangeLog
@@ -9,7 +9,6 @@ Informix.xs
 InformixTechSupport
 ItWorks
 MANIFEST
-META.yml
 Makefile.PL
 Notes/FAQ
 Notes/Working.Versions
@@ -33,6 +32,7 @@ dbdimp.ec
 dbdimp.h
 dbdixmap.h
 debug.h
+decifmx.h
 decsci.c
 decsci.h
 describe.ec
@@ -147,9 +147,11 @@ t/t92rows.t
 t/t93lvarchar.t
 t/t94bool.t
 t/t95int8.t
+t/t98pod.t
 t/t99clean.t
 test.all.sh
 test.c4gl.sh
 test.one.sh
 test.quiet.sh
 test.run.sh
+META.yml                                 Module meta-data (added by MakeMaker)

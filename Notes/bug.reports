@@ -1,6 +1,10 @@
 Notes on Submitting Bug Reports for DBD::Informix
 =================================================
 
+EMAIL ADDRESS FOR REPORTING PROBLEMS WITH DBD::INFORMIX
+
+	dbd.informix@gmail.com
+
 IF YOU HAVE PROBLEMS BUILDING DBD::INFORMIX
 
 First, read the README file and other documentation in the DBD::Informix
@@ -23,12 +27,10 @@ CPAN (http://www.perl.com/CPAN/modules/by-module) for the latest
 versions of any of the DBI or DBD files.
 
 If this does *not* resolve your problem, please post the details of your
-problem to dbi-users@perl.org and CC them to the maintainers at either
-dbd-informix@informix.com (up to 2002-06-30) or to
-dbd-informix@us.ibm.com (from 2002-07-01, though you may try this
-address before then if you wish), using one of the two methods outlined
-below.  For information on how to subscribe to (and unsubscribe from)
-the dbi-users mailing list, send a message to dbi-users-help@perl.org.
+problem to dbi-users@perl.org and CC them to the maintainer(s) at
+dbd.informix@gmail.com, using one of the two methods outlined below.
+For information on how to subscribe to (and unsubscribe from) the
+dbi-users mailing list, send a message to dbi-users-help@perl.org.
 
 Please ensure that any email message has DBD::Informix in the subject line.
 Thanks!
@@ -171,22 +173,28 @@ There are 3 mailing lists:
 
 You should probably subscribe to dbi-users and probably do not need to
 subscribe to dbi-dev unless you are planning to write your own DBD driver.
+(If you want to take over the maintenance of DBD::Informix, let me know!)
 
 Please don't post problems with DBD::Informix to comp.lang.perl.misc or
 perl5-porters because they probably will not be seen by anyone able to
 answer them (but comp.lang.perl.modules might provide an answer).
-Questions asked in comp.databases.informix will usually be answered.
+
+Questions asked in the comp.databases.informix news group will usually
+be answered.
+
 Please don't try to email Tim Bunce directly, either.  He's an expert in
-many fields, but Informix is not one of those fields.  Go through the
-proper channels, which means the dbi-users@perl.org mailing list or the
-dbd-informix@us.ibm.com (or dbd-informix@informix.com) mail alias.
+many fields, but Informix is not one of those fields.
+
+Go through the proper channels, which means the dbi-users@perl.org
+mailing list or the dbd.informix@gmail.com mail alias.
 
 ---------------------------------------------------------------------------
 
 Copyright 1999 Jonathan Leffler
 Copyright 2000 Informix Software Inc
 Copyright 2002 IBM
+Copyright 2005 Jonathan Leffler
 
 Jonathan Leffler (jleffler@us.ibm.com)
 
-@(#)$Id: bug.reports,v 100.6 2002/12/09 17:21:58 jleffler Exp $
+@(#)$Id: bug.reports,v 100.7 2005/07/06 20:13:27 jleffler Exp $

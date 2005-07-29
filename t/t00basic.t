@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t00basic.t,v 2003.4 2003/02/28 22:04:55 jleffler Exp $
+#   @(#)$Id: t00basic.t,v 2005.1 2005/07/27 23:44:38 jleffler Exp $
 #
 #   Initial test script for DBD::Informix
 #
@@ -75,7 +75,7 @@ my $stmt1 = "DROP TABLE $testtable";
 $dbh->{PrintError} = $oldmode;
 
 # Create table (now that it does not exist)...
-my $stmt2 = "CREATE TABLE $testtable (id INTEGER NOT NULL, name CHAR(64))";
+my $stmt2 = "CREATE TEMP TABLE $testtable (id INTEGER NOT NULL, name CHAR(64))";
 &stmt_test($dbh, $stmt2, 0);
 
 # Drop it (again)

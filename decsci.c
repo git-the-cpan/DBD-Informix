@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: decsci.c,v $
-@(#)Version:        $Revision: 3.3 $
-@(#)Last changed:   $Date: 2005/01/12 19:30:52 $
+@(#)Version:        $Revision: 3.4 $
+@(#)Last changed:   $Date: 2005/03/21 08:48:53 $
 @(#)Purpose:        Exponential formatting of DECIMALs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 #ifdef TEST
@@ -23,7 +23,7 @@
 ** functions are not declared unless __STDC__ is defined.  Patch this
 ** up by declaring them, prototype and all, if __STDC__ is not defined.
 */
-extern char *dececvt(dec_t *np, int ndigit, int *decpt, int *sign);
+extern char *dececvt(ifx_dec_t *np, int ndigit, int *decpt, int *sign);
 #endif /* __STDC__ */
 
 #define SIGN(s, p)  ((s) ? '-' : ((p) ? '+' : ' '))
@@ -32,14 +32,14 @@ extern char *dececvt(dec_t *np, int ndigit, int *decpt, int *sign);
 #define CONST_CAST(t, v)	((t)(v))
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: decsci.c,v 3.3 2005/01/12 19:30:52 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: decsci.c,v 3.4 2005/03/21 08:48:53 jleffler Exp $";
 #endif
 
 #ifdef USE_DEPRECATED_DECSCI_FUNCTIONS
-char           *decsci(const dec_t *d, int ndigit, int plus)
+char *decsci(const ifx_dec_t *d, int ndigit, int plus)
 {
 	/* For 32 digits, 3-digit exponent, leading blanks, etc, 42 is enough */
-	static char     buffer[42];
+	static char buffer[42];
 	if (dec_sci(d, ndigit, plus, buffer, sizeof(buffer)) != 0)
 		*buffer = '\0';
 	return(buffer);
@@ -47,13 +47,13 @@ char           *decsci(const dec_t *d, int ndigit, int plus)
 #endif /* USE_DEPRECATED_DECSCI_FUNCTIONS */
 
 /*	Format a scientific notation number */
-int dec_sci(const dec_t *d, int ndigit, int plus, char *buffer, size_t buflen)
+int dec_sci(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_t buflen)
 {
-	char  *dst = buffer;
-	char  *src;
-	int             sn;
-	int             dp;
-	dec_t           z;
+	char     *dst = buffer;
+	char     *src;
+	int       sn;
+	int       dp;
+	ifx_dec_t z;
 
 	if (d->dec_pos == DECPOSNULL)
 	{
@@ -62,20 +62,21 @@ int dec_sci(const dec_t *d, int ndigit, int plus, char *buffer, size_t buflen)
 	}
 
 	ndigit = VALID(ndigit);
-	src = dececvt(CONST_CAST(dec_t *, d), ndigit, &dp, &sn);
+	src = dececvt(CONST_CAST(ifx_dec_t *, d), ndigit, &dp, &sn);
 	*dst++ = SIGN(sn, plus);	/* Sign */
 	*dst++ = *src++;			/* Digit before decimal point */
 	*dst++ = '.';				/* Decimal point */
 	while (*src)				/* Digits after decimal point */
 		*dst++ = *src++;
 	deccvdbl(0.0, &z);
-	dst = dec_setexp(dst, dp - (deccmp(CONST_CAST(dec_t *, d), &z) != 0));	/* Exponent */
+	dst = dec_setexp(dst, dp - (deccmp(CONST_CAST(ifx_dec_t *, d), &z) != 0));	/* Exponent */
 	return(0);
 }
 
 #ifdef TEST
 
 #include <stdio.h>
+#include <string.h>
 
 #define DIM(x)	(sizeof(x)/sizeof(*(x)))
 
@@ -110,10 +111,10 @@ static char    *values[] =
 
 int main(void)
 {
-	char           *s;
-	dec_t           d;
-	int             i;
-	int             err;
+	char     *s;
+	ifx_dec_t d;
+	int       i;
+	int       err;
 
 	printf("\nScientific notation\n");
 	printf("%-30s %s\n", "Input value", "Formatted");

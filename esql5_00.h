@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esql5_00.h,v $
-@(#)Version:        $Revision: 2004.1 $
-@(#)Last changed:   $Date: 2004/11/04 18:27:10 $
-@(#)Purpose:        Function prototypes for ESQL/C Versions 5.00..5.10
+@(#)Version:        $Revision: 2005.1 $
+@(#)Last changed:   $Date: 2005/05/18 21:47:16 $
+@(#)Purpose:        Function prototypes for ESQL/C Versions 5.00..5.20
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1992-93,1995-97,2000,2002-03
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.01 (2005-03-14)
+@(#)Copyright:      (C) JLSS 1992-93,1995-97,2000,2002-05
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
 */
 
 /*
@@ -35,7 +35,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esql5_00_h[] = "@(#)$Id: esql5_00.h,v 2004.1 2004/11/04 18:27:10 jleffler Exp $";
+static const char esql5_00_h[] = "@(#)$Id: esql5_00.h,v 2005.1 2005/05/18 21:47:16 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
