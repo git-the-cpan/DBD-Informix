@@ -1,5 +1,5 @@
-# @(#)$Id: MANIFEST,v 2005.4 2005/07/29 17:10:08 jleffler Exp $
-# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+# @(#)$Id: MANIFEST,v 2007.3 2007/02/25 23:50:03 jleffler Exp $
+# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 Announce
 BugReport
 ChangeLog
@@ -32,12 +32,8 @@ dbdimp.ec
 dbdimp.h
 dbdixmap.h
 debug.h
-decifmx.h
 decsci.c
 decsci.h
-describe.ec
-describe.h
-emalloc.h
 eprintf.c
 esql5_00.h
 esql7_20.h
@@ -71,8 +67,10 @@ examples/x12cgi_noform.pl
 examples/x13cgi_noform.pl
 examples/x14cgi_form.pl
 examples/x15cgi_form.pl
+ifmxdec.h
 ixblob.ec
 ixblob.h
+jtypes.c
 kludge.c
 kludge.h
 lib/Bundle/DBD/Informix.pm
@@ -88,7 +86,6 @@ link.h
 odbctype.c
 odbctype.h
 rmautoinst.pl
-sqlquote.h
 sqltoken.c
 sqltoken.h
 sqltype.ec

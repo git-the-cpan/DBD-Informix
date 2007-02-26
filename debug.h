@@ -5,7 +5,7 @@
 @(#)Purpose:        Definitions for the debugging system
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1990-93,1997-99,2003,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 #ifndef DEBUG_H

@@ -1,14 +1,14 @@
 /*
- * @(#)$Id: esqltest.ec,v 2004.1 2004/11/16 22:29:43 jleffler Exp $
+ * @(#)$Id: esqltest.ec,v 2005.1 2005/07/29 19:59:33 jleffler Exp $
  *
- * IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+ * IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
  *
  * Test Informix-ESQL/C environment
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
  * Copyright 2002    IBM
- * Copyright 2004    Jonathan Leffler
+ * Copyright 2004-05 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -49,7 +49,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 2004.1 2004/11/16 22:29:43 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 2005.1 2005/07/29 19:59:33 jleffler Exp $";
 #endif
 
 /*
@@ -109,8 +109,9 @@ static void test_permissions(char *dbname)
 	EXEC SQL CREATE TABLE dbd_ix_esqltest (Col01 INTEGER NOT NULL);
 	if (sqlca.sqlcode < 0)
 	{
-		fprintf(stderr, "You cannot use %s as a test database.\n", dbname);
-		fprintf(stderr, "You do not have sufficient privileges.\n");
+		fprintf(stderr, "You can only use %s as a test database if you set\n", dbname);
+		fprintf(stderr, "DBD_INFORMIX_NO_RESOURCE=yes in your environment.\n");
+		fprintf(stderr, "You do not have sufficient privileges to create tables.\n");
 		ix_printerr(stderr, sqlca.sqlcode);
 		estat = EXIT_FAILURE;
 	}
@@ -159,6 +160,7 @@ int main(void)
 	char *pass2 =  getenv("DBD_INFORMIX_PASSWORD2");
 	char *ixdir = getenv("INFORMIXDIR");
 	char *ixsrv = getenv("INFORMIXSERVER");
+	char *nores = getenv("DBD_INFORMIX_NO_RESOURCE");
 	Boolean conn_ok;
 	static char  conn1[20] = "connection_1";
 	static char  conn2[20] = "connection_2";
@@ -296,7 +298,12 @@ int main(void)
 		ix_printerr(stderr, sqlca.sqlcode);
 	}
 	else
-		test_permissions(dbase1);
+	{
+		if (nores == 0 || *nores == '\0')
+			test_permissions(dbase1);
+		else
+			printf("Not testing resource privileges because DBD_INFORMIX_NO_RESOURCE=%s\n", nores);
+	}
 
 #if USE_CONNECT == 1
 	if ((user2 == 0 && pass2 != 0) || (user2 != 0 && pass2 == 0))
@@ -325,7 +332,7 @@ int main(void)
 		else
 			ix_printerr(stderr, sqlca.sqlcode);
 	}
-	else
+	else if (nores == 0 || *nores == '\0')
 		test_permissions(dbase2);
 
 	if (estat == EXIT_SUCCESS)

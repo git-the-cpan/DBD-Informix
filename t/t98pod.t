@@ -1,5 +1,7 @@
 #!/bin/perl -w
 #
+# @(#)$Id: t98pod.t,v 2003.2 2007/02/25 19:33:33 jleffler Exp $
+#
 # Check the POD files for DBD::Informix
 
 use Test::Pod tests => 10;

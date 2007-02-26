@@ -1,24 +1,25 @@
 /*
-@(#)File:           $RCSfile: decifmx.h,v $
-@(#)Version:        $Revision: 1.8 $
-@(#)Last changed:   $Date: 2005/04/12 04:58:48 $
+@(#)File:           $RCSfile: ifmxdec.h,v $
+@(#)Version:        $Revision: 1.13 $
+@(#)Last changed:   $Date: 2006/01/30 21:18:21 $
 @(#)Purpose:        Internal declarations for DECIMAL functions
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 2003-05
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Copyright:      (C) JLSS 2003-06
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 /*TABSTOP=4*/
 
-#ifndef DECIFMX_H
-#define DECIFMX_H
+#ifndef IFMXDEC_H
+#define IFMXDEC_H
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char decifmx_h[] = "@(#)$Id: decifmx.h,v 1.8 2005/04/12 04:58:48 jleffler Exp $";
+static const char ifmxdec_h[] = "@(#)$Id: ifmxdec.h,v 1.13 2006/01/30 21:18:21 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
+#include "decimal.h"
 #include "esqltype.h"
 
 #define DECEXPZERO	-64		/* Exponent used in zeroes */
@@ -35,6 +36,10 @@ extern const ifx_dec_t dec_zero;
 extern const ifx_dec_t dec_one;
 extern const ifx_dec_t dec_two;
 extern const ifx_dec_t dec_ten;
+extern const ifx_dec_t dec_sixty;	/* Time calculations */
+extern const ifx_dec_t dec_hundred;
+extern const ifx_dec_t dec_e;
+extern const ifx_dec_t dec_pi;
 
 /* decload - used in both sets of functions */
 extern int decload(ifx_dec_t *np, int pos, int expon, char *dgts, int ndgts);
@@ -102,4 +107,4 @@ extern int  dec_to_double(const ifx_dec_t *dp, double *f);
 extern int  dec_cv_string(ifx_dec_t *dp, const char *str);
 extern int  dec_to_string(const ifx_dec_t *dp, char *buffer, size_t bufsiz);
 
-#endif	/* DECIFMX_H */
+#endif	/* IFMXDEC_H */

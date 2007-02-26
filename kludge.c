@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: kludge.c,v $
-@(#)Version:        $Revision: 1.7 $
-@(#)Last changed:   $Date: 2005/07/29 00:20:10 $
+@(#)Version:        $Revision: 1.8 $
+@(#)Last changed:   $Date: 2005/10/10 07:41:26 $
 @(#)Purpose:        Library support for KLUDGE macro
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1995,1997-98,2003,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 /*TABSTOP=4*/
@@ -18,7 +18,7 @@
 
 #include "kludge.h"
 
-static const char rcs[] = "$(#)$Id: kludge.c,v 1.7 2005/07/29 00:20:10 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: kludge.c,v 1.8 2005/10/10 07:41:26 jleffler Exp $";
 
 /* Report on kludges used at run-time */
 void kludge_use(const char *str)

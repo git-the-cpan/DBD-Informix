@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t91udts.t,v 2005.1 2005/07/27 23:46:45 jleffler Exp $
+#   @(#)$Id: t91udts.t,v 2007.1 2007/02/25 23:31:05 jleffler Exp $
 #
 #   Test basic handling of user-defined data types
 #
@@ -35,39 +35,46 @@ sub do_stmt
 	$dbh->do($stmt) or stmt_err;
 }
 
+my($table)     = "dbd_ix_udts";
+my($rowtype)   = "dbd_ix_named_row";
+my($dist_int8) = "dbd_ix_distofi8";
+my($dist_bool) = "dbd_ix_distofbool";
+my($dist_lvch) = "dbd_ix_distoflvc";
+my($dist_nrow) = "dbd_ix_distofnamed";
+
 # Drop any pre-existing versions of any of these test types
 $dbh->{PrintError} = 0;
-do_stmt $dbh, "drop table dbd_ix_udts";
-do_stmt $dbh, "drop type dbd_ix_distofi8 restrict";
-do_stmt $dbh, "drop type dbd_ix_distofbool restrict";
-do_stmt $dbh, "drop type dbd_ix_distoflvc restrict";
-do_stmt $dbh, "drop type dbd_ix_distofnamed restrict";
-do_stmt $dbh, "drop row type dbd_ix_udts_named restrict";
+do_stmt $dbh, "drop table $table";
+do_stmt $dbh, "drop type $dist_int8 restrict";
+do_stmt $dbh, "drop type $dist_bool restrict";
+do_stmt $dbh, "drop type $dist_lvch restrict";
+do_stmt $dbh, "drop type $dist_nrow restrict";
+do_stmt $dbh, "drop row type $rowtype restrict";
 $dbh->{PrintError} = 1;
 
 # Create the types and table
-stmt_test $dbh, 'create row type dbd_ix_udts_named (i int)';
+stmt_test $dbh, "create row type $rowtype (i int)";
 
-stmt_test $dbh, "create distinct type dbd_ix_distofi8 as int8";
-stmt_test $dbh, "create distinct type dbd_ix_distofbool as boolean";
-stmt_test $dbh, "create distinct type dbd_ix_distoflvc as lvarchar";
-stmt_test $dbh, "create distinct type dbd_ix_distofnamed as dbd_ix_udts_named";
+stmt_test $dbh, "create distinct type $dist_int8 as int8";
+stmt_test $dbh, "create distinct type $dist_bool as boolean";
+stmt_test $dbh, "create distinct type $dist_lvch as lvarchar";
+stmt_test $dbh, "create distinct type $dist_nrow as $rowtype";
 
 my ($stmt) = qq%
-     create table dbd_ix_udts
+     create table $table
      (s8 serial8,
       i8 int8,
       b boolean,
       lvc lvarchar,
       unnamed row(i int, l lvarchar),
-      named dbd_ix_udts_named,
+      named $rowtype,
       sint set(int not null),
       lunnamed list(row(i int, c char(10)) not null),
-      mnamed multiset(dbd_ix_udts_named not null),
-      di8 dbd_ix_distofi8,
-      db dbd_ix_distofbool,
-      dlvc dbd_ix_distoflvc,
-      dnamed dbd_ix_distofnamed%;
+      mnamed multiset($rowtype not null),
+      di8 $dist_int8,
+      db $dist_bool,
+      dlvc $dist_lvch,
+      dnamed $dist_nrow%;
 $stmt .= ($noslobs) ? ")" : ", cl clob) put cl in ($sbspace)";
 stmt_test $dbh, $stmt;
 
@@ -76,17 +83,17 @@ my ($longstr) = "1234567890" x 30;
 my ($slobval) = ($noslobs) ? "" : ", filetoclob('$0', 'client')";
 stmt_test $dbh,
     qq%
-     insert into dbd_ix_udts values
-     (1, 1, 't', '$longstr', row(1, '$longstr'), row(1)::dbd_ix_udts_named,
-      set{1, 10, 100}, list{row(1, 'one')}, multiset{row(1)::dbd_ix_udts_named},
-      '1', 't', '$longstr', row(1)::dbd_ix_distofnamed $slobval)
+     insert into $table values
+     (1, 1, 't', '$longstr', row(1, '$longstr'), row(1)::$rowtype,
+      set{1, 10, 100}, list{row(1, 'one')}, multiset{row(1)::$rowtype},
+      '1', 't', '$longstr', row(1)::$dist_nrow $slobval)
      %;
 
 # Check that fetch truncates udts longer than 256 (rather than blowing up)
 my ($inserted) = 1;
 $slobval = ($noslobs) ? "" : ", filetoclob(?, 'client')";
 my ($ins) = qq%
-     insert into dbd_ix_udts values
+     insert into $table values
      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? $slobval)
      %;
 $ins =~ s/\s+/ /gm;
@@ -142,7 +149,7 @@ $slobval = ($noslobs) ? "" : ", lotofile(cl, '$filename', 'client')";
 my ($sel) = qq%
      select s8, i8, b, lvc, unnamed, named, sint, lunnamed, mnamed, di8,
      db, dlvc, dnamed $slobval
-     from dbd_ix_udts
+     from $table
      %;
 $sel =~ s/\s+/ /gm;
 stmt_note "# PREPARE: $sel\n";
@@ -165,7 +172,7 @@ stmt_note "# fetched $fetched \n";
 
 $slobval = ($noslobs) ? "" : ", cl = filetoclob(?, 'client')"; 
 my ($upd) = qq%
-     update dbd_ix_udts set i8 = ?, b = ?, lvc = ?, unnamed = ?, named = ?,
+     update $table set i8 = ?, b = ?, lvc = ?, unnamed = ?, named = ?,
          sint = ?, lunnamed = ?, mnamed = ?, di8 = ?, db = ?, dlvc = ?,
          dnamed = ? $slobval
      where s8 = ? and i8 = ? and b = ? and lvc = ?
@@ -208,7 +215,7 @@ stmt_note "# updated $nrows \n";
 stmt_ok;
 
 my ($del) = qq%
-     delete from dbd_ix_udts where s8 = ? and i8 = ? and b = ? and lvc = ?
+     delete from $table where s8 = ? and i8 = ? and b = ? and lvc = ?
          and unnamed = ? and named = ? and sint = ? and lunnamed = ?
          and mnamed = ? and di8::int8 = ? and db::boolean = ?
          and dlvc::lvarchar = ? and dnamed = ?
@@ -230,12 +237,12 @@ $nrows = $sth->rows;
 stmt_note "# deleted $nrows\n";
 
 # Drop new versions of any of these test types
-$dbh->do("drop table dbd_ix_udts");
-$dbh->do("drop type dbd_ix_distofi8 restrict");
-$dbh->do("drop type dbd_ix_distofbool restrict");
-$dbh->do("drop type dbd_ix_distoflvc restrict");
-$dbh->do("drop type dbd_ix_distofnamed restrict");
-$dbh->do("drop row type dbd_ix_udts_named restrict");
+$dbh->do("drop table $table");
+$dbh->do("drop type $dist_int8 restrict");
+$dbh->do("drop type $dist_bool restrict");
+$dbh->do("drop type $dist_lvch restrict");
+$dbh->do("drop type $dist_nrow restrict");
+$dbh->do("drop row type $rowtype restrict");
 stmt_ok;
 
 $dbh->disconnect or die;

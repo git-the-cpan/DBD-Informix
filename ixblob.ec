@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: ixblob.ec,v $
-@(#)Version:        $Revision: 2005.1 $
-@(#)Last changed:   $Date: 2005/07/25 22:03:56 $
+@(#)Version:        $Revision: 2005.2 $
+@(#)Last changed:   $Date: 2005/08/12 17:22:43 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1996-98,2000-01,2003,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 /*TABSTOP=4*/
@@ -32,6 +32,15 @@
 #endif /* _WIN32 */
 #include "ixblob.h"
 
+/*
+** 2005-08-12: Windows fix - from Brian D Campbell <campbelb@lucent.com>
+** access() is defined in <io.h>, but F_OK is not.  E_ACC is apparently
+** equivalent to F_OK and defined as 00.
+*/
+#ifndef F_OK
+#define F_OK	0
+#endif /* F_OK */
+
 #ifdef DEBUG
 #include "esqlutil.h"
 #endif /* DEBUG */
@@ -47,7 +56,7 @@ static Blob zero_blob = { 0 };
 static char *blob_dir = 0;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec,v 2005.1 2005/07/25 22:03:56 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: ixblob.ec,v 2005.2 2005/08/12 17:22:43 jleffler Exp $";
 #endif
 
 BlobLocn blob_getlocmode(void)

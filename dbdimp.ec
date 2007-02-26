@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec,v 2005.6 2005/07/29 00:17:47 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2007.1 2007/02/25 21:10:44 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29) $
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
@@ -23,13 +23,18 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 2005.6 2005/07/29 00:17:47 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: dbdimp.ec,v 2007.1 2007/02/25 21:10:44 jleffler Exp $";
 #endif
 
 #include <float.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifdef _WIN32	/* 2005-08-12: Brian D Campbell <campbelb@lucent.com> */
+#include <io.h>
+#else
 #include <unistd.h>
+#endif /* _WIN32 */
 
 #define MAIN_PROGRAM	/* Embed version information for JLSS headers */
 #include "Informix.h"
@@ -262,7 +267,7 @@ dbd_ix_fmterror(ErrNum rc, char *msgbuf, size_t msgsiz)
 		if (rgetmsg(sqlca.sqlerrd[1], errbuf, sizeof(errbuf)) != 0)
 			strcpy(errbuf, "<<Failed to locate ISAM error message>>");
 		sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
-		sprintf(isambuf, "ISAM: %ld: %s", sqlca.sqlerrd[1], fmtbuf);
+		sprintf(isambuf, "ISAM: %ld: %s", (long)sqlca.sqlerrd[1], fmtbuf);
 	}
 	else
 		isambuf[0] = '\0';
@@ -1286,7 +1291,7 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
 		dbd_ix_debug(2, "%s -- VARCHAR or NVARCHAR\n", function);
 		type = SQLVCHAR;
 		string = SvPV(val, len);
-		length = len;
+		length = len + 1;
 		EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
 						TYPE = :type, LENGTH = :length,
 						DATA = :string;

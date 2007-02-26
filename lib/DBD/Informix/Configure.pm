@@ -1,11 +1,12 @@
-#   @(#)$Id: Configure.pm,v 100.14 2003/10/17 20:02:47 jleffler Exp $ 
+#   @(#)$Id: Configure.pm,v 2005.1 2005/08/12 23:32:17 jleffler Exp $ 
 #
 #   Informix ESQL/C Support Routines for DBD::Informix
-#   (IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29))
+#   (IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25))
 #
-#   Copyright 1999 Jonathan Leffler
-#   Copyright 2000 Informix Software Inc
-#   Copyright 2002 IBM
+#   Copyright 1999      Jonathan Leffler
+#   Copyright 2000      Informix Software Inc
+#   Copyright 2002      IBM
+#   Copyright 2003,2005 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -25,7 +26,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(find_informixdir_and_esql get_esqlc_version map_informix_lib_names);
 
-	$VERSION = "2005.02";
+	$VERSION = "2007.0225";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -45,7 +46,7 @@
 			# Trying to find ESQL (and determining INFORMIXDIR too)
 			foreach $p (split( /;/, $ENV{PATH}))
 			{
-				if( -x "$p/ESQL.EXE")
+				if (-x "$p/ESQL.EXE")
 				{
 					# HUMS: \\ needed, because string goes into Makefile (via postamble)
 					$esql = "$p\\ESQL.EXE"; 
@@ -57,6 +58,22 @@
 			}
 			&did_not_read('No executable ESQL/C compiler found in $PATH')
 				unless defined $esql;
+			if ($esql =~ /\s/o)
+			{
+				warn "Path to ESQL/C compiler ($esql) contains white space";
+				if (defined($ENV{INFORMIXDIR}))
+				{
+					$ID = $ENV{INFORMIXDIR};
+					die 'Value of %INFORMIXDIR% ', "($ID) also contains spaces"
+						if ($ID =~ /\s/o);
+					my $p = "$ID/BIN/";
+					if (-x "$p/ESQL.EXE")
+					{
+						warn 'Also found ESQL/C compiler via %INFORMIXDIR% - without spaces';
+						$esql = "$p\\ESQL.EXE";
+					}
+				}
+			}
 		}
 		else
 		{
@@ -228,7 +245,7 @@ use DBD::Informix::Configure;
 
 =head1 DESCRIPTION
 
-This module is used by IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29) in the build and bug reporting code.
+This module is used by IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25) in the build and bug reporting code.
 You will seldom if ever have cause to use this module directly.
 
 =head2 Using find_informixdir_and_esql

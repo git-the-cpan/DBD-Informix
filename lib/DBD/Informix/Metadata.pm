@@ -9,7 +9,7 @@
 #
 #-------------------------------------------------------------------------
 # Code and explanations follow for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29))
+# (IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25))
 #-------------------------------------------------------------------------
 
 {
@@ -34,12 +34,12 @@
 	use strict;
 
 	my
-	$VERSION         = "2005.02";
+	$VERSION         = "2007.0225";
 	my $ATTRIBUTION = 'Jonathan Leffler <jleffler@us.ibm.com>';
 	my $Revision    = '$Id: Metadata.pm,v 2003.4 2003/03/04 22:55:05 jleffler Exp $';
 	# Perl 5.005_03 does not accept 'our'
 	#our
-	#$VERSION         = "2005.02";
+	#$VERSION         = "2007.0225";
 	#our $ATTRIBUTION = 'Jonathan Leffler <jleffler@us.ibm.com>';
 	#our $Revision    = '$Id: Metadata.pm,v 2003.4 2003/03/04 22:55:05 jleffler Exp $';
 
@@ -334,7 +334,7 @@ DBD::Informix::Metadata - Metadata Methods for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes the metadata methods for DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)).
+(IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)).
 
 Note that you would seldom actually use this package directly (despite
 the synopsis above); the methods you would use are defined in the

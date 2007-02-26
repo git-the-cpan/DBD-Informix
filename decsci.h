@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: decsci.h,v $
-@(#)Version:        $Revision: 3.5 $
-@(#)Last changed:   $Date: 2005/03/20 07:40:53 $
+@(#)Version:        $Revision: 3.9 $
+@(#)Last changed:   $Date: 2005/08/30 21:35:20 $
 @(#)Purpose:        JLSS Functions to manipulate DECIMAL values
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1996-99,2001-03,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 /*TABSTOP=4*/
@@ -15,13 +15,13 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char decsci_h[] = "@(#)$Id: decsci.h,v 3.5 2005/03/20 07:40:53 jleffler Exp $";
+static const char decsci_h[] = "@(#)$Id: decsci.h,v 3.9 2005/08/30 21:35:20 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
 #include <stddef.h>
 #include "decimal.h"
-#include "decifmx.h"
+#include "ifmxdec.h"
 
 #define DECEXPZERO	-64		/* Exponent used in zero; dec_ndgts == 0 too */
 #define DECEXPMIN	-64		/* Minimum permissible exponent */
@@ -39,6 +39,8 @@ extern int decneg(const ifx_dec_t *x, ifx_dec_t *r1);
 extern int decpower(const ifx_dec_t *x, int n, ifx_dec_t *r1);
 extern int decsqrt(const ifx_dec_t *x, ifx_dec_t *r1);
 
+extern void dec_normalize(ifx_dec_t *dp);		/* Normalize a decimal value */
+
 #ifdef USE_DEPRECATED_DECSCI_FUNCTIONS
 /*
 ** NB: the routines decfix(), decsci(), deceng() are not thread-safe
@@ -55,11 +57,15 @@ extern int dec_sci(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_
 extern int dec_eng(const ifx_dec_t *d, int ndigit, int plus, int cw, char *buffer, size_t buflen);
 
 extern int dec_fmt(const ifx_dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen); 
+
+/* Deprecated variant of dec_fmt() */
 extern int decfmt(const ifx_dec_t *d, int sqllen, int fmtcode, char *buffer, size_t buflen); 
 
 extern int dec_chk(const ifx_dec_t *d, int sqllen);
 extern int dec_set(ifx_dec_t *d, int sqllen);
 
 extern void dec_verify(const ifx_dec_t *d);
+
+extern int dec_mod(const ifx_dec_t *dividend, const ifx_dec_t *divisor, ifx_dec_t *result);
 
 #endif	/* DECSCI_H */

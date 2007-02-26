@@ -1,12 +1,12 @@
-#   @(#)$Id: Informix.pm,v 2005.1 2005/03/14 23:15:07 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2005.2 2005/08/12 23:33:40 jleffler Exp $
 #
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2001-03 IBM
-#   Copyright 2004    Jonathan Leffler
+#   Copyright 2004-05 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -19,7 +19,8 @@
 {
 	package DBD::Informix;
 
-	use vars qw($drh);
+	use strict;
+	use vars qw($VERSION $drh @ISA %EXPORT_TAGS @EXPORT @EXPORT_OK);
 
 	use DBI 1.38;	# Requires features from DBI 1.38 release
 	use DynaLoader;
@@ -46,10 +47,10 @@
 				) ] );
 	Exporter::export_ok_tags('ix_types');
 
-	$VERSION          = "2005.02";
+	$VERSION          = "2007.0225";
 
 	my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-	my $Revision         = '$Id: Informix.pm,v 2005.1 2005/03/14 23:15:07 jleffler Exp $';
+	my $Revision         = '$Id: Informix.pm,v 2005.2 2005/08/12 23:33:40 jleffler Exp $';
 
 	# This is for development only - the code must be recompiled each day!
 	$VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
@@ -105,6 +106,11 @@
 		DBD::Informix::dr::driver_init($drh);
 
 		$drh;
+	}
+
+	sub CLONE
+	{
+	    undef $drh;
 	}
 
 	1;
@@ -291,7 +297,7 @@ DBD::Informix - IBM Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29).
+This document describes IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.

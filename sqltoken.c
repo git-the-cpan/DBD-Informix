@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: sqltoken.c,v $
-@(#)Version:        $Revision: 2004.4 $
-@(#)Last changed:   $Date: 2004/12/24 17:23:23 $
+@(#)Version:        $Revision: 2005.1 $
+@(#)Last changed:   $Date: 2005/12/16 01:05:21 $
 @(#)Purpose:        Identify SQL token in string
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1998-2004
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Copyright:      (C) JLSS 1998-2005
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 /*TABSTOP=4*/
@@ -30,7 +30,7 @@
 #define DASH   '-'
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: sqltoken.c,v 2004.4 2004/12/24 17:23:23 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: sqltoken.c,v 2005.1 2005/12/16 01:05:21 jleffler Exp $";
 #endif
 
 /*
@@ -173,7 +173,6 @@ SQLComment sqlcomment(const char *input, int style, const char **bgn, const char
 ** token: {+ hint } and --+ hint to end of line
 ** 2001-03-31: # to end of line is no longer regarded as a comment
 ** (because of SLVs).
-** KLUDGE: Outer while loop should be unnecessary now...
 ** 2004-12-24: Permit hexadecimal constants (0xFFFFFFFF etc).
 */
 char *sqltoken(const char *input, const char **end)
@@ -182,7 +181,7 @@ char *sqltoken(const char *input, const char **end)
 	unsigned char  c;
 	unsigned char  q;
 
-	while (*input != '\0')
+	if (*input != '\0')
 	{
 		int   style = JLSS_ALLSQL_COMMENTS;
 		SQLComment cmt;
@@ -199,7 +198,10 @@ char *sqltoken(const char *input, const char **end)
 			return CONST_CAST(char *, input);
 		}
 		if ((c = *input) == '\0')
-			break;
+		{
+			*end = input;
+			return CONST_CAST(char *, input);
+		}
 		else if (c == '\'' || c == '"')
 		{
 			/* Character string or delimited identifier */
@@ -217,7 +219,8 @@ char *sqltoken(const char *input, const char **end)
 				}
 				str += 2;
 			}
-			break;
+			*end = input;
+			return CONST_CAST(char *, input);
 		}
 		else if (isdigit(c) || (c == '.' && isdigit((unsigned char)input[1])))
 		{
@@ -264,7 +267,11 @@ char *sqltoken(const char *input, const char **end)
 		{
 			/* Word (identifier or keyword) */
 			token = input;
-			while ((c = *input++) != '\0' && (isalnum(c) || c == '_'))
+			/*
+			** JL 2005-12-15: IDS 10.00.UC3 and 9.40.UC7 permit
+			** non-leading $ signs in identifiers.
+			*/
+			while ((c = *input++) != '\0' && (isalnum(c) || c == '_' || c == '$'))
 				;
 			*end = input - 1;
 			return CONST_CAST(char *, token);
@@ -340,6 +347,7 @@ static const char * const input[] =
 	"select a::type as _ from _",
 	"select {+ hint} _ as _ from _",
 	"select --+ hint\n\t_ as _ from _",
+	"create temp table p$q(r$s int)",
 	"select 'abc\ndef' from has_newline",
 	"select /* XX */ * from /* YY * / */ whatnot",
 	"select {/* XX */ * from /* YY * /} /* ZZ */ * from whatnot",

@@ -1,15 +1,15 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2005.4 2005/07/27 23:48:54 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2007.1 2007/02/25 23:37:54 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29))
+# (IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
 # Copyright 2000    Informix Software Inc
 # Copyright 2002-04 IBM
-# Copyright 2004-05 Jonathan Leffler
+# Copyright 2004-07 Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
@@ -19,9 +19,9 @@
 BEGIN
 {
 $main::min_DBI_ver = "1.38";		# Minimum (mandatory) version of DBI
-$main::ref_DBI_ver = "1.48";		# Reference (recommended) version of DBI
-$main::min_Perl_ver = "5.006";		# Minimum (mandatory) version of Perl
-$main::ref_Perl_ver = "5.008007";	# Reference (recommended) version of Perl
+$main::ref_DBI_ver = "1.54";		# Reference (recommended) version of DBI
+$main::min_Perl_ver = "5.006001";	# Minimum (mandatory) version of Perl
+$main::ref_Perl_ver = "5.008008";	# Reference (recommended) version of Perl
 }
 
 ########################
@@ -129,15 +129,17 @@ if ($NTConfiguration)
 	to debug the NT code and reporting the results back to the DBI
 	Users mailing list.
 
-	Note: Some of the code here or in ESQL/C may work properly if
-	%INFORMIXDIR% contains spaces.
+	Note: Some of the code here or in ESQL/C may not work properly if
+	%INFORMIXDIR% (or the entry in %PATH% that identifies
+	%INFORMIXDIR%\bin) contains spaces - for example, if you installed
+	CSDK under C:\Program Files)
 
 	Thanks!
 
 	});
 }
 
-my $dbd_ix = "2005.02";
+my $dbd_ix = "2007.0225";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -173,7 +175,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -191,9 +193,9 @@ print "System:   @Config{qw(myuname)}\n";
 # Compare installed version of DBI with version which DBD::Informix was
 # last tested with.
 # The required and reference versions are the same for this release.
-warn "*** Ideally, you should upgrade to Perl version $main::ref_Perl_ver.\n\n"
+warn "*** Ideally, you should upgrade to Perl version $main::ref_Perl_ver or later.\n\n"
 	unless ($] >= $main::ref_Perl_ver);
-warn "*** Ideally, you should upgrade to DBI version $main::ref_DBI_ver.\n\n"
+warn "*** Ideally, you should upgrade to DBI version $main::ref_DBI_ver or later.\n\n"
 	unless ($DBI::VERSION >= $main::ref_DBI_ver);
 
 my ($ID, $esqlprog) = &find_informixdir_and_esql($NTConfiguration);
@@ -208,9 +210,12 @@ print "Using $infversion from $ID\n";
 # Effective version number of ESQL/C.
 # ESQL/C 2.90 was released in ClientSDK 2.90 (Nov 2004)
 # Previous version was ESQL/C 9.53 released in ClientSDK 2.81.
-# To simplify swathes of code below, treat the 2.90..2.99 releases
-# as equivalent to 9.60 (a non-existent release).
-my ($effvernum) = ($vernum >= 290 && $vernum < 300) ? 960 : $vernum;
+# ESQL/C 2.91 was at least an internal version number.
+# CSDK   3.00 is the next planned release (at Nov 2006) - adjust
+# conditional to 400.
+# To simplify swathes of code below, treat the 2.90..2.99 and 3.00..3.99
+# releases as equivalent to 9.60 (a non-existent release).
+my ($effvernum) = ($vernum >= 290 && $vernum < 400) ? 960 : $vernum;
 
 dbd_ix_die "\n*** Environment variable \$INFORMIXSERVER is not set and should be!\n\n"
 	if ($effvernum >= 600 && !defined $ENV{INFORMIXSERVER});
@@ -284,6 +289,7 @@ elsif ($effvernum >= 510 && $effvernum < 600)
 		$opts{NAME}.  If so, try creating a statically linked version
 		instead.  Read the Notes/static.build file.\n
 		%);
+	&add_aux_obj;
 }
 elsif ($effvernum >= 600 && $effvernum < 724)
 {
@@ -320,6 +326,7 @@ elsif ($effvernum >= 724 && $effvernum < 800)
 	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 	&fix_b102265($epp, $esql, $opts{NAME})
 		if ($Config{osname} eq "hpux" && &grep_for_statopt_staticonly($epp));
+	&add_aux_obj;
 }
 elsif ($effvernum >= 800 && $effvernum < 900)
 {
@@ -360,7 +367,6 @@ elsif ($effvernum >= 916 && $effvernum < 1000)
 	# ESQL/C 9.52 was released in ClientSDK 2.80
 	# ESQL/C 9.53 was released in ClientSDK 2.81
 	# ESQL/C 2.90 was released in ClientSDK 2.90 (Nov 2004)
-	# NB: 2.90 was handled earlier...
 	print &nlt(qq%
 			The tests in t/t31nulls.t and t/t32nulls.t will probably fail.
 		%) if ($effvernum == 914);
@@ -412,11 +418,9 @@ else
 print "** Warning ** you will build $opts{NAME} for a relocatable INFORMIXDIR!\n\n"
 	if (defined($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR}));
 
-# JL 2004-12-02: Header emalloc.h is referenced in describe.ec.
-# Specifying -DUSE_REAL_MALLOC prevents emalloc.h from referencing
-# emalloc() et al, so there is no need for emalloc.c.  Hence, no need
-# for stderr.[ch] or debug.h either (only referenced in emalloc.c).
-$opts{DEFINE} .= " -DUSE_REAL_MALLOC";
+# JL 2007-02-25: DO_NOT_USE_STDERR_H prevents jtypes.c from using
+# stderr.h, so DBD::Informix does not need stderr.h or stderrr.c.
+$opts{DEFINE} .= " -DDO_NOT_USE_STDERR_H";
 
 $opts{INC} = " ";
 
@@ -480,7 +484,7 @@ $opts{DEFINE} .= ' -Wall -pedantic -Wno-comment'
 $opts{DEFINE} .= " -D__H_LOCALEDEF"
 	if ($Config{osname} eq 'aix');
 
-my $objects = "Informix.o dbdimp.o dbdattr.o describe.o sqltoken.o";
+my $objects = "Informix.o dbdimp.o dbdattr.o sqltoken.o";
 $objects .= " sqltype.o ixblob.o odbctype.o kludge.o link.o esqlcver.o $vercode.o";
 $objects .= " eprintf.o" if defined $ENV{DBD_INFORMIX_USE_EPRINTF_CODE};
 # decsci.o formatting only of relevance if effective ESQL/C Version less than 7.10.
@@ -597,6 +601,7 @@ else
 	if ($sx)
 	{
 	my($v);
+    print "C and C preprocessor flags - used in object compilations\n";
 	foreach $v (@ccflags)  { print "ccflag  = <<$v>>\n"; }
 	foreach $v (@cppflags) { print "cppflag = <<$v>>\n"; }
 	}
@@ -815,6 +820,17 @@ sub did_not_read
 	dbd_ix_die "\n*** You didn't read the README file!\n@_\n\n";
 }
 
+# add_aux_obj - add objects to build list for ESQL/C versions that need them.
+sub add_aux_obj
+{
+	my $add = "jtypes.o";
+	warn "Adding $add to \$ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES}\n";
+	my $env = defined $ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES} ?
+				$ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES} : "";
+	$env .= " $add";
+	$ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES} = $env;
+}
+
 # which: report the name of an executable command.
 sub which
 {
@@ -922,7 +938,7 @@ sub execute_command
 		foreach my $var (@$env)
 		{
 			$var =~ m/^([^=]+)=(.*)/;
-			print "+ setenv $1 = $2\n" if ($sx);
+			print "+ setenv $1 = $2\n";
 		}
 	}
 	if (my $pid = fork)
@@ -1104,7 +1120,7 @@ sub Write_DBD_Informix_Defaults
 	open DEFAULTS, ">$defaults"
 		or die "Cannot create $defaults ($!)";
 	print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004    JLSS
@@ -1119,7 +1135,7 @@ sub Write_DBD_Informix_Defaults
 	@ISA = qw(Exporter);
 	@EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
 
-	$VERSION = "2005.02";
+	$VERSION = "2007.0225";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1143,7 +1159,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)).
+(IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to.

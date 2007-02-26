@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqlc.h,v $
-@(#)Version:        $Revision: 2004.1 $
-@(#)Last changed:   $Date: 2004/11/04 18:27:10 $
+@(#)Version:        $Revision: 2007.1 $
+@(#)Last changed:   $Date: 2007/02/10 01:25:20 $
 @(#)Purpose:        Include all relevant ESQL/C type definitions
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1992-93,1995-2004
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Copyright:      (C) JLSS 1992-93,1995-2004,2006-07
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 /*
@@ -18,9 +18,9 @@
 ** Support for ESQL/C 4.x was dropped at the end of 2001.
 ** Versions of ESQL/C prior to 4.00 never were supported.
 **
-** Note that CSDK 2.90 (Nov2004) renumbered the ESQL/C version to 2.90
+** Note that CSDK 2.90 (Nov 2004) renumbered the ESQL/C version to 2.90
 ** too.  This is later than ESQL 9.53.  For the time being, assume that
-** these versions will run 2.90, 2.91, ... but not reach 3.00.
+** these versions will run 2.90, 2.91, ... but not reach 4.00.
 **
 ** Note that the ESQL/C 4.x and earlier versions placed the headers
 ** directly in $INFORMIXDIR/incl, but ESQL/C versions 5.00 and later
@@ -63,6 +63,8 @@
 ** 9.52         Client SDK 2.80 (Jun 2002)
 ** 9.53         Client SDK 2.81 (UC2 = May 2003)
 ** 2.90         Client SDK 2.90 (Nov 2004)
+** 2.91         Client SDK 2.91 (internal only?)
+** 3.00         Client SDK 3.00 (2007)
 **
 ** All versions of ESQL/C prior to 5.10, plus versions 6.x, 7.x
 ** (with the possible, marginal, exception of 7.24), 8.x, 9.0x,
@@ -74,8 +76,9 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 2004.1 2004/11/04 18:27:10 jleffler Exp $";
-#endif	/* lint */
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2007.1 2007/02/10 01:25:20 jleffler Exp $";
+#endif /* lint */
 #endif	/* MAIN_PROGRAM */
 
 #ifdef HAVE_CONFIG_H
@@ -89,6 +92,14 @@ static const char esqlc_h[] = "@(#)$Id: esqlc.h,v 2004.1 2004/11/04 18:27:10 jle
 /* If ESQLC_VERSION isn't defined, use version 0 */
 #ifndef ESQLC_VERSION
 #define ESQLC_VERSION 0
+#endif /* ESQLC_VERSION */
+
+/* ESQLC_EFFVERSION - set to 960 for CSDK 2.90 up to 3.99 */
+#undef ESQLC_EFFVERSION
+#if ESQLC_VERSION >= 290 && ESQLC_VERSION < 400
+#define ESQLC_EFFVERSION 960
+#else
+#define ESQLC_EFFVERSION ESQLC_VERSION
 #endif /* ESQLC_VERSION */
 
 /*
@@ -144,13 +155,6 @@ extern "C" {
 
 /* -- Include Files	*/
 
-/*
-** Note that an earlier version of this file protected varchar.h with
-** #if ESQLC_VERSION >= 400, but did not protect either datetime.h or
-** locator.h in the same way, even though neither of those files was
-** present prior to version 4.00.
-*/
-
 #include <datetime.h>
 #include <decimal.h>
 #include <locator.h>
@@ -160,12 +164,18 @@ extern "C" {
 #include <sqltypes.h>
 #include <varchar.h>
 
+#if ESQLC_EFFVERSION >= 900
+#include <int8.h>
+#endif /* ESQLC_EFFVERSION */
+
 /* _WIN32 (Windows 95/NT code from Harald Ums <Harald.Ums@sevensys.de> */
 
-#if (ESQLC_VERSION < 290) || (ESQLC_VERSION >= 300 && ESQLC_VERSION < 500)
+#if ESQLC_EFFVERSION < 500
 /* No prototypes available -- for earlier versions, you are on your own! */
 /* NB: Contact the author for 4.x prototypes */
-#elif (ESQLC_VERSION < 600) && !(ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#elif ESQLC_EFFVERSION < 600
+
+/* For ESQL 5.x - used by OnLine 5.x */
 
 #ifdef _WIN32
 #include <windows.h>
@@ -188,7 +198,7 @@ extern "C" {
 ** ClientSDK 2.00 reports version 9.13; the ESQL/C compiler for
 ** ClientSDK 2.01 reports version 9.14.
 */
-#if (ESQLC_VERSION >= 913) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#if ESQLC_EFFVERSION >= 913
 #define HAVE_SQLIAPI_H
 #endif
 
@@ -239,9 +249,8 @@ extern int      sqgetdbs(int *ret_fcnt,
 ** Supply missing type information for IUS (IDS/UDO) data types.
 ** Two edged sword; it means you have to test rather carefully in
 ** your code whether to build with IUS data types or not.
-** Should be keyed off ESQLC_VERSION, rather than features...
 */
-#if (ESQLC_VERSION < 900) && !(ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#if ESQLC_EFFVERSION < 900
 #include "esql_ius.h"
 #endif
 
@@ -299,7 +308,7 @@ typedef struct sqlca_s	Sqlca;
 typedef struct sqlda	Sqlda;
 typedef struct sqlva	Sqlva;
 
-#if (ESQLC_VERSION >= 900) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#if ESQLC_EFFVERSION >= 900
 
 /* Type for casting dynamic SQL types to LVARCHAR */
 typedef void *Lvarchar;
@@ -315,17 +324,17 @@ typedef void *Lvarchar;
 #define ESQLC_STORED_PROCEDURES		1
 #define ESQLC_VARIABLE_CURSORS		1
 
-#if (ESQLC_VERSION >= 600) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#if ESQLC_EFFVERSION >= 600
 #define ESQLC_CONNECT		1
 #define ESQLC_SQLSTATE      1
 #define ESQLC_RGETLMSG		1
 #endif
 
-#if (ESQLC_VERSION >= 720) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#if ESQLC_EFFVERSION >= 720
 #define ESQLC_CONNECT_DORMANT		1
 #endif
 
-#if (ESQLC_VERSION >= 900) || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#if ESQLC_EFFVERSION >= 900
 #define ESQLC_IUSTYPES		1
 #define ESQLC_IUS_TYPES		/* Deprecated - use ESQL_IUSTYPES */
 #endif

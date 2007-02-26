@@ -1,4 +1,20 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25) (aka DBD::Informix)
+
+2007.0225 Release
+---------------
+2007-02-25: Upload to PAUSE and CPAN.
+2007-02-25: Miscellaneous cleanups for the last 2 years or so.
+2007-02-25: Fix formatting of ISAM error for AMD x86_64 after report from
+            Jim Kenedy <jimkenedy@gmail.com>.
+2006-11-15: Next release of CSDK will be 3.00 - fix conditionals.
+2006-07-14: Update esqltype.h to handle ESQL/C 5.x (after CSDK 2.9x).
+2005-08-17: Reinstate jtypes.c, stderr.c, stderr.h for older versions of
+            ESQL/C (pre-dating IUS 9.00).  Update Makefile.PL to handle
+            this edge case automatically.  Problem found by Piotr Poloczek
+            <poloczekp@interia.pl> and Gerardo Santana
+            <gerardo.santana@gmail.com> in June 2005.
+2005-08-12: Windows fixes started based on extensive feedback from Brian D
+            Campbell <campbelb@lucent.com>.
 
 2005.02 Release
 ---------------
@@ -1109,4 +1125,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2005.3 2005/07/29 00:16:45 jleffler Exp $
+@(#)$Id: ChangeLog,v 2007.2 2007/02/25 21:12:01 jleffler Exp $

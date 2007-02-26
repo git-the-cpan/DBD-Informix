@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqltype.h,v $
-@(#)Version:        $Revision: 2005.2 $
-@(#)Last changed:   $Date: 2005/06/23 00:17:04 $
+@(#)Version:        $Revision: 2007.1 $
+@(#)Last changed:   $Date: 2007/02/10 01:25:52 $
 @(#)Purpose:        Platform and Version Independent Types for ESQL/C
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1992-93,1995-97,2003-05
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Copyright:      (C) JLSS 2001-07
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 /*TABSTOP=4*/
@@ -15,8 +15,9 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqltype_h[] = "@(#)$Id: esqltype.h,v 2005.2 2005/06/23 00:17:04 jleffler Exp $";
-#endif	/* lint */
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_esqltype_h[] = "@(#)$Id: esqltype.h,v 2007.1 2007/02/10 01:25:52 jleffler Exp $";
+#endif /* lint */
 #endif	/* MAIN_PROGRAM */
 
 /*
@@ -42,6 +43,7 @@ static const char esqltype_h[] = "@(#)$Id: esqltype.h,v 2005.2 2005/06/23 00:17:
 ** These values can be used to to decide the mapping.
 **
 ** JL 2005-06-22: Note ESQL/C 2.90 is more recent than ESQL/C 9.53.
+** JL 2007-02-09: Note ESQL/C 3.00 is in the field too.
 */
 
 #if ESQLC_VERSION >= 700 && ESQLC_VERSION < 921 
@@ -91,7 +93,28 @@ typedef unsigned long	ixMulong;
 /* Omitted typedefs for MCHAR and MSHORT present in ifxtypes.h */
 /* typedef char MCHAR; typedef short MSHORT; */
 
+#elif ESQLC_VERSION >= 500 && ESQLC_VERSION < 700
+
+/* Assume 32-bit platform */
+/* Regular 32-bit platform */
+#define MI_LONG_SIZE 32
+#define MI_PTR_SIZE 32
+
+typedef signed char	ixInt1;
+typedef short	ixInt2;
+typedef long	ixInt4;
+typedef int		ixMint;
+typedef long	ixMlong; 
+typedef unsigned char	ixUint1;
+typedef unsigned short	ixUint2;
+typedef unsigned long	ixUint4; 
+typedef unsigned int	ixMuint;
+typedef unsigned long	ixMulong;
+
 #else
+
+/* ESQLC_VERSION >= 921 || (ESQLC_VERSION >= 290 && ESQLC_VERSION <= 399) */
+/* ifxtypes.h provides typedefs for int1, uint2, muint, etc */
 
 typedef int1	ixInt1;
 typedef int2	ixInt2;
@@ -108,6 +131,9 @@ typedef muint	ixMuint;
 typedef mulong	ixMulong;
 
 #endif	/* ESQLC_VERSION 700..921 */
+
+
+/* printf() format strings */
 
 #if MI_LONG_SIZE == 32
 

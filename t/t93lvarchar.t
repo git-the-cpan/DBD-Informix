@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t93lvarchar.t,v 2005.2 2005/07/27 23:46:45 jleffler Exp $
+#   @(#)$Id: t93lvarchar.t,v 2005.3 2005/08/12 23:38:01 jleffler Exp $
 #
 #   Test basic handling of LVARCHAR data
 #
@@ -83,28 +83,28 @@ $dbh->{PrintError} = 1;
 
 stmt_test $dbh, "create distinct type $disttype as lvarchar";
 
-my ($stmt) = qq% create table $table (s serial, lvc lvarchar, dlvc $disttype)%;
+my ($stmt) = qq% create table $table (s serial, lvc lvarchar, lvcn lvarchar not null, dlvc $disttype, dlvcn $disttype not null)%;
 stmt_test $dbh, $stmt;
 
 my $inserted = 0;
 
-# Insert some data into the table.  NB: $0 refers to this script file!
+# Insert some data into the table.
 my ($longstr) = "1234567890" x 5;
-stmt_test $dbh, "insert into $table values (10203040, '$longstr', '$longstr')";
+stmt_test $dbh, "insert into $table values (10203040, '$longstr', '$longstr', '$longstr', '$longstr')";
 $inserted += 1;
 
-my ($ins) = "insert into $table values (?, ?, ?)";
+my ($ins) = "insert into $table values (?, ?, ?, ?, ?)";
 stmt_note("# PREPARE: $ins\n");
 my ($sth) = $dbh->prepare($ins) or stmt_fail;
 stmt_ok;
 
-$sth->execute(11213141, $longstr, $longstr) or stmt_fail;
+$sth->execute(11213141, $longstr, $longstr, $longstr, $longstr) or stmt_fail;
 $inserted += $sth->rows;
 
 # Insert nulls...
 my ($null);
 undef $null;
-$sth->execute(12223242, $null, $null) or stmt_fail;
+$sth->execute(12223242, $null, $longstr, $null, $longstr) or stmt_fail;
 stmt_ok;
 stmt_note "# inserted nulls OK\n";
 
@@ -117,8 +117,8 @@ my($rc) = 0;
 $rc += verify_fetched_data($dbh, "select s, lvc from $table order by s", 1, @vals);
 $rc += verify_fetched_data($dbh, "select s, lvc, dlvc from $table order by s", 2, @vals);
 $rc += verify_fetched_data($dbh, "select s, lvc, dlvc, 'abc'::lvarchar from $table order by s", 3, @vals);
-$rc += verify_fetched_data($dbh, "select s, lvc, dlvc, 'abc'::lvarchar, lvc as lvc_2 from $table order by s", 4, @vals);
-$rc += verify_fetched_data($dbh, "select s, lvc, dlvc, 'abc'::lvarchar, lvc as lvc_2, dlvc as dlvc_2 from $table order by s", 5, @vals);
+$rc += verify_fetched_data($dbh, "select s, lvc, dlvc, 'abc'::lvarchar, lvcn from $table order by s", 4, @vals);
+$rc += verify_fetched_data($dbh, "select s, lvc, dlvc, 'abc'::lvarchar, lvcn, dlvcn from $table order by s", 5, @vals);
 stmt_fail "# $rc data validation failures\n" if $rc > 0;
 
 # Drop new versions of any of these test types

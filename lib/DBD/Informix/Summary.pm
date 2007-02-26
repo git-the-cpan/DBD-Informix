@@ -1,6 +1,6 @@
 # $Id: Summary.pm,v 100.6 2002/12/17 01:20:18 jleffler Exp $
 #
-# IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+# IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 #
 # This driver summary is for DBD::Informix
 #
@@ -14,7 +14,7 @@
 {
 	package DBD::Informix::Summary;
 
-	$VERSION = "2005.02";
+	$VERSION = "2007.0225";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	1;
@@ -38,7 +38,7 @@ This file is an updated version of the information about DBD::Informix in the DB
 
 =head2 Driver Version
 
-DBD::Informix (IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29))
+DBD::Informix (IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25))
 
 =head2 Feature Summary
 

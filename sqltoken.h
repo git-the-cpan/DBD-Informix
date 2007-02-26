@@ -5,7 +5,7 @@
 @(#)Purpose:        SQL Tokenizer for Informix
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 2004
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2005.02 (2005-07-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
 */
 
 /*TABSTOP=4*/
