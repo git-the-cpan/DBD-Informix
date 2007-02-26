@@ -3,7 +3,7 @@
 # @(#)$Id: Makefile.PL,v 2007.1 2007/02/25 23:37:54 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25))
+# (IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -139,7 +139,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "2007.0225";
+my $dbd_ix = "2007.0226";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -175,7 +175,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -1120,7 +1120,7 @@ sub Write_DBD_Informix_Defaults
 	open DEFAULTS, ">$defaults"
 		or die "Cannot create $defaults ($!)";
 	print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
+#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004    JLSS
@@ -1135,7 +1135,7 @@ sub Write_DBD_Informix_Defaults
 	@ISA = qw(Exporter);
 	@EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
 
-	$VERSION = "2007.0225";
+	$VERSION = "2007.0226";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1159,7 +1159,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)).
+(IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to.

@@ -5,7 +5,7 @@
 @(#)Purpose:        Substitute for RTYPALIGN and RTYPMSIZE
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1995,1997-98,2001,2003,2005,2007
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
 */
 
 /*TABSTOP=4*/

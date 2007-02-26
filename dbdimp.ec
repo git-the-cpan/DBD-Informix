@@ -1,7 +1,7 @@
 /*
  * @(#)$Id: dbdimp.ec,v 2007.1 2007/02/25 21:10:44 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25) $
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce

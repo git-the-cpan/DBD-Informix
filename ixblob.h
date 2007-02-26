@@ -5,7 +5,7 @@
 @(#)Purpose:         Blob Handling Functions
 @(#)Author:          J Leffler
 @(#)Copyright:       (C) Jonathan Leffler 1997-98,2001
-@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2007.0225 (2007-02-25)
+@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
 */
 
 /*TABSTOP=4*/
