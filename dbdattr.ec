@@ -1,7 +1,7 @@
 /*
  * @(#)$Id: dbdattr.ec,v 2004.2 2004/12/01 20:36:30 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25) $ -- attribute handling
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26) $ -- attribute handling
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc

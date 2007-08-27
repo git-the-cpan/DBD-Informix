@@ -1,9 +1,9 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2007.1 2007/02/25 23:37:54 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2007.7 2007/08/26 06:24:00 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25))
+# (IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -19,7 +19,7 @@
 BEGIN
 {
 $main::min_DBI_ver = "1.38";		# Minimum (mandatory) version of DBI
-$main::ref_DBI_ver = "1.54";		# Reference (recommended) version of DBI
+$main::ref_DBI_ver = "1.59";		# Reference (recommended) version of DBI
 $main::min_Perl_ver = "5.006001";	# Minimum (mandatory) version of Perl
 $main::ref_Perl_ver = "5.008008";	# Reference (recommended) version of Perl
 }
@@ -139,7 +139,7 @@ if ($NTConfiguration)
 	});
 }
 
-my $dbd_ix = "2007.0226";
+my $dbd_ix = "2007.0826";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -175,7 +175,7 @@ my %opts = (
 		   );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -207,15 +207,37 @@ $auxincl = " -I$ID/incl/tools" if ($esqlprog =~ /\bc4gl\b/);
 my ($infversion, $vernum) = &get_esqlc_version($esqlprog);
 print "Using $infversion from $ID\n";
 
+# Check for 32-bit vs 64-bit mismatches
+# Unix versions of ESQL/C use .UCx (and .HCx on old HP-UX) to indicate a
+# 32-bit client, and .FCx to indicate a 64-bit client.  On Windows, .TCx
+# has indicated 32-bit clients.
+die "Unexpected ESQL/C version number format $infversion"
+    unless $infversion =~ m/\d+\.\d+\.([A-Z])[A-Z].*$/;
+my ($verletter) = $1;
+my ($esql_bits) = 0;
+$esql_bits = 32 if ($verletter eq 'U');
+$esql_bits = 32 if ($verletter eq 'H');
+$esql_bits = 64 if ($verletter eq 'F');
+$esql_bits = 32 if ($verletter eq 'T');
+die "Unrecognized ESQL/C 'bittiness' letter $verletter"
+    unless $esql_bits != 0;
+my ($perl_bits) = 8 * $Config{longsize};
+die "Unexpected number of bits for Perl longsize ($perl_bits)"
+    unless $perl_bits == 32 || $perl_bits == 64;
+die "Your build will fail because Perl is a $perl_bits-bit version but ESQL/C is a $esql_bits-bit version\n"
+    unless $perl_bits == $esql_bits;
+
 # Effective version number of ESQL/C.
 # ESQL/C 2.90 was released in ClientSDK 2.90 (Nov 2004)
 # Previous version was ESQL/C 9.53 released in ClientSDK 2.81.
 # ESQL/C 2.91 was at least an internal version number.
-# CSDK   3.00 is the next planned release (at Nov 2006) - adjust
-# conditional to 400.
-# To simplify swathes of code below, treat the 2.90..2.99 and 3.00..3.99
-# releases as equivalent to 9.60 (a non-existent release).
-my ($effvernum) = ($vernum >= 290 && $vernum < 400) ? 960 : $vernum;
+# CSDK 3.00 was released with IDS 11 - so adjust conditional to 400.
+# To simplify swathes of code below, treat the 2.90..2.99 as equivalent
+# to 9.60 (a non-existent release) and 3.00..3.99 releases as equivalent
+# to 9.70 (also a non-existent release).
+my ($effvernum) = $vernum;
+$effvernum = 960 if ($vernum >= 290 && $vernum < 300);
+$effvernum = 970 if ($vernum >= 300 && $vernum < 400);
 
 dbd_ix_die "\n*** Environment variable \$INFORMIXSERVER is not set and should be!\n\n"
 	if ($effvernum >= 600 && !defined $ENV{INFORMIXSERVER});
@@ -302,8 +324,7 @@ elsif ($effvernum >= 724 && $effvernum < 800)
 {
 	# 7.2x is already released.  There should not be an ESQL/C version
 	# 7.3x.  The 7.3x server is Informix Dynamic Server, IDS.  You use
-	# ClientSDK 2.x to access IDS, and the ESQL/C version numbers for
-	# ClientSDK are currently 9.xy numbers, not 7.3x (see below).
+	# ClientSDK 2.x or later to access IDS.
 	# Note that the IUS tests take into account both the version of
 	# ESQL/C and the version of the database engine you are using
 	# before trying to run any IUS data type testing.
@@ -368,12 +389,15 @@ elsif ($effvernum >= 916 && $effvernum < 1000)
 	# ESQL/C 9.53 was released in ClientSDK 2.81
 	# ESQL/C 2.90 was released in ClientSDK 2.90 (Nov 2004)
 	print &nlt(qq%
-			The tests in t/t31nulls.t and t/t32nulls.t will probably fail.
-		%) if ($effvernum == 914);
-	print &nlt(qq%
 			Please upgrade to a more recent version of ClientSDK.
 			$opts{NAME} will probably work, but that is not guaranteed.
 		%) if ($effvernum < 951);
+	print &nlt(qq%
+			Note that bug RT#13708 (IBM CQ bug idsdb00139040) may affect you.
+			In particular, if test t/t93lvarchar.t detects problems, consider an
+			upgrade to CSDK 3.00 or later - it seems to be fixed there.  All
+			other parts of $opts{NAME} will probably work.
+		%) if ($effvernum < 970);
 	print $warning;
 	$esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
 }
@@ -908,6 +932,10 @@ MAP_LINKCMD = $(ESQL_CC)
 # uses a version of ESQL/C which does not need the custom esql script).
 clean::
 	-[ ! -f esql ] || mv esql esql.old
+
+# $(O_FILES) omits the ESQL/C object files - this does not.
+$(OBJECT): $(H_FILES)
+
 ';
 
 return $p1 . $p2 . $p3 . $p4;
@@ -1044,6 +1072,7 @@ sub fix_b102265
 		ESQL/C.  Read the Notes/static.build file for more information.
 
 		Or (a much better idea) upgrade to Client SDK 2.40 or later!
+
 		%);
 	&customize_esql($epp, $esql, $name);
 }
@@ -1120,7 +1149,7 @@ sub Write_DBD_Informix_Defaults
 	open DEFAULTS, ">$defaults"
 		or die "Cannot create $defaults ($!)";
 	print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
+#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004    JLSS
@@ -1135,7 +1164,7 @@ sub Write_DBD_Informix_Defaults
 	@ISA = qw(Exporter);
 	@EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
 
-	$VERSION = "2007.0226";
+	$VERSION = "2007.0826";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1159,7 +1188,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)).
+(IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to.

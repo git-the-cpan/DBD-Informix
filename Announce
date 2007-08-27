@@ -1,8 +1,8 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, dbd.informix@gmail.com
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25) released
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26) released
 
-IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
 the driver code that enables Perl 5.6.1 or later to access Informix
@@ -21,39 +21,17 @@ http://dbi.perl.org/
 ** The ItWorks script does not send email to anybody; you have to do
 ** that yourself.
 
-New in release 2007.0226:
-* Support for CSDK 3.00.
-* Minor bug fixes.
-* No exploitation of new features in DBI.
-
-New in release 2005.02:
-* The changes here are all related to improved diagnostics during the
-  build process.  For example, esqlcc works in debug mode once more.
-* Fix bug with INT8 handling on 64-bit platforms.
-* Identify dubious Solaris linker flags (-z ignore is the trouble maker;
-  -z lazyload is the memorable one; -z combreloc usually occurs with
-  them and might or might not be damaging).
-* Identify dubious AIX compiler flags (-qlanglvl=ansi).
-* Add DBD_INFORMIX_NO_RESOURCE environment variable for under-privileged
-  Informix users (those with CONNECT privilege only).
-* Add DBD_INFORMIX_NO_DBCREATE environment variable for a different
-  class of under-privileged users (those not permitted to create
-  databases because of ONCONFIG parameter DBCREATE_PERMISSION).
-* These mean that if there is a database to which you can connect, you
-  can test DBD::Informix and have good (though not perfect) confidence
-  that all is OK.
-
-New in release 2005.01:
-* Various minor bug fixes made as reported - see ChangeLog.
-* Release required to handle Informix ClientSDK 2.90, which includes
-  ESQL/C 2.90.  The previous release (CSDK 2.81, included ESQL/C 9.51),
-  and the older DBD::Informix compilation based decisions off the ESQL/C
-  version, rejecting 2.90 as obsolete and unusable.
-* Note that a number of obsolete versions of ESQL/C are no longer supported.
-
-Known problem:
-* t/t91udts.t sometimes warns about an uninitialized variable on
-  subroutine entry.  It seems to be harmless - but it is very irksome.
+New in release 2007.0826:
+* Fixed support for CSDK 3.00.
+* Fixed support for ESQL/C 7.24 (and 5.20).
+* Detecting mismatched 32-bit Perl vs 64-bit ESQL/C or vice versa.
+* Fixed memory leak associated with LVARCHAR.
+* Fix problem with DBD_INFORMIX_DEBUG_ESQLCC=yes.
+* Fetch UDTs into SQLLVARCHAR instead of CHAR(256).
+* RT#14954 - only do smart blob test if smart blob space exists.
+* RT#14095: CLONE function added to driver 2005-08-12.
+* RT#13708: (LVARCHAR on 32-bit systems) fixed if you use CSDK (ESQL/C)
+  3.00.xC2 or later.  IBM CQ bug idsdb00139040 needs to be resolved.
 
 Support email address:
 * This release is supported by Jonathan Leffler <dbd.informix@gmail.com>.
@@ -66,4 +44,4 @@ As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce,v 2007.1 2007/02/26 00:04:02 jleffler Exp $
+@(#)$Id: Announce,v 2007.4 2007/08/26 04:52:44 jleffler Exp $

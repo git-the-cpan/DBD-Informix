@@ -1,20 +1,20 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t91udts.t,v 2007.1 2007/02/25 23:31:05 jleffler Exp $
+#   @(#)$Id: t91udts.t,v 2007.6 2007/08/26 06:26:40 jleffler Exp $
 #
 #   Test basic handling of user-defined data types
 #
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
-#   Copyright 2004-05 Jonathan Leffler
+#   Copyright 2004-07 Jonathan Leffler
 
 use strict;
 use DBD::Informix::TestHarness;
 
 if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
 {
-	stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
-	exit 0;
+    stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
+    exit 0;
 }
 
 my ($dbh) = &test_for_ius;
@@ -23,16 +23,15 @@ $dbh->{ChopBlanks} = 1;
 
 &stmt_note("1..16\n");
 
-my ($noslobs) = $ENV{DBD_INFORMIX_NO_SBSPACE};
+my ($sbspace) = smart_blob_space_name($dbh);
 
-my ($sbspace) = $ENV{DBD_INFORMIX_SBSPACE};
-$sbspace = "sbspace" unless $sbspace;
+my ($noslobs) = ($sbspace eq "") ? 1 : 0;
 
 sub do_stmt
 {
-	my($dbh,$stmt) = @_;
-	print "# $stmt\n";
-	$dbh->do($stmt) or stmt_err;
+    my($dbh,$stmt) = @_;
+    print "# $stmt\n";
+    $dbh->do($stmt) or stmt_err;
 }
 
 my($table)     = "dbd_ix_udts";
@@ -41,6 +40,7 @@ my($dist_int8) = "dbd_ix_distofi8";
 my($dist_bool) = "dbd_ix_distofbool";
 my($dist_lvch) = "dbd_ix_distoflvc";
 my($dist_nrow) = "dbd_ix_distofnamed";
+my($filename)  = "dbd_ix_udts.pl";
 
 # Drop any pre-existing versions of any of these test types
 $dbh->{PrintError} = 0;
@@ -91,6 +91,7 @@ stmt_test $dbh,
 
 # Check that fetch truncates udts longer than 256 (rather than blowing up)
 my ($inserted) = 1;
+{
 $slobval = ($noslobs) ? "" : ", filetoclob(?, 'client')";
 my ($ins) = qq%
      insert into $table values
@@ -104,10 +105,10 @@ stmt_ok;
 
 # Check inserting nulls...
 my(@vals) = (2, undef, undef, undef, undef, undef, undef,
-		        undef, undef, undef, undef, undef, undef);
+                undef, undef, undef, undef, undef, undef);
 if (!$noslobs)
 {
-	push @vals, undef;
+    push @vals, undef;
 }
 $sth->execute(@vals) or stmt_fail;
 
@@ -124,26 +125,28 @@ stmt_fail unless $inserted == 2;
 # This is lazy - there has to be a better way!
 if ($noslobs)
 {
-	$sth->execute
-		(3, 3, "f", "$longstr", "row(3, 'three')", "row(3)", "set{3, 30, 300}",
-		 "list{row(3, 'three'), row(30, 'thirty')}",
-		 "multiset{row(3), row(30)}", "3", "f", "$longstr", "row(3)")
-		or die;
+    $sth->execute
+        (3, 3, "f", "$longstr", "row(3, 'three')", "row(3)", "set{3, 30, 300}",
+         "list{row(3, 'three'), row(30, 'thirty')}",
+         "multiset{row(3), row(30)}", "3", "f", "$longstr", "row(3)")
+        or die;
 }
 else
 {
-	$sth->execute
-		(3, 3, "f", "$longstr", "row(3, 'three')", "row(3)", "set{3, 30, 300}",
-		 "list{row(3, 'three'), row(30, 'thirty')}",
-		 "multiset{row(3), row(30)}", "3", "f", "$longstr", "row(3)", "$0")
-		or die;
+    $sth->execute
+        (3, 3, "f", "$longstr", "row(3, 'three')", "row(3)", "set{3, 30, 300}",
+         "list{row(3, 'three'), row(30, 'thirty')}",
+         "multiset{row(3), row(30)}", "3", "f", "$longstr", "row(3)", "$0")
+        or die;
 }
 $inserted += $sth->rows;
 $sth->finish;
-stmt_note "# inserted $inserted \n";
+stmt_note "# inserted $inserted\n";
+stmt_note "# statement name $sth->{CursorName}\n";
+}
 
 # Record basename of extracted file names...
-my ($filename) = "dbd_ix_udts.pl";
+{
 my ($fetched) = 0;
 $slobval = ($noslobs) ? "" : ", lotofile(cl, '$filename', 'client')";
 my ($sel) = qq%
@@ -153,23 +156,26 @@ my ($sel) = qq%
      %;
 $sel =~ s/\s+/ /gm;
 stmt_note "# PREPARE: $sel\n";
-$sth = $dbh->prepare($sel)
+my ($sth) = $dbh->prepare($sel)
     or stmt_fail;
+stmt_note "# statement name $sth->{CursorName}\n";
 $sth->execute
-	or stmt_fail;
+    or stmt_fail;
 stmt_ok;
 
 my ($results) = $sth->fetchall_arrayref;
 my ($row);
 foreach $row (@$results) {
     $fetched++;
-	grep { $_ = "." if !defined $_; } @$row;
+    grep { $_ = "." if !defined $_; } @$row;
     print "# ROW-$fetched: @$row\n";
 }
 $sth->finish;
 # Need to verify fetched data
-stmt_note "# fetched $fetched \n";
+stmt_note "# fetched $fetched\n";
+}
 
+{
 $slobval = ($noslobs) ? "" : ", cl = filetoclob(?, 'client')"; 
 my ($upd) = qq%
      update $table set i8 = ?, b = ?, lvc = ?, unnamed = ?, named = ?,
@@ -182,7 +188,7 @@ my ($upd) = qq%
      %;
 $upd =~ s/\s+/ /gm;
 stmt_note "# PREPARE: $upd\n";
-$sth = $dbh->prepare($upd)
+my ($sth) = $dbh->prepare($upd)
     or stmt_fail;
 stmt_ok;
 
@@ -190,30 +196,32 @@ stmt_note "# EXECUTE\n";
 # This is lazy - there has to be a better way!
 if ($noslobs)
 {
-	$sth->execute
-		 (10, "f", "$longstr", "row(10, 'ten')", "row(10)",
-		  "set{10000, 100000, 1000000}", "list{row(10, 'ten')}",
-		  "multiset{row(10)}", "10", "f", "$longstr", "row(10)",
-		  1, 1, "t", "$longstr", "row(1)", "set{1, 10, 100}",
-		  "list{row(1, 'one')}", "multiset{row(1)}", "1", "t",
-		  "$longstr", "row(1)")
-		or stmt_fail;
+    $sth->execute
+         (10, "f", "$longstr", "row(10, 'ten')", "row(10)",
+          "set{10000, 100000, 1000000}", "list{row(10, 'ten')}",
+          "multiset{row(10)}", "10", "f", "$longstr", "row(10)",
+          1, 1, "t", "$longstr", "row(1)", "set{1, 10, 100}",
+          "list{row(1, 'one')}", "multiset{row(1)}", "1", "t",
+          "$longstr", "row(1)")
+        or stmt_fail;
 }
 else
 {
-	$sth->execute
-		 (10, "f", "$longstr", "row(10, 'ten')", "row(10)",
-		  "set{10000, 100000, 1000000}", "list{row(10, 'ten')}",
-		  "multiset{row(10)}", "10", "f", "$longstr", "row(10)", "$0",
-		  1, 1, "t", "$longstr", "row(1)", "set{1, 10, 100}",
-		  "list{row(1, 'one')}", "multiset{row(1)}", "1", "t",
-		  "$longstr", "row(1)")
-		or stmt_fail;
+    $sth->execute
+         (10, "f", "$longstr", "row(10, 'ten')", "row(10)",
+          "set{10000, 100000, 1000000}", "list{row(10, 'ten')}",
+          "multiset{row(10)}", "10", "f", "$longstr", "row(10)", "$0",
+          1, 1, "t", "$longstr", "row(1)", "set{1, 10, 100}",
+          "list{row(1, 'one')}", "multiset{row(1)}", "1", "t",
+          "$longstr", "row(1)")
+        or stmt_fail;
 }
 my ($nrows) = $sth->rows;
-stmt_note "# updated $nrows \n";
+stmt_note "# updated $nrows\n";
 stmt_ok;
+}
 
+{
 my ($del) = qq%
      delete from $table where s8 = ? and i8 = ? and b = ? and lvc = ?
          and unnamed = ? and named = ? and sint = ? and lunnamed = ?
@@ -222,7 +230,7 @@ my ($del) = qq%
      %;
 $del =~ s/\s+/ /gm;
 stmt_note "# PREPARE: $del\n";
-$sth = $dbh->prepare($del)
+my ($sth) = $dbh->prepare($del)
     or stmt_fail;
 stmt_ok;
 
@@ -233,8 +241,9 @@ $sth->execute
      "multiset{row(3), row(30)}", "3", "f", "$longstr", "row(3)")
     or stmt_fail;
 stmt_ok;
-$nrows = $sth->rows;
+my ($nrows) = $sth->rows;
 stmt_note "# deleted $nrows\n";
+}
 
 # Drop new versions of any of these test types
 $dbh->do("drop table $table");

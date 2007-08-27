@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t09exec.t,v 2003.5 2003/10/17 19:52:56 jleffler Exp $
+#   @(#)$Id: t09date.t,v 2003.6 2007/07/10 09:00:06 jleffler Exp $
 #
 #   Test for DATE data in SELECT
 #
@@ -38,39 +38,6 @@ $sth1->execute or stmt_fail "Cannot execute $sql1";
 	{
 		$csdt3 => { 'c1' => $csdt1, 'c2' => $csdt2, 'c3' => $csdt3 },
 	});
-
-#T# # Testing operation of validate_unordered_unique_data itself
-#T# # TEST ERROR: Key c3 does not appear in values.
-#T# $sth1->execute or stmt_fail "Cannot execute $sql1";
-#T# eval {
-#T# &validate_unordered_unique_data($sth1, 'c3',
-#T# 	{
-#T# 		'1899-12-31' => { 'c1' => '2002-12-31', 'c2' => '1970-01-01', 'c4' => '1899-12-31' },
-#T# 	});
-#T# };
-#T# 
-#T# # Database contains unexpected value for c2
-#T# $sth1->execute or stmt_fail "Cannot execute $sql1";
-#T# &validate_unordered_unique_data($sth1, 'c3',
-#T# 	{
-#T# 		'1899-12-31' => { 'c1' => '2002-12-31', 'c2' => '9107-10-20', 'c3' => '1899-12-31' },
-#T# 	});
-#T# 
-#T# # TEST ERROR: Mismatched values for c3
-#T# $sth1->execute or stmt_fail "Cannot execute $sql1";
-#T# eval {
-#T# &validate_unordered_unique_data($sth1, 'c3',
-#T# 	{
-#T# 		'8199-12-13' => { 'c1' => '2002-12-31', 'c2' => '1970-01-01', 'c3' => '1899-12-31' },
-#T# 	});
-#T# };
-#T# 
-#T# # Unmatched value for c3
-#T# $sth1->execute or stmt_fail "Cannot execute $sql1";
-#T# &validate_unordered_unique_data($sth1, 'c3',
-#T# 	{
-#T# 		'8199-12-13' => { 'c1' => '2002-12-31', 'c2' => '1970-01-01', 'c3' => '8199-12-13' },
-#T# 	});
 
 my @vals = (55, 66, 0);
 $uph->execute(@vals);

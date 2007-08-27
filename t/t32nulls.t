@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t32nulls.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t32nulls.t,v 2003.3 2007/08/27 02:53:46 jleffler Exp $
 #
 #   Test Null Handling for DBD::Informix
 #
@@ -13,6 +13,12 @@ use strict;
 
 # Test install...
 my $dbh = &connect_to_test_database();
+
+if ($dbh->{ix_ServerVersion} < 730)
+{
+    stmt_note "1..0 # Skip: test fails on servers earlier than 7.30\n";
+    exit 0;
+}
 
 &stmt_note("1..7\n");
 &stmt_ok();
@@ -46,7 +52,8 @@ stmt_fail unless $sel = $dbh->prepare($select);
 stmt_fail unless $sel->execute();
 stmt_fail unless (@row = $sel->fetchrow);
 print "# TOTAL: ", $row[0], "\n";
-stmt_fail unless $row[0] == 2;
+stmt_fail "# Incorrect row count (got $row[0], expected 2)\n"
+          unless $row[0] == 2;
 stmt_fail unless $sel->finish;
 undef $sel;
 stmt_ok;
@@ -56,7 +63,8 @@ stmt_fail unless $sel = $dbh->prepare($select);
 stmt_fail unless $sel->execute();
 stmt_fail unless (@row = $sel->fetchrow);
 print "# NULLS: ", $row[0], "\n";
-stmt_fail unless $row[0] == 1;
+stmt_fail "# Incorrect row count (got $row[0], expected 1)\n"
+          unless $row[0] == 1;
 stmt_fail unless $sel->finish;
 undef $sel;
 stmt_ok;

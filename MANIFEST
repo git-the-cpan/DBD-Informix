@@ -1,8 +1,11 @@
-# @(#)$Id: MANIFEST,v 2007.3 2007/02/25 23:50:03 jleffler Exp $
-# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
+# @(#)$Id: MANIFEST,v 2007.10 2007/08/26 06:49:02 jleffler Exp $
+# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
 Announce
 BugReport
 ChangeLog
+DBD-Informix.jdc
+DBD-Informix.msd
+DBD-Informix.nmd
 Informix.h
 Informix.pm
 Informix.xs
@@ -27,6 +30,8 @@ Notes/web.servers
 README
 Release.Checklist
 TODO
+bug-lvcnn.ec
+bug-lvcnn.pl
 dbdattr.ec
 dbdimp.ec
 dbdimp.h
@@ -83,8 +88,10 @@ lib/DBD/Informix/TestHarness.pm
 lib/DBD/Informix/TypeInfo.pm
 link.c
 link.h
+mknmd.sh
 odbctype.c
 odbctype.h
+prodverstamp.sh
 rmautoinst.pl
 sqltoken.c
 sqltoken.h
@@ -97,7 +104,7 @@ t/t02ixtype.t
 t/t05dbase.t
 t/t07dblist.t
 t/t08fork.t
-t/t09exec.t
+t/t09date.t
 t/t10sqlca.t
 t/t12bindval.t
 t/t13bindref.t
@@ -131,6 +138,7 @@ t/t56tabinfo.t
 t/t57tables.t
 t/t58typeinfoall.t
 t/t60unlog.t
+t/t61varchar.t
 t/t65updcur.t
 t/t66insert.t
 t/t72blob.t
@@ -138,6 +146,8 @@ t/t73blobupd.t
 t/t74blob.t
 t/t75blob.t
 t/t76blob.t
+t/t77varchar.t
+t/t78varchar.t
 t/t90ius.t
 t/t91udts.t
 t/t92rows.t

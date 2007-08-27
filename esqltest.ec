@@ -1,14 +1,14 @@
 /*
- * @(#)$Id: esqltest.ec,v 2005.1 2005/07/29 19:59:33 jleffler Exp $
+ * @(#)$Id: esqltest.ec,v 2007.3 2007/06/09 23:19:15 jleffler Exp $
  *
- * IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
+ * IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
  *
  * Test Informix-ESQL/C environment
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
  * Copyright 2002    IBM
- * Copyright 2004-05 Jonathan Leffler
+ * Copyright 2004-07 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -18,12 +18,13 @@
 ** Expects -DESQLC_VERSION=290 or similar on command line.
 **
 ** Note that CSDK 2.90 includes ESQL/C 2.90, but ESQL/C 2.81 includes
-** ESQL/C 9.53.  (Assume 2.90 - 2.99 are capable of using CONNECT;
+** ESQL/C 9.53.  (Assume 2.90 - 3.99 are capable of using CONNECT;
 ** sometime, this will break, again!)
 */
 
 /*TABSTOP=4*/
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,16 +41,16 @@
 #define EXIT_SUCCESS 0
 #endif
 
-#if ESQLC_VERSION >= 600 || (ESQLC_VERSION >= 290 && ESQLC_VERSION < 300)
+#if ESQLC_EFFVERSION >= 600
 #define USE_CONNECT 1
 #else
 #define USE_CONNECT 0
-#endif /* ESQLC_VERSION */
+#endif /* ESQLC_EFFVERSION */
 
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 2005.1 2005/07/29 19:59:33 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 2007.3 2007/06/09 23:19:15 jleffler Exp $";
 #endif
 
 /*
@@ -135,16 +136,14 @@ static void test_permissions(char *dbname)
 	EXEC SQL ROLLBACK WORK;
 }
 
-void dbd_ix_debug(int level, char *fmt, const char *arg)
+void dbd_ix_debug(int level, const char *fmt, ...)
 {
-	putchar('\t');
-	printf(fmt, arg);
-}
+    va_list args;
 
-void dbd_ix_debug_l(int level, char *fmt, long arg)
-{
 	putchar('\t');
-	printf(fmt, arg);
+    va_start(args, fmt);
+	vprintf(fmt, args);
+    va_end(args);
 }
 
 int main(void)

@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: jtypes.c,v $
-@(#)Version:        $Revision: 2007.1 $
-@(#)Last changed:   $Date: 2007/02/25 20:24:04 $
+@(#)Version:        $Revision: 2007.2 $
+@(#)Last changed:   $Date: 2007/08/26 15:50:47 $
 @(#)Purpose:        Substitute for RTYPALIGN and RTYPMSIZE
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1995,1997-98,2001,2003,2005,2007
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
 */
 
 /*TABSTOP=4*/
@@ -24,7 +24,7 @@
 #include "esqlutil.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: jtypes.c,v 2007.1 2007/02/25 20:24:04 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: jtypes.c,v 2007.2 2007/08/26 15:50:47 jleffler Exp $";
 #endif
 
 /* Return memory size for type */
@@ -116,7 +116,7 @@ int             jtypmsize(int type, int len)
 		break;
 
 	default:
-#ifdef DO_NOT_USE_STDERR_H
+#ifndef DO_NOT_USE_STDERR_H
 		err_remark("jtypsize: unknown type number %d (assume zero size)\n", type);
 #endif	/* DO_NOT_USE_STDERR_H */
 		size = 0;
@@ -260,7 +260,7 @@ int             jtypalign(int offset, int type)
 		break;
 
 	default:
-#ifdef DO_NOT_USE_STDERR_H
+#ifndef DO_NOT_USE_STDERR_H
 		err_remark("jtypalign: unknown type number %d (assume 'double' alignment)\n", type);
 #endif	/* DO_NOT_USE_STDERR_H */
 		align = ((char *)&d.d2) - &d.dc;

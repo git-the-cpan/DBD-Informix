@@ -1,7 +1,33 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26) (aka DBD::Informix)
+
+2007.0826 Release
+-----------------
+2007-08-26: Upload to PAUSE and CPAN.
+2007-08-26: Fix compilation with ESQL/C 5.20 and 7.24.  Modify t/t32nulls.t
+            and t/t61varchar.t to skip when test won't pass on server.
+2007-08-25: Declare RT#13708 (and IBM CQ idbsdb00139040) resolved by CSDK
+            3.00.xC2. This is another LVARCHAR problem, related
+            to LVARCHAR NOT NULL on non-temp tables with (mainly) 32-bit
+            CSDK.  See bug-lvcnn.ec for the pure ESQL/C reproduction;
+            bug-lvcnn.pl for the Perl version.
+2007-08-25: Finally work out how to deal with CLVCHARPTRTYPE properly.
+2007-08-24: Fix problem with DBD_INFORMIX_DEBUG_ESQLCC=yes found by
+            Piotr Poloczek <poloczekp@interia.pl>.
+2007-06-10: Fetch UDTs into SQLLVARCHAR instead of CHAR(256).
+2007-06-09: Makefile.PL now detects 32-bit Perl vs 64-bit ESQL/C, etc.
+2007-06-09: RT#14954: only test smart blobs if smart blob space exists.
+2007-06-09: RT#14095: CLONE function added to driver 2005-08-12.
+2007-06-09: Rework dbd_ix_debug() and eliminate variants.
+2007-06-03: Fix leak from LVARCHAR handling - pointed to by valgrind.
+2007-06-02: Remove #if 0 code from dbdimp.ec.
+
+2007.0226 Release
+-----------------
+2007-02-26: Upload to PAUSE and CPAN.
+2007-02-26: Fix Announce file problems.
 
 2007.0225 Release
----------------
+-----------------
 2007-02-25: Upload to PAUSE and CPAN.
 2007-02-25: Miscellaneous cleanups for the last 2 years or so.
 2007-02-25: Fix formatting of ISAM error for AMD x86_64 after report from
@@ -1125,4 +1151,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2007.2 2007/02/25 21:12:01 jleffler Exp $
+@(#)$Id: ChangeLog,v 2007.8 2007/08/27 03:00:17 jleffler Exp $

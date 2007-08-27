@@ -3,7 +3,8 @@
 @(#)Author:          J Leffler
 @(#)Copyright:       1996-98 Jonathan Leffler
 @(#)Copyright:       2002    IBM
-@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
+@(#)Copyright:       2004-07 Jonathan Leffler
+@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
 */
 
 /*TABSTOP=4*/
@@ -13,7 +14,7 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 2004.1 2004/11/25 01:13:53 jleffler Exp $";
+static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 2007.1 2007/06/09 18:15:32 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -40,17 +41,16 @@ typedef enum Boolean Boolean;
 */
 #define SQLTYPENAME_BUFSIZ sizeof("DISTINCT INTERVAL MINUTE(2) TO FRACTION(5)")
 
-extern void dbd_ix_debug(int n, char *fmt, const char *arg);
-extern void dbd_ix_debug_l(int n, char *fmt, long arg);
+extern void dbd_ix_debug(int n, const char *fmt, ...);
 extern void dbd_ix_setconnection(char *conn);
 
-#if ESQLC_VERSION >= 600
+#if ESQLC_EFFVERSION >= 600
 extern void dbd_ix_disconnect(char *connection);
 extern Boolean dbd_ix_connect(char *conn, char *dbase, char *user, char *pass);
 #else
 extern void dbd_ix_closedatabase(char *dbase);
 extern Boolean dbd_ix_opendatabase(char *dbase);
-#endif	/* ESQLC_VERSION >= 600 */
+#endif	/* ESQLC_EFFVERSION >= 600 */
 
 /* Informix to ODBC mapping for type, precision and scale */
 extern int map_type_ifmx_to_odbc(int coltype, int collen);

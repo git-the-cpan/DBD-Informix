@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: ifmxdec.h,v $
-@(#)Version:        $Revision: 1.13 $
-@(#)Last changed:   $Date: 2006/01/30 21:18:21 $
+@(#)Version:        $Revision: 1.14 $
+@(#)Last changed:   $Date: 2007/08/10 17:25:22 $
 @(#)Purpose:        Internal declarations for DECIMAL functions
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 2003-06
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
+@(#)Copyright:      (C) JLSS 2003-07
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
 */
 
 /*TABSTOP=4*/
@@ -15,10 +15,11 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char ifmxdec_h[] = "@(#)$Id: ifmxdec.h,v 1.13 2006/01/30 21:18:21 jleffler Exp $";
+static const char ifmxdec_h[] = "@(#)$Id: ifmxdec.h,v 1.14 2007/08/10 17:25:22 jleffler Exp $";
 #endif	/* lint */
 #endif	/* MAIN_PROGRAM */
 
+#include <stddef.h> /* size_t */
 #include "decimal.h"
 #include "esqltype.h"
 
@@ -45,7 +46,7 @@ extern const ifx_dec_t dec_pi;
 extern int decload(ifx_dec_t *np, int pos, int expon, char *dgts, int ndgts);
 
 /* lddecimal() - used in C-ISAM */
-extern int lddecimal(char *cp, int len, ifx_dec_t *np);
+extern int lddecimal(const char *cp, int len, ifx_dec_t *np);
 /* stdecimal() - used in C-ISAM */
 extern void stdecimal(const ifx_dec_t *np, char *cp, int len);
 

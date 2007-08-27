@@ -1,6 +1,6 @@
 #   @(#)$Id: Informix.pm,v 2005.2 2005/08/12 23:33:40 jleffler Exp $
 #
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
@@ -47,7 +47,7 @@
 				) ] );
 	Exporter::export_ok_tags('ix_types');
 
-	$VERSION          = "2007.0226";
+	$VERSION          = "2007.0826";
 
 	my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
 	my $Revision         = '$Id: Informix.pm,v 2005.2 2005/08/12 23:33:40 jleffler Exp $';
@@ -297,7 +297,7 @@ DBD::Informix - IBM Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25).
+This document describes IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.

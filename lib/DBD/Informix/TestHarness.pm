@@ -1,11 +1,13 @@
-#   @(#)$Id: TestHarness.pm,v 2005.4 2005/08/12 18:33:08 jleffler Exp $
+#!/usr/bin/perl -w
 #
-#   Pure Perl Test Harness for IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25)
+#   @(#)$Id: TestHarness.pm,v 2007.4 2007/08/27 02:55:11 jleffler Exp $
+#
+#   Pure Perl Test Harness for IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
 #
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
-#   Copyright 2004-05 Jonathan Leffler
+#   Copyright 2004-07 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -29,6 +31,7 @@
 		primary_connection
 		print_dbinfo
 		print_sqlca
+        smart_blob_space_name
 		secondary_connection
 		select_zero_data
 		set_verbosity
@@ -55,8 +58,8 @@
 	require_version DBI 1.38;
 
 	my
-	$VERSION = "2007.0226";
-	# our $VERSION = "2007.0226"; # But 'our' not acceptable to Perl 5.005_03!
+	$VERSION = "2007.0826";
+	# our $VERSION = "2007.0826"; # But 'our' not acceptable to Perl 5.005_03!
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
@@ -260,9 +263,10 @@
 
 	my $test_counter = 0;
 	my $fail_counter = 0;
+
 	sub stmt_err
 	{
-		# NB: error messages $DBI::errstr no longer end with a newline.
+		# NB: error message in $DBI::errstr no longer ends with a newline.
 		my ($str) = @_;
 		my ($err, $state);
 		$str = "Error Message" unless ($str);
@@ -320,7 +324,7 @@
 		}
 		else
 		{
-			&stmt_note("# *** There appear to be some problems! ***\n");
+			&stmt_note("# !!!!!! There appear to be problems !!!!!!\n");
 			exit(1);
 		}
 	}
@@ -373,7 +377,7 @@
 	}
 
 	# Check that both the ESQL/C and the database server are IUS-aware
-	# Handles ESQL/C 2.90 .. 2.99 - which are IUS-aware.
+	# Handles ESQL/C 2.90 .. 3.99 - which are IUS-aware.
 	# Return database handle if all is OK.
 	sub test_for_ius
 	{
@@ -386,7 +390,7 @@
 		print "#     Product:               $drh->{ix_ProductName}\n";
 		print "#     Product Version:       $drh->{ix_ProductVersion}\n";
 		my ($ev) = $drh->{ix_ProductVersion};
-		if ($ev < 900 && !($ev >= 290 && $ev < 300))
+		if ($ev < 900 && !($ev >= 290 && $ev < 400))
 		{
 			&stmt_note("1..0 # Skip: IUS data types are not supported by $drh->{ix_ProductName}\n");
 			exit(0);
@@ -570,6 +574,57 @@
 		$verbose = $_[0];
 	}
 
+    sub smart_blob_space_name
+    {
+        my ($dbh) = @_;
+        my ($sbspace) = "";
+
+        if ($dbh->{ix_ServerVersion} < 900)
+        {
+            stmt_note "# No Smart BLOB testing because server version too old\n";
+        }
+        elsif ($ENV{DBD_INFORMIX_NO_SBSPACE})
+        {
+            stmt_note "# No Smart BLOB testing because \$DBD_INFORMIX_NO_SBSPACE set.\n";
+        }
+        else
+        {
+            # RT#14954: Only do smart blob testing if DBD_INFORMIX_SBSPACE is set.
+            # Better - check whether there is an sbspace of the given name.
+            # sysmaster:sysdbspaces has (relevant) columns name and is_sbspace.
+            $sbspace = $ENV{DBD_INFORMIX_SBSPACE};
+            $sbspace = "sbspace" unless $sbspace;
+            my $sql = "select name from sysmaster:sysdbspaces where name = ? and is_sbspace = 1";
+            my $ore = $dbh->{RaiseError};
+            my $ope = $dbh->{PrintError};
+            $dbh->{RaiseError} = 0;
+            $dbh->{PrintError} = 1;
+            my $sth = $dbh->prepare($sql);
+            $dbh->{RaiseError} = $ore;
+            $dbh->{PrintError} = $ope;
+            return "" if (!$sth);
+            $sth->execute($sbspace);
+            my @arr;
+            my $ok = 0;
+            while (@arr = $sth->fetchrow_array)
+            {
+                $ok = 1;
+                last;
+            }
+            if ($ok)
+            {
+                stmt_note "# Smart BLOB testing using smart blob space '$sbspace'\n";
+            }
+            else
+            {
+                stmt_note "# No Smart BLOB testing - can't find smart blob space '$sbspace'\n";
+                stmt_note "# Check value of \$DBD_INFORMIX_SBSPACE - or set it\n";
+                $sbspace = "";
+            }
+        }
+        return $sbspace;
+    }
+
 	# Validate that the data returned from the database is correct.
 	# Assume each row in result set is supposed to appear exactly once.
 	# Extra results are erroneous; missing results are erroneous.
@@ -736,7 +791,7 @@ DBD::Informix::TestHarness - Test Harness for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes DBD::Informix::TestHarness distributed with
-IBM Informix Database Driver for Perl DBI Version 2007.0226 (2007-02-25).
+IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26).
 This is pure Perl code which exploits DBI and DBD::Informix to make it
 easier to write tests.
 Most notably, it provides a simple mechanism to connect to the user's
@@ -1118,6 +1173,17 @@ DBD_INFORMIX_DATABASE3, DBD_INFORMIX_USERNAME3 and
 DBD_INFORMIX_PASSWORD3.
 If the database is not determined, it uses the primary_connection
 method above to specify the values.
+
+=head2 Using smart_blob_space_name
+
+The C<smart_blob_space_name> function is used to determine the name of a
+smart blob space that the program should use.
+It takes a database handle, and uses the environment variables
+DBD_INFORMIX_NO_SBSPACE and DBD_INFORMIX_SBSPACE to determine whether
+smart blobs should be tested.
+
+The return value is either an empty string (do not test smart blobs) or
+the name of a valid smart blob space.
 
 =head2 Using validate_unordered_unique_data
 

@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlc_v6.ec,v 100.6 2002/12/06 22:18:24 jleffler Exp $
+ * @(#)$Id: esqlc_v6.ec,v 2007.1 2007/06/09 18:15:08 jleffler Exp $
  *
  * IBM Informix Database Driver for Perl (DBD::Informix)
  * Connection Management for ESQL/C Version 6.0x and later
@@ -7,6 +7,7 @@
  * Copyright 1996-98 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
  * Copyright 2002    IBM
+ * Copyright 2007    Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -19,7 +20,7 @@
 #include "esqlperl.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlc_v6.ec,v 100.6 2002/12/06 22:18:24 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqlc_v6.ec,v 2007.1 2007/06/09 18:15:08 jleffler Exp $";
 #endif
 
 /* ================================================================= */
@@ -183,7 +184,7 @@ void dbd_ix_disconnect(char *connection)
 		}
 		if (sqlca.sqlcode < 0)
 		{
-			dbd_ix_debug_l(1, "DISCONNECT ** FAILED AGAIN (%ld) **\n",
+			dbd_ix_debug(1, "DISCONNECT ** FAILED AGAIN (%ld) **\n",
 						   sqlca.sqlcode);
 			dbd_ix_debug(1, "Try CLOSE DATABASE <<%s>>\n", connection);
 			EXEC SQL CLOSE DATABASE;
@@ -194,7 +195,7 @@ void dbd_ix_disconnect(char *connection)
 			}
 		}
 	}
-	dbd_ix_debug_l(1, "DISCONNECT -- STATUS %ld\n", sqlca.sqlcode);
+	dbd_ix_debug(1, "DISCONNECT -- STATUS %ld\n", sqlca.sqlcode);
 }
 
 /* Ensure that the correct connection is current -- a no-op in version 5.0x */

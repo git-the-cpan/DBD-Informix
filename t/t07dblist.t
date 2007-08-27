@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t07dblist.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t07dblist.t,v 2007.1 2007/06/04 05:20:14 jleffler Exp $
 #
 #   List of available databases:
 #   @ary = $DBI->data_sources('Informix');
@@ -9,6 +9,7 @@
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
+#   Copyright 2007    Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
@@ -23,7 +24,7 @@ if (!@ary)
 		# -951	User username is not known on the database server.
 		# -956	Client client-name or user is not trusted by the database server.
 		# There could be other errors which should cause test to be skipped.
-		print "1..0 # Skip: Test: DBI->data_sources('Informix'): skipped\n";
+		print "1..0 # Skip: DBI->data_sources('Informix') because of username/password\n";
 	}
 	else
 	{
@@ -38,6 +39,7 @@ else
 	my $y = $x + 1;
 	print "1..$y\n";
 	# Note that there is not very much we can do to validate database list.
+    # Remember SE: not even sysmaster is reliable there.
 	&stmt_note("# Test: DBI->data_sources('Informix'):\n");
 	&stmt_fail("# *** No databases to list? ***\n") if ($#ary < 0);
 	my $srv = 0;
