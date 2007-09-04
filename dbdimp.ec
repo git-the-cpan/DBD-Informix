@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec,v 2007.13 2007/08/27 02:58:03 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2007.15 2007/09/03 23:39:00 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26) $
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
@@ -23,8 +23,9 @@
 /*TABSTOP=4*/
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: dbdimp.ec,v 2007.13 2007/08/27 02:58:03 jleffler Exp $";
-#endif
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2007.15 2007/09/03 23:39:00 jleffler Exp $";
+#endif /* lint */
 
 #include <float.h>
 #include <stdio.h>
@@ -387,8 +388,56 @@ new_connection(imp_dbh_t *imp_dbh)
     connection_num++;
 }
 
-/* Get the server version number 930 => 9.30 */
-static int dbd_ix_serverversion(void)
+/* Get the server version number from DBINFO */
+static int dbd_ix_dbinfo_version(void)
+{
+    EXEC SQL BEGIN DECLARE SECTION;
+    string maj_ver[SQL_USERLEN1];
+    string min_ver[SQL_USERLEN1];
+    EXEC SQL END DECLARE SECTION;
+    int vernum = 0;
+    Sqlca local = sqlca;
+
+    /* Note DBINFO('version','major') support was added relatively recently */
+    /* Some really old servers might not support it - ignore the errors and return 0 */
+    EXEC SQL DECLARE c_dbinfo_version CURSOR FOR
+        SELECT DBINFO('version','major') AS major,
+               DBINFO('version', 'minor') AS minor
+           FROM "informix".Systables WHERE TabName = ' VERSION';
+    if (sqlca.sqlcode == 0)
+    {
+        EXEC SQL OPEN c_dbinfo_version;
+        if (sqlca.sqlcode == 0)
+        {
+            EXEC SQL FETCH c_dbinfo_version INTO :maj_ver, :min_ver;
+            if (sqlca.sqlcode == 0)
+            {
+                /* Convert "11" and "10" to "1110". */
+                if (strlen(maj_ver) > 3 || strlen(min_ver) > 3)
+                {
+                    /* We've got problems! */
+                    dbd_ix_debug(0, "Bad Informix server version information <<%s>><<%s>>\n", maj_ver, min_ver);
+                    strcpy(maj_ver, "0");
+                }
+                else
+                {
+                    strcat(maj_ver, min_ver);
+                }
+                vernum = strtol(maj_ver, (char **)0, 10);
+            }
+            EXEC SQL CLOSE c_dbinfo_version;
+        }
+        EXEC SQL FREE c_dbinfo_version;
+        /* In case we are in a MODE ANSI database */
+        EXEC SQL ROLLBACK WORK;
+    }
+    sqlca = local;
+    return vernum;
+}
+
+/* Get the server version number from systables.owner for tabname ' VERSION' */
+/* This gets confusing - IDS 11.10.xC1 identifies itself as 9.51C1 */
+static int dbd_ix_systab_version(void)
 {
     EXEC SQL BEGIN DECLARE SECTION;
     string verstr[SQL_USERLEN1];
@@ -397,14 +446,14 @@ static int dbd_ix_serverversion(void)
     Sqlca local = sqlca;
 
     /* Note DBINFO('version','major') and DBINFO('version','minor') could be used */
-    EXEC SQL DECLARE c_serverversion CURSOR FOR
+    EXEC SQL DECLARE c_systab_version CURSOR FOR
         SELECT Owner FROM "informix".Systables WHERE TabName = ' VERSION';
     if (sqlca.sqlcode == 0)
     {
-        EXEC SQL OPEN c_serverversion;
+        EXEC SQL OPEN c_systab_version;
         if (sqlca.sqlcode == 0)
         {
-            EXEC SQL FETCH c_serverversion INTO :verstr;
+            EXEC SQL FETCH c_systab_version INTO :verstr;
             if (sqlca.sqlcode == 0)
             {
                 /* Convert 7.30UC1 to 730, allowing for version 10.30, etc */
@@ -413,14 +462,23 @@ static int dbd_ix_serverversion(void)
                     memmove(dot, dot+1, strlen(verstr) - (dot - verstr) + 1);
                 vernum = strtol(verstr, (char **)0, 10);
             }
-            EXEC SQL CLOSE c_serverversion;
+            EXEC SQL CLOSE c_systab_version;
         }
-        EXEC SQL FREE c_serverversion;
+        EXEC SQL FREE c_systab_version;
         /* In case we are in a MODE ANSI database */
         EXEC SQL ROLLBACK WORK;
     }
     sqlca = local;
     return vernum;
+}
+
+/* Get the server version number 930 => 9.30 */
+static int dbd_ix_serverversion(void)
+{
+    int vernum;
+    if ((vernum = dbd_ix_dbinfo_version()) <= 0)
+        vernum = dbd_ix_systab_version();
+    return(vernum);
 }
 
 static void
@@ -2048,6 +2106,7 @@ dbd_ix_st_destroy(SV *sth, imp_sth_t *imp_sth)
 static char *
 decgen(dec_t *val, int collen)
 {
+    static char buffer[170];
     char *str;
     int dp = PRECDEC(collen);   /* Decimal places */
     int sf = PRECTOT(collen);   /* Significant digits */
@@ -2055,12 +2114,14 @@ decgen(dec_t *val, int collen)
     if (dp == 0xFF)
     {
         /* Floating point decimal */
-        str = decsci(val, sf, 0);
+        dec_sci(val, sf, 0, buffer, sizeof(buffer));
     }
     else
     {
-        str = decfix(val, dp, 0);
+        /* Fixed point decimal */
+        dec_fix(val, dp, 0, buffer, sizeof(buffer));
     }
+    str = buffer;
     while (*str == ' ')
         str++;
     /* Chop trailing blanks */

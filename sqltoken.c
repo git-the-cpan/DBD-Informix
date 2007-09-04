@@ -5,7 +5,7 @@
 @(#)Purpose:        Identify SQL token in string
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1998-2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 */
 
 /*TABSTOP=4*/

@@ -1,12 +1,12 @@
-#   @(#)$Id: Informix.pm,v 2005.2 2005/08/12 23:33:40 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2007.1 2007/09/04 02:02:39 jleffler Exp $
 #
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2001-03 IBM
-#   Copyright 2004-05 Jonathan Leffler
+#   Copyright 2004-07 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -17,177 +17,179 @@
 #-------------------------------------------------------------------------
 
 {
-	package DBD::Informix;
+    package DBD::Informix;
 
-	use strict;
-	use vars qw($VERSION $drh @ISA %EXPORT_TAGS @EXPORT @EXPORT_OK);
+    use strict;
+    use vars qw($VERSION $drh @ISA %EXPORT_TAGS @EXPORT @EXPORT_OK);
 
-	use DBI 1.38;	# Requires features from DBI 1.38 release
-	use DynaLoader;
-	use Exporter;
-	use POSIX qw(strftime);
-	@ISA = qw(DynaLoader Exporter);
+    use DBI 1.38;   # Requires features from DBI 1.38 release
+    use DynaLoader;
+    use Exporter;
+    use POSIX qw(strftime);
+    @ISA = qw(DynaLoader Exporter);
 
-	# Make the ix_types values available on request
-	# use DBD::Informix qw(:ix_types);
-	# Note this is about the only time someone should use
-	# an explicit 'use DBD::Informix' statement.
-	@EXPORT    = ();        # we export nothing by default
-	@EXPORT_OK = ();		# populated by export_ok_tags:
-	%EXPORT_TAGS = (
-	   ix_types => [ qw(
-				IX_SMALLINT IX_INTEGER IX_SERIAL IX_INT8 IX_SERIAL8
-				IX_DECIMAL IX_MONEY IX_FLOAT IX_SMALLFLOAT
-				IX_CHAR IX_VARCHAR IX_NCHAR IX_NVARCHAR IX_LVARCHAR
-				IX_BOOLEAN
-				IX_DATE IX_DATETIME IX_INTERVAL
-				IX_BYTE IX_TEXT IX_CLOB IX_BLOB
-				IX_FIXUDT IX_VARUDT
-				IX_SET IX_MULTISET IX_LIST IX_ROW IX_COLLECTION
-				) ] );
-	Exporter::export_ok_tags('ix_types');
+    # Make the ix_types values available on request
+    # use DBD::Informix qw(:ix_types);
+    # Note this is about the only time someone should use
+    # an explicit 'use DBD::Informix' statement.
+    @EXPORT    = ();        # we export nothing by default
+    @EXPORT_OK = ();        # populated by export_ok_tags:
+    %EXPORT_TAGS = (
+       ix_types => [ qw(
+                IX_SMALLINT IX_INTEGER IX_SERIAL IX_INT8 IX_SERIAL8
+                IX_DECIMAL IX_MONEY IX_FLOAT IX_SMALLFLOAT
+                IX_CHAR IX_VARCHAR IX_NCHAR IX_NVARCHAR IX_LVARCHAR
+                IX_BOOLEAN
+                IX_DATE IX_DATETIME IX_INTERVAL
+                IX_BYTE IX_TEXT IX_CLOB IX_BLOB
+                IX_FIXUDT IX_VARUDT
+                IX_SET IX_MULTISET IX_LIST IX_ROW IX_COLLECTION
+                ) ] );
+    Exporter::export_ok_tags('ix_types');
 
-	$VERSION          = "2007.0826";
+    $VERSION          = "2007.0903";
 
-	my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-	my $Revision         = '$Id: Informix.pm,v 2005.2 2005/08/12 23:33:40 jleffler Exp $';
+    my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
+    my $Revision         = '$Id: Informix.pm,v 2007.1 2007/09/04 02:02:39 jleffler Exp $';
 
-	# This is for development only - the code must be recompiled each day!
-	$VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
+    # This is for development only - the code must be recompiled each day!
+    $VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
 
-	bootstrap DBD::Informix $VERSION;
+    bootstrap DBD::Informix $VERSION;
 
-	$drh = undef;	# holds driver handle once initialized
+    $drh = undef;   # holds driver handle once initialized
 
-	sub driver
-	{
-		return $drh if (defined $drh);
+    sub driver
+    {
+        return $drh if (defined $drh);
 
-		my($class, $attr) = @_;
+        my($class, $attr) = @_;
 
-		unless ($ENV{INFORMIXDIR})
-		{
-			require DBD::Informix::Defaults;
-			foreach (&DBD::Informix::Defaults::default_INFORMIXDIR(), qw(/usr/informix /opt/informix))
-			{
-				# If Informix-Connect or Informix-ESQL/C is installed,
-				# $INFORMIXDIR must have lib and msg sub-directories.
-				if (-d "$_/lib" && -d "$_/msg")
-				{
-					$ENV{INFORMIXDIR} = $_;
-					# warn "DBD::Informix - (warning) INFORMIXDIR defaulted to $ENV{INFORMIXDIR}\n";
-					last;
-				}
-			}
-			warn "DBD::Informix - (warning) INFORMIXDIR not set!\n" unless $ENV{INFORMIXDIR};
-		}
-		unless ($ENV{INFORMIXSERVER})
-		{
-			require DBD::Informix::Defaults;
-			$ENV{INFORMIXSERVER} = &DBD::Informix::Defaults::default_INFORMIXSERVER();
-			# warn "DBD::Informix - (warning) INFORMIXSERVER defaulted to $ENV{INFORMIXSERVER}\n";
-		}
+        unless ($ENV{INFORMIXDIR})
+        {
+            require DBD::Informix::Defaults;
+            foreach (&DBD::Informix::Defaults::default_INFORMIXDIR(), qw(/usr/informix /opt/informix))
+            {
+                # If Informix-Connect or Informix-ESQL/C is installed,
+                # $INFORMIXDIR must have lib and msg sub-directories.
+                if (-d "$_/lib" && -d "$_/msg")
+                {
+                    $ENV{INFORMIXDIR} = $_;
+                    # warn "DBD::Informix - (warning) INFORMIXDIR defaulted to $ENV{INFORMIXDIR}\n";
+                    last;
+                }
+            }
+            warn "DBD::Informix - (warning) INFORMIXDIR not set!\n" unless $ENV{INFORMIXDIR};
+        }
+        unless ($ENV{INFORMIXSERVER})
+        {
+            require DBD::Informix::Defaults;
+            $ENV{INFORMIXSERVER} = &DBD::Informix::Defaults::default_INFORMIXSERVER();
+            # Warning suppressed - OnLine (ESQL/C) 5.x does not need $INFORMIXSERVER.
+            # But we do not know what we're working with yet!
+            # warn "DBD::Informix - (warning) INFORMIXSERVER defaulted to $ENV{INFORMIXSERVER}\n";
+        }
 
-		$class .= "::dr";
+        $class .= "::dr";
 
-		# Create new driver handle.
-		# The ix_ProductName, ix_ProductVersion, ix_MultipleConnections
-		# ix_CurrentConnection and ix_ActiveConnections attributes are
-		# handled by the driver's FETCH_attrib function.
-		$drh = DBI::_new_drh($class, {
-				'Name'                   => 'Informix',
-				'Version'                => $VERSION,
-				'Attribution'            => "$ATTRIBUTION",
-				%{$attr}
-			})
-			or return undef;
+        # Create new driver handle.
+        # The ix_ProductName, ix_ProductVersion, ix_MultipleConnections
+        # ix_CurrentConnection and ix_ActiveConnections attributes are
+        # handled by the driver's FETCH_attrib function.
+        $drh = DBI::_new_drh($class, {
+                'Name'                   => 'Informix',
+                'Version'                => $VERSION,
+                'Attribution'            => "$ATTRIBUTION",
+                %{$attr}
+            })
+            or return undef;
 
-		# Initialize driver data
-		DBD::Informix::dr::driver_init($drh);
+        # Initialize driver data
+        DBD::Informix::dr::driver_init($drh);
 
-		$drh;
-	}
+        $drh;
+    }
 
-	sub CLONE
-	{
-	    undef $drh;
-	}
+    sub CLONE
+    {
+        undef $drh;
+    }
 
-	1;
+    1;
 }
 
 {
-	package DBD::Informix::dr; # ====== DRIVER ======
-	use strict;
+    package DBD::Informix::dr; # ====== DRIVER ======
+    use strict;
 
-	sub connect
-	{
-		my ($drh, $dbname, $dbuser, $dbpass, $dbattr) = @_;
+    sub connect
+    {
+        my ($drh, $dbname, $dbuser, $dbpass, $dbattr) = @_;
 
-		$dbname = "" unless(defined $dbname);
-		$dbuser = "" unless(defined $dbuser);
-		$dbpass = "" unless(defined $dbpass);
-		$dbattr = undef unless(defined $dbattr && ref $dbattr eq "HASH");
+        $dbname = "" unless(defined $dbname);
+        $dbuser = "" unless(defined $dbuser);
+        $dbpass = "" unless(defined $dbpass);
+        $dbattr = undef unless(defined $dbattr && ref $dbattr eq "HASH");
 
-		if ($ENV{DBD_INFORMIX_DEBUG_CONNATTR} && defined $dbattr)
-		{
-			print STDERR "# DBD::Informix::dr::connect\n";
-			print STDERR "# debugging connection attributes (\$DBD_INFORMIX_DEBUG_CONNATTR set)\n";
-			foreach my $attr (keys %$dbattr)
-			{
-				print STDERR "# attribute: $attr => ${$dbattr}{$attr}\n";
-			}
-			print STDERR "# end of connection attributes\n";
-		}
+        if ($ENV{DBD_INFORMIX_DEBUG_CONNATTR} && defined $dbattr)
+        {
+            print STDERR "# DBD::Informix::dr::connect\n";
+            print STDERR "# debugging connection attributes (\$DBD_INFORMIX_DEBUG_CONNATTR set)\n";
+            foreach my $attr (keys %$dbattr)
+            {
+                print STDERR "# attribute: $attr => ${$dbattr}{$attr}\n";
+            }
+            print STDERR "# end of connection attributes\n";
+        }
 
-		# Create new database connection handle for driver
-		my $dbh = DBI::_new_dbh($drh, {
-				'Name'        => $dbname,
-				'ix_Username' => $dbuser,
-				'ix_Password' => $dbpass,
-			})
-			or return undef;
+        # Create new database connection handle for driver
+        my $dbh = DBI::_new_dbh($drh, {
+                'Name'        => $dbname,
+                'ix_Username' => $dbuser,
+                'ix_Password' => $dbpass,
+            })
+            or return undef;
 
-		# Initialize database connection
-		DBD::Informix::db::_login($dbh, $dbname, $dbuser, $dbpass, $dbattr)
-			or return undef;
+        # Initialize database connection
+        DBD::Informix::db::_login($dbh, $dbname, $dbuser, $dbpass, $dbattr)
+            or return undef;
 
-		$dbh;
-	}
+        $dbh;
+    }
 
-	1;
+    1;
 }
 
 {
-	package DBD::Informix::db; # ====== DATABASE ======
-	use strict;
+    package DBD::Informix::db; # ====== DATABASE ======
+    use strict;
 
-	sub get_info
-	{
-		my ($dbh, $info_type) = @_;
-		require DBD::Informix::GetInfo;
-		my $v = $DBD::Informix::GetInfo::info{int($info_type)};
-		$v = $v->($dbh) if ref $v eq 'CODE';
-		return $v;
-	}
+    sub get_info
+    {
+        my ($dbh, $info_type) = @_;
+        require DBD::Informix::GetInfo;
+        my $v = $DBD::Informix::GetInfo::info{int($info_type)};
+        $v = $v->($dbh) if ref $v eq 'CODE';
+        return $v;
+    }
 
-	sub prepare
-	{
-		my($dbh, $statement, $attr) = @_;
+    sub prepare
+    {
+        my($dbh, $statement, $attr) = @_;
 
-		my $sth = DBI::_new_sth($dbh, {
-			'Statement' => $statement,
-			})
-			or return undef;
+        my $sth = DBI::_new_sth($dbh, {
+            'Statement' => $statement,
+            })
+            or return undef;
 
-		DBD::Informix::st::_prepare($sth, $statement, $attr)
-			or return undef;
+        DBD::Informix::st::_prepare($sth, $statement, $attr)
+            or return undef;
 
-		$sth;
-	}
+        $sth;
+    }
 
-	# This type_info_all function was automatically generated by
-	# DBI::DBD::TypeInfo::write_typeinfo v1.00.
+    # This type_info_all function was automatically generated by
+    # DBI::DBD::TypeInfo::write_typeinfo v1.00.
 
     sub type_info_all
     {
@@ -196,86 +198,86 @@
         return $DBD::Informix::TypeInfo::type_info_all;
     }
 
-	# ----------------------------------------------------------------
-	# Use default implementation of do (which is DBD::_::db::do).  
-	# Although EXECUTE IMMEDIATE was introduced in Informix ESQL/C 
-	# Version 5.00, when it is used, DBD::Informix loses track
-	# of key operations such as BEGIN WORK (as pointed out by 
-	# Jason Bodnar <jcbodnar@mail.utexas.edu>).
-	# So, DBD::Informix needs to use the full prepare, execute, and
-	# finish functions under all circumstances.  Because the default 
-	# routine does that, use the default routine.
-	# ----------------------------------------------------------------
+    # ----------------------------------------------------------------
+    # Use default implementation of do (which is DBD::_::db::do).
+    # Although EXECUTE IMMEDIATE was introduced in Informix ESQL/C
+    # Version 5.00, when it is used, DBD::Informix loses track
+    # of key operations such as BEGIN WORK (as pointed out by
+    # Jason Bodnar <jcbodnar@mail.utexas.edu>).
+    # So, DBD::Informix needs to use the full prepare, execute, and
+    # finish functions under all circumstances.  Because the default
+    # routine does that, use the default routine.
+    # ----------------------------------------------------------------
 
-	# ---------------------------------------------------------------------
-	# Override DBD::_::db::tables because it does not quote table owner
-	# names.  Mostly, this does not matter unless you work with a MODE ANSI
-	# database where owner.table and "owner".table are two different tables
-	# (but informix.systables and "informix".systables are still the same
-	# table by some internal chicanery).  Note: Using double quotes around
-	# the name is correct even if DELIMIDENT is set.  Note that it is
-	# necessary to escape double quotes within both the owner name and
-	# table name strings.  Note that table names are only escaped if they
-	# do not match a C identifier (alphabetic or underscore for first
-	# character; alphanumeric or underscore thereafter).
+    # ---------------------------------------------------------------------
+    # Override DBD::_::db::tables because it does not quote table owner
+    # names.  Mostly, this does not matter unless you work with a MODE ANSI
+    # database where owner.table and "owner".table are two different tables
+    # (but informix.systables and "informix".systables are still the same
+    # table by some internal chicanery).  Note: Using double quotes around
+    # the name is correct even if DELIMIDENT is set.  Note that it is
+    # necessary to escape double quotes within both the owner name and
+    # table name strings.  Note that table names are only escaped if they
+    # do not match a C identifier (alphabetic or underscore for first
+    # character; alphanumeric or underscore thereafter).
 
-	sub tables
-	{
-		my ($dbh, @args) = @_;
-		my $sth = $dbh->table_info(@args);
-		return () unless $sth;
-		require DBD::Informix::Metadata;
-		my ($owner, $table, @tables, $unwanted1, $unwanted2, $unwanted3);
-		$sth->bind_columns(\$unwanted1, \$owner, \$table, \$unwanted2, \$unwanted3);
-		while($sth->fetchrow_arrayref)
-		{
-			my $result = &DBD::Informix::Metadata::ix_map_tablename($owner, $table);
-			push @tables, $result;
-		}
-		return @tables;
-	}
+    sub tables
+    {
+        my ($dbh, @args) = @_;
+        my $sth = $dbh->table_info(@args);
+        return () unless $sth;
+        require DBD::Informix::Metadata;
+        my ($owner, $table, @tables, $unwanted1, $unwanted2, $unwanted3);
+        $sth->bind_columns(\$unwanted1, \$owner, \$table, \$unwanted2, \$unwanted3);
+        while($sth->fetchrow_arrayref)
+        {
+            my $result = &DBD::Informix::Metadata::ix_map_tablename($owner, $table);
+            push @tables, $result;
+        }
+        return @tables;
+    }
 
-	# ----------------------------------------------------------------
+    # ----------------------------------------------------------------
 
-	# ----------------------------------------------------------------
-	# Utility functions: _tables and _columns
-	# ----------------------------------------------------------------
-	# SQL fragments to list tables, views, and synonyms
+    # ----------------------------------------------------------------
+    # Utility functions: _tables and _columns
+    # ----------------------------------------------------------------
+    # SQL fragments to list tables, views, and synonyms
 
-	sub _tables
-	{
-		my ($dbh, @info) = @_;
-		require DBD::Informix::Metadata;
-		return &DBD::Informix::Metadata::ix_tables($dbh, @info);
-	}
+    sub _tables
+    {
+        my ($dbh, @info) = @_;
+        require DBD::Informix::Metadata;
+        return &DBD::Informix::Metadata::ix_tables($dbh, @info);
+    }
 
-	sub _columns
-	{
-		my ($dbh, @tables) = @_;
-		require DBD::Informix::Metadata;
-		return &DBD::Informix::Metadata::ix_columns($dbh, @tables);
-	}
+    sub _columns
+    {
+        my ($dbh, @tables) = @_;
+        require DBD::Informix::Metadata;
+        return &DBD::Informix::Metadata::ix_columns($dbh, @tables);
+    }
 
-	#-----------------------------------------------------------------
-	# table_info function
-	# - originally by David Bitseff <dbitsef@uswest.com>
+    #-----------------------------------------------------------------
+    # table_info function
+    # - originally by David Bitseff <dbitsef@uswest.com>
 
-	sub table_info
-	{
-		my($dbh) = @_;
-		require DBD::Informix::Metadata;
-		return &DBD::Informix::Metadata::ix_table_info($dbh);
-	}
+    sub table_info
+    {
+        my($dbh) = @_;
+        require DBD::Informix::Metadata;
+        return &DBD::Informix::Metadata::ix_table_info($dbh);
+    }
 
-	1;
+    1;
 }
 
 {
-	package DBD::Informix::st; # ====== STATEMENT ======
+    package DBD::Informix::st; # ====== STATEMENT ======
 
-	# No non-standard methods needed by DBD::Informix
+    # No non-standard methods needed by DBD::Informix
 
-	1;
+    1;
 }
 
 1;
@@ -297,7 +299,7 @@ DBD::Informix - IBM Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26).
+This document describes IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.
@@ -434,7 +436,7 @@ Informix driver independently of connecting to any database, use:
 
     $drh = DBI->install_driver('Informix');
 
-This statement gives you a reference to the driver, also known as 
+This statement gives you a reference to the driver, also known as
 the driver handle.
 If the load fails, your program stops immediately (unless, perhaps,
 you eval the statement).
@@ -561,13 +563,13 @@ If it is true, all transactions are started without replication, using
 the statement "BEGIN WORK WITHOUT REPLICATION".
 You cannot suppress replication by using the following statement.
 
-    $dbh->do("BEGIN WORK WITHOUT REPLICATION"); 
+    $dbh->do("BEGIN WORK WITHOUT REPLICATION");
 
 The value of ix_WithoutReplication can always be changed.
 When the value is changed, the last transaction is committed and a new
 one is started (with the correct statement).
 
-    $dbh->{ix_WithoutReplication} = 0; # commit then begin occurs internally 
+    $dbh->{ix_WithoutReplication} = 0; # commit then begin occurs internally
 
 Note that if you set ix_WithoutReplication to true and the database does
 not support the statement "BEGIN WORK WITHOUT REPLICATION", you get
@@ -751,7 +753,7 @@ at some basic Informix metadata relatively conveniently.
     @list = $dbh->func('synonym', '_tables');
 
 The lists of tables are all qualified as "owner".tablename, and you
-can use them in SQL statements without fear that the table is not 
+can use them in SQL statements without fear that the table is not
 present in the database (unless someone deletes it behind your back).
 The leading arguments qualify the list of names returned.
 Private synonyms are reported for just the current user.
@@ -760,7 +762,7 @@ Private synonyms are reported for just the current user.
     @list = $dbh->func(@tables, '_columns');
 
 The lists are each references to an array of values corresponding to
-the owner name, table name, column number, column name, basic 
+the owner name, table name, column number, column name, basic
 data type (C<ix_ColType> value--see below), and data length
 (C<ix_ColLength> value--see below).
 If no tables are listed, all columns in the database are listed.
@@ -911,7 +913,7 @@ disabled.
 When AutoCommit is enabled, all cursors have to be WITH HOLD (just one
 more reason to hate AutoCommit).
 
-	$sth = $dbh->prepare("SELECT id, name FROM tablename", {'ix_CursorWithHold' => 1});
+    $sth = $dbh->prepare("SELECT id, name FROM tablename", {'ix_CursorWithHold' => 1});
 
 After the cursor is opened ($sth->execute), it is not closed by
 $dbh->commit().
@@ -1122,7 +1124,7 @@ When you have fetched as many rows as required, you close the cursor using:
 You do not have to finish a cursor explicitly if you executed a fetch
 that failed to retrieve any data.
 
-Using $sth->finish simply closes the cursor but does not free the cursor 
+Using $sth->finish simply closes the cursor but does not free the cursor
 or the statement.
 That is done when you destroy (undef) the statement handle:
 
@@ -1220,7 +1222,7 @@ transactions and AutoCommit correctly.
 
 =head2 THE INTERACTIONS OF AUTOCOMMIT WITH INFORMIX DATABASES
 
-Three types of Informix database need to be considered: 
+Three types of Informix database need to be considered:
 MODE ANSI, Logged, and UnLogged.
 Although MODE ANSI databases also have a transaction log, the category
 of Logged databases specifically excludes MODE ANSI databases.
@@ -1367,8 +1369,8 @@ more or less current with releases of DBD::Informix).
 =head1 MAPPING BETWEEN ESQL/C AND DBD::INFORMIX
 
 A crude form of the mapping between DBD::Informix functions and ESQL/C
-equivalents follows--there are a number of ways in which it is not 
-quite precise (for example, the influence of AutoCommit), but the 
+equivalents follows--there are a number of ways in which it is not
+quite precise (for example, the influence of AutoCommit), but the
 mapping is accurate enough for most purposes.
 
     DBI->connect            => DATABASE in 5.0x
@@ -1399,7 +1401,7 @@ Blobs can be reliably located only in memory.
 
 =item *
 
-If you use Informix ESQL/C Version 6.00 or later 
+If you use Informix ESQL/C Version 6.00 or later
 and do not set both the environment variables CLIENT_LOCALE
 and DB_LOCALE, ESQL/C might set one or both of them during the
 connect operation.

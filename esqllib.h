@@ -5,7 +5,7 @@
 @(#)Purpose:        ESQL/C Library Function Prototypes
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1992-93,1995-97,2003-06
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 */
 
 /*TABSTOP=4*/

@@ -1,10 +1,10 @@
-#   @(#)$Id: TechSupport.pm,v 2003.4 2004/12/02 19:06:01 jleffler Exp $
+#   @(#)$Id: TechSupport.pm,v 2007.1 2007/09/03 03:26:47 jleffler Exp $
 #
-#	Technical Support Tools for IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+#	Technical Support Tools for IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 #
 #   Copyright 2000-01 Informix Software Inc
 #   Copyright 2002-03 IBM
-#   Copyright 2004    Jonathan Leffler
+#   Copyright 2004-07 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -16,7 +16,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(print_versions bug_report it_works);
 
-	$VERSION = "2007.0826";
+	$VERSION = "2007.0903";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -256,8 +256,16 @@
 		$tags{DBD_INFORMIX} = "$dbh->{Driver}->{Version}";
 		$tags{DBI} = "$DBI::VERSION";
 		$tags{INFORMIX_ESQLC} = "$dbh->{ix_ProductName}";
+        my ($server) = ($dbh->{ix_InformixOnLine} == 0) ? "SE"
+                     : ($dbh->{ix_ServerVersion} < 600) ? "OnLine"
+                     : ($dbh->{ix_ServerVersion} < 730) ? "ODS"
+                     : ($dbh->{ix_ServerVersion} < 800) ? "IDS"
+                     : ($dbh->{ix_ServerVersion} < 900) ? "XPS"
+                     : ($dbh->{ix_ServerVersion} < 920) ? "IUS"
+                     :                                    "IDS"
+                     ;
 		$tags{INFORMIX_SERVER} = sprintf "%.2f (%s)", ($dbh->{ix_ServerVersion}/100),
-										(($dbh->{ix_InformixOnLine}) ? "OnLine" : "SE");
+										$server;
 		$tags{PERL} = "$] @Config{qw(archname dlsrc)}";
 		$tags{SYSTEM} = "@Config{qw(myuname)}";
 		$tags{SYS_COMPILER} = "@Config{qw(cc gccversion)}";
@@ -266,18 +274,16 @@
 		$tags{WHO} = "$who";
 		$tags{Z_NOTES} = "Optional Notes";
 
-		my ($keylen, $taglen) = (0, 0);
+		my ($keylen) = (0);
 		my ($key, $tag);
 
-		# Determine longest key and tag
-		for $key (keys %tags)
+		# Determine longest key
+		foreach $key (keys %tags)
 		{
-			$tag = $tags{$key};
 			$keylen = length($key) if (length($key) > $keylen);
-			$taglen = length($tag) if (length($tag) > $taglen);
 		}
 
-		my ($fmt) = "    <%s>%s %-${taglen}s </%s>\n";
+		my ($fmt) = "    <%s>%s %s </%s>\n";
 
 		print "<WORKING_VERSION VERSION=\"1.00\">\n";
 		for $key (sort keys %tags)
@@ -305,14 +311,14 @@ use DBD::Informix::TechSupport;
 =head1 DESCRIPTION
 
 This document describes how to obtain technical support for
-IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 (which is also known as DBD::Informix).
 It also describes how to use the Perl module to report information to
 any of technical support channels.
 
 =head1 IBM INFORMIX TECHNICAL SUPPORT
 
-IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 is not officially supported by IBM Informix Technical Support.
 If you are using a supported configuration, they will route problem
 reports to the maintenance team listed below.
@@ -341,7 +347,7 @@ weekends.
 
 =head1 CONFIGURATIONS SUPPORTED
 
-We normally only support IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+We normally only support IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 if you are using certain supported versions of ESQL/C or Client SDK:
 
 =over 2
@@ -364,7 +370,7 @@ above.
 
 =head1 OTHER CONFIGURATIONS WHICH PROBABLY WORK
 
-IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26) is believed to work with all versions of ESQL/C and ClientSDK
+IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03) is believed to work with all versions of ESQL/C and ClientSDK
 from ESQL/C 5.00.UC1 upwards.
 However, you may run into problems with shared libraries if you use
 versions of ESQL/C which are not explicitly supported.
@@ -420,7 +426,7 @@ builds it (classes B, C, D) and tests it (classes C, D).
 =head2 Using it_works
 
 This generates the information needed for a report that you have managed
-to get IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26) working.
+to get IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03) working.
 
 	it_works;
 

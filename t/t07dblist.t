@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t07dblist.t,v 2007.1 2007/06/04 05:20:14 jleffler Exp $
+#   @(#)$Id: t07dblist.t,v 2007.2 2007/09/04 00:02:58 jleffler Exp $
 #
 #   List of available databases:
 #   @ary = $DBI->data_sources('Informix');
@@ -35,11 +35,13 @@ if (!@ary)
 }
 else
 {
+    my $flag = (defined $ENV{INFORMIXSERVER} && $ENV{INFORMIXSERVER} ne "") ? 1 : 0;
 	my $x = @ary;
 	my $y = $x + 1;
 	print "1..$y\n";
 	# Note that there is not very much we can do to validate database list.
-    # Remember SE: not even sysmaster is reliable there.
+    # Remember SE: not even sysmaster is reliable there (but there is a test DB).
+    # And OnLine 5.x does not play with INFORMIXSERVER!
 	&stmt_note("# Test: DBI->data_sources('Informix'):\n");
 	&stmt_fail("# *** No databases to list? ***\n") if ($#ary < 0);
 	my $srv = 0;
@@ -47,9 +49,10 @@ else
 	{
 		&stmt_note("# Database: $db\n");
 		($db =~ /^dbi:Informix:/) ? &stmt_ok(0) : &stmt_fail();
-		$srv++ if ($db =~ /\@$ENV{INFORMIXSERVER}$/o);
+        $srv++ if ($flag && $db =~ /\@$ENV{INFORMIXSERVER}$/o);
 	}
-	&stmt_fail("# No databases match INFORMIXSERVER=$ENV{INFORMIXSERVER}\n") if ($srv == 0);
+	&stmt_fail("# No databases match INFORMIXSERVER=$ENV{INFORMIXSERVER}\n")
+        if ($srv == 0 && $flag);
 	&stmt_ok();
 }
 

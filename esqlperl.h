@@ -4,7 +4,7 @@
 @(#)Copyright:       1996-98 Jonathan Leffler
 @(#)Copyright:       2002    IBM
 @(#)Copyright:       2004-07 Jonathan Leffler
-@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 */
 
 /*TABSTOP=4*/
@@ -14,9 +14,11 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 2007.1 2007/06/09 18:15:32 jleffler Exp $";
-#endif	/* lint */
-#endif	/* MAIN_PROGRAM */
+/* Prevent over-aggressive optimizers from eliminating ID string */
+extern const char jlss_id_esqlperl_h[];
+const char jlss_id_esqlperl_h[] = "@(#)$Id: esqlperl.h,v 2007.2 2007/09/03 23:37:25 jleffler Exp $";
+#endif /* lint */
+#endif /* MAIN_PROGRAM */
 
 #include <stdio.h>
 #include "esqlc.h"
@@ -24,7 +26,7 @@ static const char esqlperl_h[] = "@(#)$Id: esqlperl.h,v 2007.1 2007/06/09 18:15:
 
 enum Boolean
 {
-	False, True
+    False, True
 };
 typedef enum Boolean Boolean;
 
@@ -32,7 +34,7 @@ typedef enum Boolean Boolean;
 ** Under some circumstances, MSVC gets horrendously fussy and rejects
 ** valid C code.  This is a sop to MSVC and to other C++ compilers.
 */
-#define DBD_IX_BOOLEAN(x)	((x) ? True : False)
+#define DBD_IX_BOOLEAN(x)   ((x) ? True : False)
 
 /*
 ** The sqltypename() routine assumes is has a buffer of at least
@@ -50,11 +52,14 @@ extern Boolean dbd_ix_connect(char *conn, char *dbase, char *user, char *pass);
 #else
 extern void dbd_ix_closedatabase(char *dbase);
 extern Boolean dbd_ix_opendatabase(char *dbase);
-#endif	/* ESQLC_EFFVERSION >= 600 */
+#endif /* ESQLC_EFFVERSION >= 600 */
 
 /* Informix to ODBC mapping for type, precision and scale */
 extern int map_type_ifmx_to_odbc(int coltype, int collen);
 extern int map_prec_ifmx_to_odbc(int coltype, int collen);
 extern int map_scale_ifmx_to_odbc(int coltype, int collen);
 
-#endif	/* ESQLPERL_H */
+/* DBD::Informix module name - as a constant string (link.c) */
+extern const char *dbd_ix_module(void);
+
+#endif /* ESQLPERL_H */

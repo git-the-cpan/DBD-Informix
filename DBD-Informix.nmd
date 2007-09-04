@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.nmd,v 2007.21 2007/08/27 04:01:59 jleffler Exp $
+#   @(#)$Id: DBD-Informix.nmd,v 2007.23 2007/09/04 00:07:16 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 #   @(#)Definitive list of files -- Non-Modifiable Source Distribution
 #
 #   -- The Source file column contains the name of the source file to be
@@ -29,8 +29,11 @@
 
 # Library Files
 debug.h                     RCS/debug.h,v               3.4
+decfix.c                    RCS/decfix.c,v              3.5
+decintl.h                   RCS/decintl.h,v             2.2
 decsci.c                    RCS/decsci.c,v              3.4
 decsci.h                    RCS/decsci.h,v              3.9
+decsetexp.c                 RCS/decsetexp.c,v           2.2
 esql5_00.h                  RCS/esql5_00.h,v            2006.1
 esql7_20.h                  RCS/esql7_20.h,v            2006.1
 esql_ius.h                  RCS/esql_ius.h,v            2006.1
@@ -52,13 +55,13 @@ sqltype.ec                  RCS/sqltype.ec,v            2004.2
 # Source Files
 Announce                        RCS/Announce,v          2007.4
 BugReport                       RCS/BugReport,v         100.5
-ChangeLog                       RCS/ChangeLog,v         2007.8
+ChangeLog                       RCS/ChangeLog,v         2007.11
 
 InformixTechSupport             RCS/InformixTechSupport,v   100.9
 ItWorks                         RCS/ItWorks,v               100.5
-MANIFEST                        RCS/MANIFEST,v              2007.10
+MANIFEST                        RCS/MANIFEST,v              2007.11
 MANIFEST.SKIP                   RCS/MANIFEST.SKIP,v         2004.2
-Makefile.PL                     RCS/Makefile.PL,v           2007.7
+Makefile.PL                     RCS/Makefile.PL,v           2007.8
 README                          RCS/README,v                2005.2
 TODO                            RCS/TODO,v                  2003.1
 rmautoinst.pl                   RCS/rmautoinst.pl,v         2004.1
@@ -67,19 +70,19 @@ Informix.h                      RCS/Informix.h,v        100.3
 Informix.pm                     RCS/Informix.pm,v       2005.2
 Informix.xs                     RCS/Informix.xs,v       2003.1
 dbdattr.ec                      RCS/dbdattr.ec,v        2004.2
-dbdimp.ec                       RCS/dbdimp.ec,v         2007.13
-dbdimp.h                        RCS/dbdimp.h,v          2007.1
+dbdimp.ec                       RCS/dbdimp.ec,v         2007.15
+dbdimp.h                        RCS/dbdimp.h,v          2007.2
 dbdixmap.h                      RCS/dbdixmap.h,v        100.6
 eprintf.c                       RCS/eprintf.c,v         60.1
 esqlbasic.ec                    RCS/esqlbasic.ec,v      100.1
 esqlc_v5.ec                     RCS/esqlc_v5.ec,v       100.2
 esqlc_v6.ec                     RCS/esqlc_v6.ec,v       2007.1
-esqlcc                          RCS/esqlcc,v            2007.2
+esqlcc                          RCS/esqlcc,v            2007.3
 esqlld                          RCS/esqlld,v            2005.1
-esqlperl.h                      RCS/esqlperl.h,v        2007.1
+esqlperl.h                      RCS/esqlperl.h,v        2007.2
 esqlsed                         RCS/esqlsed,v           100.2
 esqltest.ec                     RCS/esqltest.ec,v       2007.3
-link.c                          RCS/link.c,v            2003.2
+link.c                          RCS/link.c,v            2007.1
 link.h                          RCS/link.h,v            2003.1
 
 odbctype.c                      RCS/odbctype.c,v        100.2
@@ -94,12 +97,12 @@ test.run.sh                     RCS/test.run.sh,v       2004.1
 Release.Checklist               RCS/Release.Checklist,v 2004.1
 
 # Supporting tools
-lib/Bundle/DBD/Informix.pm          lib/Bundle/DBD/RCS/Informix.pm,v        100.4
+lib/Bundle/DBD/Informix.pm          lib/Bundle/DBD/RCS/Informix.pm,v        2007.2
 lib/DBD/Informix/Configure.pm       lib/DBD/Informix/RCS/Configure.pm,v     2005.1
 lib/DBD/Informix/GetInfo.pm         lib/DBD/Informix/RCS/GetInfo.pm,v       2004.1
 lib/DBD/Informix/Metadata.pm        lib/DBD/Informix/RCS/Metadata.pm,v      2003.4
 lib/DBD/Informix/Summary.pm         lib/DBD/Informix/RCS/Summary.pm,v       100.6
-lib/DBD/Informix/TechSupport.pm     lib/DBD/Informix/RCS/TechSupport.pm,v   2003.4
+lib/DBD/Informix/TechSupport.pm     lib/DBD/Informix/RCS/TechSupport.pm,v   2007.1
 lib/DBD/Informix/TestHarness.pm     lib/DBD/Informix/RCS/TestHarness.pm,v   2007.4
 lib/DBD/Informix/TypeInfo.pm        lib/DBD/Informix/RCS/TypeInfo.pm,v      2003.4
 
@@ -112,7 +115,7 @@ t/t00basic.t                    t/RCS/t00basic.t,v      2005.1
 t/t01stproc.t                   t/RCS/t01stproc.t,v     2005.1
 t/t02ixtype.t                   t/RCS/t02ixtype.t,v     2003.2
 t/t05dbase.t                    t/RCS/t05dbase.t,v      2005.1
-t/t07dblist.t                   t/RCS/t07dblist.t,v     2007.1
+t/t07dblist.t                   t/RCS/t07dblist.t,v     2007.2
 t/t08fork.t                     t/RCS/t08fork.t,v       2003.1
 t/t09date.t                     t/RCS/t09date.t,v       2003.6
 t/t10sqlca.t                    t/RCS/t10sqlca.t,v      2004.1
@@ -203,8 +206,8 @@ examples/x15cgi_form.pl                 examples/RCS/x15cgi_form.pl,v           
 # Experiment - simulate scroll cursors.
 examples/fetchscroll.pl                 examples/RCS/fetchscroll.pl,v           1.4
 
-DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2007.9
-DBD-Informix.msd            RCS/DBD-Informix.msd,v      2007.14
-DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      2007.21
-mknmd.sh                    RCS/mknmd.sh,v              2003.3
-prodverstamp.sh             RCS/prodverstamp.sh,v       2007.7
+DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2007.11
+DBD-Informix.msd            RCS/DBD-Informix.msd,v      2007.15
+DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      2007.23
+mknmd.sh                    RCS/mknmd.sh,v              2007.2
+prodverstamp.sh             RCS/prodverstamp.sh,v       2007.8

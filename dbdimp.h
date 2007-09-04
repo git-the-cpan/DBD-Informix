@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 2007.1 2007/08/25 00:26:39 jleffler Exp $
+ * @(#)$Id: dbdimp.h,v 2007.3 2007/09/04 02:03:22 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1996-99 Jonathan Leffler
@@ -13,6 +13,14 @@
 
 #ifndef DBDIMP_H
 #define DBDIMP_H
+
+#ifdef MAIN_PROGRAM
+#ifndef lint
+/* Prevent over-aggressive optimizers from eliminating ID string */
+extern const char jlss_id_dbdimp_h[];
+const char jlss_id_dbdimp_h[] = "@(#)$Id: dbdimp.h,v 2007.3 2007/09/04 02:03:22 jleffler Exp $";
+#endif /* lint */
+#endif /* MAIN_PROGRAM */
 
 /**
 ** Handle assert.
@@ -39,7 +47,6 @@
 #include "dbdixmap.h"   /* Defines for functions called in Informix.xs */
 #include "esqlc.h"      /* Prototypes for ESQL/C version 5.0x etc */
 #include "esqlperl.h"   /* Declarations for code used in esqltest.ec */
-#include "esqlvrsn.h"   /* Defines ESQLC_VERSION_STRING */
 #include "link.h"       /* Declares Link data type and functions */
 #include "kludge.h"     /* Support for documenting kludges in code */
 
@@ -171,8 +178,7 @@ extern int dbd_ix_st_rows(SV *, imp_sth_t *);
 extern void dbd_ix_st_destroy(SV *, imp_sth_t *);
 
 /* Other non-standard entry points */
-extern const char *dbd_ix_module(void);
 extern void dbd_ix_enter(const char *function);
 extern void dbd_ix_exit(const char *function);
 
-#endif  /* DBDIMP_H */
+#endif /* DBDIMP_H */

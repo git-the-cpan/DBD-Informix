@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.msd,v 2007.14 2007/08/26 06:42:59 jleffler Exp $
+#   @(#)$Id: DBD-Informix.msd,v 2007.15 2007/09/03 23:42:24 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 #   @(#)Definitive list of files -- Modifiable Source Distribution
 #
 #   -- The MSD RCS file column contains the name of the RCS file to be
@@ -37,8 +37,11 @@ JLSSDIST=${JL}/bin/JLSS-Dist/RCS
 
 # Library Files
 RCS/debug.h,v                   ${JLIS}/debug.h,v
+RCS/decfix.c,v                  ${JLES}/decfix.c,v
+RCS/decintl.h,v                 ${JLES}/decintl.h,v
 RCS/decsci.c,v                  ${JLES}/decsci.c,v
 RCS/decsci.h,v                  ${JLES}/decsci.h,v
+RCS/decsetexp.c,v               ${JLES}/decsetexp.c,v
 RCS/esql5_00.h,v                ${JLIS}/esql5_00.h,v
 RCS/esql7_20.h,v                ${JLIS}/esql7_20.h,v
 RCS/esql_ius.h,v                ${JLIS}/esql_ius.h,v

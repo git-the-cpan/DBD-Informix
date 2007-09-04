@@ -1,5 +1,5 @@
-# @(#)$Id: MANIFEST,v 2007.10 2007/08/26 06:49:02 jleffler Exp $
-# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2007.0826 (2007-08-26)
+# @(#)$Id: MANIFEST,v 2007.11 2007/09/03 23:42:01 jleffler Exp $
+# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
 Announce
 BugReport
 ChangeLog
@@ -37,8 +37,11 @@ dbdimp.ec
 dbdimp.h
 dbdixmap.h
 debug.h
+decfix.c
+decintl.h
 decsci.c
 decsci.h
+decsetexp.c
 eprintf.c
 esql5_00.h
 esql7_20.h
