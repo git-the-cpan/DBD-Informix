@@ -43,12 +43,6 @@ Checklist for Releasing a New Version of DBD::Informix
       test failures better.
     - Run regression tests from regression sub-directory.
 
-Note: with an Atria-based CM system, you can probably simplify some of
-the versioning stuff.  In fact, we could probably do so with RCS, too.
-
-Much of this is automated by the NewRelease script, but not all of it
-can be automated by the NewRelease script.
-
 --
 
-@(#)$Id: Release.Checklist,v 2004.1 2004/12/02 22:26:13 jleffler Exp $
+@(#)$Id: Release.Checklist,v 2007.1 2007/09/04 05:59:08 jleffler Exp $

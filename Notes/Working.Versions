@@ -1,7 +1,7 @@
 Working Versions of DBD::Informix
 =================================
 
-@(#)$Id: Working.Versions,v 2004.1 2004/12/02 22:52:16 jleffler Exp $
+@(#)$Id: Working.Versions,v 2007.3 2007/09/04 07:24:17 jleffler Exp $
 
 This file documents combinations of machine, operating system, Perl, DBI,
 DBD::Informix and Informix-ESQL/C which have been reported as working,
@@ -1130,3 +1130,46 @@ Working Versions of DBD::Informix
     <WHO>             Jonathan Leffler <jleffler@anubis.menlo.ibm.com>                     </WHO>
     <Z_NOTES>         Optional Notes                                                       </Z_NOTES>
 </WORKING_VERSION>
+
+<WORKING_VERSION VERSION="1.00">
+    <DBD_INFORMIX>    2007.0904 </DBD_INFORMIX>
+    <DBI>             1.59 </DBI>
+    <INFORMIX_ESQLC>  IBM INFORMIX-ESQL Version 5.20.UC1 </INFORMIX_ESQLC>
+    <INFORMIX_SERVER> 5.10 (OnLine) </INFORMIX_SERVER>
+    <PERL>            5.008008 sun4-solaris dl_dlopen.xs </PERL>
+    <SYSTEM>          sunos black 5.10 generic sun4u sparc sunw,ultra-4 solaris  </SYSTEM>
+    <SYS_COMPILER>    cc  </SYS_COMPILER>
+    <SYS_LOADER>      cc </SYS_LOADER>
+    <WHEN>            2007-09-04 </WHEN>
+    <WHO>             Jonathan Leffler <jleffler@black.menlo.ibm.com> </WHO>
+    <Z_NOTES>         Optional Notes </Z_NOTES>
+</WORKING_VERSION>
+
+<WORKING_VERSION VERSION="1.00">
+    <DBD_INFORMIX>    2007.0904 </DBD_INFORMIX>
+    <DBI>             1.59 </DBI>
+    <INFORMIX_ESQLC>  IBM Informix CSDK Version 2.81, IBM Informix-ESQL Version 9.53.UC2 </INFORMIX_ESQLC>
+    <INFORMIX_SERVER> 7.31 (IDS) </INFORMIX_SERVER>
+    <PERL>            5.008008 sun4-solaris dl_dlopen.xs </PERL>
+    <SYSTEM>          sunos black 5.10 generic sun4u sparc sunw,ultra-4 solaris  </SYSTEM>
+    <SYS_COMPILER>    cc  </SYS_COMPILER>
+    <SYS_LOADER>      cc </SYS_LOADER>
+    <WHEN>            2007-09-04 </WHEN>
+    <WHO>             Jonathan Leffler <jleffler@black.menlo.ibm.com> </WHO>
+    <Z_NOTES>         Optional Notes </Z_NOTES>
+</WORKING_VERSION>
+
+<WORKING_VERSION VERSION="1.00">
+    <DBD_INFORMIX>    2007.0904 </DBD_INFORMIX>
+    <DBI>             1.59 </DBI>
+    <INFORMIX_ESQLC>  IBM Informix CSDK Version 3.00, IBM Informix-ESQL Version 3.00.FC2 </INFORMIX_ESQLC>
+    <INFORMIX_SERVER> 11.10 (IDS) </INFORMIX_SERVER>
+    <PERL>            5.008008 sun4-solaris-thread-multi-64 dl_dlopen.xs </PERL>
+    <SYSTEM>          sunos anubis 5.8 generic_117350-16 sun4u sparc sunw,ultra-5_10 solaris  </SYSTEM>
+    <SYS_COMPILER>    gcc -m64 4.0.2 </SYS_COMPILER>
+    <SYS_LOADER>      gcc -m64 </SYS_LOADER>
+    <WHEN>            2007-09-04 </WHEN>
+    <WHO>             Jonathan Leffler <jleffler@anubis.menlo.ibm.com> </WHO>
+    <Z_NOTES>         Optional Notes </Z_NOTES>
+</WORKING_VERSION>
+

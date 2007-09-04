@@ -1,8 +1,14 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04) (aka DBD::Informix)
 
-2007.xxyy Release
+2007.0904 Release
 -----------------
-2007-xx-yy: Upload to PAUSE and CPAN.
+2007-09-04: Upload to PAUSE and CPAN.
+2007-09-04: Rework ExtUtils::AutoInstall code.
+2007-09-03: Fix Announce and ChangeLog.
+
+2007.0903 Release
+-----------------
+2007-09-03: Released without fixing Announce or ChangeLog.
 2007-09-03: Redo the fixes to ESQL/C 5.20 for decimals.
 2007-09-02: Various minor cleanups in build and release system.
 2007-08-31: Get server version via DBINFO('version','major') when possible.
@@ -1159,4 +1165,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2007.11 2007/09/03 23:44:17 jleffler Exp $
+@(#)$Id: ChangeLog,v 2007.13 2007/09/04 05:49:02 jleffler Exp $

@@ -1,9 +1,9 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2007.11 2007/09/04 03:21:19 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2007.12 2007/09/04 05:47:03 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03))
+# (IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -28,50 +28,9 @@ $main::ref_Perl_ver = "5.008008";   # Reference (recommended) version of Perl
 ### AUTOINSTALL CODE ###
 ########################
 
-# If the ExtUtils::AutoInstall code causes you angst, place comment
-# markers at the start of the lines between each pair of lines marked
-# with #-HERE-# and #-AND-HERE-#
-# In vi:  :g/^#-HERE-#$/.+1,/#-AND-HERE#$/-1s/^/#-EU-AI-#/
-#
-# Alternatively: perl rmautoinst.pl Makefile.PL | perl -
-
-#-HERE-#
-# ExtUtils::AutoInstall Bootstrap Code, version 5.
-BEGIN{my$p='ExtUtils::AutoInstall';my$v=0.40;eval"use $p $v;1
-"or do{my$e=$ENV{PERL_EXTUTILS_AUTOINSTALL};(!defined($e)||$e
-!~m/--(?:default|skip|testonly)/and-t STDIN or eval"use Ext".
-"Utils::MakeMaker;WriteMakefile('PREREQ_PM'=>{'$p',$v});1"and
-exit)and print"==> $p $v required. Install it from CPAN? [Y".
-"/n] "and<STDIN>!~/^n/i and print"*** Installing $p\n"and do{
-eval{require CPANPLUS;CPANPLUS::install $p};eval"use $p $v;1"
-or eval{require CPAN;CPAN::install$p};eval"use $p $v;1"or die
-"*** Please install $p $v manually from cpan.org first.\n"}}}
-#-AND-HERE-#
-
-# postamble handler; generates a string to be appended to Makefile.
-# DBI::DBD::dbd_postamble() returns standardised code to generate
-# Informix.xs from Informix.xsi and the template from DBI (Driver.xst).
-# dbd_informix_postamble() does a similar job for ESQL/C.
-sub MY::postamble
-{
-#-HERE-#
-    return &ExtUtils::AutoInstall::postamble .
-#-AND-HERE-#
-           &DBI::DBD::dbd_postamble .
-           &dbd_informix_postamble;
-}
-
-#-HERE-#
-# The MY::postamble handler must be defined before this BEGIN block.
-BEGIN
-{
-    require ExtUtils::AutoInstall;
-    # Pre-install the DBI module.
-    ExtUtils::AutoInstall->install([], 'DBI' => "$main::min_DBI_ver");
-}
-
-ExtUtils::AutoInstall->import(
-    -version        => '0.43',
+use lib 'inc';
+use ExtUtils::AutoInstall (
+    -version        => '0.63',
     -config         => {
         make_args   => '--hello',   # Suppress hello message from CPAN
     },
@@ -89,7 +48,17 @@ ExtUtils::AutoInstall->import(
         'Test::Pod' => '',
     ],
 );
-#-AND-HERE-#
+
+# postamble handler; generates a string to be appended to Makefile.
+# DBI::DBD::dbd_postamble() returns standardised code to generate
+# Informix.xs from Informix.xsi and the template from DBI (Driver.xst).
+# dbd_informix_postamble() does a similar job for ESQL/C.
+sub MY::postamble
+{
+    return &ExtUtils::AutoInstall::postamble .
+           &DBI::DBD::dbd_postamble .
+           &dbd_informix_postamble;
+}
 
 ###############################
 ### END OF AUTOINSTALL CODE ###
@@ -105,8 +74,6 @@ use 5.006;
 use strict;
 use Config;
 use lib 'lib';
-use ExtUtils::MakeMaker;    # Only needed if ExtUtils::AutoInstall is disabled
-use DBI $main::min_DBI_ver; # Only needed if ExtUtils::AutoInstall is disabled
 use DBI::DBD;               # dbd_postamble()
 use DBD::Informix::Configure;
 use POSIX qw(strftime);
@@ -139,7 +106,7 @@ if ($NTConfiguration)
     });
 }
 
-my $dbd_ix = "2007.0903";
+my $dbd_ix = "2007.0904";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -175,7 +142,7 @@ my %opts = (
            );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -311,7 +278,6 @@ elsif ($effvernum >= 510 && $effvernum < 600)
         $opts{NAME}.  If so, try creating a statically linked version
         instead.  Read the Notes/static.build file.\n
         %);
-    &add_aux_obj;
 }
 elsif ($effvernum >= 600 && $effvernum < 724)
 {
@@ -347,7 +313,6 @@ elsif ($effvernum >= 724 && $effvernum < 800)
     $esqlc_flags .= &set_esqlc_linkage("-shared", $NTConfiguration);
     &fix_b102265($epp, $esql, $opts{NAME})
         if ($Config{osname} eq "hpux" && &grep_for_statopt_staticonly($epp));
-    &add_aux_obj;
 }
 elsif ($effvernum >= 800 && $effvernum < 900)
 {
@@ -509,6 +474,7 @@ $objects .= " sqltype.o ixblob.o odbctype.o kludge.o link.o esqlcver.o $vercode.
 $objects .= " eprintf.o" if defined $ENV{DBD_INFORMIX_USE_EPRINTF_CODE};
 # Decimal formatting only of relevance if effective ESQL/C Version less than 7.10.
 $objects .= " decsetexp.o decfix.o decsci.o" if ($effvernum < 710);
+$objects .= " jtypes.o" if ($effvernum < 800);
 if (defined $ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES})
 {
     my ($list) = $ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES};
@@ -840,17 +806,6 @@ sub did_not_read
     dbd_ix_die "\n*** You didn't read the README file!\n@_\n\n";
 }
 
-# add_aux_obj - add objects to build list for ESQL/C versions that need them.
-sub add_aux_obj
-{
-    my $add = "jtypes.o";
-    warn "Adding $add to \$ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES}\n";
-    my $env = defined $ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES} ?
-                $ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES} : "";
-    $env .= " $add";
-    $ENV{DBD_INFORMIX_AUXILLIARY_OBJECT_FILES} = $env;
-}
-
 # which: report the name of an executable command.
 sub which
 {
@@ -1156,7 +1111,7 @@ sub Write_DBD_Informix_Defaults
     $ENV{INFORMIXSERVER} = "" unless defined $ENV{INFORMIXSERVER};
 
     print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
+#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004-07 Jonathan Leffler
@@ -1170,7 +1125,7 @@ sub Write_DBD_Informix_Defaults
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
-    $VERSION = "2007.0903";
+    $VERSION = "2007.0904";
     $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1194,7 +1149,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)).
+(IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to,

@@ -5,7 +5,7 @@
 @(#)Purpose:        Include all relevant ESQL/C type definitions
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1992-93,1995-2004,2006-07
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)
 */
 
 /*

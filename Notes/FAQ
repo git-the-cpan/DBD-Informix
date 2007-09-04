@@ -1,7 +1,7 @@
 Frequently Asked Questions about IBM Informix Database Driver for Perl DBI
 ==========================================================================
 
-IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
+IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)
 
 --------------------------------------------------------------------------
 
@@ -96,6 +96,7 @@ obsolete, and the other available versions are mostly part of Client SDK.
     ESQL/C 9.52     - Client SDK 2.80
     ESQL/C 9.53     - Client SDK 2.81
     ESQL/C 2.90     - Client SDK 2.90 (Nov 2004)
+    ESQL/C 3.00     - Client SDK 3.00 (2007)
 
 With the 7.3x servers, you would normally use Client SDK 2.40 or later.
 With the 8.2x or later servers, you would normally use Client SDK 2.40
@@ -176,6 +177,8 @@ released and included:
 In 2001, the 2000 appellation was dropped.
 
 In 2004, the current version of IDS was 9.40.
+In 2005, the current version of IDS was 10.00.
+In 2007, the current version of IDS was 11.10.
 
 Version 9.2x merges the 7.x and 9.x code streams.  Basically, Informix
 Dynamic Server.2000 is the direct upgrade path if you use Informix Dynamic
@@ -274,7 +277,7 @@ remote database access because the remote database access technology is
 part of the basic product.  If you use a 6.0x, 7.0x or 7.1x server, it
 is long past time to upgrade.
 
-If you use a 7.2x, 9.0x or 9.1x database server, you need an Informix
+If you use a 7.2x, 9.x or later database server, you need an Informix
 Connect license, and you do not need a separate license for remote
 database access because the remote database access technology is part of
 the basic product.  If you use a 7.2x server earlier than 7.24, you
@@ -486,4 +489,4 @@ what 'uname -n' gives is what you need for the local machine.
 Jonathan Leffler
 Informix Database Engineering, IBM Data Management Solutions
 
-@(#)$Id: FAQ,v 2004.1 2004/12/02 22:46:27 jleffler Exp $
+@(#)$Id: FAQ,v 2007.1 2007/09/04 05:58:09 jleffler Exp $

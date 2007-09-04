@@ -1,5 +1,5 @@
-# @(#)$Id: MANIFEST,v 2007.11 2007/09/03 23:42:01 jleffler Exp $
-# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
+# @(#)$Id: MANIFEST,v 2007.12 2007/09/04 05:48:17 jleffler Exp $
+# MANIFEST for IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)
 Announce
 BugReport
 ChangeLog
@@ -76,6 +76,7 @@ examples/x13cgi_noform.pl
 examples/x14cgi_form.pl
 examples/x15cgi_form.pl
 ifmxdec.h
+inc/ExtUtils/AutoInstall.pm
 ixblob.ec
 ixblob.h
 jtypes.c
@@ -95,7 +96,6 @@ mknmd.sh
 odbctype.c
 odbctype.h
 prodverstamp.sh
-rmautoinst.pl
 sqltoken.c
 sqltoken.h
 sqltype.ec

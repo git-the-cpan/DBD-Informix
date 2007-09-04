@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.msd,v 2007.15 2007/09/03 23:42:24 jleffler Exp $
+#   @(#)$Id: DBD-Informix.msd,v 2007.16 2007/09/04 05:48:17 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0903 (2007-09-03)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)
 #   @(#)Definitive list of files -- Modifiable Source Distribution
 #
 #   -- The MSD RCS file column contains the name of the RCS file to be
@@ -72,7 +72,6 @@ RCS/MANIFEST.SKIP,v             RCS/MANIFEST.SKIP,v
 RCS/Makefile.PL,v               RCS/Makefile.PL,v
 RCS/README,v                    RCS/README,v
 RCS/TODO,v                      RCS/TODO,v
-RCS/rmautoinst.pl,v             RCS/rmautoinst.pl,v
 
 RCS/Informix.h,v                RCS/Informix.h,v
 RCS/Informix.pm,v               RCS/Informix.pm,v
@@ -217,6 +216,9 @@ RCS/Release.Checklist,v         RCS/Release.Checklist,v
 RCS/DBD-Informix.jdc,v          RCS/DBD-Informix.jdc,v
 RCS/DBD-Informix.msd,v          RCS/DBD-Informix.msd,v
 RCS/DBD-Informix.nmd,v          RCS/DBD-Informix.nmd,v
+
+# Recommended mechanism for using ExtUtils::AutoInstall
+inc/ExtUtils/AutoInstall.pm     inc/ExtUtils/AutoInstall.pm
 
 # Generic installation tools
 RCS/mknmd.sh,v                  ${JLSSDIST}/mknmd.sh,v
