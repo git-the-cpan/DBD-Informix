@@ -1,8 +1,8 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, dbd.informix@gmail.com
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04) released
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) released
 
-IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
 the driver code that enables Perl 5.6.1 or later to access Informix
@@ -21,7 +21,10 @@ http://dbi.perl.org/
 ** The ItWorks script does not send email to anybody; you have to do
 ** that yourself.
 
-New in release 2007.0904:
+New in release 2007.0914:
+* RT#29364: Fix problem identifying ESQL/C libraries.
+
+Release 2007.0904:
 * Bug fix and tidying up release - no new functionality.
 * Simplified internal release processing
 * Refixed support for ESQL/C 5.20.
@@ -33,7 +36,7 @@ Release 2007.0903:
 * Released without updating Announce or ChangeLog.
 * Will be removed from CPAN shortly.
 
-New in release 2007.0826
+Release 2007.0826:
 * Fixed support for CSDK 3.00.
 * Fixed support for ESQL/C 7.24 (and 5.20).
 * Detecting mismatched 32-bit Perl vs 64-bit ESQL/C or vice versa.
@@ -56,4 +59,4 @@ As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce,v 2007.7 2007/09/04 07:31:21 jleffler Exp $
+@(#)$Id: Announce,v 2007.8 2007/09/14 15:35:43 jleffler Exp $

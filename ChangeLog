@@ -1,4 +1,11 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) (aka DBD::Informix)
+
+2007.0914 Release
+-----------------
+2007-09-14: Upload to PAUSE and CPAN.
+2007-09-14: RT#29364: tab changed to blank in library detection, reported
+            by Stephan Hendl <Stephan.Hendl@lds.brandenburg.de>.  Fix
+            ensures literal tab isn't needed.
 
 2007.0904 Release
 -----------------
@@ -1165,4 +1172,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2007.13 2007/09/04 05:49:02 jleffler Exp $
+@(#)$Id: ChangeLog,v 2007.14 2007/09/14 15:35:43 jleffler Exp $

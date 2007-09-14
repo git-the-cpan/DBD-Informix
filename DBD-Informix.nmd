@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.nmd,v 2007.28 2007/09/04 06:46:16 jleffler Exp $
+#   @(#)$Id: DBD-Informix.nmd,v 2007.31 2007/09/14 16:13:25 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
 #   @(#)Definitive list of files -- Non-Modifiable Source Distribution
 #
 #   -- The Source file column contains the name of the source file to be
@@ -53,15 +53,15 @@ sqltoken.h                  RCS/sqltoken.h,v            2004.3
 sqltype.ec                  RCS/sqltype.ec,v            2004.2
 
 # Source Files
-Announce                        RCS/Announce,v          2007.6
+Announce                        RCS/Announce,v          2007.8
 BugReport                       RCS/BugReport,v         100.5
-ChangeLog                       RCS/ChangeLog,v         2007.13
+ChangeLog                       RCS/ChangeLog,v         2007.14
 
 InformixTechSupport             RCS/InformixTechSupport,v   100.9
 ItWorks                         RCS/ItWorks,v               100.5
 MANIFEST                        RCS/MANIFEST,v              2007.12
 MANIFEST.SKIP                   RCS/MANIFEST.SKIP,v         2004.2
-Makefile.PL                     RCS/Makefile.PL,v           2007.12
+Makefile.PL                     RCS/Makefile.PL,v           2007.13
 README                          RCS/README,v                2007.1
 TODO                            RCS/TODO,v                  2003.1
 
@@ -171,9 +171,9 @@ t/t99clean.t                    t/RCS/t99clean.t,v      2003.2
 
 # Various scraps of documentation.
 Notes/FAQ                       Notes/RCS/FAQ,v                     2007.1
-Notes/Working.Versions          Notes/RCS/Working.Versions,v        2004.1
+Notes/Working.Versions          Notes/RCS/Working.Versions,v        2007.3
 Notes/bug.reports               Notes/RCS/bug.reports,v             100.7
-Notes/environment.variables     Notes/RCS/environment.variables,v   2005.2
+Notes/environment.variables     Notes/RCS/environment.variables,v   2007.1
 Notes/eprintf                   Notes/RCS/eprintf,v                 100.1
 Notes/hpux                      Notes/RCS/hpux,v                    100.2
 Notes/hpux-gcc-build.sh         Notes/RCS/hpux-gcc-build.sh,v       100.3
@@ -207,8 +207,8 @@ examples/fetchscroll.pl                 examples/RCS/fetchscroll.pl,v           
 
 inc/ExtUtils/AutoInstall.pm             inc/ExtUtils/AutoInstall.pm             -
 
-DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2007.13
+DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2007.14
 DBD-Informix.msd            RCS/DBD-Informix.msd,v      2007.16
-DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      2007.27
+DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2007.31 $
 mknmd.sh                    RCS/mknmd.sh,v              2007.2
 prodverstamp.sh             RCS/prodverstamp.sh,v       2007.8

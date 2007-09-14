@@ -1,9 +1,9 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2007.12 2007/09/04 05:47:03 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2007.13 2007/09/14 15:32:31 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04))
+# (IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -106,7 +106,7 @@ if ($NTConfiguration)
     });
 }
 
-my $dbd_ix = "2007.0904";
+my $dbd_ix = "2007.0914";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -142,14 +142,16 @@ my %opts = (
            );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
 %;
 
+my($Perl) = $^X;    # Translate inscrutable to scrutable!
+
 # log key platform information to help me help you quickly
-print "Perl:     perl v$] @Config{qw(archname dlsrc)}\n";
+print "Perl:     $Perl v$] @Config{qw(archname dlsrc)}\n";
 print "System:   @Config{qw(myuname)}\n";
 
 # Sometimes the 'use' commands above enforce the same restriction as
@@ -672,10 +674,11 @@ if ($NTConfiguration)
         # Do not override default version of $opts{LD}
     }
 }
-elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
+elsif (($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc}) ||
+        defined $ENV{DBD_INFORMIX_DEBUG_LIBDETECTION})
 {
     # Unix configuration (awkward squad subset of Unix configurations)
-    # NB: On AIX 4.2, the C compiler cannot be used to create share libraries.
+    # NB: On AIX 4.2, the C compiler cannot be used to create shared libraries.
     # This problem noted and fixed by JL, 1999-09.
     print &nlws(qq{
         Uh oh!  We're on a machine which does not use the C compiler to
@@ -695,7 +698,8 @@ elsif ($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc})
             what we do; it's horrid but it works, usually!
             });
         my $esqlscript = (-f $esql) ? $esql : "$ID/bin/esql";
-        my $libs = `sed 's/^[   ]*exec/echo/' $esqlscript | sh -s -- -o pseudonym $esqlc_flags dbd::ix.o`
+        # Note the double backslash to get \s to the subordinate Perl.
+        my $libs = `$Perl -pe 's/^\\s*exec/echo/' $esqlscript | sh -s -- -o pseudonym $esqlc_flags dbd::ix.o`
             || die "Couldn't execute $esqlscript to determine the ESQL/C libraries\n";
         $libs =~ s/\n/ /gm;
         $libs =~ s/^.* dbd::ix.o / /;
@@ -775,8 +779,8 @@ for $file (qw(esqlcc esqlld esqlsed))
 }
 
 # Probably cause for being thrown out of The Perl Institute, but TMTOWTDI!
-system "$^X t/dtgen.pl > t/dtgen.sql";
-system "$^X t/decgen.pl > t/decgen.sql";
+system "$Perl t/dtgen.pl > t/dtgen.sql";
+system "$Perl t/decgen.pl > t/decgen.sql";
 
 WriteMakefile(%opts);
 
@@ -794,7 +798,7 @@ sub dbd_ix_die
     warn $msg;
     my($line) = "+" . "-" x 72 . "+";
     print "\n$line\n";
-    system "$^X -V";    # Generate 'perl -V' output; it is forgotten too often.
+    system "$Perl -V";    # Generate 'perl -V' output; it is forgotten too often.
     print "$line\n\n";
     die "Farewell!";
 }
@@ -1111,7 +1115,7 @@ sub Write_DBD_Informix_Defaults
     $ENV{INFORMIXSERVER} = "" unless defined $ENV{INFORMIXSERVER};
 
     print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)
+#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004-07 Jonathan Leffler
@@ -1125,7 +1129,7 @@ sub Write_DBD_Informix_Defaults
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
-    $VERSION = "2007.0904";
+    $VERSION = "2007.0914";
     $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1149,7 +1153,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2007.0904 (2007-09-04)).
+(IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to,
