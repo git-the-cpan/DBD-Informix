@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: kludge.h,v $
-@(#)Version:        $Revision: 1.11 $
-@(#)Last changed:   $Date: 2005/10/10 07:44:18 $
+@(#)Version:        $Revision: 1.14 $
+@(#)Last changed:   $Date: 2008/02/24 06:55:48 $
 @(#)Purpose:        Provide support for KLUDGE macro
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1995,1997-2000,2003,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1995,1997-2000,2003,2005,2008
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*TABSTOP=4*/
@@ -16,9 +16,9 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_kludge_h[] = "@(#)$Id: kludge.h,v 1.11 2005/10/10 07:44:18 jleffler Exp $";
+const char jlss_id_kludge_h[] = "@(#)$Id: kludge.h,v 1.14 2008/02/24 06:55:48 jleffler Exp $";
 #endif /* lint */
-#endif	/* MAIN_PROGRAM */
+#endif /* MAIN_PROGRAM */
 
 /*
  * The KLUDGE macro is enabled by default.
@@ -27,51 +27,58 @@ const char jlss_id_kludge_h[] = "@(#)$Id: kludge.h,v 1.11 2005/10/10 07:44:18 jl
 
 #ifdef KLUDGE_DISABLE
 
-#define KLUDGE(x)	((void)0)
-#define FEATURE(x)	((void)0)
+#define KLUDGE(x)   ((void)0)
+#define FEATURE(x)  ((void)0)
 
 #else
 
 /*
- * The Solaris C compiler without either -O or -g removes unreferenced
- * strings, which defeats the purpose of the KLUDGE macro.  With such
- * compilers, use -DKLUDGE_FORCE to force the variable to be used.
- */
-
-#ifdef lint
-#define KLUDGE_FORCE
-#endif /* lint */
-
-/*
+** The Solaris C compiler without either -O or -g removes unreferenced
+** strings, which defeats the purpose of the KLUDGE macro.
+** If your compiler is lenient enough, you can use -DKLUDGE_NO_FORCE,
+** but most modern compilers make KLUDGE_FORCE preferable.
+**
 ** The GNU C Compiler will complain about unused variables if told to
 ** do so.  Setting KLUDGE_FORCE ensures that it doesn't complain about
-** any kludges.  On the other hand, it is better to leave kludges
-** visible during the compilation, so don't set KLUDGE_FORCE if
-** __GNUC__ is defined.
+** any kludges.
 */
 
-/*
- * Example use: KLUDGE("Fix macro to accept arguments with commas");
- * Note that the argument is now a string.  An alternative (and
- * previously used) design is to have the argument as a non-string:
- *              KLUDGE(Fix macro to accept arguments with commas);
- * This allows it to work with traditional compilers but runs foul of
- * the absence of string concatenation, and you have to avoid commas
- * in the reason string, etc.
- */
-
-#define KLUDGE_DEC	static const char kludge[]
-#define FEATURE_DEC	static const char feature[]
-
-extern void kludge_use(const char *str);
-#define KLUDGE(x)	{ KLUDGE_DEC = "@(#)KLUDGE: " x; KLUDGE_USE(kludge); }
-#define FEATURE(x)	{ FEATURE_DEC = "@(#)Feature: " x; KLUDGE_USE(feature); }
+#undef KLUDGE_FORCE
+#ifndef KLUDGE_NO_FORCE
+#define KLUDGE_FORCE
+#endif /* KLUDGE_NO_FORCE */
 
 #ifdef KLUDGE_FORCE
-#define KLUDGE_USE(x)	kludge_use(x)
+#define KLUDGE_USE(x)   kludge_use(x)
 #else
-#define KLUDGE_USE(x)	((void)0)
+#define KLUDGE_USE(x)   ((void)0)
 #endif /* KLUDGE_FORCE */
+
+/*
+** Example use: KLUDGE("Fix macro to accept arguments with commas");
+** Note that the argument is now a string.  An alternative (and
+** previously used) design is to have the argument as a non-string:
+**              KLUDGE(Fix macro to accept arguments with commas);
+** This allows it to work with traditional compilers but runs foul of
+** the absence of string concatenation, and you have to avoid commas
+** in the reason string, etc.
+*/
+
+#define KLUDGE_DEC  static const char kludge[]
+#define FEATURE_DEC static const char feature[]
+
+#define KLUDGE(x)   { KLUDGE_DEC = "@(#)KLUDGE: " x; KLUDGE_USE(kludge); }
+#define FEATURE(x)  { FEATURE_DEC = "@(#)Feature: " x; KLUDGE_USE(feature); }
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+extern void kludge_use(const char *str);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* KLUDGE_DISABLE */
 

@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqlc.h,v $
-@(#)Version:        $Revision: 2007.1 $
-@(#)Last changed:   $Date: 2007/02/10 01:25:20 $
+@(#)Version:        $Revision: 2008.1 $
+@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
 @(#)Purpose:        Include all relevant ESQL/C type definitions
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1992-93,1995-2004,2006-07
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1992-93,1995-2004,2006-08
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*
@@ -77,9 +77,9 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2007.1 2007/02/10 01:25:20 jleffler Exp $";
+const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
 #endif /* lint */
-#endif	/* MAIN_PROGRAM */
+#endif /* MAIN_PROGRAM */
 
 #ifdef HAVE_CONFIG_H
 /*
@@ -153,7 +153,7 @@ extern "C" {
 ** header usually does not work.
 */
 
-/* -- Include Files	*/
+/* -- Include Files */
 
 #include <datetime.h>
 #include <decimal.h>
@@ -279,8 +279,8 @@ extern int      sqgetdbs(int *ret_fcnt,
 ** identifiers.
 ** JL 2004-08-24: Simplify - assume longer names.
 */
-#define SQL_NAMELEN	128
-#define SQL_USERLEN	32
+#define SQL_NAMELEN 128
+#define SQL_USERLEN 32
 
 /*
 ** Note that a fully specified table name in an SQL statement could be:
@@ -292,21 +292,21 @@ extern int      sqgetdbs(int *ret_fcnt,
 ** = 584     characters in total.
 ** Database name and server name cannot contain non-alphanumerics.
 */
-#define SQL_TABNAMELEN	(3 * SQL_NAMELEN + SQL_USERLEN + sizeof("@:''."))
-#define SQL_COLNAMELEN	(SQL_NAMELEN + 1)
+#define SQL_TABNAMELEN  (3 * SQL_NAMELEN + SQL_USERLEN + sizeof("@:''."))
+#define SQL_COLNAMELEN  (SQL_NAMELEN + 1)
 
-#define loc_mode	lc_union.lc_file.lc_mode
-#define sqlva		sqlvar_struct
+#define loc_mode    lc_union.lc_file.lc_mode
+#define sqlva       sqlvar_struct
 
 /* -- Type Definitions */
 
-typedef loc_t		    Blob;
-typedef struct decimal	Decimal;
-typedef struct dtime	Datetime;
-typedef struct intrvl	Interval;
-typedef struct sqlca_s	Sqlca;
-typedef struct sqlda	Sqlda;
-typedef struct sqlva	Sqlva;
+typedef loc_t           Blob;
+typedef struct decimal  Decimal;
+typedef struct dtime    Datetime;
+typedef struct intrvl   Interval;
+typedef struct sqlca_s  Sqlca;
+typedef struct sqlda    Sqlda;
+typedef struct sqlva    Sqlva;
 
 #if ESQLC_EFFVERSION >= 900
 
@@ -321,26 +321,26 @@ typedef void *Lvarchar;
 /* They are essentially always available in ESQL/C.  */
 /* Some (old) versions of XPS did not support stored procedures. */
 /* Some (old) versions of XPS did not support BYTE and TEXT blobs. */
-#define ESQLC_STORED_PROCEDURES		1
-#define ESQLC_VARIABLE_CURSORS		1
+#define ESQLC_STORED_PROCEDURES     1
+#define ESQLC_VARIABLE_CURSORS      1
 
 #if ESQLC_EFFVERSION >= 600
-#define ESQLC_CONNECT		1
+#define ESQLC_CONNECT       1
 #define ESQLC_SQLSTATE      1
-#define ESQLC_RGETLMSG		1
+#define ESQLC_RGETLMSG      1
 #endif
 
 #if ESQLC_EFFVERSION >= 720
-#define ESQLC_CONNECT_DORMANT		1
+#define ESQLC_CONNECT_DORMANT       1
 #endif
 
 #if ESQLC_EFFVERSION >= 900
-#define ESQLC_IUSTYPES		1
-#define ESQLC_IUS_TYPES		/* Deprecated - use ESQL_IUSTYPES */
+#define ESQLC_IUSTYPES      1
+#define ESQLC_IUS_TYPES     /* Deprecated - use ESQL_IUSTYPES */
 #endif
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif	/* ESQLC_H */
+#endif /* ESQLC_H */

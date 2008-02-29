@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqltype.h,v $
-@(#)Version:        $Revision: 2007.2 $
-@(#)Last changed:   $Date: 2007/08/20 00:31:15 $
+@(#)Version:        $Revision: 2008.1 $
+@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
 @(#)Purpose:        Platform and Version Independent Types for ESQL/C
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 2001-07
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 2001-08
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*TABSTOP=4*/
@@ -16,7 +16,7 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esqltype_h[] = "@(#)$Id: esqltype.h,v 2007.2 2007/08/20 00:31:15 jleffler Exp $";
+const char jlss_id_esqltype_h[] = "@(#)$Id: esqltype.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
@@ -46,7 +46,7 @@ const char jlss_id_esqltype_h[] = "@(#)$Id: esqltype.h,v 2007.2 2007/08/20 00:31
 ** JL 2007-02-09: Note ESQL/C 3.00 is in the field too.
 */
 
-#if ESQLC_VERSION >= 700 && ESQLC_VERSION < 921 
+#if ESQLC_VERSION >= 700 && ESQLC_VERSION < 921
 
 #include <limits.h>
 
@@ -132,7 +132,7 @@ typedef uint4   ixUint4;
 typedef muint   ixMuint;
 typedef mulong  ixMulong;
 
-#endif  /* ESQLC_VERSION 700..921 */
+#endif /* ESQLC_VERSION 700..921 */
 
 
 /* printf() format strings */

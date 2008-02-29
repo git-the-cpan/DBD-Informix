@@ -1,15 +1,14 @@
 /*
 @(#)File:           $RCSfile: ixblob.ec,v $
-@(#)Version:        $Revision: 2005.2 $
-@(#)Last changed:   $Date: 2005/08/12 17:22:43 $
+@(#)Version:        $Revision: 2008.1 $
+@(#)Last changed:   $Date: 2008/02/11 05:33:53 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1996-98,2000-01,2003,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1996-98,2000-01,2003,2005,2007-08
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*TABSTOP=4*/
-/*LINTLIBRARY*/
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -17,7 +16,7 @@
 
 #ifndef _XOPEN_SOURCE
 /* JL 2005-07-25: Some systems (eg AIX 5.2) define _XOPEN_SOURCE 600 */
-#define _XOPEN_SOURCE	500
+#define _XOPEN_SOURCE   500
 #endif /* _XOPEN_SOURCE */
 
 #include <assert.h>
@@ -38,17 +37,17 @@
 ** equivalent to F_OK and defined as 00.
 */
 #ifndef F_OK
-#define F_OK	0
+#define F_OK    0
 #endif /* F_OK */
 
 #ifdef DEBUG
 #include "esqlutil.h"
 #endif /* DEBUG */
 
-#define FILENAMESIZE	128
+#define FILENAMESIZE    128
 
 #ifndef DEFAULT_TMPDIR
-#define DEFAULT_TMPDIR	"/tmp"
+#define DEFAULT_TMPDIR  "/tmp"
 #endif
 
 static BlobLocn def_blob_locn = BLOB_IN_MEMORY;
@@ -56,47 +55,48 @@ static Blob zero_blob = { 0 };
 static char *blob_dir = 0;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: ixblob.ec,v 2005.2 2005/08/12 17:22:43 jleffler Exp $";
-#endif
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_ixblob_ec[] = "@(#)$Id: ixblob.ec,v 2008.1 2008/02/11 05:33:53 jleffler Exp $";
+#endif /* lint */
 
 BlobLocn blob_getlocmode(void)
 {
-	return(def_blob_locn);
+    return(def_blob_locn);
 }
 
 void blob_setlocmode(BlobLocn locn)
 {
-	def_blob_locn = locn;
+    def_blob_locn = locn;
 }
 
 void blob_setdirectory(const char *dir)
 {
-	if (blob_dir != 0)
-		free(blob_dir);
-	blob_dir = (char *)malloc(strlen(dir)+1);
-	if (blob_dir != 0)
-		strcpy(blob_dir, dir);
+    if (blob_dir != 0)
+        free(blob_dir);
+    blob_dir = (char *)malloc(strlen(dir)+1);
+    if (blob_dir != 0)
+        strcpy(blob_dir, dir);
 }
 
 const char *blob_getdirectory(void)
 {
-	const char *rv = blob_dir;
-	if (rv == 0)
-		rv = sql_dbtemp();
-	return rv;
+    const char *rv = blob_dir;
+    if (rv == 0)
+        rv = sql_dbtemp();
+    return rv;
 }
 
 const char *sql_dbtemp(void)
 {
-	static char    *db_temp = 0;
+    static const char *db_temp = 0;
 
-	if (db_temp == (char *)0)
-	{
-		if (((db_temp = getenv("DBTEMP")) == (char *)0) &&
-			((db_temp = getenv("TMPDIR")) == (char *)0))
-			db_temp = DEFAULT_TMPDIR;
-	}
-	return(db_temp);
+    if (db_temp == 0)
+    {
+        if (((db_temp = getenv("DBTEMP")) == 0) &&
+            ((db_temp = getenv("TMPDIR")) == 0))
+            db_temp = DEFAULT_TMPDIR;
+    }
+    return(db_temp);
 }
 
 /*
@@ -124,80 +124,80 @@ const char *sql_dbtemp(void)
 */
 char *blob_newfilename(void)
 {
-	char            tmp[FILENAMESIZE];
-	char *rv;
-	static int counter = 0;
+    char            tmp[FILENAMESIZE];
+    char *rv;
+    static int counter = 0;
 
-	do
-	{
-		sprintf(tmp, "%s/blob.%05d.%06d", blob_getdirectory(), (int)getpid(), ++counter);
-	}
-	while (access(tmp, F_OK) == 0);
+    do
+    {
+        sprintf(tmp, "%s/blob.%05d.%06d", blob_getdirectory(), (int)getpid(), ++counter);
+    }
+    while (access(tmp, F_OK) == 0);
 
-	/* Cast result of malloc() to placate C++ compilers (eg MSVC) */
-	rv = (char *)malloc(strlen(tmp) + 1);
-	if (rv != (char *)0)
-		strcpy(rv, tmp);
-	return(rv);
+    /* Cast result of malloc() to placate C++ compilers (eg MSVC) */
+    rv = (char *)malloc(strlen(tmp) + 1);
+    if (rv != (char *)0)
+        strcpy(rv, tmp);
+    return(rv);
 }
 
 static int blob_locinnamefile(Blob *blob)
 {
-	blob->loc_fname = blob_newfilename();
-	if (blob->loc_fname == (char *)0)
-		return(-1);
-	blob->loc_loctype = LOCFNAME;
-	blob->loc_mode = 0666;
-	blob->loc_oflags = LOC_WONLY | LOC_RONLY;
-	blob->loc_size = -1;
-	blob->loc_indicator = 0;
-	blob->loc_fd = -1;
+    blob->loc_fname = blob_newfilename();
+    if (blob->loc_fname == (char *)0)
+        return(-1);
+    blob->loc_loctype = LOCFNAME;
+    blob->loc_mode = 0666;
+    blob->loc_oflags = LOC_WONLY | LOC_RONLY;
+    blob->loc_size = -1;
+    blob->loc_indicator = 0;
+    blob->loc_fd = -1;
 #ifdef DEBUG
-	dump_blob(stderr, "blob_locinnamefile()", blob);
-#endif	/* DEBUG */
-	return(0);
+    dump_blob(stderr, "blob_locinnamefile()", blob);
+#endif /* DEBUG */
+    return(0);
 }
 
 static int blob_locinanonfile(Blob *blob)
 {
-	char            tmp[FILENAMESIZE];
+    char            tmp[FILENAMESIZE];
 
-	/* Open a file and then delete it, but keep it open. */
-	/* The system cleans it up regardless of how we exit */
-	strcpy(tmp, sql_dbtemp());
-	strcat(tmp, "/blob.XXXXXX");
-	blob->loc_loctype = LOCFILE;
-	blob->loc_fname = (char *)0;
-	blob->loc_mode = 0666;
-	blob->loc_oflags = LOC_WONLY | LOC_RONLY;
-	blob->loc_size = -1;
-	blob->loc_indicator = 0;
-	mktemp(tmp);
-	blob->loc_fd = open(tmp, 0666, O_RDWR);
-	if (blob->loc_fd < 0)
-	{
-		return(-1);
-	}
-	unlink(tmp);
+    /* Open a file and then delete it, but keep it open. */
+    /* The system cleans it up regardless of how we exit */
+    strcpy(tmp, sql_dbtemp());
+    strcat(tmp, "/blob.XXXXXX");
+    blob->loc_loctype = LOCFILE;
+    blob->loc_fname = (char *)0;
+    blob->loc_mode = 0666;
+    blob->loc_oflags = LOC_WONLY | LOC_RONLY;
+    blob->loc_size = -1;
+    blob->loc_indicator = 0;
+    mktemp(tmp);
+    blob->loc_fd = open(tmp, 0666, O_RDWR);
+    if (blob->loc_fd < 0)
+    {
+        return(-1);
+    }
+    unlink(tmp);
 #ifdef DEBUG
-	dump_blob(stderr, "blob_locinanonfile()", blob);
-#endif	/* DEBUG */
-	return(0);
+    dump_blob(stderr, "blob_locinanonfile()", blob);
+#endif /* DEBUG */
+    return(0);
 }
 
 static int blob_locinmem(Blob *blob)
 {
-	/* Use memory only */
-	blob->loc_loctype = LOCMEMORY;
-	blob->loc_size = 0;
-	blob->loc_bufsize = -1;
-	blob->loc_buffer = (char *)0;
-	blob->loc_indicator = 0;
-	blob->loc_oflags = 0;
+    /* Use memory only */
+    blob->loc_loctype = LOCMEMORY;
+    blob->loc_size = 0;
+    blob->loc_bufsize = -1;
+    blob->loc_buffer = (char *)0;
+    blob->loc_indicator = 0;
+    blob->loc_oflags = 0;
 #ifdef DEBUG
-	dump_blob(stderr, "blob_locinmem()", blob);
-#endif	/* DEBUG */
-	return(0);
+    dump_blob(stderr, "blob_locinmem()", blob);
+#endif /* DEBUG */
+    return(0);
 }
 
 /*
@@ -206,70 +206,70 @@ static int blob_locinmem(Blob *blob)
 */
 int blob_locate(Blob * blob, BlobLocn locn)
 {
-	int rc;
+    int rc;
 
-	*blob = zero_blob;
-	blob->loc_status = 0;
-	blob->loc_type = SQLTEXT;
-	blob->loc_xfercount = 0;
-	if (locn == BLOB_DEFAULT)
-		locn = blob_getlocmode();
-	switch(locn)
-	{
-	case BLOB_IN_NAMEFILE:
-		rc = blob_locinnamefile(blob);
-		break;
-	case BLOB_IN_ANONFILE:
-		rc = blob_locinanonfile(blob);
-		break;
-	case BLOB_IN_MEMORY:
-		rc = blob_locinmem(blob);
-		break;
-	case BLOB_DEFAULT:
-	default:
-		assert(0);
-		rc = -1;
-		break;
-	}
-	return(rc);
+    *blob = zero_blob;
+    blob->loc_status = 0;
+    blob->loc_type = SQLTEXT;
+    blob->loc_xfercount = 0;
+    if (locn == BLOB_DEFAULT)
+        locn = blob_getlocmode();
+    switch(locn)
+    {
+    case BLOB_IN_NAMEFILE:
+        rc = blob_locinnamefile(blob);
+        break;
+    case BLOB_IN_ANONFILE:
+        rc = blob_locinanonfile(blob);
+        break;
+    case BLOB_IN_MEMORY:
+        rc = blob_locinmem(blob);
+        break;
+    case BLOB_DEFAULT:
+    default:
+        assert(0);
+        rc = -1;
+        break;
+    }
+    return(rc);
 }
 
 void blob_release(Blob *blob, int dflag)
 {
-	switch (blob->loc_loctype)
-	{
-	case LOCFILE:
-		if (blob->loc_fd >= 0)
-			close(blob->loc_fd);
-		blob->loc_fd = -1;
-		break;
+    switch (blob->loc_loctype)
+    {
+    case LOCFILE:
+        if (blob->loc_fd >= 0)
+            close(blob->loc_fd);
+        blob->loc_fd = -1;
+        break;
 
-	case LOCFNAME:
-		if (blob->loc_fd >= 0)
-			close(blob->loc_fd);
-		blob->loc_fd = -1;
-		if (blob->loc_fname != (char *)0)
-			{
-			if (dflag)
-				unlink(blob->loc_fname);
-			free(blob->loc_fname);
-			blob->loc_fname = 0;
-			}
-		break;
+    case LOCFNAME:
+        if (blob->loc_fd >= 0)
+            close(blob->loc_fd);
+        blob->loc_fd = -1;
+        if (blob->loc_fname != (char *)0)
+            {
+            if (dflag)
+                unlink(blob->loc_fname);
+            free(blob->loc_fname);
+            blob->loc_fname = 0;
+            }
+        break;
 
-	case LOCMEMORY:
-		if (blob->loc_buffer != (char *)0)
-			free(blob->loc_buffer);
-		blob->loc_buffer = (char *)0;
-		blob->loc_bufsize = -1;
-		blob->loc_mflags = 0;
-		blob->loc_size = 0;
-		blob->loc_indicator = 0;
-		break;
+    case LOCMEMORY:
+        if (blob->loc_buffer != (char *)0)
+            free(blob->loc_buffer);
+        blob->loc_buffer = (char *)0;
+        blob->loc_bufsize = -1;
+        blob->loc_mflags = 0;
+        blob->loc_size = 0;
+        blob->loc_indicator = 0;
+        break;
 
-	case LOCUSER:
-	default:
-		assert(0);
-		break;
-	}
+    case LOCUSER:
+    default:
+        assert(0);
+        break;
+    }
 }

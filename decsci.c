@@ -1,135 +1,247 @@
 /*
 @(#)File:           $RCSfile: decsci.c,v $
-@(#)Version:        $Revision: 3.4 $
-@(#)Last changed:   $Date: 2005/03/21 08:48:53 $
+@(#)Version:        $Revision: 4.6 $
+@(#)Last changed:   $Date: 2008/01/28 05:25:26 $
 @(#)Purpose:        Exponential formatting of DECIMALs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005,2007-08
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 #ifdef TEST
 #define USE_DEPRECATED_DECSCI_FUNCTIONS
 #endif /* TEST */
 
-#include "esqlc.h"
+#include <assert.h>
+#include <string.h>
 #include "decsci.h"
-#include "decintl.h"
 
-#ifndef __STDC__
-/*
-** JL - 1999-12-06
-** For some versions of ESQL/C (eg 7.23), the dececvt() and decfcvt()
-** functions are not declared unless __STDC__ is defined.  Patch this
-** up by declaring them, prototype and all, if __STDC__ is not defined.
-*/
-extern char *dececvt(ifx_dec_t *np, int ndigit, int *decpt, int *sign);
-#endif /* __STDC__ */
+/* -1273: Output buffer is NULL or too small to hold the result. */
+/* Explanation from finderr is not ideal, but will probably do.  */
+enum { ERR_FMTBUFFERTOOSHORT = -1273 };
 
-#define SIGN(s, p)  ((s) ? '-' : ((p) ? '+' : ' '))
-#define VALID(n)	(((n) <= 0) ? 6 : (((n) > 32) ? 32 : (n)))
-
-#define CONST_CAST(t, v)	((t)(v))
+#define SIGN(s, p)  (((s) == DECPOSNEG) ? '-' : ((p) ? '+' : ' '))
+#define VALID(n)    (((n) <= 0) ? 6 : (((n) > 32) ? 32 : (n)))
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: decsci.c,v 3.4 2005/03/21 08:48:53 jleffler Exp $";
-#endif
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_decsci_c[] = "@(#)$Id: decsci.c,v 4.6 2008/01/28 05:25:26 jleffler Exp $";
+#endif /* lint */
 
 #ifdef USE_DEPRECATED_DECSCI_FUNCTIONS
-char *decsci(const ifx_dec_t *d, int ndigit, int plus)
+char *decsci(const ifx_dec_t *d, int ndigits, int plus)
 {
-	/* For 32 digits, 3-digit exponent, leading blanks, etc, 42 is enough */
-	static char buffer[42];
-	if (dec_sci(d, ndigit, plus, buffer, sizeof(buffer)) != 0)
-		*buffer = '\0';
-	return(buffer);
+    /* For 32 digits, 3-digit exponent, leading blanks, etc, 42 is enough */
+    static char buffer[42];
+    if (dec_sci(d, ndigits, plus, buffer, sizeof(buffer)) != 0)
+        *buffer = '\0';
+    return(buffer);
 }
 #endif /* USE_DEPRECATED_DECSCI_FUNCTIONS */
 
-/*	Format a scientific notation number */
-int dec_sci(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_t buflen)
+/* dec_sci_round - round at ndigits (rather than ndigits after decimal point) */
+/*
+** The function decround() rounds a decimal value to a given number of
+** decimal places.  This code should round to a given number of digits
+** instead.  It can exploit decround() by calculating the correct number
+** of decimal places to specify.
+** Given:
+**  d = 3.141592E+00, rounding to n digits == decround(d, n-1).
+**  d = 3.141592E+01, rounding to n digits == decround(d, n-2).
+**  d = 3.141592E+02, rounding to n digits == decround(d, n-3).
+**  d = 3.141592E-01, rounding to n digits == decround(d, n+0).
+**  d = 3.141592E-02, rounding to n digits == decround(d, n+1).
+**  d = 3.141592E-03, rounding to n digits == decround(d, n+2).
+**  So for d with decimal exponent e,      => decround(d, n - (e + 1))
+** Problem: given dec_exp, determining the exponent of 10 is not entirely trivial.
+**  d = 3.141592E+00, dec_exp =  1, dec_dgts[0] =  3
+**  d = 3.141592E+01, dec_exp =  1, dec_dgts[0] = 31
+**  d = 3.141592E+02, dec_exp =  2, dec_dgts[0] =  3
+**  d = 3.141592E-01, dec_exp =  0, dec_dgts[0] = 31
+**  d = 3.141592E-02, dec_exp =  0, dec_dgts[0] =  3
+**  d = 3.141592E-03, dec_exp = -1, dec_dgts[0] = 31
+** Hence: e = 2 * (dec_exp - 1) + (dec_dgts[0] >= 10);
+*/
+static void dec_sci_round(ifx_dec_t *dp, int ndigits)
 {
-	char     *dst = buffer;
-	char     *src;
-	int       sn;
-	int       dp;
-	ifx_dec_t z;
+    assert(!dec_is_zero(dp) && !dec_is_null(dp));
+    int e = 2 * (dp->dec_exp - 1) + (dp->dec_dgts[0] >= 10);
+    decround(dp, ndigits - (e + 1));
+}
 
-	if (d->dec_pos == DECPOSNULL)
-	{
-		*dst = '\0';
-		return(0);
-	}
+/*  Format a scientific notation number */
+int dec_sci(const ifx_dec_t *d, int ndigits, int plus, char *buffer, size_t buflen)
+{
+    char     *dst = buffer;
+    int       digitpair;
+    int       decexp = 0;
+    size_t    i;
+    ifx_dec_t dv;
 
-	ndigit = VALID(ndigit);
-	src = dececvt(CONST_CAST(ifx_dec_t *, d), ndigit, &dp, &sn);
-	*dst++ = SIGN(sn, plus);	/* Sign */
-	*dst++ = *src++;			/* Digit before decimal point */
-	*dst++ = '.';				/* Decimal point */
-	while (*src)				/* Digits after decimal point */
-		*dst++ = *src++;
-	deccvdbl(0.0, &z);
-	dst = dec_setexp(dst, dp - (deccmp(CONST_CAST(ifx_dec_t *, d), &z) != 0));	/* Exponent */
-	return(0);
+    if (dec_is_null(d))
+    {
+        *dst = '\0';
+        return(0);
+    }
+
+    ndigits = VALID(ndigits);
+    if (buflen < ndigits + sizeof("+.E+123"))
+    {
+        *dst = '\0';
+        return(ERR_FMTBUFFERTOOSHORT);
+    }
+
+    /* Rounding to n digits total cannot generate zero from a non-zero number */
+    if (dec_is_zero(d))
+    {
+        *dst++ = SIGN(DECPOSPOS, plus);    /* Sign */
+        *dst++ = '0';
+        if (ndigits > 1)
+            *dst++ = '.';
+        memset(dst, '0', ndigits - 1);
+        dst = dec_setexp(dst + ndigits - 1, 0); /* Exponent */
+        return(0);
+    }
+
+    dv = *d;
+    dec_sci_round(&dv, ndigits);
+
+    *dst++ = SIGN(dv.dec_pos, plus);    /* Sign */
+    decexp = 0;
+    digitpair = dv.dec_dgts[0];
+    if (digitpair >= 10)
+    {
+        decexp = 1;
+        *dst++ = digitpair / 10 + '0';
+        if (ndigits > 1)
+        {
+            *dst++ = '.';
+            *dst++ = digitpair % 10 + '0';
+        }
+        ndigits -= 2;
+    }
+    else
+    {
+        decexp = 0;
+        *dst++ = digitpair % 10 + '0';
+        if (ndigits > 1)
+            *dst++ = '.';
+        ndigits--;
+    }
+
+    for (i = 1; i < dv.dec_ndgts && ndigits > 0; i++)
+    {
+        digitpair = dv.dec_dgts[i];
+        *dst++ = digitpair / 10 + '0';
+        ndigits--;
+        if (ndigits > 0)
+        {
+            *dst++ = digitpair % 10 + '0';
+            ndigits--;
+        }
+    }
+    if (ndigits > 0)
+    {
+        memset(dst, '0', ndigits);
+        dst += ndigits;
+    }
+    decexp = (2 * dv.dec_exp) + decexp - 2;
+    dst = dec_setexp(dst, decexp);  /* Exponent */
+
+    return(0);
 }
 
 #ifdef TEST
 
 #include <stdio.h>
-#include <string.h>
+#include "phasedtest.h"
 
-#define DIM(x)	(sizeof(x)/sizeof(*(x)))
-
-static char    *values[] =
+typedef struct p1_test
 {
- "0",
- "+3.14159265358979323844e+00",
- "-3.14159265358979323844e+01",
- " 3.14159265358979323844e+02",
- "+3.14159265358979323844e+03",
- "-3.14159265358979323844e+34",
- " 3.14159265358979323844e+68",
- "+3.14159265358979323844e+99",
- "-3.14159265358979323844e+100",
- " 9.99999999999999999999e+125",
- "+1.00000000000000000000e+126",
- "-3.14159265358979323844e+00",
- " 3.14159265358979323844e-01",
- "+3.14159265358979323844e-02",
- "-3.14159265358979323844e-03",
- " 3.14159265358979323844e-34",
- "+3.14159265358979323844e-68",
- "-3.14159265358979323844e-99",
- " 3.14159265358979323844e-100",
- "+3.14159265358979323844e-126",
- "-3.14159265358979323844e-127",
- " 1.00000000000000000000e-128",
- "+1.00000000000000000000e-129",
- "-1.00000000000000000000e-130",
- " 9.99999999999999999999e-131",
+    const char *input;
+    int         dp;
+    int         plus;
+    int         rc;
+    const char *output;
+}   p1_test;
+
+static p1_test values[] =
+{
+    { "0",                             1, 0,     0, " 0E+00 "                      },
+    { "0",                             2, 1,     0, "+0.0E+00 "                    },
+    { "0",                             3, 0,     0, " 0.00E+00 "                   },
+    { "0",                             4, 1,     0, "+0.000E+00 "                  },
+    { "0",                             5, 0,     0, " 0.0000E+00 "                 },
+    { "+3.14159265358979323844e+00",   1, 1,     0, "+3E+00 "                      },
+    { "+3.14159265358979323844e+00",   2, 0,     0, " 3.1E+00 "                    },
+    { "+3.14159265358979323844e+00",   3, 1,     0, "+3.14E+00 "                   },
+    { "+3.14159265358979323844e+00",   4, 0,     0, " 3.142E+00 "                  },
+    { "+3.14159265358979323844e+00",   5, 1,     0, "+3.1416E+00 "                 },
+    { "+3.14159265358979323844e+00",   6, 1,     0, "+3.14159E+00 "                },
+    { "-3.14159265358979323844e+01",   8, 0,     0, "-3.1415927E+01 "              },
+    { " 3.14159265358979323844e+02",  10, 1,     0, "+3.141592654E+02 "            },
+    { "+3.14159265358979323844e+03",  12, 0,     0, " 3.14159265359E+03 "          },
+    { "-3.14159265358979323844e+34",  13, 1,     0, "-3.141592653590E+34 "         },
+    { " 3.14159265358979323844e+68",  14, 0,     0, " 3.1415926535898E+68 "        },
+    { "+3.14159265358979323844e+99",  15, 1,     0, "+3.14159265358979E+99 "       },
+    { "-3.14159265358979323844e+100", 21, 0,     0, "-3.14159265358979323844E+100" },
+    { " 9.99999999999999999999e+123", 20, 1,     0, "+1.0000000000000000000E+124"  },
+    { " 9.99999999999999999999e+123", 21, 0,     0, " 9.99999999999999999999E+123" },
+    { "+1.00000000000000000000e+124", 12, 1,     0, "+1.00000000000E+124"          },
+    { " 9.99999999999999999999e+124", 21, 0,     0, " 9.99999999999999999999E+124" },
+    { "+1.00000000000000000000e+125", 14, 1, -1213, ""                             },
+    { " 9.99999999999999999999e+125", 14, 0, -1213, ""                             },
+    { "+1.00000000000000000000e+126", 14, 1, -1213, ""                             },
+    { "-3.14159265358979323844e+00",  13, 0,     0, "-3.141592653590E+00 "         },
+    { " 3.14159265358979323844e-01",  13, 1,     0, "+3.141592653590E-01 "         },
+    { "+3.14159265358979323844e-02",  13, 0,     0, " 3.141592653590E-02 "         },
+    { "-3.14159265358979323844e-03",  13, 1,     0, "-3.141592653590E-03 "         },
+    { " 3.14159265358979323844e-34",  13, 0,     0, " 3.141592653590E-34 "         },
+    { "+3.14159265358979323844e-68",  13, 1,     0, "+3.141592653590E-68 "         },
+    { "-3.14159265358979323844e-99",  13, 0,     0, "-3.141592653590E-99 "         },
+    { " 3.14159265358979323844e-100", 13, 1,     0, "+3.141592653590E-100"         },
+    { "+3.14159265358979323844e-126", 13, 0,     0, " 3.141592653590E-126"         },
+    { "-3.14159265358979323844e-127", 13, 1,     0, "-3.141592653590E-127"         },
+    { " 1.00000000000000000000e-128", 13, 0,     0, " 1.000000000000E-128"         },
+    { "+1.00000000000000000000e-129", 13, 1,     0, "+1.000000000000E-129"         },
+    { "-1.00000000000000000000e-130", 13, 0,     0, "-1.000000000000E-130"         },
+    { " 9.99999999999999999999e-131", 13, 1, -1213, ""                             },
 };
 
-int main(void)
+static void p1_tester(const void *data)
 {
-	char     *s;
-	ifx_dec_t d;
-	int       i;
-	int       err;
+    const p1_test *test = (const p1_test *)data;
+    char     *s;
+    ifx_dec_t d;
+    int       err;
 
-	printf("\nScientific notation\n");
-	printf("%-30s %s\n", "Input value", "Formatted");
-	for (i = 0; i < DIM(values); i++)
-	{
-		if ((err = deccvasc(values[i], strlen(values[i]), &d)) != 0)
-			printf("deccvasc error %d on %s\n", err, values[i]);
-		else
-		{
-			s = decsci(&d, 6, i % 2);
-			printf("%-30s :%s:\n", values[i], s);
-		}
-	}
-
-	return(0);
+    err = deccvasc(CONST_CAST(char *, test->input), strlen(test->input), &d);
+    if (err != test->rc)
+        pt_fail("unexpected status %d from deccvasc() for %s\n", err, test->input);
+    else if (err != 0)
+        pt_pass("conversion failed %d as expected for %s\n", err, test->input);
+    else
+    {
+        s = decsci(&d, test->dp, test->plus);
+        if (strcmp(s, test->output) == 0)
+            pt_pass("%-30s %2d/%d :%s:\n", test->input, test->dp, test->plus, s);
+        else
+        {
+            pt_fail("%-30s got  :%s:\n", test->input, s);
+            pt_info("%-21s expected %2d/%d :%s:\n", "", test->dp, test->plus, test->output);
+        }
+    }
 }
 
-#endif	/* TEST */
+static pt_auto_phase phases[] =
+{
+    { p1_tester, PT_ARRAYINFO(values), 0, "Basic testing of decsci" },
+};
+
+int main(int argc, char **argv)
+{
+    return(pt_auto_harness(argc, argv, phases, DIM(phases)));
+}
+
+#endif  /* TEST */
+

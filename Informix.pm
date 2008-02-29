@@ -1,6 +1,6 @@
-#   @(#)$Id: Informix.pm,v 2007.1 2007/09/04 02:02:39 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2008.1 2008/02/29 22:17:55 jleffler Exp $
 #
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
@@ -47,10 +47,10 @@
                 ) ] );
     Exporter::export_ok_tags('ix_types');
 
-    $VERSION          = "2007.0914";
+    $VERSION          = "2008.0229";
 
     my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-    my $Revision         = '$Id: Informix.pm,v 2007.1 2007/09/04 02:02:39 jleffler Exp $';
+    my $Revision         = '$Id: Informix.pm,v 2008.1 2008/02/29 22:17:55 jleffler Exp $';
 
     # This is for development only - the code must be recompiled each day!
     $VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
@@ -299,7 +299,7 @@ DBD::Informix - IBM Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14).
+This document describes IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.
@@ -1200,6 +1200,12 @@ the SERIAL data type.
 For more information, you can read the "Informix ESQL/C Programmer's
 Manual" or "Informix Guide to SQL: Reference Manual."
 The exact chapter and verse depends on which version you use.
+
+As an extension (provisional as of 2008-02-29: this might change but probably won't),
+you can also access $sth->{ix_serial} as a synonym for $sth->{ix_sqlerrd}[1]
+and $sth->{ix_serial8} to obtain the last SERIAL8 value that was generated.
+
+In due course, $sth->{ix_bigserial} will be added too.
 
 =head1 TRANSACTION MANAGEMENT
 

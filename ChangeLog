@@ -1,4 +1,16 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) (aka DBD::Informix)
+
+2008.0229 Release
+-----------------
+2008-02-29: Upload to PAUSE and CPAN.
+2008-02-29: Release - only once in 4 years can you do it on Leap Day.
+2008-02-29: RT#32975: Add $h->{ix_serial} and $h->{ix_serial8} (requested
+            by John Siracusa <siracusa@gmail.com>), and $h->{ix_bigserial}
+            to be added soon.
+2007-09-27: Problems with INT8 to long conversions on 64-bit Linux reported
+            by Clive Eisen <clive@serendipita.com>.  Resolved as a bug in
+            ESQL/C 2.90 on 32-bit Linux platforms, fixed in ESQL/C
+            3.00.UC2.
 
 2007.0914 Release
 -----------------
@@ -1172,4 +1184,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2007.14 2007/09/14 15:35:43 jleffler Exp $
+@(#)$Id: ChangeLog,v 2008.2 2008/02/29 22:25:54 jleffler Exp $

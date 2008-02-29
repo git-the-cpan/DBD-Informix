@@ -1,8 +1,8 @@
 #!/bin/ksh
 #
-#   @(#)$Id: prodverstamp.sh,v 2007.8 2007/08/27 04:11:03 jleffler Exp $
+#   @(#)$Id: prodverstamp.sh,v 2007.9 2007/09/30 07:25:24 jleffler Exp $
 #
-#   $Product: IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) $
+#   $Product: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) $
 #
 #   Product version stamping tool
 #
@@ -33,7 +33,7 @@ if [ "X$PRODVERSTAMPFLAGS" != "X" ]
 then eval set -- "$@" $PRODVERSTAMPFLAGS
 fi
 
-usestr="Usage: $0 [-F][-hCDLMNPV] [-A attribute] -j file.jdc [-c code][-d date][-l licence][-m cmdirs][-n name][-v version] [file ...]"
+usestr="Usage: $0 [-F][-hCDLMNPV] [-A attribute] [-j file.jdc] [-c code][-d date][-l licence][-m cmdirs][-n name][-v version] [file ...]"
 
 helpinfo()
 {
@@ -84,7 +84,9 @@ do
 done
 shift `expr $OPTIND - 1`
 
-[ -z "$JDCFILE" ] && { echo "No JDC file specified"; echo "$usestr"; exit 1; }
+if [ -z "$JDCFILE" ]
+then JDCFILE=$(basename $(pwd) | sed -e 's/-MSD$//' -e 's/-[0-9][^-]*$//').jdc
+fi
 
 checkout_file()
 {
@@ -149,7 +151,7 @@ esac
 # NB: Files (such as this one) may include the RCS-like keyword Product
 #     enclosed with dollar signs, and prodverstamp will then expand it.
 UCPRODCODE=`echo $PRODCODE | tr '[a-z]' '[A-Z]'`
-sed -e 's%[$]Product: [^$]* [$]%$Product: IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) $%' \
+sed -e 's%[$]Product: [^$]* [$]%$Product: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) $%' \
     -e "s%[$]Product[$]%\$Product: $VERSION \$%" \
     -e "s%[:]PRODNAME:%$PRODNAME%" \
     -e "s%[:]PRODDATE:%$PRODDATE%" \

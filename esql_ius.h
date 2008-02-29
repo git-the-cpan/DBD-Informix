@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esql_ius.h,v $
-@(#)Version:        $Revision: 2006.1 $
-@(#)Last changed:   $Date: 2006/03/07 09:12:51 $
+@(#)Version:        $Revision: 2008.1 $
+@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
 @(#)Purpose:        Supply key macros from IUS version of sqltypes.h
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1998,2003-06
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1998,2003-06,2008
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*TABSTOP=4*/
@@ -16,16 +16,16 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2006.1 2006/03/07 09:12:51 jleffler Exp $";
+const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
 #endif /* lint */
-#endif	/* MAIN_PROGRAM */
+#endif /* MAIN_PROGRAM */
 
 /* C types */
 #ifndef CINT8TYPE
-#define CINT8TYPE	117
+#define CINT8TYPE   117
 #endif
 #ifndef CCOLLTYPE
-#define CCOLLTYPE       118   
+#define CCOLLTYPE       118
 #endif
 #ifndef CLVCHARTYPE
 #define CLVCHARTYPE     119
@@ -48,10 +48,10 @@ const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2006.1 2006/03/07 09:12
 
 /* SQL types */
 #ifndef SQLNCHAR
-#define SQLNCHAR		15
+#define SQLNCHAR        15
 #endif
 #ifndef SQLNVCHAR
-#define SQLNVCHAR		16
+#define SQLNVCHAR       16
 #endif
 #ifndef SQLINT8
 #define SQLINT8         17
@@ -79,13 +79,13 @@ const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2006.1 2006/03/07 09:12
 #endif
 /* Note: SQLXXX values from 25 through 39 are reserved. */
 #ifndef SQLUDTVAR
-#define SQLUDTVAR   	40
+#define SQLUDTVAR       40
 #endif
 #ifndef SQLUDTFIXED
-#define SQLUDTFIXED   	41
+#define SQLUDTFIXED     41
 #endif
 #ifndef SQLREFSER8
-#define SQLREFSER8   	42
+#define SQLREFSER8      42
 #endif
 #ifndef SQLLVARCHAR
 #define SQLLVARCHAR     43
@@ -104,11 +104,11 @@ const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2006.1 2006/03/07 09:12
 #endif
 
 #ifndef SQLDISTINCT
-#define SQLDISTINCT		0x0800
+#define SQLDISTINCT     0x0800
 #endif
 
 #ifndef ISDISTINCTTYPE
-#define ISDISTINCTTYPE(x)	((x) & SQLDISTINCT)
+#define ISDISTINCTTYPE(x)   ((x) & SQLDISTINCT)
 #endif
 
-#endif	/* ESQL_IUS_H */
+#endif /* ESQL_IUS_H */

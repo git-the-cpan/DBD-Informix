@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: ifmxdec.h,v $
-@(#)Version:        $Revision: 1.14 $
-@(#)Last changed:   $Date: 2007/08/10 17:25:22 $
+@(#)Version:        $Revision: 1.17 $
+@(#)Last changed:   $Date: 2008/02/11 03:32:23 $
 @(#)Purpose:        Internal declarations for DECIMAL functions
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 2003-07
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 2003-08
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*TABSTOP=4*/
@@ -13,18 +13,19 @@
 #ifndef IFMXDEC_H
 #define IFMXDEC_H
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char ifmxdec_h[] = "@(#)$Id: ifmxdec.h,v 1.14 2007/08/10 17:25:22 jleffler Exp $";
-#endif	/* lint */
-#endif	/* MAIN_PROGRAM */
+static const char ifmxdec_h[] = "@(#)$Id: ifmxdec.h,v 1.17 2008/02/11 03:32:23 jleffler Exp $";
+#endif  /* lint */
+#endif  /* MAIN_PROGRAM */
 
 #include <stddef.h> /* size_t */
 #include "decimal.h"
 #include "esqltype.h"
-
-#define DECEXPZERO	-64		/* Exponent used in zeroes */
-#define DECEXPINF	+63		/* Maximum permissible exponent */
 
 #ifndef IFX_DEC_T
 #define IFX_DEC_T
@@ -37,31 +38,15 @@ extern const ifx_dec_t dec_zero;
 extern const ifx_dec_t dec_one;
 extern const ifx_dec_t dec_two;
 extern const ifx_dec_t dec_ten;
-extern const ifx_dec_t dec_sixty;	/* Time calculations */
+extern const ifx_dec_t dec_sixty;   /* Time calculations */
 extern const ifx_dec_t dec_hundred;
 extern const ifx_dec_t dec_e;
 extern const ifx_dec_t dec_pi;
-
-/* decload - used in both sets of functions */
-extern int decload(ifx_dec_t *np, int pos, int expon, char *dgts, int ndgts);
 
 /* lddecimal() - used in C-ISAM */
 extern int lddecimal(const char *cp, int len, ifx_dec_t *np);
 /* stdecimal() - used in C-ISAM */
 extern void stdecimal(const ifx_dec_t *np, char *cp, int len);
-
-/* decprec: only used in rvaldata.c */
-extern int decprec(const ifx_dec_t *np);
-/* dec2prec: only used in rvaldata.c */
-extern int dec2prec(const ifx_dec_t *np);
-
-/* ifx_dececvt: unused in genlib */
-extern int ifx_dececvt(const ifx_dec_t *np, int ndigit, int *decpt, int *sign, char *decstr, size_t decstrlen);
-/* ifx_decfcvt: only used in rfmt.c */
-extern int ifx_decfcvt(const ifx_dec_t *np, int ndigit, int *decpt, int *sign, char *decstr, size_t decstrlen);
-
-/* dbltoasc: only used in rconvert.c */
-extern int dbltoasc(const ifx_dec_t *np, char *cp, int len, int right);
 
 /* JLSS - additions */
 extern int  flt_is_null(float f);
@@ -79,16 +64,16 @@ extern int  (dec_is_pos)(const ifx_dec_t *dp);
 
 /* Macro overrides for functions */
 #ifndef dec_setnull
-#define dec_setnull(d)	((void)((d)->dec_pos = DECPOSNULL))
+#define dec_setnull(d)  ((void)((d)->dec_pos = DECPOSNULL))
 #endif /* dec_setnull */
 #ifndef dec_is_null
-#define dec_is_null(d)	((d)->dec_pos == DECPOSNULL)
+#define dec_is_null(d)  ((d)->dec_pos == DECPOSNULL)
 #endif /* dec_is_null */
 #ifndef dec_is_neg
-#define dec_is_neg(d)	((d)->dec_pos == DECPOSNEG)
+#define dec_is_neg(d)   ((d)->dec_pos == DECPOSNEG)
 #endif /* dec_is_neg */
 #ifndef dec_is_pos
-#define dec_is_pos(d)	((d)->dec_pos == DECPOSPOS)
+#define dec_is_pos(d)   ((d)->dec_pos == DECPOSPOS)
 #endif /* dec_is_pos */
 
 /* JLSS - revised conversion interfaces */
@@ -108,4 +93,8 @@ extern int  dec_to_double(const ifx_dec_t *dp, double *f);
 extern int  dec_cv_string(ifx_dec_t *dp, const char *str);
 extern int  dec_to_string(const ifx_dec_t *dp, char *buffer, size_t bufsiz);
 
-#endif	/* IFMXDEC_H */
+#ifdef  __cplusplus
+}
+#endif
+
+#endif  /* IFMXDEC_H */

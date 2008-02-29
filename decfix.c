@@ -1,18 +1,16 @@
 /*
 @(#)File:           $RCSfile: decfix.c,v $
-@(#)Version:        $Revision: 3.5 $
-@(#)Last changed:   $Date: 2005/04/12 05:19:28 $
+@(#)Version:        $Revision: 3.15 $
+@(#)Last changed:   $Date: 2008/01/28 05:25:26 $
 @(#)Purpose:        Fixed formatting of DECIMALs
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005,2007-08
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
-#ifdef TEST
-#define USE_DEPRECATED_DECSCI_FUNCTIONS
-#endif /* TEST */
-
-#include "esqlc.h"
+#include <assert.h>
+#include <string.h>
+#include <stdio.h>
 #include "decsci.h"
 
 /*
@@ -24,84 +22,166 @@
 ** decimal places.
 */
 
-#ifndef __STDC__
 /*
-** JL - 1999-12-06
-** For some versions of ESQL/C (eg 7.23), the dececvt() and decfcvt()
-** functions are not declared unless __STDC__ is defined.  Patch this
-** up by declaring them, prototype and all, if __STDC__ is not defined.
-** JL - 2001-10-04
-** NB: the interface to decfcvt() is not thread safe either; we'll need
-** to write our own some day using a layout that is thread-safe.  We can
-** then fix the const-ness of the interface, too.
+** Suppose the value to be printed is 1E+130 yet the user wants to
+** accommodate values down to 1.000000000000000000000000000001E-130.
+** This requires a buffer with 130 digits before the point, and 162
+** after, plus the decimal point, and the sign, and the null!  That
+** is a grand total of 295 characters (call it 300).  If you were to
+** put commas every three digits before the point, you'd add another
+** 45 characters; for commas every three places after the point, yet
+** another 55, requiring 400 characters or so!
+** Ouch!!
+** This is why exponential notation is used!
+** It is also fair to note that you use fixed notation only when the
+** range of values you will deal with is appropriately constrained,
+** which is normally the case in practice.
 */
-extern char *decfcvt(ifx_dec_t *np, int ndigit, int *decpt, int *sign);
-#endif /* __STDC__ */
 
+enum { MAX_FIXDECSTRLEN = 166 };
+
+#define MAX(x,y)	(((x)>(y))?(x):(y))
+#define MIN(x,y)	(((x)<(y))?(x):(y))
 #define SIGN(s, p)  ((s) ? '-' : ((p) ? '+' : ' '))
 #define VALID(n)	(((n) <= 0) ? 0 : (((n) > 162) ? 162 : (n)))
 
-#define CONST_CAST(t, v)	((t)(v))
-
 #ifndef lint
-static const char rcs[] = "@(#)$Id: decfix.c,v 3.5 2005/04/12 05:19:28 jleffler Exp $";
-#endif
-
-#ifdef USE_DEPRECATED_DECSCI_FUNCTIONS
-char           *decfix(const ifx_dec_t *d, int ndigit, int plus)
-{
-	/* fixed format could have -0.(130*0)(32 digits) + null for length 166 */
-	static char     buffer[166];
-	if (dec_fix(d, ndigit, plus, buffer, sizeof(buffer)) != 0)
-		*buffer = '\0';
-	return(buffer);
-}
-#endif /* USE_DEPRECATE_DECSCI_FUNCTIONS */
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_decfix_c[] = "@(#)$Id: decfix.c,v 3.15 2008/01/28 05:25:26 jleffler Exp $";
+#endif /* lint */
 
 /*
-**	Format a fixed-point number.  Unreliable for ndigit > 58 because of the
-**	implementation of decfcvt in ${SOURCE}/genlib/decconv.c
+** Formatting fixed-point numbers:
+** -- Eliminate null quickly.
+** -- Round a copy of the value.
+** -- Generate sign.
+** -- Process zero because it is easy.
+** -- Format digits before decimal point, if any.
+** --     If (dec_exp > 0) then
+** --         Add MIN(dec_exp, dec_ndgts) digit pairs, chopping (one) leading zero.
+** --         Add pairs of zeroes if we aren't at dec_exp.
+** --     Else add a single zero
+** -- Format digits after decimal point, if any.
+** --     Add any needed leading zeroes (dec_exp < 0).
+** --     Add MIN(MAX(dec_ndgt - dec_exp, 0), (nfrac+1)/2) digit pairs.
+** --     Add zeroes if we aren't at nfrac.
+** --     Note that there might be some leading zeroes required...
+** --     Must not drop zeroes after decimal point.
 */
+
+/* dec_fix() - format a fixed-point DECIMAL number */
 int dec_fix(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_t buflen)
 {
-	char  *dst = buffer;
-	char  *src;
-	int    i;
-	int    sn;
-	int    dp;
+	char     *dst = buffer;
+	size_t    i;
+	ifx_dec_t dv;
+	size_t len;
 
 	/* Deal with null values first */
-	if (d->dec_pos == DECPOSNULL)
+	if (dec_is_null(d))
 	{
 		*dst = '\0';
 		return(0);
 	}
 
+	dv = *d;
 	ndigit = VALID(ndigit);
+	decround(&dv, ndigit);
 
-	src = decfcvt(CONST_CAST(ifx_dec_t *, d), ndigit, &dp, &sn);
+	*dst++ = SIGN(!d->dec_pos, plus);	/* Sign */
 
-	*dst++ = SIGN(sn, plus);	/* Sign */
-	if (dp >= 1)
+	if (dec_is_zero(&dv))
 	{
-		while (dp-- > 0)
-			*dst++ = ((*src) ? *src++ : '0');
-		if (ndigit > 0)
-			*dst++ = '.';
-		for (i = 0; i < ndigit; i++)
-			*dst++ = ((*src) ? *src++ : '0');
+		len = ndigit + sizeof("+0.");
+		if (buflen < len + 1)
+		{
+			*buffer = '\0';
+			return(-1);		/* Buffer too short */
+		}
+		else
+		{
+			*dst++ = '0';
+            if (ndigit > 0)
+            {
+                *dst++ = '.';
+                memset(dst, '0', ndigit);
+            }
+			dst[ndigit] = '\0';
+			return(0);
+		}
 	}
+
+	if (dv.dec_exp > 0) 
+		len = 2 * dv.dec_exp - (dv.dec_dgts[0] < 10) + ndigit + sizeof("+.");
+	else
+		len = ndigit + sizeof("+0.");
+	if (buflen < len)
+	{
+		*buffer = '\0';
+		return(-1);		/* Buffer too short */
+	}
+
+	/* There is now known to be enough space */
+
+	/* Process integral part of number */
+	i = 0;
+	if (dv.dec_exp <= 0)
+		*dst++ = '0';
 	else
 	{
-		*dst++ = '0';
-		if (ndigit > 0)
-			*dst++ = '.';
-		i = 0;
-		while (dp++ < 0 && i++ < ndigit)
-			*dst++ = '0';
-		while (i++ < ndigit)
-			*dst++ = ((*src) ? *src++ : '0');
+		size_t d1 = MIN(dv.dec_exp, dv.dec_ndgts);
+		size_t j;
+		if (dv.dec_dgts[0] >= 10)
+			*dst++ = (dv.dec_dgts[0] / 10) + '0';
+		*dst++ = (dv.dec_dgts[0] % 10) + '0';
+		for (i = 1; i < d1; i++)
+		{
+			*dst++ = (dv.dec_dgts[i] / 10) + '0';
+			*dst++ = (dv.dec_dgts[i] % 10) + '0';
+		}
+		/* Pad with zeroes to decimal point */
+		for (j = i; j < dv.dec_exp; j++)
+		{
+			*dst++ = '0'; /* Tens */
+			*dst++ = '0'; /* Units */
+		}
 	}
+
+	if (ndigit > 0)
+	{
+		size_t n = 0;
+		size_t j;
+		/* Emit decimal point! */
+		*dst++ = '.';
+		if (dv.dec_exp < 0)
+		{
+			/* Add leading zeroes on fraction */
+			for (j = -dv.dec_exp; j > 0; j--)
+			{
+				*dst++ = '0'; /* Tens */
+				if (++n < ndigit)
+				{
+					*dst++ = '0'; /* Units */
+					++n;
+				}
+			}
+		}
+		/* Add residual digits */
+		while (i < dv.dec_ndgts)
+		{
+			*dst++ = (dv.dec_dgts[i] / 10) + '0';
+			if (++n < ndigit)
+			{
+				*dst++ = (dv.dec_dgts[i] % 10) + '0';
+				++n;
+			}
+			i++;
+		}
+		/* Add residual zeroes */
+		while (n++ < ndigit)
+			*dst++ = '0';
+	}
+
 	*dst = '\0';
 
 	return(0);
@@ -110,89 +190,100 @@ int dec_fix(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_t bufle
 #ifdef TEST
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-
-#define DIM(x)	(sizeof(x)/sizeof(*(x)))
+#include "phasedtest.h"
 
 typedef struct Test
 {
 	const char *val;
-	int dp;
-	int plus;
+	ifx_dec_t   dv;
+	int         dp;
+	int         plus;
 	const char *res;
 } Test;
 
-static Test test[] =
+static const Test p1_test[] =
 {
-	{	"0", 3, 1, "+0.000"	},
-	{	"0", 6, 1, "+0.000000"	},
-	{	"+3.14159265358979323844e+00", 6, 0, " 3.141593"	},
-	{	"-3.14159265358979323844e+00", 5, 0, "-3.14159"	},
-	{	"-3.14159265358979323844e+01", 5, 1, "-31.41593"	},
-	{	"-3.14159265358979323844e+01", 9, 0, "-31.415926536"	},
-	{	" 3.14159265358979323844e+02", 12, 1,	"+314.159265358979"	},
-	{	"+3.14159265358979323844e+03", 0,  1,	"+3142"	},
-	{	"-3.14159265358979323844e+34", 0,  1,	"-31415926535897932384400000000000000"	},
-	{	" 3.14159265358979323844e+68", 3, 0, " 314159265358979323844000000000000000000000000000000000000000000000000.000"	},
-	{	"+3.14159265358979323844e+99", 0, 0, " 3141592653589793238440000000000000000000000000000000000000000000000000000000000000000000000000000000"	},
-	{	"-3.14159265358979323844e+100", 0, 0, "-31415926535897932384400000000000000000000000000000000000000000000000000000000000000000000000000000000"	},
-	{	" 9.99999999999999999999e+124", 0, 0, " 99999999999999999999900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" 	},
-	{	"+1.00000000000000000000e+125", 0, 0, " 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"	},
-	{	" 9.99999999999999999999e+125", 0, 0, " 999999999999999999999000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" 	},
-	{	"+1.00000000000000000000e+126", 0, 0, ""	},
-	{	" 3.14159265358979323844e-01",	3,	0,	" 0.314"	},
-	{	"+3.14159265358979323844e-02",	6,	1,	"+0.031416"	},
-	{	"-3.14159265358979323844e-03",	6,	0,	"-0.003142"	},
-	{	" 3.14159265358979323844e-34",	10,	0,	" 0.0000000000"	},
-	{	"+3.14159265358979323844e-66",	70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000031416"	},
-	{	"+3.14159265358979323844e-67",	70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000003142"	},
-	{	"+3.14159265358979323844e-68",	70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000000314"	},
-	{	"+3.14159265358979323844e-69",	70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000000031"	},
-	{	"+3.14159265358979323844e-70",	70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000000003"	},
-	{	"+3.14159265358979323844e-71",	70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000000000"	},
-	{	" 1.000000000000000000000000000001E-108",	140,	1,	"+0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000100"	},
-	{	"+3.14159265358979323844e-126",	20,	1,	"+0.00000000000000000000"	},
-	{	"-3.14159265358979323844e-127",	135,	0,	"-0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000314159265"	},
-	{	"11.001001001001001001001001001001E-128",	161,	1,	"+0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011001001001001001001001001001001000"	},
-	{	"+1.00000000000000000000e-129",	10,	1,	"+0.0000000000"	},
-	{	"-1.00000000000000000000e-130",	10,	1,	"-0.0000000000"	},
-	{	" 9.99999999999999999999e-131",	0,	0,	""	},
+	{	"0", DECZERO_INITIALIZER, 3, 1, "+0.000" },
+	{	"0", DECZERO_INITIALIZER, 6, 1, "+0.000000" },
+	{	"0", DECZERO_INITIALIZER, 0, 0, " 0" },
+	{	"-1", { 1, DECPOSNEG, 1, {  1 } }, 0, 0, "-1" },
+	{	"91", { 1, DECPOSPOS, 1, { 91 } }, 0, 0, " 91" },
+	{	"0.0011", { -1, DECPOSPOS, 1, { 11 } }, 6, 1, "+0.001100" },
+	{	"0.000001122", { -2, DECPOSPOS, 3, {  1, 12, 20 } }, 15, 1, "+0.000001122000000" },
+	{	"+3.14159265358979323844e+00", { 1, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 6, 0, " 3.141593" },
+	{	"-3.14159265358979323844e+00", { 1, DECPOSNEG, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 5, 0, "-3.14159" },
+	{	"+3.14159265358979323844e+00", { 1, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 4, 1, "+3.1416" },
+	{	"+3.14159265358979323844e+00", { 1, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 3, 1, "+3.142" },
+	{	"-3.14159265358979323844e+01", { 1, DECPOSNEG, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 5, 1, "-31.41593" },
+	{	"-3.14159265358979323844e+01", { 1, DECPOSNEG, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 9, 0, "-31.415926536" },
+
+	{	" 3.14159265358979323844e+02", { 2, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 12, 1,	"+314.159265358979" },
+	{	"+3.14159265358979323844e+03", { 2, DECPOSPOS, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 0,  1,	"+3142" },
+	{	"-3.14159265358979323844e+34", { 18, DECPOSNEG, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 0,  1,	"-31415926535897932384400000000000000" },
+	{	" 3.14159265358979323844e+68", { 35, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 3, 0, " 314159265358979323844000000000000000000000000000000000000000000000000.000" },
+	{	"+3.14159265358979323844e+99", { 50, DECPOSPOS, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 0, 0, " 3141592653589793238440000000000000000000000000000000000000000000000000000000000000000000000000000000" },
+	{	"-3.14159265358979323844e+100", { 51, DECPOSNEG, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 0, 0, "-31415926535897932384400000000000000000000000000000000000000000000000000000000000000000000000000000000" },
+
+	{	" 9.99999999999999999999e+124", { 63, DECPOSPOS, 11, {  9, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99 } }, 0, 0, " 99999999999999999999900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"  },
+	{	"+1.00000000000000000000e+125", { 63, DECPOSPOS, 1, { 10 } }, 0, 0, " 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000" },
+	{	" 9.99999999999999999999e+125", { 63, DECPOSPOS, 11, { 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 90 } }, 0, 0, " 999999999999999999999000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"  },
+	/* 1E+126 should have a conversion failure! */
+	/*
+	{	"+1.00000000000000000000e+126", { 64, DECPOSPOS, 1, {  1 } }, 0, 0, "" },
+	*/
+
+	{	" 3.14159265358979323844e-01",	{ 0, DECPOSPOS, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 3,	0,	" 0.314" },
+	{	"+3.14159265358979323844e-02",	{ 0, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 6,	1,	"+0.031416" },
+
+	{	"-3.14159265358979323844e-03",	{ -1, DECPOSNEG, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 6,	0,	"-0.003142" },
+	{	" 3.14159265358979323844e-34",	{ -16, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 10,	0,	" 0.0000000000" },
+	{	"+3.14159265358979323844e-66",	{ -32, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000031416" },
+	{	"+3.14159265358979323844e-67",	{ -33, DECPOSPOS, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000003142" },
+	{	"+3.14159265358979323844e-68",	{ -33, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000000314" },
+	{	"+3.14159265358979323844e-69",	{ -34, DECPOSPOS, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000000031" },
+	{	"+3.14159265358979323844e-70",	{ -34, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000000003" },
+	{	"+3.14159265358979323844e-71",	{ -35, DECPOSPOS, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 70,	0,	" 0.0000000000000000000000000000000000000000000000000000000000000000000000" },
+
+	{	" 1.000000000000000000000000000001E-108",	{ -53, DECPOSPOS, 16, {  1,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1 } }, 140,	1,	"+0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000100" },
+	{	"+3.14159265358979323844e-126",	{ -62, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 20,	1,	"+0.00000000000000000000" },
+	{	"-3.14159265358979323844e-127",	{ -63, DECPOSNEG, 11, { 31, 41, 59, 26, 53, 58, 97, 93, 23, 84, 40 } }, 135,	0,	"-0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000314159265" },
+	{	"11.001001001001001001001001001001E-128",	{ -63, DECPOSPOS, 16, { 11,  0, 10,  1,  0, 10,  1,  0, 10,  1,  0, 10,  1,  0, 10,  1 } }, 161,	1,	"+0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011001001001001001001001001001001000" },
+
+	/* more overflow values!
+	{	"+1.00000000000000000000e-129",	{ 0, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 10,	1,	"+0.0000000000" },
+	{	"-1.00000000000000000000e-130",	{ 0, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 10,	1,	"-0.0000000000" },
+	{	" 9.99999999999999999999e-131",	{ 0, DECPOSPOS, 11, {  3, 14, 15, 92, 65, 35, 89, 79, 32, 38, 44 } }, 0,	0,	"" },
+	*/
+
 };
 
-int main(void)
+static void p1_tester(const void *data)
 {
+    const Test *test = (const Test *)data;
 	int       rv;
-	ifx_dec_t d;
-	int       i;
-	int       err;
-	char      buffer[166];
-	int       fail = 0;
-	int       take = 0;
+	char      buffer[MAX_FIXDECSTRLEN];
 
-	for (i = 0; i < DIM(test); i++)
-	{
-		if ((err = deccvasc(CONST_CAST(char *, test[i].val), strlen(test[i].val), &d)) != 0)
-			printf("deccvasc error %d on %s\n", err, test[i].val);
-		else
-		{
-			take++;
-			rv = dec_fix(&d, test[i].dp, test[i].plus, buffer, sizeof(buffer));
-			if (rv != 0 || strcmp(test[i].res, buffer) != 0)
-			{
-				fail++;
-				printf("** FAIL ** input <%s>\n\tgot    <%s>\n\t"
-						"wanted <%s>\n\terror = %d\n",
-						test[i].val, buffer, test[i].res, rv);
-			}
-		}
-	}
-	if (fail == 0)
-		printf("== PASS == %d tests\n", take);
-	else
-		printf("** FAIL ** %d failures in %d tests\n", fail, take);
+    rv = dec_fix(&test->dv, test->dp, test->plus, buffer, sizeof(buffer));
+    if (rv != 0 || strcmp(test->res, buffer) != 0)
+    {
+        pt_fail("input <<%s>> (%d dp)\n", test->val, test->dp);
+        pt_info("got    <<%s>>\n", buffer);
+        pt_info("wanted <<%s>>\n", test->res);
+        pt_info("error = %d\n", rv);
+    }
+    else
+        pt_pass("input <<%s>> (%d dp) = <<%s>>\n", test->val, test->dp, buffer);
+}
 
-	return((fail == 0) ? EXIT_SUCCESS : EXIT_FAILURE);
+static const pt_auto_phase phases[] =
+{
+    { p1_tester, PT_ARRAYINFO(p1_test), 0, "Testing dec_fix()" },
+};
+
+int main(int argc, char **argv)
+{
+    return(pt_auto_harness(argc, argv, phases, DIM(phases)));
 }
 
 #endif	/* TEST */

@@ -1,40 +1,41 @@
 /*
 @(#)File:           $RCSfile: decsetexp.c,v $
-@(#)Version:        $Revision: 2.2 $
-@(#)Last changed:   $Date: 2005/01/12 19:30:52 $
+@(#)Version:        $Revision: 2.5 $
+@(#)Last changed:   $Date: 2008/01/28 05:25:26 $
 @(#)Purpose:        Format the exponent of a DECIMAL
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 2001,2005
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 2001,2005,2007-08
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*TABSTOP=4*/
 
-#include "decintl.h"
+#include "decsci.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: decsetexp.c,v 2.2 2005/01/12 19:30:52 jleffler Exp $";
-#endif
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_decsetexp_c[] = "@(#)$Id: decsetexp.c,v 2.5 2008/01/28 05:25:26 jleffler Exp $";
+#endif /* lint */
 
 /* Format an exponent */
 char    *dec_setexp(char  *dst, int dp)
 {
-	*dst++ = 'E';
-	if (dp >= 0)
-		*dst++ = '+';
-	else
-	{
-		*dst++ = '-';
-		dp = -dp;
-	}
-	if (dp / 100 != 0)
-		*dst++ = dp / 100 + '0';
-	*dst++ = (dp / 10) % 10 + '0';
-	*dst++ = (dp % 10) + '0';
-	if (dp / 100 == 0)
-		*dst++ = ' ';
-	*dst = '\0';
-	return(dst);
+    *dst++ = 'E';
+    if (dp >= 0)
+        *dst++ = '+';
+    else
+    {
+        *dst++ = '-';
+        dp = -dp;
+    }
+    if (dp / 100 != 0)
+        *dst++ = dp / 100 + '0';
+    *dst++ = (dp / 10) % 10 + '0';
+    *dst++ = (dp % 10) + '0';
+    if (dp / 100 == 0)
+        *dst++ = ' ';
+    *dst = '\0';
+    return(dst);
 }
 
 #ifdef TEST
@@ -42,57 +43,56 @@ char    *dec_setexp(char  *dst, int dp)
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#define DIM(x) (sizeof(x)/sizeof(*(x)))
+#include "phasedtest.h"
 
 typedef struct Test
 {
-	int		val;
-	char	*res;
-}	Test;
+    int     val;
+    char    *res;
+}   Test;
 
-static Test test[] =
+static Test p1_test[] =
 {
-	{	0,		"E+00 "	},
-	{	-1,		"E-01 "	},
-	{	-2,		"E-02 "	},
-	{	-3,		"E-03 "	},
-	{	-10,	"E-10 "	},
-	{	-20,	"E-20 "	},
-	{	-99,	"E-99 "	},
-	{	-100,	"E-100"	},
-	{	-120,	"E-120"	},
-	{	+1,		"E+01 "	},
-	{	+2,		"E+02 "	},
-	{	+3,		"E+03 "	},
-	{	+10,	"E+10 "	},
-	{	+20,	"E+20 "	},
-	{	+99,	"E+99 "	},
-	{	+100,	"E+100"	},
-	{	+120,	"E+120"	},
+    {   0,      "E+00 " },
+    {   -1,     "E-01 " },
+    {   -2,     "E-02 " },
+    {   -3,     "E-03 " },
+    {   -10,    "E-10 " },
+    {   -20,    "E-20 " },
+    {   -99,    "E-99 " },
+    {   -100,   "E-100" },
+    {   -120,   "E-120" },
+    {   +1,     "E+01 " },
+    {   +2,     "E+02 " },
+    {   +3,     "E+03 " },
+    {   +10,    "E+10 " },
+    {   +20,    "E+20 " },
+    {   +99,    "E+99 " },
+    {   +100,   "E+100" },
+    {   +120,   "E+120" },
 };
 
-int main(void)
+static void p1_tester(const void *data)
 {
-	int i;
-	int fail = 0;
+    const Test *test = (const Test *)data;
+    char buffer[10];
 
-	for (i = 0; i < DIM(test); i++)
-	{
-		char buffer[10];
-		dec_setexp(buffer, test[i].val);
-		if (strcmp(test[i].res, buffer) != 0)
-		{
-			fail++;
-			printf("** FAIL ** in = %d, got <%s>, wanted <%s>\n", test[i].val,
-					buffer, test[i].res);
-		}
-	}
-	if (fail == 0)
-		printf("== PASS == %d tests\n", i);
-	else
-		printf("== FAIL == %d tests failed out of %d total\n", fail, i);
-	return(fail == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
+    dec_setexp(buffer, test->val);
+    if (strcmp(test->res, buffer) != 0)
+        pt_fail("in = %4d, got <%s>, wanted <%s>\n", test->val,
+                buffer, test->res);
+    else
+        pt_pass("in = %4d, got <%s> as expected\n", test->val, test->res);
+}
+
+static pt_auto_phase phases[] =
+{
+    { p1_tester, PT_ARRAYINFO(p1_test), 0, "Test decsetexp()" },
+};
+
+int main(int argc, char **argv)
+{
+    return(pt_auto_harness(argc, argv, phases, DIM(phases)));
 }
 
 #endif /* TEST */

@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqlutil.h,v $
-@(#)Version:        $Revision: 2006.1 $
-@(#)Last changed:   $Date: 2006/01/30 21:19:47 $
+@(#)Version:        $Revision: 2008.3 $
+@(#)Last changed:   $Date: 2008/01/30 16:38:21 $
 @(#)Purpose:        ESQL/C Utility Functions
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1995-2006
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1995-2006,2008
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*TABSTOP=4*/
@@ -15,8 +15,9 @@
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2006.1 2006/01/30 21:19:47 jleffler Exp $";
-#endif	/* lint */
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2008.3 2008/01/30 16:38:21 jleffler Exp $";
+#endif /* lint */
 #endif	/* MAIN_PROGRAM */
 
 #include <stdio.h>
@@ -56,15 +57,14 @@ extern char *iustypename(ixInt2 coltype, ixInt4 collen, ixInt4 xtd_id, char *buf
 extern const char *sqltype(ixInt2 coltype, ixInt4 collen);	/* Deprecated! */
 extern int sqltypemode(int mode);
 
-/* -- Future direction -- */
-/*
+/* -- Transition step: #include dumpesql.h will be removed from 2009-01-01 -- */
 #include "dumpesql.h"
-*/
 /*
 ** The dump_xyz routines are a systematic way of dumping the
 ** information in the Informix compound types onto the specified file.
 ** Each routine identifies its output with the user-specified tag.
 */
+#if 0
 extern void dump_blob(FILE *fp, const char *tag, const Blob *blob);
 extern void dump_datetime(FILE *fp, const char *tag, const dtime_t *dp);
 extern void dump_decimal(FILE *fp, const char *tag, const dec_t *dp);
@@ -77,6 +77,7 @@ extern void dump_sqldescriptor(FILE *fp, const char *tag, const char *name);
 
 /* Simple interface for dumping the global sqlca structure */
 extern void dumpsqlca(FILE *fp, const char *tag);
+#endif /* 0 */
 
 /*
 ** Alternatives to the (historically buggy) ESQL/C functions

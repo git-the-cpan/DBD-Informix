@@ -1,15 +1,15 @@
 /*
 @(#)File:           $RCSfile: esql5_00.h,v $
-@(#)Version:        $Revision: 2006.1 $
-@(#)Last changed:   $Date: 2006/03/07 09:12:51 $
+@(#)Version:        $Revision: 2008.1 $
+@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
 @(#)Purpose:        Function prototypes for ESQL/C Versions 5.00..5.20
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1992-93,1995-97,2000,2002-06
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1992-93,1995-97,2000,2002-06,2008
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*
-**	@(#)Informix ESQL/C Version 5.0x ANSI C Function Prototypes
+**  @(#)Informix ESQL/C Version 5.0x ANSI C Function Prototypes
 */
 
 /*
@@ -36,9 +36,9 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esql5_00_h[] = "@(#)$Id: esql5_00.h,v 2006.1 2006/03/07 09:12:51 jleffler Exp $";
+const char jlss_id_esql5_00_h[] = "@(#)$Id: esql5_00.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
 #endif /* lint */
-#endif	/* MAIN_PROGRAM */
+#endif /* MAIN_PROGRAM */
 
 #ifdef __cplusplus
 #define ESQLC_STRICT_PROTOTYPES
@@ -155,4 +155,4 @@ extern void     sqldetach(void);
 extern void     sqlexit(void);
 extern int      sqlstart(void);
 
-#endif	/* ESQL5_00_H */
+#endif /* ESQL5_00_H */

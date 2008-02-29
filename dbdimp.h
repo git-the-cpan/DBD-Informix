@@ -1,11 +1,11 @@
 /*
- * @(#)$Id: dbdimp.h,v 2007.3 2007/09/04 02:03:22 jleffler Exp $
+ * @(#)$Id: dbdimp.h,v 2008.1 2008/02/29 22:17:55 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1996-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
  * Copyright 2001-02 IBM
- * Copyright 2003-07 Jonathan Leffler
+ * Copyright 2003-08 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -18,7 +18,7 @@
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
 extern const char jlss_id_dbdimp_h[];
-const char jlss_id_dbdimp_h[] = "@(#)$Id: dbdimp.h,v 2007.3 2007/09/04 02:03:22 jleffler Exp $";
+const char jlss_id_dbdimp_h[] = "@(#)$Id: dbdimp.h,v 2008.1 2008/02/29 22:17:55 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
@@ -105,6 +105,8 @@ struct imp_dbh_st
     int             srvr_vrsn;      /* Server version number (eg 510 or 731) */
     BlobLocn        blob_bind;      /* Blob binding */
     Sqlca           ix_sqlca;       /* Last SQLCA record for connection */
+    ifx_int8_t      ix_serial8;     /* Last SERIAL8 value inserted on connection */
+  /*ifx_bigint_t    ix_bigserial;      Last BIGSERIAL value inserted on connection */
     Link            chain;          /* Link in list of connections */
     Link            head;           /* Head of list of statements */
     long            dbh_pid;        /* PID of Perl process creating handle */

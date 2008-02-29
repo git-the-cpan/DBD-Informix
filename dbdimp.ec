@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec,v 2007.15 2007/09/03 23:39:00 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2008.1 2008/02/29 22:17:55 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) $
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
@@ -24,7 +24,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2007.15 2007/09/03 23:39:00 jleffler Exp $";
+const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2008.1 2008/02/29 22:17:55 jleffler Exp $";
 #endif /* lint */
 
 #include <float.h>
@@ -346,6 +346,7 @@ static void
 dbd_ix_savesqlca(imp_dbh_t *imp_dbh)
 {
     imp_dbh->ix_sqlca = sqlca;
+    ifx_getserial8(&imp_dbh->ix_serial8);
 }
 
 /* Record (and report) and SQL error, saving SQLCA information */
@@ -1188,7 +1189,7 @@ dbd_ix_setbindnum(imp_sth_t *imp_sth, int items)
 }
 
 $ifdef ESQLC_IUSTYPES;
-/* Convert INT8 to machine long - both 32-bit and 64-bit machines */
+/* Convert machine long to INT8 - both 32-bit and 64-bit machines */
 static void
 dbd_ix_int8_to_ifx_int8(ifx_int8_t *i8val, long intvar)
 {

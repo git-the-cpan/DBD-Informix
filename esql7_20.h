@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esql7_20.h,v $
-@(#)Version:        $Revision: 2006.1 $
-@(#)Last changed:   $Date: 2006/03/07 09:12:51 $
+@(#)Version:        $Revision: 2008.1 $
+@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
 @(#)Purpose:        Function prototypes for ESQL/C Versions 7.20..7.24
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1997,1999-2000,2003-06
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14)
+@(#)Copyright:      (C) JLSS 1997,1999-2000,2003-06,2008
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
 */
 
 /*TABSTOP=4*/
@@ -16,9 +16,9 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esql7_20_h[] = "@(#)$Id: esql7_20.h,v 2006.1 2006/03/07 09:12:51 jleffler Exp $";
+const char jlss_id_esql7_20_h[] = "@(#)$Id: esql7_20.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
 #endif /* lint */
-#endif	/* MAIN_PROGRAM */
+#endif /* MAIN_PROGRAM */
 
 /*
 ** JL 2000-06-29:
@@ -103,60 +103,60 @@ extern int rtypmsize(int type, int len);
 extern char *rtypname(int type);
 extern int rtypwidth(int type, int len);
 
-extern 	int sqlbreak(void);
-extern 	char *ifx_getcur_conn_name(void);
-extern 	int sqldetach(void);
-extern 	int sqlexit(void);
-extern 	int sqlstart(void);
+extern  int sqlbreak(void);
+extern  char *ifx_getcur_conn_name(void);
+extern  int sqldetach(void);
+extern  int sqlexit(void);
+extern  int sqlstart(void);
 extern void sqlsignal(int sigvalue, void (*ldv)(void), int mode);
 extern int sqlbreakcallback(long timeout, void(*)(int));
 
-extern 	int _iqalloc(char *descname, int occurrence);
-extern 	int _iqbeginwork(void);
-extern 	int _iqcdcl(struct _sqcursor *cursor,char *curname, char **cmdtxt, struct sqlda *idesc, struct sqlda *odesc, int flags);
-extern 	int _iqcddcl(struct _sqcursor *cursor, char *curname, struct _sqcursor *stmt, int flags);
-extern 	int _iqcftch(struct _sqcursor *cursor, struct sqlda *idesc, struct sqlda *odesc, char *odesc_name, _FetchSpec *fetchspec);
-extern 	int _iqchkbuff(struct _sqcursor *cursor, int *direction, long *valptr);
+extern  int _iqalloc(char *descname, int occurrence);
+extern  int _iqbeginwork(void);
+extern  int _iqcdcl(struct _sqcursor *cursor,char *curname, char **cmdtxt, struct sqlda *idesc, struct sqlda *odesc, int flags);
+extern  int _iqcddcl(struct _sqcursor *cursor, char *curname, struct _sqcursor *stmt, int flags);
+extern  int _iqcftch(struct _sqcursor *cursor, struct sqlda *idesc, struct sqlda *odesc, char *odesc_name, _FetchSpec *fetchspec);
+extern  int _iqchkbuff(struct _sqcursor *cursor, int *direction, long *valptr);
 extern  int _iqsetautofree(struct _sqcursor *cursor, int status);
-extern 	int _iqsetdefprep(int status);
-extern 	int _iqclose(struct _sqcursor *cursor);
-extern 	int _iqcommit(void);
-extern 	int _iqcopen(struct _sqcursor *cursor, int icnt, struct sqlvar_struct *ibind, struct sqlda *idesc, struct value *ivalues, int useflag);
-extern 	int _iqcput(struct _sqcursor *cursor, struct sqlda *idesc, char *desc_name);
-extern 	int _iqcrproc(char *fname);
-extern 	int _iqdatabase(char *db_name, int exclusive, int icnt, struct sqlvar_struct *ibind);
-extern 	int _iqdbase(char *db_name, int exclusive);
-extern 	int _iqdbclose(void);
-extern 	int _iqdclcur(struct _sqcursor *cursor, char *curname, char **cmdtxt, int icnt, struct sqlvar_struct *ibind, int ocnt, struct sqlvar_struct *obind, int flags);
+extern  int _iqsetdefprep(int status);
+extern  int _iqclose(struct _sqcursor *cursor);
+extern  int _iqcommit(void);
+extern  int _iqcopen(struct _sqcursor *cursor, int icnt, struct sqlvar_struct *ibind, struct sqlda *idesc, struct value *ivalues, int useflag);
+extern  int _iqcput(struct _sqcursor *cursor, struct sqlda *idesc, char *desc_name);
+extern  int _iqcrproc(char *fname);
+extern  int _iqdatabase(char *db_name, int exclusive, int icnt, struct sqlvar_struct *ibind);
+extern  int _iqdbase(char *db_name, int exclusive);
+extern  int _iqdbclose(void);
+extern  int _iqdclcur(struct _sqcursor *cursor, char *curname, char **cmdtxt, int icnt, struct sqlvar_struct *ibind, int ocnt, struct sqlvar_struct *obind, int flags);
 #ifndef XA_5_0
-extern 	int _iqdcopen(struct _sqcursor *cursor, struct sqlda *idesc, char *desc_name, struct value *ivalues, int useflag, int reoptflag);
+extern  int _iqdcopen(struct _sqcursor *cursor, struct sqlda *idesc, char *desc_name, struct value *ivalues, int useflag, int reoptflag);
 #else /* !XA_5_0 */
-extern 	int _iqdcopen(struct _sqcursor *cursor, struct sqlda *idesc, char *desc_name, struct value *ivalues, int useflag);
+extern  int _iqdcopen(struct _sqcursor *cursor, struct sqlda *idesc, char *desc_name, struct value *ivalues, int useflag);
 #endif /* !XA_5_0 */
-extern 	int _iqddclcur(struct _sqcursor *cursor, char *curname, int flags);
-extern 	int _iqdealloc(char *desc_name);
-extern 	int _iqdescribe(struct _sqcursor *cursor, struct sqlda **descp, char *desc_name);
-extern 	int _iqdscribe(struct _sqcursor *cursor, struct sqlda **descp);
-extern 	int _iqexecute(struct _sqcursor *cursor, struct sqlda *idesc, char *idesc_name, struct value *ivalues, struct sqlda *odesc, char *odesc_name, struct value *ovalues, int chkind);
-extern 	int _iqeximm(char *stmt);
-extern 	int _iqexproc(struct _sqcursor *cursor, char **cmdtxt, int icnt, struct sqlvar_struct *ibind, int ocnt, struct sqlvar_struct *obind, int chkind, int freecursor);
-extern 	int _iqflush(struct _sqcursor *cursor);
-extern 	int _iqfree(struct _sqcursor *cursor);
-extern 	int _iqftch(struct _sqcursor *cursor, struct sqlda *odesc, int sysdesc, int chkind, char *odesc_name);
-extern 	int _iqgetdesc(char *desc_name, int sqlvar_num, struct hostvar_struct *hosttab, int xopen_flg);
-extern	int _iqgetdiag(struct hostvar_struct *hosttab, int exception_num);
-extern 	int _iqinsput( struct _sqcursor *cursor, int icnt, struct sqlvar_struct *ibind, struct sqlda *idesc, struct value *ivalues);
-extern 	struct _sqcursor *_iqlocate_cursor(char *name, int type);
-extern 	int _iqnftch(struct _sqcursor *cursor, int ocnt, struct sqlvar_struct *obind, struct sqlda *odesc, int fetch_type, long val, int icnt, struct sqlvar_struct *ibind, struct sqlda *idesc, int chkind );
-extern 	struct _sqcursor *_iqnprep(char *name, char *stmt);
-extern 	int _iqrollback(void);
-extern 	int _iqsetdesc(char *desc_name, int sqlvar_num, struct hostvar_struct *hosttab, int xopen_flg);
-extern 	void _iqseterr(int sys_errno);
-extern 	int _iqsftch(struct _sqcursor *cursor, struct sqlda *idesc, struct sqlda *odesc, int sysdesc, _FetchSpec *fetchspec, char *odesc_name);
-extern 	int _iqslct(struct _sqcursor *cursor, char **cmdtxt, int icnt, struct sqlvar_struct *ibind, int ocnt, struct sqlvar_struct *obind, int chkind);
+extern  int _iqddclcur(struct _sqcursor *cursor, char *curname, int flags);
+extern  int _iqdealloc(char *desc_name);
+extern  int _iqdescribe(struct _sqcursor *cursor, struct sqlda **descp, char *desc_name);
+extern  int _iqdscribe(struct _sqcursor *cursor, struct sqlda **descp);
+extern  int _iqexecute(struct _sqcursor *cursor, struct sqlda *idesc, char *idesc_name, struct value *ivalues, struct sqlda *odesc, char *odesc_name, struct value *ovalues, int chkind);
+extern  int _iqeximm(char *stmt);
+extern  int _iqexproc(struct _sqcursor *cursor, char **cmdtxt, int icnt, struct sqlvar_struct *ibind, int ocnt, struct sqlvar_struct *obind, int chkind, int freecursor);
+extern  int _iqflush(struct _sqcursor *cursor);
+extern  int _iqfree(struct _sqcursor *cursor);
+extern  int _iqftch(struct _sqcursor *cursor, struct sqlda *odesc, int sysdesc, int chkind, char *odesc_name);
+extern  int _iqgetdesc(char *desc_name, int sqlvar_num, struct hostvar_struct *hosttab, int xopen_flg);
+extern  int _iqgetdiag(struct hostvar_struct *hosttab, int exception_num);
+extern  int _iqinsput( struct _sqcursor *cursor, int icnt, struct sqlvar_struct *ibind, struct sqlda *idesc, struct value *ivalues);
+extern  struct _sqcursor *_iqlocate_cursor(char *name, int type);
+extern  int _iqnftch(struct _sqcursor *cursor, int ocnt, struct sqlvar_struct *obind, struct sqlda *odesc, int fetch_type, long val, int icnt, struct sqlvar_struct *ibind, struct sqlda *idesc, int chkind );
+extern  struct _sqcursor *_iqnprep(char *name, char *stmt);
+extern  int _iqrollback(void);
+extern  int _iqsetdesc(char *desc_name, int sqlvar_num, struct hostvar_struct *hosttab, int xopen_flg);
+extern  void _iqseterr(int sys_errno);
+extern  int _iqsftch(struct _sqcursor *cursor, struct sqlda *idesc, struct sqlda *odesc, int sysdesc, _FetchSpec *fetchspec, char *odesc_name);
+extern  int _iqslct(struct _sqcursor *cursor, char **cmdtxt, int icnt, struct sqlvar_struct *ibind, int ocnt, struct sqlvar_struct *obind, int chkind);
 extern int _iqstmnt(_SQSTMT *scb, char **cmdtxt, int icnt, struct sqlvar_struct *ibind, struct value *ivalues);
-extern 	void _iqstop(void);
-extern 	int _iqxecute(struct _sqcursor *cursor, int icnt, struct sqlvar_struct *ibind, struct sqlda *idesc, struct value *ivalues);
+extern  void _iqstop(void);
+extern  int _iqxecute(struct _sqcursor *cursor, int icnt, struct sqlvar_struct *ibind, struct sqlda *idesc, struct value *ivalues);
 
 extern void _iqconnect(int conn_kw, char *dbenv, char *conn_name, char *username, char *passwd, int concur_tx);
 extern void _iqdisconnect(int conn_kw, char *conn_name, int flag, int from_reassoc);
@@ -168,4 +168,4 @@ extern char * ifx_sqlstate(void);
 extern struct sqlca_s * ifx_sqlca(void);
 #endif /* _REENTRANT */
 
-#endif	/* ESQL7_20_H */
+#endif /* ESQL7_20_H */

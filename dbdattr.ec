@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdattr.ec,v 2007.1 2007/09/04 02:06:50 jleffler Exp $
+ * @(#)$Id: dbdattr.ec,v 2008.2 2008/02/29 22:43:38 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2007.0914 (2007-09-14) $ -- attribute handling
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) $ -- attribute handling
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
@@ -16,7 +16,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_dbdattr_ec[] = "@(#)$Id: dbdattr.ec,v 2007.1 2007/09/04 02:06:50 jleffler Exp $";
+const char jlss_id_dbdattr_ec[] = "@(#)$Id: dbdattr.ec,v 2008.2 2008/02/29 22:43:38 jleffler Exp $";
 #endif /* lint */
 
 #include <stdio.h>
@@ -61,6 +61,8 @@ static const char ix_sqlerrd[] = "ix_sqlerrd";
 static const char ix_sqlerrm[] = "ix_sqlerrm";
 static const char ix_sqlerrp[] = "ix_sqlerrp";
 static const char ix_sqlwarn[] = "ix_sqlwarn";
+static const char ix_serial4[] = "ix_serial";
+static const char ix_serial8[] = "ix_serial8";
 
 static const char esql_prodname[] = "@(#)" ESQLC_VERSION_STRING;
 static const int  esql_prodvrsn   = ESQLC_VERSION;
@@ -252,6 +254,17 @@ static SV *newSqlwarn(const Sqlca *psqlca)
     return(retsv);
 }
 
+/* Argument is not const because ifx_int8toasc() is not declared const */
+static SV *newSerial8(ifx_int8_t *v)
+{
+    char buffer[24];
+    SV *retsv;
+
+    ifx_int8toasc(v, buffer, sizeof(buffer)-1);
+    retsv = newSVpv(buffer, 0);
+    return(retsv);
+}
+
 static SV *dbd_ix_getsqlca(imp_dbh_t *imp_dbh, STRLEN kl, char *key)
 {
     SV *retsv = NULL;
@@ -276,6 +289,14 @@ static SV *dbd_ix_getsqlca(imp_dbh_t *imp_dbh, STRLEN kl, char *key)
     else if (KEY_MATCH(kl, key, ix_sqlwarn))
     {
         retsv = newSqlwarn(&imp_dbh->ix_sqlca);
+    }
+    else if (KEY_MATCH(kl, key, ix_serial8))
+    {
+        retsv = newSerial8(&imp_dbh->ix_serial8);
+    }
+    else if (KEY_MATCH(kl, key, ix_serial4))
+    {
+        retsv = newSViv((IV)imp_dbh->ix_sqlca.sqlerrd[1]);
     }
 
     return(retsv);

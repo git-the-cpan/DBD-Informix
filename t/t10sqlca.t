@@ -1,16 +1,28 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t10sqlca.t,v 2004.1 2004/12/01 17:53:46 jleffler Exp $
+#   @(#)$Id: t10sqlca.t,v 2008.1 2008/02/29 22:17:55 jleffler Exp $
 #
 #   Test SQLCA Record Handling for DBD::Informix
 #
-#   Copyright 1997,1999 Jonathan Leffler
-#   Copyright 2000      Informix Software Inc
-#   Copyright 2002-03   IBM
-#   Copyright 2004      Jonathan Leffler
+#   Copyright 1997-99 Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
+#   Copyright 2004-08 Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
+
+sub check_serial
+{
+    my($h, $v) = @_;
+    my($actual) = $h->{ix_sqlerrd}[1];
+    stmt_fail "Incorrect SERIAL value (\$h->{ix_sqlerrd}[1] = $actual wanted $v)"
+        unless $actual == $v;
+    $actual = $h->{ix_serial};
+    stmt_fail "Incorrect SERIAL value (\$h->{ix_serial}     = $actual wanted $v)"
+        unless $actual == $v;
+    &stmt_note("# Correct SERIAL value $v\n");
+}
 
 # Explicitly set date format to ISO 8601 to avoid date format problems.
 $ENV{DBDATE} = "Y4MD-";
@@ -45,7 +57,7 @@ INSERT INTO $table VALUES(0, 'Some Value', '$date', '$time', $pi)
 };
 
 print_sqlca($dbh);
-stmt_fail "Incorrect SERIAL value" unless $dbh->{ix_sqlerrd}[1] == 1000;
+check_serial($dbh, 1000);
 
 my $select = "SELECT * FROM $table";
 my $sth1 = $dbh->prepare($select) or stmt_fail "# failed to prepare $select\n";
@@ -70,7 +82,7 @@ my $time2 = '1997-02-28 00:11:22.55555';
 &stmt_fail() unless $sth2->execute('Another value', $date2, $time2, $e);
 &stmt_ok;
 print_sqlca $sth2;
-stmt_fail "Incorrect SERIAL value" unless $dbh->{ix_sqlerrd}[1] == 1001;
+check_serial($dbh, 1001);
 
 # Check that there are now two rows of data
 $sth1->execute or stmt_fail "# failed to execute $select\n";
