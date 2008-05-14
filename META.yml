@@ -1,14 +1,22 @@
 --- #YAML:1.0
 name:                DBD-Informix
-version:             2008.0229
-abstract:            ~
-license:             ~
-author:              ~
-generated_by:        ExtUtils::MakeMaker version 6.42
+version:             2008.0513
+abstract:            IBM Informix Database Driver for Perl DBI
+license:             perl
+author:
+    -                Jonathan Leffler <jleffler@earthlink.net>
 distribution_type:   module
 requires:     
-    DBI:                           1.38
-    Time::HiRes:                   0
+    DBI:             1.38
+    Time::HiRes:     0
+recommends:
+    DBI:             1.604
+dynamic_config:      1
+urls:
+    license:         http://dev.perl.org/licenses/
+    homepage:        http://dbi.perl.org/
+    bugtracker:      http://rt.cpan.org/NoAuth/Bugs.html?Dist=DBD-Informix
+generated_by:        Jonathan Leffler version 1.000
 meta-spec:
-    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
-    version: 1.3
+    url:             http://module-build.sourceforge.net/META-spec-v1.3.html
+    version:         1.3

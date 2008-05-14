@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqlc.h,v $
-@(#)Version:        $Revision: 2008.1 $
-@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
+@(#)Version:        $Revision: 2008.4 $
+@(#)Last changed:   $Date: 2008/03/10 00:45:19 $
 @(#)Purpose:        Include all relevant ESQL/C type definitions
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1992-93,1995-2004,2006-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 */
 
 /*
@@ -65,6 +65,7 @@
 ** 2.90         Client SDK 2.90 (Nov 2004)
 ** 2.91         Client SDK 2.91 (internal only?)
 ** 3.00         Client SDK 3.00 (2007)
+** 3.50         Client SDK 3.50 (2008)
 **
 ** All versions of ESQL/C prior to 5.10, plus versions 6.x, 7.x
 ** (with the possible, marginal, exception of 7.24), 8.x, 9.0x,
@@ -77,7 +78,7 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
+const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2008.4 2008/03/10 00:45:19 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
@@ -94,10 +95,14 @@ const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2008.1 2008/02/11 07:39:08 jl
 #define ESQLC_VERSION 0
 #endif /* ESQLC_VERSION */
 
-/* ESQLC_EFFVERSION - set to 960 for CSDK 2.90 up to 3.99 */
+/* ESQLC_EFFVERSION - set to 960 for CSDK 2.90, 970 for 3.00, 975 for 3.50 up to 3.99 */
 #undef ESQLC_EFFVERSION
-#if ESQLC_VERSION >= 290 && ESQLC_VERSION < 400
+#if     ESQLC_VERSION >= 290 && ESQLC_VERSION < 300
 #define ESQLC_EFFVERSION 960
+#elif   ESQLC_VERSION >= 300 && ESQLC_VERSION < 350
+#define ESQLC_EFFVERSION 970
+#elif   ESQLC_VERSION >= 350 && ESQLC_VERSION < 400
+#define ESQLC_EFFVERSION 975
 #else
 #define ESQLC_EFFVERSION ESQLC_VERSION
 #endif /* ESQLC_VERSION */
@@ -249,10 +254,11 @@ extern int      sqgetdbs(int *ret_fcnt,
 ** Supply missing type information for IUS (IDS/UDO) data types.
 ** Two edged sword; it means you have to test rather carefully in
 ** your code whether to build with IUS data types or not.
+** Test: ESQLC_IUSTYPES for BOOLEAN, INT8, SERIAL8, LVARCHAR +
+**       collection, row, distinct, BLOB, CLOB types and UDTs.
+** Test: ESQLC_BIGINT for BIGINT and BIGSERIAL.
 */
-#if ESQLC_EFFVERSION < 900
 #include "esql_ius.h"
-#endif
 
 /*
 ** JL 2001-01-23:
@@ -336,7 +342,11 @@ typedef void *Lvarchar;
 
 #if ESQLC_EFFVERSION >= 900
 #define ESQLC_IUSTYPES      1
-#define ESQLC_IUS_TYPES     /* Deprecated - use ESQL_IUSTYPES */
+#define ESQLC_IUS_TYPES     1   /* Deprecated - use ESQL_IUSTYPES */
+#endif
+
+#if ESQLC_EFFVERSION >= 975
+#define ESQLC_BIGINT        1
 #endif
 
 #ifdef __cplusplus

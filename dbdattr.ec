@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdattr.ec,v 2008.2 2008/02/29 22:43:38 jleffler Exp $
+ * @(#)$Id: dbdattr.ec,v 2008.3 2008/05/10 23:53:18 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) $ -- attribute handling
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) $ -- attribute handling
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
@@ -16,7 +16,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_dbdattr_ec[] = "@(#)$Id: dbdattr.ec,v 2008.2 2008/02/29 22:43:38 jleffler Exp $";
+const char jlss_id_dbdattr_ec[] = "@(#)$Id: dbdattr.ec,v 2008.3 2008/05/10 23:53:18 jleffler Exp $";
 #endif /* lint */
 
 #include <stdio.h>
@@ -52,6 +52,7 @@ static const char ix_prodnam[] = "ix_ProductName";
 static const char ix_prodver[] = "ix_ProductVersion";
 static const char ix_scrlcsr[] = "ix_ScrollCursor";
 static const char ix_srvrvsn[] = "ix_ServerVersion";
+static const char ix_srvrnam[] = "ix_ServerName";
 static const char ix_stoproc[] = "ix_StoredProcedures";
 static const char ix_typenam[] = "ix_NativeTypeName";
 static const char ix_worepln[] = "ix_WithoutReplication";
@@ -63,6 +64,9 @@ static const char ix_sqlerrp[] = "ix_sqlerrp";
 static const char ix_sqlwarn[] = "ix_sqlwarn";
 static const char ix_serial4[] = "ix_serial";
 static const char ix_serial8[] = "ix_serial8";
+#ifdef ESQLC_BIGINT
+static const char ix_bigser8[] = "ix_bigserial";
+#endif /* ESQLC_BIGINT */
 
 static const char esql_prodname[] = "@(#)" ESQLC_VERSION_STRING;
 static const int  esql_prodvrsn   = ESQLC_VERSION;
@@ -265,6 +269,18 @@ static SV *newSerial8(ifx_int8_t *v)
     return(retsv);
 }
 
+#ifdef ESQLC_BIGINT
+static SV *newBigSerial(bigint v)
+{
+    char buffer[24];
+    SV *retsv;
+
+    biginttoasc(v, buffer, sizeof(buffer)-1, 10);
+    retsv = newSVpv(buffer, 0);
+    return(retsv);
+}
+#endif /* ESQLC_BIGINT */
+
 static SV *dbd_ix_getsqlca(imp_dbh_t *imp_dbh, STRLEN kl, char *key)
 {
     SV *retsv = NULL;
@@ -298,6 +314,12 @@ static SV *dbd_ix_getsqlca(imp_dbh_t *imp_dbh, STRLEN kl, char *key)
     {
         retsv = newSViv((IV)imp_dbh->ix_sqlca.sqlerrd[1]);
     }
+#ifdef ESQLC_BIGINT
+    else if (KEY_MATCH(kl, key, ix_bigser8))
+    {
+        retsv = newBigSerial(imp_dbh->ix_bigserial);
+    }
+#endif /* ESQLC_BIGINT */
 
     return(retsv);
 }
@@ -334,6 +356,13 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
     else if (KEY_MATCH(kl, key, ix_srvrvsn))
     {
         retsv = newSViv((IV)imp_dbh->srvr_vrsn);
+    }
+    else if (KEY_MATCH(kl, key, ix_srvrnam))
+    {
+        char *srvrname = "";
+        if (imp_dbh->srvr_name)
+            srvrname = SvPV(imp_dbh->srvr_name, na);
+        retsv = newSVpv(srvrname, 0);
     }
     else if (KEY_MATCH(kl, key, ix_stoproc))
     {

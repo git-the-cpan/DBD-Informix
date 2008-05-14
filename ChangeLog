@@ -1,4 +1,27 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) (aka DBD::Informix)
+
+2008.0xyz Release
+-----------------
+2008-0x-yz: Upload to PAUSE and CPAN.
+2008-05-13: Fix warnings for unset $INFORMIXDIR on Windows (Yunming Wang,
+            yunming@us.ibm.com)
+2008-05-11: Finish adding basic support for BIGINT, after finding CQ
+            idsdb00158856 (fixed in GA version of CSDK 3.50.xC1) and CQ
+            idsdb00159790 (not found until after GA).  Configuration work
+            for down-versions still to be done, but code passes under CSDK
+            3.50.UC1 with Perl 5.10.0 and CSDK 3.50.FC1 with Perl 5.8.8.
+2008-04-17: Fix $sth->{TYPE}: return 9 (SQL_DATE) not -1 (SQL_LVARCHAR),
+            fixing an 11-year old bug (Ravi Krishna <srkrishna@yahoo.com>).
+2008-03-07: Add support for BIGINT in ESQL/C 3.50.
+2008-03-07: CPAN Testers reporting issues because Makefile.PL not exiting
+            successfully when pre-requisites not met.
+2008-03-07: ESQL/C 3.50 (for IDS 11.50) typedefs ifx_loc_t - update
+            dumpesql.h to cope (Joe R Plugge <jrplugge@west.com>).
+2008-03-07: ESQL/C test fails when $Config{ccflags} has leading spaces
+            (Michael Lieman, <michael.lieman@bankofamerica.com>), and
+            several other people too.  Records show this problem also
+            affected Dr Guenther Seifert <guenther-h.seifert@t-systems.com>
+            in June 2007.  Apologies for not getting it fixed sooner.
 
 2008.0229 Release
 -----------------
@@ -1184,4 +1207,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2008.2 2008/02/29 22:25:54 jleffler Exp $
+@(#)$Id: ChangeLog,v 2008.4 2008/05/14 00:04:39 jleffler Exp $

@@ -5,7 +5,7 @@
 @(#)Purpose:        Exponential formatting of DECIMALs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005,2007-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 */
 
 #ifdef TEST

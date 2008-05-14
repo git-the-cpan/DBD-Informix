@@ -1,12 +1,12 @@
-#   @(#)$Id: Informix.pm,v 2008.1 2008/02/29 22:17:55 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2008.2 2008/05/12 06:12:52 jleffler Exp $
 #
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2001-03 IBM
-#   Copyright 2004-07 Jonathan Leffler
+#   Copyright 2004-08 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -37,6 +37,7 @@
     %EXPORT_TAGS = (
        ix_types => [ qw(
                 IX_SMALLINT IX_INTEGER IX_SERIAL IX_INT8 IX_SERIAL8
+                IX_BIGINT IX_BIGSERIAL
                 IX_DECIMAL IX_MONEY IX_FLOAT IX_SMALLFLOAT
                 IX_CHAR IX_VARCHAR IX_NCHAR IX_NVARCHAR IX_LVARCHAR
                 IX_BOOLEAN
@@ -47,10 +48,10 @@
                 ) ] );
     Exporter::export_ok_tags('ix_types');
 
-    $VERSION          = "2008.0229";
+    $VERSION          = "2008.0513";
 
     my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-    my $Revision         = '$Id: Informix.pm,v 2008.1 2008/02/29 22:17:55 jleffler Exp $';
+    my $Revision         = '$Id: Informix.pm,v 2008.2 2008/05/12 06:12:52 jleffler Exp $';
 
     # This is for development only - the code must be recompiled each day!
     $VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
@@ -299,7 +300,7 @@ DBD::Informix - IBM Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29).
+This document describes IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.
@@ -399,6 +400,7 @@ previously not an option.
 
 The Informix type names are:
     IX_SMALLINT, IX_INTEGER, IX_SERIAL, IX_INT8, IX_SERIAL8,
+    IX_BIGINT, IX_BIGSERIAL,
     IX_DECIMAL, IX_MONEY, IX_FLOAT, IX_SMALLFLOAT,
     IX_CHAR, IX_VARCHAR, IX_NCHAR, IX_NVARCHAR, IX_LVARCHAR,
     IX_BOOLEAN,
@@ -1201,11 +1203,10 @@ For more information, you can read the "Informix ESQL/C Programmer's
 Manual" or "Informix Guide to SQL: Reference Manual."
 The exact chapter and verse depends on which version you use.
 
-As an extension (provisional as of 2008-02-29: this might change but probably won't),
-you can also access $sth->{ix_serial} as a synonym for $sth->{ix_sqlerrd}[1]
-and $sth->{ix_serial8} to obtain the last SERIAL8 value that was generated.
-
-In due course, $sth->{ix_bigserial} will be added too.
+As an extension, you can also access $sth->{ix_serial} as a synonym for
+$sth->{ix_sqlerrd}[1] and $sth->{ix_serial8} to obtain the last SERIAL8
+value that was generated, and if you have CSDK 3.50 (and IDS 11.50) with
+support for BIGINT and BIGSERIAL, $sth->{ix_bigserial} too.
 
 =head1 TRANSACTION MANAGEMENT
 
@@ -1403,9 +1404,33 @@ mapping is accurate enough for most purposes.
 
 =item *
 
-Blobs can be reliably located only in memory.
+Blobs (meaning BYTE and TEXT blobs) can only be located in memory.
+The provision for locating them in files is not functional.
 
 =item *
+
+BLOB and CLOB smart blobs are not handled directly by DBD::Informix.
+The workaround is to use LOTOFILE to extract blobs from the database to
+a file, and to use FILETOBLOB or FILETOCLOB to insert blobs from file
+into the database.
+
+=item *
+
+Support for the less common types, such as row types, is either less
+than perfect or even non-existent.
+Sometimes, it will work sufficiently well; you won't, however, get a
+Perl structured value out of the system - at most you would get a string
+representation of the value.
+If you really need to use some feature and DBD::Informix screws it up
+impossibly badly, then either (a) submit a patch that fixes it or (b)
+contact the maintenance team with a request for help.
+This situation has been ongoing for more than a decade, and few people
+have reported problems, which is a main reason that it hasn't been
+fixed.
+
+=item *
+
+[I<This was an issue in the 1990s; I've not seen the problem for a long time.>]
 
 If you use Informix ESQL/C Version 6.00 or later
 and do not set both the environment variables CLIENT_LOCALE
@@ -1431,33 +1456,43 @@ At various times:
 =over 2
 
 =item *
+
 Tim Bunce (Tim.Bunce@ig.co.uk) # Obsolete email address
 
 =item *
+
 Tim Bunce (Tim.Bunce@pobox.com)
 
 =item *
+
 Alligator Descartes (descarte@hermetica.com) # Obsolete email address
 
 =item *
+
 Alligator Descartes (descarte@arcana.co.uk) # Obsolete email address
 
 =item *
+
 Alligator Descartes (descarte@symbolstone.org)
 
 =item *
+
 Jonathan Leffler (johnl@informix.com) # Obsolete email address
 
 =item *
+
 Jonathan Leffler (jleffler@visa.com) # Obsolete email address
 
 =item *
+
 Jonathan Leffler (j.leffler@acm.org)
 
 =item *
+
 Jonathan Leffler (jleffler@informix.com) # Obsolete email address
 
 =item *
+
 Jonathan Leffler (jleffler@us.ibm.com)
 
 =back

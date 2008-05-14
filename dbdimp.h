@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: dbdimp.h,v 2008.1 2008/02/29 22:17:55 jleffler Exp $
+ * @(#)$Id: dbdimp.h,v 2008.2 2008/05/10 23:50:13 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1996-99 Jonathan Leffler
@@ -18,7 +18,7 @@
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
 extern const char jlss_id_dbdimp_h[];
-const char jlss_id_dbdimp_h[] = "@(#)$Id: dbdimp.h,v 2008.1 2008/02/29 22:17:55 jleffler Exp $";
+const char jlss_id_dbdimp_h[] = "@(#)$Id: dbdimp.h,v 2008.2 2008/05/10 23:50:13 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
@@ -103,10 +103,13 @@ struct imp_dbh_st
     Boolean         has_procs;      /* Has stored procedures (not 8.[012]x) */
     Boolean         has_blobs;      /* Has blobs (not SE nor 8.[012]x) */
     int             srvr_vrsn;      /* Server version number (eg 510 or 731) */
+    SV             *srvr_name;      /* Server version name (DBINFO('version','full')) */
     BlobLocn        blob_bind;      /* Blob binding */
     Sqlca           ix_sqlca;       /* Last SQLCA record for connection */
     ifx_int8_t      ix_serial8;     /* Last SERIAL8 value inserted on connection */
-  /*ifx_bigint_t    ix_bigserial;      Last BIGSERIAL value inserted on connection */
+#ifdef ESQLC_BIGINT
+    bigint          ix_bigserial;   /* Last BIGSERIAL value inserted on connection */
+#endif /* ESQLC_BIGINT */
     Link            chain;          /* Link in list of connections */
     Link            head;           /* Head of list of statements */
     long            dbh_pid;        /* PID of Perl process creating handle */

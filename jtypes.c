@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: jtypes.c,v $
-@(#)Version:        $Revision: 2007.2 $
-@(#)Last changed:   $Date: 2007/08/26 15:50:47 $
+@(#)Version:        $Revision: 2008.1 $
+@(#)Last changed:   $Date: 2008/03/09 03:09:10 $
 @(#)Purpose:        Substitute for RTYPALIGN and RTYPMSIZE
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1995,1997-98,2001,2003,2005,2007
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+@(#)Copyright:      (C) JLSS 1995,1997-98,2001,2003,2005,2007-08
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 */
 
 /*TABSTOP=4*/
@@ -24,8 +24,9 @@
 #include "esqlutil.h"
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: jtypes.c,v 2007.2 2007/08/26 15:50:47 jleffler Exp $";
-#endif
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_jtypes_c[] = "@(#)$Id: jtypes.c,v 2008.1 2008/03/09 03:09:10 jleffler Exp $";
+#endif /* lint */
 
 /* Return memory size for type */
 int             jtypmsize(int type, int len)
@@ -115,6 +116,22 @@ int             jtypmsize(int type, int len)
 		size = sizeof(Blob);
 		break;
 
+#ifdef ESQLC_IUSTYPES
+    case SQLINT8:
+    case SQLSERIAL8:
+    case CINT8TYPE:
+        size = sizeof(ifx_int8_t);
+        break;
+#endif /* ESQLC_IUSTYPES */
+
+#ifdef ESQLC_BIGINT
+    case SQLINFXBIGINT:
+    case SQLBIGSERIAL:
+    case CBIGINTTYPE:
+        size = sizeof(ixInt8);
+        break;
+#endif /* ESQLC_BIGINT */
+
 	default:
 #ifndef DO_NOT_USE_STDERR_H
 		err_remark("jtypsize: unknown type number %d (assume zero size)\n", type);
@@ -129,56 +146,70 @@ int             jtypmsize(int type, int len)
 int             jtypalign(int offset, int type)
 {
 	int             align;
-	struct
+	struct      /* SMALLINT */
 	{
 		char            ic;
 		ixInt2          i2;
 	}               i;
-	struct
+	struct      /* Machine int */
 	{
 		char            ic;
 		ixMint          i2;
 	}               mi;
-	struct
+	struct      /* INTEGER, DATE */
 	{
 		char            lc;
 		ixInt4          l2;
 	}               l;
-	struct
+	struct      /* SMALLFLOAT */
 	{
 		char            fc;
 		float           f2;
 	}               f;
-	struct
+	struct      /* FLOAT */
 	{
 		char            dc;
 		double          d2;
 	}               d;
-	struct
+	struct      /* DECIMAL, MONEY */
 	{
 		char            nc;
 		Decimal         n2;
 	}               n;
-	struct
+	struct      /* DATETIME */
 	{
 		char            dtc;
 		Datetime        dt2;
 	}               dt;
-	struct
+	struct      /* INTERVAL */
 	{
 		char            inc;
 		Interval        in2;
 	}               in;
-	struct
+	struct      /* BYTE or TEXT blob */
 	{
 		char            blc;
 		Blob            bl2;
 	}               bl;
-	struct
+	struct      /* LVARCHAR - or BLOB or CLOB */
 	{
-		char             lvc;
-		void            *lv2;
+		char            lvc;
+		void           *lv2;
 	}               lv;
+#ifdef ESQLC_IUSTYPES
+	struct      /* INT8 */
+	{
+		char            i8c;
+		ifx_int8_t      i82;
+    }               i8;
+#endif /* ESQLC_IUSTYPES */
+#ifdef ESQLC_BIGINT
+    struct      /* BIGINT */
+    {
+        char            bic;
+        bigint          bi2;
+    }               bi;
+#endif /* ESQLC_BIGINT */
 
 	switch (type)
 	{
@@ -198,6 +229,22 @@ int             jtypalign(int offset, int type)
 	case CDATETYPE:
 		align = ((char *)&l.l2) - &l.lc;
 		break;
+
+#ifdef ESQLC_IUSTYPES
+    case SQLINT8:
+    case SQLSERIAL8:
+    case CINT8TYPE:
+        align = ((char *)&i8.i82) - &i8.i8c;
+        break;
+#endif /* ESQLC_IUSTYPES */
+
+#ifdef ESQLC_BIGINT
+    case SQLINFXBIGINT:
+    case SQLBIGSERIAL:
+    case CBIGINTTYPE:
+        align = ((char *)&bi.bi2) - &bi.bic;
+        break;
+#endif /* ESQLC_BIGINT */
 
 	case SQLSMFLOAT:
 	case CFLOATTYPE:

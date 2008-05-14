@@ -1,9 +1,10 @@
 /*
 @(#)Purpose:         Map Informix SQL Types to ODBC Types
 @(#)Author:          J Leffler
-@(#)Copyright:       1997-98 Jonathan Leffler (JLSS)
-@(#)Copyright:       2002    IBM
-@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+@(#)Copyright:       1997-98,2008 Jonathan Leffler (JLSS)
+@(#)Copyright:       2000         Informix Software Inc
+@(#)Copyright:       2002         IBM
+@(#)Product:         IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 */
 
 /*TABSTOP=4*/
@@ -47,8 +48,9 @@ typedef enum IxSQLType
 } IxSQLType;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: odbctype.c,v 100.2 2002/02/08 22:49:35 jleffler Exp $";
-#endif
+/* Prevent over-aggressive optimizers from eliminating ID string */
+const char jlss_id_odbctype_c[] = "@(#)$Id: odbctype.c,v 2008.1 2008/04/17 21:13:41 jleffler Exp $";
+#endif /* lint */
 
 /* Map Informix DATETIME types to equivalent ODBC types */
 static int
@@ -158,6 +160,9 @@ map_type_ifmx_to_odbc(int coltype, int collen)
 		break;
 	case ix_TEXT:
 		odbctype = SQL_LONGVARCHAR;
+		break;
+	case ix_DATE:
+		odbctype = SQL_DATE;
 		break;
 	case ix_BYTE:
 		odbctype = SQL_LONGVARBINARY;

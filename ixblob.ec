@@ -5,7 +5,7 @@
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1996-98,2000-01,2003,2005,2007-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 */
 
 /*TABSTOP=4*/

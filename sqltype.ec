@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: sqltype.ec,v $
-@(#)Version:        $Revision: 2008.1 $
-@(#)Last changed:   $Date: 2008/02/11 15:52:15 $
+@(#)Version:        $Revision: 2008.2 $
+@(#)Last changed:   $Date: 2008/03/09 03:09:10 $
 @(#)Purpose:        Convert type and length from Syscolumns to string
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1988-93,1995-98,2001,2003-04,2007-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 */
 
 /*TABSTOP=4*/
@@ -16,7 +16,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_sqltype_ec[] = "@(#)$Id: sqltype.ec,v 2008.1 2008/02/11 15:52:15 jleffler Exp $";
+const char jlss_id_sqltype_ec[] = "@(#)$Id: sqltype.ec,v 2008.2 2008/03/09 03:09:10 jleffler Exp $";
 #endif /* lint */
 
 #include <string.h>
@@ -71,6 +71,14 @@ static const char * const sqltypes[] =
     "LVARCHAR",
     "[reserved44]",
     "BOOLEAN",
+    "[reserved46]",
+    "[reserved47]",
+    "[reserved48]",
+    "[reserved49]",
+    "[reserved50]",
+    "SQLUNKNOWN",
+    "BIGINT",
+    "BIGSERIAL",
 };
 
 static const char dt_day[] = "DAY";
@@ -183,10 +191,12 @@ char    *sqltypename(ixInt2 coltype, ixInt4 collen, char *buffer, size_t buflen)
     case SQLINT8:
     case SQLSERIAL8:
     case SQLBOOL:
+    case SQLINFXBIGINT:
+    case SQLBIGSERIAL:
         strcpy(start, sqltypes[type]);
         break;
 
-    /* IUS types -- may need more work in future */
+    /* IUS types -- will need more work in future */
     case SQLSET:
     case SQLLIST:
     case SQLMULTISET:
@@ -278,21 +288,25 @@ typedef struct  Typelist
 
 static Typelist types[] =
 {
-    {   "serial",                           262,        4       },
     {   "char",                             0,          10      },
-    {   "date",                             7,          4       },
+    {   "smallint",                         1,          2       },
+    {   "integer",                          2,          4       },
+    {   "float",                            3,          8       },
+    {   "smallfloat",                       4,          4       },
     {   "decimal",                          5,          4351    },
     {   "decimal(16)",                      5,          4351    },
     {   "decimal(32,14)",                   5,          8206    },
-    {   "float",                            3,          8       },
-    {   "integer",                          2,          4       },
+    {   "date",                             7,          4       },
+    {   "serial",                           6,          4       },
     {   "money",                            8,          4098    },
     {   "money(16,2)",                      8,          4098    },
-    {   "smallfloat",                       4,          4       },
-    {   "smallint",                         1,          2       },
-    {   "varchar(128)",                     13,         128     },
-    {   "varchar(128,64)",                  13,         16512   },
     {   "datetime day to day",              10,         580     },
+    {   "datetime fraction to fraction",    10,         973     },
+    {   "datetime fraction to fraction(1)", 10,         459     },
+    {   "datetime fraction to fraction(2)", 10,         716     },
+    {   "datetime fraction to fraction(3)", 10,         973     },
+    {   "datetime fraction to fraction(4)", 10,         1230    },
+    {   "datetime fraction to fraction(5)", 10,         1487    },
     {   "datetime hour to fraction(3)",     10,         2413    },
     {   "datetime minute to fraction(3)",   10,         1933    },
     {   "datetime month to fraction(3)",    10,         3373    },
@@ -301,26 +315,40 @@ static Typelist types[] =
     {   "datetime year to fraction(3)",     10,         4365    },
     {   "datetime year to fraction(5)",     10,         4879    },
     {   "datetime year to year",            10,         1024    },
-    {   "interval day(4) to fraction(3)",   14,         3405    },
-    {   "interval day(9) to fraction(5)",   14,         5199    },
-    {   "interval day to fraction(5)",      14,         3407    },
-    {   "interval hour(4) to fraction(3)",  14,         2925    },
-    {   "interval hour(6) to fraction(5)",  14,         3951    },
-    {   "interval hour to fraction(5)",     14,         2927    },
     {   "byte in table",                    11,         56      },
     {   "text in table",                    12,         56      },
-    {   "datetime fraction to fraction", 10,            973     },
-    {   "datetime fraction to fraction(1)", 10,         459     },
-    {   "datetime fraction to fraction(2)", 10,         716     },
-    {   "datetime fraction to fraction(3)", 10,         973     },
-    {   "datetime fraction to fraction(4)", 10,         1230    },
-    {   "datetime fraction to fraction(5)", 10,         1487    },
+    {   "varchar(128)",                     13,         128     },
+    {   "varchar(128,64)",                  13,         16512   },
+    {   "interval day to fraction(5)",      14,         3407    },
+    {   "interval day(4) to fraction(3)",   14,         3405    },
+    {   "interval day(9) to fraction(5)",   14,         5199    },
     {   "interval fraction to fraction",    14,         973     },
     {   "interval fraction to fraction(1)", 14,         459     },
     {   "interval fraction to fraction(2)", 14,         716     },
     {   "interval fraction to fraction(3)", 14,         973     },
     {   "interval fraction to fraction(4)", 14,         1230    },
     {   "interval fraction to fraction(5)", 14,         1487    },
+    {   "interval hour to fraction(5)",     14,         2927    },
+    {   "interval hour(4) to fraction(3)",  14,         2925    },
+    {   "interval hour(6) to fraction(5)",  14,         3951    },
+    {   "serial",                           262,        4       },
+    {   "nchar(456)",                       15,         456     },
+    {   "nvarchar(255)",                    16,         255     },
+    {   "nvarchar(128,64)",                 16,         16512   },
+    {   "int8",                             17,         10      },
+    {   "serial8",                          18,         10      },
+    {   "set",                              19,         100     },
+    {   "multiset",                         20,         100     },
+    {   "list",                             21,         100     },
+    {   "row",                              22,         100     },
+    {   "collection",                       23,         100     },
+    {   "fixed udt",                        40,         100     },
+    {   "variable udt",                     41,         100     },
+    {   "lvarchar",                         43,         100     },
+    {   "boolean",                          45,         1       },
+    {   "unknown",                          51,         1       },
+    {   "bigint",                           52,         8       },
+    {   "bigserial",                        53,         8       },
 };
 
 static void printtypes(int mode)
@@ -338,7 +366,7 @@ static void printtypes(int mode)
     }
 }
 
-int main()
+int main(void)
 {
     printtypes(0);
     printtypes(1);

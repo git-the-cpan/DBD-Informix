@@ -2,7 +2,7 @@
 #
 #   @(#)$Id: prodverstamp.sh,v 2007.9 2007/09/30 07:25:24 jleffler Exp $
 #
-#   $Product: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) $
+#   $Product: IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) $
 #
 #   Product version stamping tool
 #
@@ -151,7 +151,7 @@ esac
 # NB: Files (such as this one) may include the RCS-like keyword Product
 #     enclosed with dollar signs, and prodverstamp will then expand it.
 UCPRODCODE=`echo $PRODCODE | tr '[a-z]' '[A-Z]'`
-sed -e 's%[$]Product: [^$]* [$]%$Product: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) $%' \
+sed -e 's%[$]Product: [^$]* [$]%$Product: IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) $%' \
     -e "s%[$]Product[$]%\$Product: $VERSION \$%" \
     -e "s%[:]PRODNAME:%$PRODNAME%" \
     -e "s%[:]PRODDATE:%$PRODDATE%" \

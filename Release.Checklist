@@ -36,13 +36,16 @@ Checklist for Releasing a New Version of DBD::Informix
       that the c4gl script expects to use.  For example, on Solaris 7,
       using Perl built with GCC fails because the '-K PIC' options passed
       by c4gl are not understood by GCC.  You can fix this with the two
-	  environment variables:
-	  DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX
-	  DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX
+      environment variables:
+          DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX
+          DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX
     - Ensure that username and password are not always the same to spot
       test failures better.
     - Run regression tests from regression sub-directory.
+10. Make the release using jdcrelease with the -F flag.
+    - Send the announcement with PTS and checksum information to the
+      names listed in the Announce file (dbi-dev is overkill).
 
 --
 
-@(#)$Id: Release.Checklist,v 2007.1 2007/09/04 05:59:08 jleffler Exp $
+@(#)$Id: Release.Checklist,v 2008.1 2008/03/01 00:47:06 jleffler Exp $

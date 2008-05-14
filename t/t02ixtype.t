@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t02ixtype.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t02ixtype.t,v 2008.1 2008/05/12 06:16:11 jleffler Exp $
 #
 #   Test ix_types attribute
 #
@@ -13,6 +13,8 @@ use strict;
 
 # You need to update this list if any types are added (unlikely) or if
 # any types are removed (IX_COLLECTION is the plausible candidate).
+# The IX_xxxx name is defined in Informix.xs
+# The numeric value is defined in sqltypes.h
 my %typeinfo = (
 	"IX_ROW"        => [ IX_ROW,          22 ],
 	"IX_SMALLINT"   => [ IX_SMALLINT,      1 ],
@@ -20,6 +22,8 @@ my %typeinfo = (
 	"IX_SERIAL"     => [ IX_SERIAL,        6 ],
 	"IX_INT8"       => [ IX_INT8,         17 ],
 	"IX_SERIAL8"    => [ IX_SERIAL8,      18 ],
+	"IX_BIGINT"     => [ IX_BIGINT,       52 ],
+	"IX_BIGSERIAL"  => [ IX_BIGSERIAL,    53 ],
 	"IX_DECIMAL"    => [ IX_DECIMAL,       5 ],
 	"IX_MONEY"      => [ IX_MONEY,         8 ],
 	"IX_FLOAT"      => [ IX_FLOAT,         3 ],

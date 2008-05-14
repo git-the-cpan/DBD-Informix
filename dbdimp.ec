@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec,v 2008.1 2008/02/29 22:17:55 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2008.3 2008/05/13 02:52:16 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) $
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
@@ -14,7 +14,7 @@
  * Copyright 2000    Paul Palacios, C-Group Inc
  * Copyright 2001-03 IBM
  * Copyright 2002    Bryan Castillo <Bryan_Castillo@eFunds.com>
- * Copyright 2003-07 Jonathan Leffler
+ * Copyright 2003-08 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -24,7 +24,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2008.1 2008/02/29 22:17:55 jleffler Exp $";
+const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2008.3 2008/05/13 02:52:16 jleffler Exp $";
 #endif /* lint */
 
 #include <float.h>
@@ -342,11 +342,15 @@ dbd_ix_db_seterror746(imp_dbh_t *imp_dbh, const char *msg)
 }
 
 /* Save the current sqlca record */
+/* The saving of serials could be dubious - but it is symmetric */
 static void
 dbd_ix_savesqlca(imp_dbh_t *imp_dbh)
 {
     imp_dbh->ix_sqlca = sqlca;
     ifx_getserial8(&imp_dbh->ix_serial8);
+#ifdef ESQLC_BIGINT
+    ifx_getbigserial(&imp_dbh->ix_bigserial);
+#endif /* ESQLC_BIGINT */
 }
 
 /* Record (and report) and SQL error, saving SQLCA information */
@@ -370,23 +374,25 @@ static void
 new_connection(imp_dbh_t *imp_dbh)
 {
     static long     connection_num = 0;
-    sprintf(imp_dbh->nm_connection, "x_%09ld", connection_num);
-    imp_dbh->is_onlinedb  = False;
-    imp_dbh->is_loggeddb  = False;
-    imp_dbh->is_modeansi  = False;
-    imp_dbh->is_txactive  = False;
-    imp_dbh->is_connected = False;
+
+    sprintf(imp_dbh->nm_connection, "x_%09ld", connection_num++);
+
+    imp_dbh->is_onlinedb    = False;
+    imp_dbh->is_loggeddb    = False;
+    imp_dbh->is_modeansi    = False;
+    imp_dbh->is_txactive    = False;
+    imp_dbh->is_connected   = False;
     imp_dbh->no_replication = False; /* Bryan Castillo: work is replicated by default */
-    imp_dbh->has_procs = False;
-    imp_dbh->has_blobs = False;
-    imp_dbh->srvr_vrsn = 0;
-    imp_dbh->database = (SV *)0;
-    imp_dbh->blob_bind = BLOB_DEFAULT;
-    imp_dbh->ix_sqlca = zero_sqlca;
-    imp_dbh->chain = zero_link;
-    imp_dbh->head = zero_link;
-    imp_dbh->dbh_pid = getpid();
-    connection_num++;
+    imp_dbh->has_procs      = False;
+    imp_dbh->has_blobs      = False;
+    imp_dbh->srvr_vrsn      = 0;
+    imp_dbh->srvr_name      = (SV *)0;
+    imp_dbh->database       = (SV *)0;
+    imp_dbh->blob_bind      = BLOB_DEFAULT;
+    imp_dbh->ix_sqlca       = zero_sqlca;
+    imp_dbh->chain          = zero_link;
+    imp_dbh->head           = zero_link;
+    imp_dbh->dbh_pid        = getpid();
 }
 
 /* Get the server version number from DBINFO */
@@ -1331,6 +1337,18 @@ dbd_ix_bindsv(imp_sth_t *imp_sth, int idx, int p_type, SV *val)
                         TYPE = :type, LENGTH = :length,
                         DATA = :string;
     }
+#ifdef ESQLC_BIGINT
+    else if (type == SQLINFXBIGINT || type == SQLBIGSERIAL)
+    {
+        dbd_ix_debug(2, "\t---- %s -- BIGINT or BIGSERIAL\n", function);
+        type = SQLCHAR;
+        string = SvPV(val, len);
+        length = len + 1;
+        EXEC SQL SET DESCRIPTOR :nm_ibind VALUE :index
+                        TYPE = :type, LENGTH = :length,
+                        DATA = :string;
+    }
+#endif /* ESQLC_BIGINT */
     else if (SvIOK(val) && SvIOKp(val))
     {
         /*
@@ -2301,7 +2319,7 @@ $endif; -- ESQLC_IUSTYPES
 #ifdef SQLINT8
             case SQLINT8:
 #endif /* SQLINT8 */
-                /* These types will always fit into a 256 character string */
+                /* These types always fit into a 256 character string */
                 EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
                         :coldata = DATA;
                 result = coldata;
@@ -2309,6 +2327,30 @@ $endif; -- ESQLC_IUSTYPES
                 result[length] = '\0';
                 /* warn("Normal Data: %d <<%s>>\n", length, result); */
                 break;
+
+$ifdef ESQLC_BIGINT;
+                /*
+                ** BIGINT and BIGSERIAL: added to ESQL/C 3.50.xC1, GA
+                ** May 2008, but the implementation there is buggy (CQ
+                ** idsdb00159790).  So, until 3.50.xC1 is obsolete
+                ** (circa 2015, I expect), this workaround and
+                ** inconsistency has to remain in place.
+                ** These types always fit into a 256 character string.
+                */
+            case SQLINFXBIGINT:
+            case SQLBIGSERIAL:
+                {
+                $ bigint bi_value;
+                EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
+                        :bi_value = DATA;
+                /* That seems to be reliable - so now lets convert to string */
+                /* biginttoasc() does not blank pad and does null terminate.  */
+                biginttoasc(bi_value, coldata, sizeof(coldata), 10);
+                result = coldata;
+                length = strlen(result);
+                }
+                break;
+$endif; /* ESQLC_BIGINT */
 
             case SQLFLOAT:
                 EXEC SQL GET DESCRIPTOR :nm_obind VALUE :index
@@ -2963,6 +3005,10 @@ valid_ix_type(int val_type)
     case SQLCOLLECTION:
     case SQLUDTVAR:
     case SQLUDTFIXED:
+#ifdef ESQLC_BIGINT
+    case SQLINFXBIGINT:
+    case SQLBIGSERIAL:
+#endif /* ESQLC_BIGINT */
     /*
     ** In the Informix system catalog, CLOB and BLOB types are simply
     ** specific cases of a fixed UDT.  They seem to have extended ids

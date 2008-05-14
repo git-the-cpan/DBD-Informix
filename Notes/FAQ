@@ -1,7 +1,7 @@
 Frequently Asked Questions about IBM Informix Database Driver for Perl DBI
 ==========================================================================
 
-IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 
 --------------------------------------------------------------------------
 
@@ -25,7 +25,8 @@ Perl DBI.
 
 HOW DO I REPORT TECHNICAL PROBLEMS WITH DBD::INFORMIX?
 
-See the information available via "perldoc DBD::Informix::TechSupport".
+See the information available via "perldoc DBD::Informix::TechSupport" and
+in the README file.
 
 --------------------------------------------------------------------------
 
@@ -58,7 +59,7 @@ IBM Informix web-site:
 	http://www.ibm.com/software/data/informix/pubs
 
 Electronic manuals are not available for some of the older product
-versions.
+versions (but they are truly obsolete and should not be in use).
 
 ---------------------------------------------------------------------------
 
@@ -73,11 +74,12 @@ consult the documentation:
 
 WHICH OTHER VERSIONS OF IBM INFORMIX ESQL/C EXIST?
 
-Informix ESQL/C exists in versions 5.0x (obsolete), 5.1x, 6.0x (obsolete),
-7.0x (obsolete), 7.1x (obsolete), 7.2x, 8.0x (obsolete), 8.1x, and 9.x.
-Anything earlier than version 5.00 is very obsolete and cannot be used to
-build DBD::Informix.  Within the 9.x family, the 9.0x versions are
-obsolete, and the other available versions are mostly part of Client SDK.
+Informix ESQL/C exists in versions 5.0x (obsolete), 5.1x, 5.2x, 6.0x
+(obsolete), 7.0x (obsolete), 7.1x (obsolete), 7.2x (obsolete), 8.0x
+(obsolete), 8.1x, and 9.x.  Anything earlier than version 5.00 is very
+obsolete and cannot be used to build DBD::Informix.  Within the 9.x
+family, the 9.0x, 9.1x, 9.2x and 9.30 versions are obsolete, and the
+other available versions are mostly part of Client SDK.
 
     Former Name       Current Name
     -----------       ----------------------
@@ -89,23 +91,25 @@ obsolete, and the other available versions are mostly part of Client SDK.
     ESQL/C 9.16     - Client SDK 2.10 (obsolete)
     ESQL/C 9.20     - Client SDK 2.20 (obsolete)
     ESQL/C 9.21     - Client SDK 2.30 (obsolete)
-    ESQL/C 9.30     - Client SDK 2.40
-    ESQL/C 9.40     - Client SDK 2.50
+    ESQL/C 9.30     - Client SDK 2.40 (obsolete)
+    ESQL/C 9.40     - Client SDK 2.50 (obsolete)
     ESQL/C 9.50     - Client SDK 2.60
     ESQL/C 9.51     - Client SDK 2.70
     ESQL/C 9.52     - Client SDK 2.80
     ESQL/C 9.53     - Client SDK 2.81
     ESQL/C 2.90     - Client SDK 2.90 (Nov 2004)
-    ESQL/C 3.00     - Client SDK 3.00 (2007)
+    ESQL/C 3.00     - Client SDK 3.00 (Jul 2007)
+    ESQL/C 3.50     - Client SDK 3.50 (May 2008)
 
-With the 7.3x servers, you would normally use Client SDK 2.40 or later.
-With the 8.2x or later servers, you would normally use Client SDK 2.40
-or later.  With the 9.1x servers, you would normally use some version of
-Client SDK, but you are long overdue for an upgrade.  If you have a 9.2x
-server, you would normally use Client SDK 2.40 or later.  Finally, note
-that Client SDK is available free of charge, so you should use it if at
-all possible.  You can make Client SDK talk to the 7.x and even 5.x
-servers.
+With the 7.3x servers, you would normally use Client SDK 2.80 or later.
+You should be planning to upgrade soon, too.  With the 8.2x or later
+servers, you would normally use Client SDK 2.70 or later.  If you have a
+9.40 server, you would normally use Client SDK 2.70 or later; for IDS
+10.00, you should use Client SDK 2.90 or later.  For IDS 11.10, you
+should use Client SDK 3.00; for IDS 11.50, you should use Client SDK
+3.50.  Finally, note that Client SDK is available free of charge, so you
+should use it if at all possible.  You can make Client SDK talk to the
+7.x and even 5.x servers.
 
 ---------------------------------------------------------------------------
 
@@ -176,9 +180,10 @@ released and included:
 
 In 2001, the 2000 appellation was dropped.
 
-In 2004, the current version of IDS was 9.40.
+In 2004, the current version of IDS was  9.40.
 In 2005, the current version of IDS was 10.00.
 In 2007, the current version of IDS was 11.10.
+In 2008, the current version of IDS was 11.50.
 
 Version 9.2x merges the 7.x and 9.x code streams.  Basically, Informix
 Dynamic Server.2000 is the direct upgrade path if you use Informix Dynamic
@@ -213,32 +218,32 @@ CAN DBD::INFORMIX BE COMPILED WITHOUT IBM INFORMIX ESQL/C?
 To compile DBD::Informix, you should have an IBM Informix ESQL/C
 compiler.
 
-If you built Perl with the same C compiler as the IBM Informix Classic
-4GL c-code compiler uses, then you may be able to build DBD::Informix
-with a version 6.00 or later C4GL compiler.  You would configure the
-build with the command:
+If you built Perl with the same C compiler as the IBM Informix Classic 4GL
+c-code compiler uses, then you may be able to build DBD::Informix with a
+version 6.00 or later C4GL compiler.  You would configure the build with
+the command:
 
     ESQL=c4gl perl Makefile.PL
     make
     make test
 
-This is not supported by IBM; it is not a good option and it should only
-be used as a last resort.  The resulting executable code might be much
-larger than if you use a pure ESQL/C version.  You cannot use IBM
-Informix 4GL Version 4.1x because it uses the ESQL/C Version 4.1x
-compiler, which does not provide the features that DBD::Informix needs.
+This is not supported; it is not a good option and it should only be used
+as a last resort.  The resulting executable code might be much larger than
+if you use a pure ESQL/C version.  You cannot use IBM Informix 4GL Version
+4.1x because it uses the ESQL/C Version 4.1x compiler, which does not
+provide the features that DBD::Informix needs.
 
 This compilation technique was shown to work in 1997 using DBD::Informix
-Version 0.56 (with Perl 5.004 and DBI Version 0.90) with IBM Informix
-4GL 6.05.UC1 on a Sun Sparc 20 running Solaris 2.5.1.  It was also shown
-to work in 2002 on a Sun UltraSparc running Solaris 7 with DBD::Informix
-1.03.PC1, Perl 5.8.0, DBI 1.30, IBM Informix 4GL 7.31.UC3, with both
-Sun's WorkShop 6 update 2 C 5.3 2001/05/15 C compiler and with the GNU C
-Compiler (GCC) 3.1.  Note that you should set the environment variable
+Version 0.56 (with Perl 5.004 and DBI Version 0.90) with IBM Informix 4GL
+6.05.UC1 on a Sun Sparc 20 running Solaris 2.5.1.  It was also shown to
+work in 2002 on a Sun UltraSparc running Solaris 7 with DBD::Informix
+1.03.PC1, Perl 5.8.0, DBI 1.30, IBM Informix 4GL 7.31.UC3, with both Sun's
+WorkShop 6 update 2 C 5.3 2001/05/15 C compiler and with the GNU C Compiler
+(GCC) 3.1.  Note that you should set the environment variable
 DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX to "^-KPIC$" to avoid warnings
-from GCC, and DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX to the same value
-to prevent linkage warnings.  Note that Solaris is a simple environment
-to handle; other environments such as HP-UX are less easy.
+from GCC, and DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX to the same value to
+prevent linkage warnings.  Note that Solaris is a simple environment to
+handle; other environments such as HP-UX are less easy.
 
 --------------------------------------------------------------------------
 
@@ -487,6 +492,6 @@ what 'uname -n' gives is what you need for the local machine.
 ===========================================================================
 
 Jonathan Leffler
-Informix Database Engineering, IBM Data Management Solutions
+Informix Database Engineering, IBM Information Management
 
-@(#)$Id: FAQ,v 2007.1 2007/09/04 05:58:09 jleffler Exp $
+@(#)$Id: FAQ,v 2008.1 2008/05/13 17:11:20 jleffler Exp $

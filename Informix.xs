@@ -1,12 +1,12 @@
 /*
- * @(#)$Id: Informix.xs,v 2007.1 2007/09/04 02:04:41 jleffler Exp $
+ * @(#)$Id: Informix.xs,v 2008.1 2008/05/12 06:09:46 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1995-96 Alligator Descartes
  * Copyright 1996-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
  * Copyright 2002-03 IBM
- * Copyright 2004-07 Jonathan Leffler
+ * Copyright 2004-08 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -21,7 +21,7 @@ DBISTATE_DECLARE;
 /* Assume string concatenation is available */
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_informix_xs[] = "@(#)$Id: Informix.xs,v 2007.1 2007/09/04 02:04:41 jleffler Exp $";
+const char jlss_id_informix_xs[] = "@(#)$Id: Informix.xs,v 2008.1 2008/05/12 06:09:46 jleffler Exp $";
 #endif /* lint */
 
 MODULE = DBD::Informix PACKAGE = DBD::Informix
@@ -57,6 +57,8 @@ constant()
     IX_COLLECTION = SQLCOLLECTION
     IX_VARUDT     = SQLUDTVAR
     IX_FIXUDT     = SQLUDTFIXED
+    IX_BIGINT     = SQLINFXBIGINT
+    IX_BIGSERIAL  = SQLBIGSERIAL
     # In the Informix system catalog, CLOB and BLOB types are simply
     # specific cases of a fixed UDT.  They seem to have extended ids
     # 10, 11.  However, they are also base types (opaque), and there

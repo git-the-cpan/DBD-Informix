@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esql_ius.h,v $
-@(#)Version:        $Revision: 2008.1 $
-@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
+@(#)Version:        $Revision: 2008.2 $
+@(#)Last changed:   $Date: 2008/03/08 19:34:28 $
 @(#)Purpose:        Supply key macros from IUS version of sqltypes.h
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1998,2003-06,2008
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 */
 
 /*TABSTOP=4*/
@@ -16,9 +16,11 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
+const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2008.2 2008/03/08 19:34:28 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
+
+#include "sqltypes.h"   /* Include the official version */
 
 /* C types */
 #ifndef CINT8TYPE
@@ -44,6 +46,9 @@ const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2008.1 2008/02/11 07:39
 #endif
 #ifndef CLVCHARPTRTYPE
 #define CLVCHARPTRTYPE  124
+#endif
+#ifndef CBIGINTTYPE
+#define CBIGINTTYPE     125
 #endif
 
 /* SQL types */
@@ -109,6 +114,18 @@ const char jlss_id_esql_ius_h[] = "@(#)$Id: esql_ius.h,v 2008.1 2008/02/11 07:39
 
 #ifndef ISDISTINCTTYPE
 #define ISDISTINCTTYPE(x)   ((x) & SQLDISTINCT)
+#endif
+
+#ifndef SQLUNKNOWN
+#define SQLUNKNOWN   	51
+#endif
+
+#ifndef SQLINFXBIGINT
+#define SQLINFXBIGINT   52 /* Avoid collision with ODBC */
+#endif
+
+#ifndef SQLBIGSERIAL
+#define SQLBIGSERIAL    53
 #endif
 
 #endif /* ESQL_IUS_H */

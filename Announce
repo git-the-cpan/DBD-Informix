@@ -1,14 +1,14 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, dbd.informix@gmail.com
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) released
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) released
 
-IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
 the driver code that enables Perl 5.6.1 or later to access Informix
 databases via the DBI module (but if you are not already using Perl
 5.10.0 - or any later version - you should be planning to upgrade).  You
-will need the code for DBI version 1.38 or later as well (v1.602 - or any
+will need the code for DBI version 1.38 or later as well (v1.604 - or any
 later version - is recommended).  The code for DBD::Informix is
 available for download via:
 
@@ -21,7 +21,20 @@ http://dbi.perl.org/
 ** The ItWorks script does not send email to anybody; you have to do
 ** that yourself.
 
-New in release 2008.0229:
+New in release :PRODVER::
+* Fix $sth->{TYPE}: return 9 (SQL_DATE) not -1 (SQL_LVARCHAR), fixing an
+  11-year old bug.
+* Add support for BIGINT in ESQL/C 3.50, including $h->{ix_bigserial}.
+* CPAN Testers reporting issues because Makefile.PL not exiting
+  successfully when pre-requisites not met.
+* ESQL/C 3.50 (for IDS 11.50) typedefs ifx_loc_t - update dumpesql.h to
+  cope (Joe R Plugge <jrplugge@west.com>).
+* ESQL/C test fails during configuration when $Config{ccflags} has
+  leading spaces.  Records show this problem also affected Dr Guenther
+  Seifert <guenther-h.seifert@t-systems.com> in June 2007.  Apologies
+  for not getting it fixed sooner.
+
+Release 2008.0229:
 * RT#32975: Add $h->{ix_serial} and $h->{ix_serial8}.
 
 Release 2007.0914
@@ -35,22 +48,6 @@ Release 2007.0904:
 * Reworked some headers.
 * Reworked ExtUtils::AutoInstall code.
 
-Release 2007.0903:
-* Released without updating Announce or ChangeLog.
-* Will be removed from CPAN shortly.
-
-Release 2007.0826:
-* Fixed support for CSDK 3.00.
-* Fixed support for ESQL/C 7.24 (and 5.20).
-* Detecting mismatched 32-bit Perl vs 64-bit ESQL/C or vice versa.
-* Fixed memory leak associated with LVARCHAR.
-* Fix problem with DBD_INFORMIX_DEBUG_ESQLCC=yes.
-* Fetch UDTs into SQLLVARCHAR instead of CHAR(256).
-* RT#14954 - only do smart blob test if smart blob space exists.
-* RT#14095: CLONE function added to driver 2005-08-12.
-* RT#13708: (LVARCHAR on 32-bit systems) fixed if you use CSDK (ESQL/C)
-  3.00.xC2 or later.  IBM CQ bug idsdb00139040 needs to be resolved.
-
 Support email address:
 * This release is supported by Jonathan Leffler <dbd.informix@gmail.com>.
 * You may also report your bugs via the CPAN resolution tracking system:
@@ -62,4 +59,4 @@ As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce,v 2008.1 2008/02/29 22:25:54 jleffler Exp $
+@(#)$Id: Announce,v 2008.2 2008/05/13 03:03:31 jleffler Exp $

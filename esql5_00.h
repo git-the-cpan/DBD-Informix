@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esql5_00.h,v $
-@(#)Version:        $Revision: 2008.1 $
-@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
+@(#)Version:        $Revision: 2008.2 $
+@(#)Last changed:   $Date: 2008/03/10 00:45:19 $
 @(#)Purpose:        Function prototypes for ESQL/C Versions 5.00..5.20
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1992-93,1995-97,2000,2002-06,2008
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 */
 
 /*
@@ -31,12 +31,14 @@
 #undef _iqlocate_cursor
 
 #include <sqlda.h>
+#ifndef MAXADDR
 #include <value.h>
+#endif /* MAXADDR */
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esql5_00_h[] = "@(#)$Id: esql5_00.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
+const char jlss_id_esql5_00_h[] = "@(#)$Id: esql5_00.h,v 2008.2 2008/03/10 00:45:19 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
@@ -44,8 +46,8 @@ const char jlss_id_esql5_00_h[] = "@(#)$Id: esql5_00.h,v 2008.1 2008/02/11 07:39
 #define ESQLC_STRICT_PROTOTYPES
 #endif /* __cplusplus */
 
-#ifdef ESQLC_STRICT_PROTOTYPES
 /* A non-prototyped declaration for _iqnprep() is emitted by the compiler */
+#ifdef ESQLC_STRICT_PROTOTYPES
 extern _SQCURSOR *_iqnprep(const char *name, const char *stmt, short cs_sens);
 #else
 extern _SQCURSOR *_iqnprep();

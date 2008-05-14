@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.nmd,v 2008.3 2008/02/29 23:04:57 jleffler Exp $
+#   @(#)$Id: DBD-Informix.nmd,v 2008.4 2008/05/14 00:11:39 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2008.0229 (2008-02-29)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
 #   @(#)Definitive list of files -- Non-Modifiable Source Distribution
 #
 #   -- The Source file column contains the name of the source file to be
@@ -33,44 +33,45 @@ decfix.c                    RCS/decfix.c,v              3.15
 decsci.c                    RCS/decsci.c,v              4.6
 decsci.h                    RCS/decsci.h,v              3.15
 decsetexp.c                 RCS/decsetexp.c,v           2.5
-dumpesql.h                  RCS/dumpesql.h,v            1.9
-esql5_00.h                  RCS/esql5_00.h,v            2008.1
+dumpesql.h                  RCS/dumpesql.h,v            1.15
+esql5_00.h                  RCS/esql5_00.h,v            2008.2
 esql7_20.h                  RCS/esql7_20.h,v            2008.1
-esql_ius.h                  RCS/esql_ius.h,v            2008.1
-esqlc.h                     RCS/esqlc.h,v               2008.1
+esql_ius.h                  RCS/esql_ius.h,v            2008.2
+esqlc.h                     RCS/esqlc.h,v               2008.4
 esqlcver.ec                 RCS/esqlcver.ec,v           2003.1
 esqllib.h                   RCS/esqllib.h,v             2008.1
-esqltype.h                  RCS/esqltype.h,v            2008.1
+esqltype.h                  RCS/esqltype.h,v            2008.3
 esqlutil.h                  RCS/esqlutil.h,v            2008.3
 ifmxdec.h                   RCS/ifmxdec.h,v             1.17
 ixblob.ec                   RCS/ixblob.ec,v             2008.1
 ixblob.h                    RCS/ixblob.h,v              50.5
-jtypes.c                    RCS/jtypes.c,v              2007.2
+jtypes.c                    RCS/jtypes.c,v              2008.1
 kludge.c                    RCS/kludge.c,v              1.8
 kludge.h                    RCS/kludge.h,v              1.14
 sqltoken.c                  RCS/sqltoken.c,v            2008.1
 sqltoken.h                  RCS/sqltoken.h,v            2004.3
-sqltype.ec                  RCS/sqltype.ec,v            2008.1
+sqltype.ec                  RCS/sqltype.ec,v            2008.2
 
 # Source Files
-Announce                        RCS/Announce,v          2008.1
+Announce                        RCS/Announce,v          2008.2
 BugReport                       RCS/BugReport,v         100.5
-ChangeLog                       RCS/ChangeLog,v         2008.2
+ChangeLog                       RCS/ChangeLog,v         2008.4
 
 InformixTechSupport             RCS/InformixTechSupport,v   100.9
 ItWorks                         RCS/ItWorks,v               100.5
-MANIFEST                        RCS/MANIFEST,v              2008.2
+MANIFEST                        RCS/MANIFEST,v              2008.3
 MANIFEST.SKIP                   RCS/MANIFEST.SKIP,v         2004.2
-Makefile.PL                     RCS/Makefile.PL,v           2008.1
+META.yml                        RCS/META.yml,v              2008.3
+Makefile.PL                     RCS/Makefile.PL,v           2008.4
 README                          RCS/README,v                2007.1
 TODO                            RCS/TODO,v                  2003.1
 
 Informix.h                      RCS/Informix.h,v        100.3
-Informix.pm                     RCS/Informix.pm,v       2008.1
-Informix.xs                     RCS/Informix.xs,v       2007.1
-dbdattr.ec                      RCS/dbdattr.ec,v        2008.2
-dbdimp.ec                       RCS/dbdimp.ec,v         2008.1
-dbdimp.h                        RCS/dbdimp.h,v          2008.1
+Informix.pm                     RCS/Informix.pm,v       2008.2
+Informix.xs                     RCS/Informix.xs,v       2008.1
+dbdattr.ec                      RCS/dbdattr.ec,v        2008.3
+dbdimp.ec                       RCS/dbdimp.ec,v         2008.3
+dbdimp.h                        RCS/dbdimp.h,v          2008.2
 dbdixmap.h                      RCS/dbdixmap.h,v        100.6
 eprintf.c                       RCS/eprintf.c,v         60.1
 esqlbasic.ec                    RCS/esqlbasic.ec,v      100.1
@@ -80,11 +81,11 @@ esqlcc                          RCS/esqlcc,v            2007.3
 esqlld                          RCS/esqlld,v            2005.1
 esqlperl.h                      RCS/esqlperl.h,v        2007.2
 esqlsed                         RCS/esqlsed,v           100.2
-esqltest.ec                     RCS/esqltest.ec,v       2007.3
+esqltest.ec                     RCS/esqltest.ec,v       2008.1
 link.c                          RCS/link.c,v            2007.1
 link.h                          RCS/link.h,v            2003.1
 
-odbctype.c                      RCS/odbctype.c,v        100.2
+odbctype.c                      RCS/odbctype.c,v        2008.1
 odbctype.h                      RCS/odbctype.h,v        100.1
 test.all.sh                     RCS/test.all.sh,v       100.1
 test.c4gl.sh                    RCS/test.c4gl.sh,v      100.1
@@ -93,7 +94,7 @@ test.quiet.sh                   RCS/test.quiet.sh,v     100.1
 test.run.sh                     RCS/test.run.sh,v       2004.1
 
 # Release mechanism stuff - not needed elsewhere, mostly.
-Release.Checklist               RCS/Release.Checklist,v 2007.1
+Release.Checklist               RCS/Release.Checklist,v 2008.1
 
 # Supporting tools
 lib/Bundle/DBD/Informix.pm          lib/Bundle/DBD/RCS/Informix.pm,v        2007.2
@@ -112,7 +113,7 @@ t/decgen.pl                     t/RCS/decgen.pl,v       2003.1
 t/dtgen.pl                      t/RCS/dtgen.pl,v        2003.1
 t/t00basic.t                    t/RCS/t00basic.t,v      2005.1
 t/t01stproc.t                   t/RCS/t01stproc.t,v     2005.1
-t/t02ixtype.t                   t/RCS/t02ixtype.t,v     2003.2
+t/t02ixtype.t                   t/RCS/t02ixtype.t,v     2008.1
 t/t05dbase.t                    t/RCS/t05dbase.t,v      2005.1
 t/t07dblist.t                   t/RCS/t07dblist.t,v     2007.2
 t/t08fork.t                     t/RCS/t08fork.t,v       2003.1
@@ -170,7 +171,7 @@ t/t98pod.t                      t/RCS/t98pod.t,v        2003.2
 t/t99clean.t                    t/RCS/t99clean.t,v      2003.2
 
 # Various scraps of documentation.
-Notes/FAQ                       Notes/RCS/FAQ,v                     2007.1
+Notes/FAQ                       Notes/RCS/FAQ,v                     2008.1
 Notes/Working.Versions          Notes/RCS/Working.Versions,v        2007.3
 Notes/bug.reports               Notes/RCS/bug.reports,v             100.7
 Notes/environment.variables     Notes/RCS/environment.variables,v   2007.1
@@ -207,8 +208,8 @@ examples/fetchscroll.pl                 examples/RCS/fetchscroll.pl,v           
 
 inc/ExtUtils/AutoInstall.pm             inc/ExtUtils/AutoInstall.pm             -
 
-DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2008.1
-DBD-Informix.msd            RCS/DBD-Informix.msd,v      2008.2
-DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2008.3 $
+DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2008.2
+DBD-Informix.msd            RCS/DBD-Informix.msd,v      2008.3
+DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2008.4 $
 mknmd.sh                    RCS/mknmd.sh,v              2007.2
 prodverstamp.sh             RCS/prodverstamp.sh,v       2007.9
