@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqlutil.h,v $
-@(#)Version:        $Revision: 2008.3 $
-@(#)Last changed:   $Date: 2008/01/30 16:38:21 $
+@(#)Version:        $Revision: 2009.1 $
+@(#)Last changed:   $Date: 2009/02/27 06:38:13 $
 @(#)Purpose:        ESQL/C Utility Functions
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1995-2006,2008
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Copyright:      (C) JLSS 1995-2006,2008-09
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*TABSTOP=4*/
@@ -16,7 +16,7 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2008.3 2008/01/30 16:38:21 jleffler Exp $";
+const char jlss_id_esqlutil_h[] = "@(#)$Id: esqlutil.h,v 2009.1 2009/02/27 06:38:13 jleffler Exp $";
 #endif /* lint */
 #endif	/* MAIN_PROGRAM */
 
@@ -57,36 +57,12 @@ extern char *iustypename(ixInt2 coltype, ixInt4 collen, ixInt4 xtd_id, char *buf
 extern const char *sqltype(ixInt2 coltype, ixInt4 collen);	/* Deprecated! */
 extern int sqltypemode(int mode);
 
-/* -- Transition step: #include dumpesql.h will be removed from 2009-01-01 -- */
-#include "dumpesql.h"
-/*
-** The dump_xyz routines are a systematic way of dumping the
-** information in the Informix compound types onto the specified file.
-** Each routine identifies its output with the user-specified tag.
-*/
-#if 0
-extern void dump_blob(FILE *fp, const char *tag, const Blob *blob);
-extern void dump_datetime(FILE *fp, const char *tag, const dtime_t *dp);
-extern void dump_decimal(FILE *fp, const char *tag, const dec_t *dp);
-extern void dump_interval(FILE *fp, const char *tag, const intrvl_t *ip);
-extern void dump_sqlca(FILE *fp, const char *tag, const Sqlca *psqlca);
-extern void dump_sqlda(FILE *fp, const char *tag, const Sqlda *desc);
-extern void dump_sqlva(FILE *fp, int item, const Sqlva *sqlvar);
-extern void dump_value(FILE *fp, const char *tag, const value_t *vp);
-extern void dump_sqldescriptor(FILE *fp, const char *tag, const char *name);
-
-/* Simple interface for dumping the global sqlca structure */
-extern void dumpsqlca(FILE *fp, const char *tag);
-#endif /* 0 */
-
 /*
 ** Alternatives to the (historically buggy) ESQL/C functions
 ** rtypmsize() and rtypalign()
 */
 extern int jtypmsize(int type, int len);
 extern int jtypalign(int offset, int type);
-
-/* sqltoken(), iustoken() -- #include "sqltoken.h" */
 
 /* sql_printerror() -- print error in global sqlca on specified file */
 extern void sql_printerror(FILE *fp);

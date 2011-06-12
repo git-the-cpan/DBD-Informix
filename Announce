@@ -1,16 +1,16 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, dbd.informix@gmail.com
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) released
+Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12) released
 
-IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) has been uploaded to CPAN.
+IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
 the driver code that enables Perl 5.6.1 or later to access Informix
 databases via the DBI module (but if you are not already using Perl
-5.10.0 - or any later version - you should be planning to upgrade).  You
-will need the code for DBI version 1.38 or later as well (v1.604 - or any
-later version - is recommended).  The code for DBD::Informix is
-available for download via:
+5.10.0 - or any later version - you should be planning to upgrade to
+Perl 5.14.0 or later).  You will need the code for DBI version 1.38 or
+later as well (v1.616 - or any later version - is recommended).  The
+code for DBD::Informix is available for download via:
 
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
 http://dbi.perl.org/
@@ -22,6 +22,20 @@ http://dbi.perl.org/
 ** that yourself.
 
 New in release :PRODVER::
+* Minor bug fix release.
+* Main change is related to Perl internals and avoids the need for
+  PERL_POLLUTE.  This change is not visible to users except that Perl
+  5.14.x can use the fixed code.
+* Fixed problem with string that is not null terminated by ESQL/C library.
+* Clean up some 64-bit compilation warnings.
+* Build on AIX.
+* Evade problem with a DISTINCT type of LVARCHAR with NOT NULL (probably
+  ESQL/C bug).
+* Fewer versions of Informix products are supported.  You may try
+  building DBD::Informix with other versions.  If it works, great; if
+  not, please upgrade to a supported Informix version.
+
+New in release 2008.0513:
 * Fix $sth->{TYPE}: return 9 (SQL_DATE) not -1 (SQL_LVARCHAR), fixing an
   11-year old bug.
 * Add support for BIGINT in ESQL/C 3.50, including $h->{ix_bigserial}.
@@ -34,20 +48,6 @@ New in release :PRODVER::
   Seifert <guenther-h.seifert@t-systems.com> in June 2007.  Apologies
   for not getting it fixed sooner.
 
-Release 2008.0229:
-* RT#32975: Add $h->{ix_serial} and $h->{ix_serial8}.
-
-Release 2007.0914
-* RT#29364: Fix problem identifying ESQL/C libraries.
-
-Release 2007.0904:
-* Bug fix and tidying up release - no new functionality.
-* Simplified internal release processing
-* Refixed support for ESQL/C 5.20.
-* Report server version better (using DBINFO).
-* Reworked some headers.
-* Reworked ExtUtils::AutoInstall code.
-
 Support email address:
 * This release is supported by Jonathan Leffler <dbd.informix@gmail.com>.
 * You may also report your bugs via the CPAN resolution tracking system:
@@ -59,4 +59,4 @@ As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
 
-@(#)$Id: Announce,v 2008.2 2008/05/13 03:03:31 jleffler Exp $
+@(#)$Id: Announce,v 2011.1 2011/06/12 22:14:47 jleffler Exp $

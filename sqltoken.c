@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: sqltoken.c,v $
-@(#)Version:        $Revision: 2008.1 $
-@(#)Last changed:   $Date: 2008/02/11 09:05:54 $
+@(#)Version:        $Revision: 2009.1 $
+@(#)Last changed:   $Date: 2009/02/26 21:35:41 $
 @(#)Purpose:        Identify SQL token in string
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1998-2005,2008
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Copyright:      (C) JLSS 1998-2005,2008-09
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*TABSTOP=4*/
@@ -17,7 +17,11 @@
 #include <string.h>
 
 /* Simulate C++ const_cast<type>(value) */
+#ifdef __cplusplus
+#define CONST_CAST(type, value) const_cast<type>(value)
+#else
 #define CONST_CAST(type, value) ((type)(value))
+#endif /* __cplusplus */
 
 #define LCURLY '{'
 #define RCURLY '}'
@@ -28,7 +32,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_sqltoken_c[] = "@(#)$Id: sqltoken.c,v 2008.1 2008/02/11 09:05:54 jleffler Exp $";
+const char jlss_id_sqltoken_c[] = "@(#)$Id: sqltoken.c,v 2009.1 2009/02/26 21:35:41 jleffler Exp $";
 #endif /* lint */
 
 /*

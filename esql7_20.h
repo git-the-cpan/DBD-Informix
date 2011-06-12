@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esql7_20.h,v $
-@(#)Version:        $Revision: 2008.1 $
-@(#)Last changed:   $Date: 2008/02/11 07:39:08 $
+@(#)Version:        $Revision: 2009.1 $
+@(#)Last changed:   $Date: 2009/02/27 06:32:49 $
 @(#)Purpose:        Function prototypes for ESQL/C Versions 7.20..7.24
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1997,1999-2000,2003-06,2008
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Copyright:      (C) JLSS 1997,1999-2000,2003-06,2008-09
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*TABSTOP=4*/
@@ -16,9 +16,19 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esql7_20_h[] = "@(#)$Id: esql7_20.h,v 2008.1 2008/02/11 07:39:08 jleffler Exp $";
+const char jlss_id_esql7_20_h[] = "@(#)$Id: esql7_20.h,v 2009.1 2009/02/27 06:32:49 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
+
+/*
+** JL 2009-02-26
+** Reports from people using ESQL/C 7.23 indicate that some of our code
+** uses ifx_sqlca_t, ifx_sqlda_t, and ifx_sqlvar_t but these were not
+** typedef'd in ESQL/C 7.2x.
+*/
+typedef struct sqlca_s       ifx_sqlca_t;
+typedef struct sqlvar_struct ifx_sqlvar_t;
+typedef struct sqlda         ifx_sqlda_t;
 
 /*
 ** JL 2000-06-29:

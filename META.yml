@@ -1,11 +1,15 @@
 --- #YAML:1.0
 name:                DBD-Informix
-version:             2008.0513
+version:             2011.0612
 abstract:            IBM Informix Database Driver for Perl DBI
 license:             perl
 author:
     -                Jonathan Leffler <jleffler@earthlink.net>
 distribution_type:   module
+build_requires:
+    DBI:             1.38
+configure_requires:
+    DBI:             1.38
 requires:     
     DBI:             1.38
     Time::HiRes:     0
@@ -18,5 +22,5 @@ urls:
     bugtracker:      http://rt.cpan.org/NoAuth/Bugs.html?Dist=DBD-Informix
 generated_by:        Jonathan Leffler version 1.000
 meta-spec:
-    url:             http://module-build.sourceforge.net/META-spec-v1.3.html
-    version:         1.3
+    version:         1.4
+    url:             http://module-build.sourceforge.net/META-spec-v1.4.html

@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.msd,v 2008.3 2008/05/14 00:11:19 jleffler Exp $
+#   @(#)$Id: DBD-Informix.msd,v 2011.1 2011/05/12 20:43:43 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 #   @(#)Definitive list of files -- Modifiable Source Distribution
 #
 #   -- The MSD RCS file column contains the name of the RCS file to be
@@ -24,7 +24,7 @@
 #   -- Tabs are non-preferred characters
 ##################################################################
 
-JL=/work1/jleffler
+JL=/Users/jleffler
 JLBS=${JL}/bin/RCS
 JLIS=${JL}/inc/RCS
 JLES=${JL}/lib/ESQL/RCS
@@ -36,26 +36,26 @@ JLSSDIST=${JL}/bin/JLSS-Dist/RCS
 ##################################################################
 
 # Library Files
-RCS/debug.h,v                   ${JLIS}/debug.h,v
+RCS/debug.h,v                   ${JLLS}/debug.h,v
 RCS/decfix.c,v                  ${JLES}/decfix.c,v
 RCS/decsci.c,v                  ${JLES}/decsci.c,v
 RCS/decsci.h,v                  ${JLES}/decsci.h,v
 RCS/decsetexp.c,v               ${JLES}/decsetexp.c,v
 RCS/dumpesql.h,v                ${JLES}/dumpesql.h,v
-RCS/esql5_00.h,v                ${JLIS}/esql5_00.h,v
-RCS/esql7_20.h,v                ${JLIS}/esql7_20.h,v
-RCS/esql_ius.h,v                ${JLIS}/esql_ius.h,v
-RCS/esqlc.h,v                   ${JLIS}/esqlc.h,v
+RCS/esql5_00.h,v                ${JLES}/esql5_00.h,v
+RCS/esql7_20.h,v                ${JLES}/esql7_20.h,v
+RCS/esql_ius.h,v                ${JLES}/esql_ius.h,v
+RCS/esqlc.h,v                   ${JLES}/esqlc.h,v
 RCS/esqlcver.ec,v               ${JLES}/esqlcver.ec,v
-RCS/esqllib.h,v                 ${JLIS}/esqllib.h,v
-RCS/esqltype.h,v                ${JLIS}/esqltype.h,v
+RCS/esqllib.h,v                 ${JLES}/esqllib.h,v
+RCS/esqltype.h,v                ${JLES}/esqltype.h,v
 RCS/esqlutil.h,v                ${JLES}/esqlutil.h,v
 RCS/ifmxdec.h,v                 ${JLES}/ifmxdec.h,v
 RCS/ixblob.ec,v                 ${JLES}/ixblob.ec,v
 RCS/ixblob.h,v                  ${JLES}/ixblob.h,v
 RCS/jtypes.c,v                  ${JLES}/jtypes.c,v
 RCS/kludge.c,v                  ${JLLS}/kludge.c,v
-RCS/kludge.h,v                  ${JLIS}/kludge.h,v
+RCS/kludge.h,v                  ${JLLS}/kludge.h,v
 RCS/sqltoken.c,v                ${JLES}/sqltoken.c,v
 RCS/sqltoken.h,v                ${JLES}/sqltoken.h,v
 RCS/sqltype.ec,v                ${JLES}/sqltype.ec,v
@@ -172,6 +172,7 @@ t/RCS/t92rows.t,v               t/RCS/t92rows.t,v
 t/RCS/t93lvarchar.t,v           t/RCS/t93lvarchar.t,v
 t/RCS/t94bool.t,v               t/RCS/t94bool.t,v
 t/RCS/t95int8.t,v               t/RCS/t95int8.t,v
+t/RCS/t96bigint.t,v             t/RCS/t96bigint.t,v
 t/RCS/t98pod.t,v                t/RCS/t98pod.t,v
 t/RCS/t99clean.t,v              t/RCS/t99clean.t,v
 

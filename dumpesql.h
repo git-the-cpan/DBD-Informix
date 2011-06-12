@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: dumpesql.h,v $
-@(#)Version:        $Revision: 1.15 $
-@(#)Last changed:   $Date: 2008/04/07 06:23:14 $
+@(#)Version:        $Revision: 1.18 $
+@(#)Last changed:   $Date: 2009/03/26 07:12:46 $
 @(#)Purpose:        ESQL/C Type Dumper Code
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 2005,2007-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Copyright:      (C) JLSS 2005,2007-09
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*TABSTOP=4*/
@@ -25,16 +25,17 @@ extern "C" {
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
 extern const char jlss_id_dumpesql_h[];
-const char jlss_id_dumpesql_h[] = "@(#)$Id: dumpesql.h,v 1.15 2008/04/07 06:23:14 jleffler Exp $";
+const char jlss_id_dumpesql_h[] = "@(#)$Id: dumpesql.h,v 1.18 2009/03/26 07:12:46 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
 #include <stdio.h>
 #include "esqlc.h"
 
-#ifndef __GNUC__
+#if !defined(__GNUC__) && !defined(__IBM_ATTRIBUTES)
+/* IBM Visual Age C supports GNU attribute notations (define not allowed) */
 #define __attribute__(x) /* If only other compilers supported this */
-#endif /* __GNUC__ */
+#endif /* !__GNUC__ && !__IBM_ATTRIBUTES */
 
 #ifndef TU_FRACDIGITS
 #define TU_FRACDIGITS(q)    ((TU_END(q) < TU_SECOND) ? 0 : (TU_END(q) - TU_SECOND))
@@ -52,6 +53,11 @@ const char jlss_id_dumpesql_h[] = "@(#)$Id: dumpesql.h,v 1.15 2008/04/07 06:23:1
 #ifndef DIM
 #define DIM(x)  (sizeof(x)/sizeof(*(x)))
 #endif /* DIM */
+
+#ifndef TYPEDEF_IFX_ERRNUM_T
+#define TYPEDEF_IFX_ERRNUM_T
+typedef int ifx_errnum_t;
+#endif /* TYPEDEF_IFX_ERRNUM_T */
 
 #ifndef IFX_DEC_T
 #define IFX_DEC_T

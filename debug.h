@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: debug.h,v $
-@(#)Version:        $Revision: 3.6 $
-@(#)Last changed:   $Date: 2008/02/11 06:46:37 $
+@(#)Version:        $Revision: 3.7 $
+@(#)Last changed:   $Date: 2011/04/17 22:01:21 $
 @(#)Purpose:        Definitions for the debugging system
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1990-93,1997-99,2003,2005,2008
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 #ifndef DEBUG_H
@@ -35,7 +35,7 @@
 static const char jlss_id_debug_enabled[] = "@(#)*** DEBUG ***";
 #endif /* DEBUG */
 #ifdef MAIN_PROGRAM
-const char jlss_id_debug_h[] = "@(#)$Id: debug.h,v 3.6 2008/02/11 06:46:37 jleffler Exp $";
+const char jlss_id_debug_h[] = "@(#)$Id: debug.h,v 3.7 2011/04/17 22:01:21 jleffler Exp $";
 #endif /* MAIN_PROGRAM */
 #endif /* lint */
 
@@ -78,6 +78,6 @@ extern int      db_mdgetdebug(int subsys);
 extern int      db_mdparsearg(char *arg);
 extern int      db_mdsetdebug(int subsys, int level);
 extern void     db_mdprint(int subsys, int level, const char *fmt,...);
-extern void     db_mdsubsysnames(char const * const *names);
+extern void     db_mdsubsysnames(char * const *names);
 
 #endif /* DEBUG_H */

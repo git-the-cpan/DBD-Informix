@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: ifmxdec.h,v $
-@(#)Version:        $Revision: 1.17 $
-@(#)Last changed:   $Date: 2008/02/11 03:32:23 $
+@(#)Version:        $Revision: 1.19 $
+@(#)Last changed:   $Date: 2008/08/31 11:54:43 $
 @(#)Purpose:        Internal declarations for DECIMAL functions
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 2003-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*TABSTOP=4*/
@@ -19,7 +19,7 @@ extern "C" {
 
 #ifdef MAIN_PROGRAM
 #ifndef lint
-static const char ifmxdec_h[] = "@(#)$Id: ifmxdec.h,v 1.17 2008/02/11 03:32:23 jleffler Exp $";
+static const char ifmxdec_h[] = "@(#)$Id: ifmxdec.h,v 1.19 2008/08/31 11:54:43 jleffler Exp $";
 #endif  /* lint */
 #endif  /* MAIN_PROGRAM */
 
@@ -49,14 +49,14 @@ extern int lddecimal(const char *cp, int len, ifx_dec_t *np);
 extern void stdecimal(const ifx_dec_t *np, char *cp, int len);
 
 /* JLSS - additions */
-extern int  flt_is_null(float f);
+extern int  flt_eq_null(float f);
 extern void flt_setnull(float *fp);
-extern int  dbl_is_null(double d);
+extern int  dbl_eq_null(double d);
 extern void dbl_setnull(double *dp);
 
-extern int  (dec_is_null)(const ifx_dec_t *dp);
+extern int  (dec_eq_null)(const ifx_dec_t *dp);
 extern void (dec_setnull)(ifx_dec_t *dp);
-extern int  (dec_is_zero)(const ifx_dec_t *dp);
+extern int  (dec_eq_zero)(const ifx_dec_t *dp);
 extern void (dec_setzero)(ifx_dec_t *dp);
 
 extern int  (dec_is_neg)(const ifx_dec_t *dp);
@@ -66,9 +66,9 @@ extern int  (dec_is_pos)(const ifx_dec_t *dp);
 #ifndef dec_setnull
 #define dec_setnull(d)  ((void)((d)->dec_pos = DECPOSNULL))
 #endif /* dec_setnull */
-#ifndef dec_is_null
-#define dec_is_null(d)  ((d)->dec_pos == DECPOSNULL)
-#endif /* dec_is_null */
+#ifndef dec_eq_null
+#define dec_eq_null(d)  ((d)->dec_pos == DECPOSNULL)
+#endif /* dec_eq_null */
 #ifndef dec_is_neg
 #define dec_is_neg(d)   ((d)->dec_pos == DECPOSNEG)
 #endif /* dec_is_neg */

@@ -1,7 +1,7 @@
 Working Versions of DBD::Informix
 =================================
 
-@(#)$Id: Working.Versions,v 2007.3 2007/09/04 07:24:17 jleffler Exp $
+@(#)$Id: Working.Versions,v 2011.1 2011/06/12 22:21:16 jleffler Exp $
 
 This file documents combinations of machine, operating system, Perl, DBI,
 DBD::Informix and Informix-ESQL/C which have been reported as working,
@@ -1170,6 +1170,20 @@ Working Versions of DBD::Informix
     <SYS_LOADER>      gcc -m64 </SYS_LOADER>
     <WHEN>            2007-09-04 </WHEN>
     <WHO>             Jonathan Leffler <jleffler@anubis.menlo.ibm.com> </WHO>
+    <Z_NOTES>         Optional Notes </Z_NOTES>
+</WORKING_VERSION>
+
+<WORKING_VERSION VERSION="1.00">
+    <DBD_INFORMIX>    2008.0513 </DBD_INFORMIX>
+    <DBI>             1.614 </DBI>
+    <INFORMIX_ESQLC>  IBM Informix CSDK Version 3.50, IBM Informix-ESQL Version 3.50.FC6 </INFORMIX_ESQLC>
+    <INFORMIX_SERVER> 11.70 (IDS) </INFORMIX_SERVER>
+    <PERL>            5.012001 darwin-2level dl_dlopen.xs </PERL>
+    <SYSTEM>          darwin dyn744040.sanjose.ibm.com 10.3.0 darwin kernel version 10.3.0: fri feb 26 11:58:09 pst 2010; root:xnu-1504.3.12~1release_i386 i386  </SYSTEM>
+    <SYS_COMPILER>    cc 4.2.1 (Apple Inc. build 5659) </SYS_COMPILER>
+    <SYS_LOADER>      env MACOSX_DEPLOYMENT_TARGET=10.3 cc </SYS_LOADER>
+    <WHEN>            2011-06-12 </WHEN>
+    <WHO>             Jonathan Leffler <jleffler@dyn744040.sanjose.ibm.com> </WHO>
     <Z_NOTES>         Optional Notes </Z_NOTES>
 </WORKING_VERSION>
 

@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqlc.h,v $
-@(#)Version:        $Revision: 2008.4 $
-@(#)Last changed:   $Date: 2008/03/10 00:45:19 $
+@(#)Version:        $Revision: 2008.5 $
+@(#)Last changed:   $Date: 2008/06/11 05:35:00 $
 @(#)Purpose:        Include all relevant ESQL/C type definitions
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1992-93,1995-2004,2006-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*
@@ -64,8 +64,8 @@
 ** 9.53         Client SDK 2.81 (UC2 = May 2003)
 ** 2.90         Client SDK 2.90 (Nov 2004)
 ** 2.91         Client SDK 2.91 (internal only?)
-** 3.00         Client SDK 3.00 (2007)
-** 3.50         Client SDK 3.50 (2008)
+** 3.00         Client SDK 3.00 (Jul 2007)
+** 3.50         Client SDK 3.50 (Apr 2008)
 **
 ** All versions of ESQL/C prior to 5.10, plus versions 6.x, 7.x
 ** (with the possible, marginal, exception of 7.24), 8.x, 9.0x,
@@ -78,7 +78,7 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2008.4 2008/03/10 00:45:19 jleffler Exp $";
+const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2008.5 2008/06/11 05:35:00 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
@@ -305,6 +305,16 @@ extern int      sqgetdbs(int *ret_fcnt,
 #define sqlva       sqlvar_struct
 
 /* -- Type Definitions */
+
+/*
+** Using ifx_loc_t directly with ESQL/C 3.50 generates (bogus) -33014 warnings.
+** Continue to use loc_t - under protest.
+** On AIX, loc_t is not typedef'd, to avoid conflicts with <sys/localedef32.h>.
+** So, patch up the omission, and continue with the other workarounds.
+*/
+#if defined(ESQLC_AIX_LOC_T) && defined(ESQLC_IFX_LOC_T)
+typedef ifx_loc_t loc_t;
+#endif /* ESQLC_AIX_LOC_T && ESQLC_IFX_LOC_T */
 
 typedef loc_t           Blob;
 typedef struct decimal  Decimal;

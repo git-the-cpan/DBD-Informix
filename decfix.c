@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: decfix.c,v $
-@(#)Version:        $Revision: 3.15 $
-@(#)Last changed:   $Date: 2008/01/28 05:25:26 $
+@(#)Version:        $Revision: 3.17 $
+@(#)Last changed:   $Date: 2008/08/31 11:54:43 $
 @(#)Purpose:        Fixed formatting of DECIMALs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005,2007-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 #include <assert.h>
@@ -47,7 +47,7 @@ enum { MAX_FIXDECSTRLEN = 166 };
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_decfix_c[] = "@(#)$Id: decfix.c,v 3.15 2008/01/28 05:25:26 jleffler Exp $";
+const char jlss_id_decfix_c[] = "@(#)$Id: decfix.c,v 3.17 2008/08/31 11:54:43 jleffler Exp $";
 #endif /* lint */
 
 /*
@@ -78,7 +78,7 @@ int dec_fix(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_t bufle
 	size_t len;
 
 	/* Deal with null values first */
-	if (dec_is_null(d))
+	if (dec_eq_null(d))
 	{
 		*dst = '\0';
 		return(0);
@@ -90,7 +90,7 @@ int dec_fix(const ifx_dec_t *d, int ndigit, int plus, char *buffer, size_t bufle
 
 	*dst++ = SIGN(!d->dec_pos, plus);	/* Sign */
 
-	if (dec_is_zero(&dv))
+	if (dec_eq_zero(&dv))
 	{
 		len = ndigit + sizeof("+0.");
 		if (buflen < len + 1)

@@ -1,23 +1,24 @@
 /*
 @(#)File:           $RCSfile: ixblob.ec,v $
-@(#)Version:        $Revision: 2008.1 $
-@(#)Last changed:   $Date: 2008/02/11 05:33:53 $
+@(#)Version:        $Revision: 2008.2 $
+@(#)Last changed:   $Date: 2008/06/01 23:12:29 $
 @(#)Purpose:        Handle Blobs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1996-98,2000-01,2003,2005,2007-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*TABSTOP=4*/
 
+#if __STDC_VERSION__ >= 199901L
+#define _XOPEN_SOURCE 600
+#else
+#define _XOPEN_SOURCE 500
+#endif /* __STDC_VERSION__ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
-
-#ifndef _XOPEN_SOURCE
-/* JL 2005-07-25: Some systems (eg AIX 5.2) define _XOPEN_SOURCE 600 */
-#define _XOPEN_SOURCE   500
-#endif /* _XOPEN_SOURCE */
 
 #include <assert.h>
 #include <fcntl.h>
@@ -30,6 +31,10 @@
 #include <unistd.h>
 #endif /* _WIN32 */
 #include "ixblob.h"
+
+#ifndef HAVE_MKSTEMP
+extern int mkstemp(char *);
+#endif /* HAVE_MKSTEMP */
 
 /*
 ** 2005-08-12: Windows fix - from Brian D Campbell <campbelb@lucent.com>
@@ -56,7 +61,7 @@ static char *blob_dir = 0;
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_ixblob_ec[] = "@(#)$Id: ixblob.ec,v 2008.1 2008/02/11 05:33:53 jleffler Exp $";
+const char jlss_id_ixblob_ec[] = "@(#)$Id: ixblob.ec,v 2008.2 2008/06/01 23:12:29 jleffler Exp $";
 #endif /* lint */
 
 BlobLocn blob_getlocmode(void)
@@ -109,19 +114,19 @@ const char *sql_dbtemp(void)
 **
 ** Using mktemp() is not recommended by the Linux/GNU headers (the man
 ** pages claim it is BSD 4.3 only, but it was in Version 7 Unix too),
-** and it is not defined by POSIX.  The standard alternatives are:
+** and it is not defined by POSIX (But it is in SUS V3 - marked LEGACY).
+** The standard alternatives are:
 **      tmpnam()    ISO C 1990  -- no control over directory
 **      tmpfile()   ISO C 1990  -- no access to name
-**      tempnam()   SVID/BDS4.3 -- not very standard; otherwise OK
-**      mkstemp()   BSD4.3      -- even less standard; otherwise OK
-** By design, we need control over the directory, so if mktemp() was
-** always available, using mktemp() is the least of many evils.
-** However, at least one machine did not provide a header declaring
-** mktemp(), which leads to compilation problems, so we are, in fact,
-** better off writing our own.  It does not have to be all that complex,
-** as long as we assume flexible names in the file system.  That is
-** pretty safe these days!
+**      tempnam()   SVID/BDS4.3 -- Standard in POSIX 1003.1 2004 (SUS V3)
+**      mkstemp()   BSD4.3      -- Standard in POSIX 1003.1 2004 (SUS V3)
+** By design, we need control over the directory, so if mkstemp() was
+** always available, using mkstemp() is the least of many evils.
+**
+** 2008-06-01: Time to upgrade - use mkstemp() if it is available, and
+** use surrogate implementation of mkstemp() if it is not.
 */
+
 char *blob_newfilename(void)
 {
     char            tmp[FILENAMESIZE];
@@ -172,8 +177,7 @@ static int blob_locinanonfile(Blob *blob)
     blob->loc_oflags = LOC_WONLY | LOC_RONLY;
     blob->loc_size = -1;
     blob->loc_indicator = 0;
-    mktemp(tmp);
-    blob->loc_fd = open(tmp, 0666, O_RDWR);
+    blob->loc_fd = mkstemp(tmp);
     if (blob->loc_fd < 0)
     {
         return(-1);

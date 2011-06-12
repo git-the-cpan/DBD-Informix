@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec,v 2008.3 2008/05/13 02:52:16 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2010.2 2010/08/31 21:25:14 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) $
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
@@ -14,7 +14,7 @@
  * Copyright 2000    Paul Palacios, C-Group Inc
  * Copyright 2001-03 IBM
  * Copyright 2002    Bryan Castillo <Bryan_Castillo@eFunds.com>
- * Copyright 2003-08 Jonathan Leffler
+ * Copyright 2003-10 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -24,7 +24,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2008.3 2008/05/13 02:52:16 jleffler Exp $";
+const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2010.2 2010/08/31 21:25:14 jleffler Exp $";
 #endif /* lint */
 
 #include <float.h>
@@ -904,7 +904,7 @@ $ifdef ESQLC_CONNECT;
 $else;
     if (imp_dbh->is_connected == True)
     {
-        char *dbname = (imp_dbh->database) ? SvPV(imp_dbh->database, na) : "";
+        char *dbname = (imp_dbh->database) ? SvPV(imp_dbh->database, PL_na) : "";
         dbd_ix_closedatabase(dbname);
     }
 $endif; /* ESQLC_CONNECT */
@@ -2432,7 +2432,7 @@ $ifdef ESQLC_IUSTYPES;
                             break;
                         }
                     default:
-                        warn("IUS extended type (%d) is not yet supported", extypeid);
+                        warn("IUS extended type (%ld) is not yet supported", extypeid);
                         break;
                     }
                     break;
@@ -2654,32 +2654,32 @@ dbd_ix_setdbname(const char *kw1, const char *kw2, imp_sth_t *sth)
     ** OK: we created sqltoken() to handle this!
     */
     /* Where's the statement text? */
-    char *tok = SvPV(sth->st_text, na);
+    char *tok = SvPV(sth->st_text, PL_na);
     const char *end = tok;
 
     dbd_ix_enter(function);
     tok = sqltoken(end, &end);
     /* Should be same as kw1 -- give or take case */
     if (DBIc_DBISTATE(sth)->debug >= 6)
-        warn("%s: %s = <<%*.*s>>\n", function, kw1, end - tok, end - tok, tok);
+        warn("%s: %s = <<%*.*s>>\n", function, kw1, (int)(end - tok), (int)(end - tok), tok);
     /* What's the Perl case-insensitive string comparison routine called? */
     if (kw2 != 0)
     {
         tok = sqltoken(end, &end);
         if (DBIc_DBISTATE(sth)->debug >= 6)
-            warn("%s: %s = <<%*.*s>>\n", function, kw2, end - tok, end - tok, tok);
+            warn("%s: %s = <<%*.*s>>\n", function, kw2, (int)(end - tok), (int)(end - tok), tok);
         /* Should be same as kw2 -- give or take case */
     }
     tok = sqltoken(end, &end);
     if (DBIc_DBISTATE(sth)->debug >= 6)
-        warn("%s: dbn = <<%*.*s>>\n", function, end - tok, end - tok, tok);
+        warn("%s: dbn = <<%*.*s>>\n", function, (int)(end - tok), (int)(end - tok), tok);
     /* Should be the database name! */
     /* Must handle this correctly! */
     if (sth->dbh->database != 0)
         SvREFCNT_dec(sth->dbh->database);
     sth->dbh->database = newSVpv(tok, end - tok);
     if (DBIc_DBISTATE(sth)->debug >= 4)
-        warn("new database name <<%s>>\n", SvPV(sth->dbh->database, na));
+        warn("new database name <<%s>>\n", SvPV(sth->dbh->database, PL_na));
     dbd_ix_exit(function);
 }
 

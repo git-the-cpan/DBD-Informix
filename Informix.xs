@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: Informix.xs,v 2008.1 2008/05/12 06:09:46 jleffler Exp $
+ * @(#)$Id: Informix.xs,v 2010.1 2010/08/31 21:25:14 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1995-96 Alligator Descartes
@@ -21,7 +21,7 @@ DBISTATE_DECLARE;
 /* Assume string concatenation is available */
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_informix_xs[] = "@(#)$Id: Informix.xs,v 2008.1 2008/05/12 06:09:46 jleffler Exp $";
+const char jlss_id_informix_xs[] = "@(#)$Id: Informix.xs,v 2010.1 2010/08/31 21:25:14 jleffler Exp $";
 #endif /* lint */
 
 MODULE = DBD::Informix PACKAGE = DBD::Informix
@@ -81,7 +81,7 @@ void
 driver_init(drh)
     SV *        drh
     CODE:
-    ST(0) = dbd_ix_dr_driver(drh) ? &sv_yes : &sv_no;
+    ST(0) = dbd_ix_dr_driver(drh) ? &PL_sv_yes : &PL_sv_no;
 
 # Fetch a driver attribute.  The keys are always strings.
 # For some reason, not a part of the DBI standard

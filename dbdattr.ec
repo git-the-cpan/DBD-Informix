@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdattr.ec,v 2008.3 2008/05/10 23:53:18 jleffler Exp $
+ * @(#)$Id: dbdattr.ec,v 2010.2 2010/08/31 23:36:13 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13) $ -- attribute handling
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12) $ -- attribute handling
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
@@ -16,7 +16,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_dbdattr_ec[] = "@(#)$Id: dbdattr.ec,v 2008.3 2008/05/10 23:53:18 jleffler Exp $";
+const char jlss_id_dbdattr_ec[] = "@(#)$Id: dbdattr.ec,v 2010.2 2010/08/31 23:36:13 jleffler Exp $";
 #endif /* lint */
 
 #include <stdio.h>
@@ -229,7 +229,7 @@ static SV *newSqlerrd(const Sqlca *psqlca)
 {
     int i;
     AV *av = newAV();
-    SV *retsv = newRV((SV *)av);
+    SV *retsv = newRV_inc((SV *)av);
     av_extend(av, (I32)6);
     sv_2mortal((SV *)av);
     for (i = 0; i < 6; i++)
@@ -246,7 +246,7 @@ static SV *newSqlwarn(const Sqlca *psqlca)
     AV             *av = newAV();
     char            warning[2];
     const char     *sqlwarn = &psqlca->sqlwarn.sqlwarn0;
-    SV *retsv = newRV((SV *)av);
+    SV *retsv = newRV_inc((SV *)av);
     av_extend(av, (I32)8);
     sv_2mortal((SV *)av);
     warning[1] = '\0';
@@ -259,12 +259,14 @@ static SV *newSqlwarn(const Sqlca *psqlca)
 }
 
 /* Argument is not const because ifx_int8toasc() is not declared const */
+/* ifx_int8toasc() blank pads but does not null terminate its output. */
 static SV *newSerial8(ifx_int8_t *v)
 {
     char buffer[24];
     SV *retsv;
 
     ifx_int8toasc(v, buffer, sizeof(buffer)-1);
+    buffer[sizeof(buffer)-1] = '\0';
     retsv = newSVpv(buffer, 0);
     return(retsv);
 }
@@ -361,7 +363,7 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
     {
         char *srvrname = "";
         if (imp_dbh->srvr_name)
-            srvrname = SvPV(imp_dbh->srvr_name, na);
+            srvrname = SvPV(imp_dbh->srvr_name, PL_na);
         retsv = newSVpv(srvrname, 0);
     }
     else if (KEY_MATCH(kl, key, ix_stoproc))
@@ -389,7 +391,7 @@ SV *dbd_ix_db_FETCH_attrib(SV *dbh, imp_dbh_t *imp_dbh, SV *keysv)
     {
         char *dbname = "";
         if (imp_dbh->database)
-            dbname = SvPV(imp_dbh->database, na);
+            dbname = SvPV(imp_dbh->database, PL_na);
         retsv = newSVpv(dbname, 0);
     }
     else if ((retsv = dbd_ix_getsqlca(imp_dbh, kl, key)) != NULL)
@@ -460,7 +462,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
     if (KEY_MATCH(kl, key, "NAME"))
     {
         av = newAV();
-        retsv = newRV((SV *)av);
+        retsv = newRV_inc((SV *)av);
         for (i = 1; i <= imp_sth->n_ocols; i++)
         {
             EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
@@ -472,7 +474,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
     else if (KEY_MATCH(kl, key, "NULLABLE"))
     {
         av = newAV();
-        retsv = newRV((SV *)av);
+        retsv = newRV_inc((SV *)av);
         for (i = 1; i <= imp_sth->n_ocols; i++)
         {
             EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
@@ -484,7 +486,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
     {
         /* Returns ODBC (CLI) type numbers. */
         av = newAV();
-        retsv = newRV((SV *)av);
+        retsv = newRV_inc((SV *)av);
         for (i = 1; i <= imp_sth->n_ocols; i++)
         {
             SV      *sv;
@@ -498,7 +500,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
     {
         /* Should return CLI precision numbers. */
         av = newAV();
-        retsv = newRV((SV *)av);
+        retsv = newRV_inc((SV *)av);
         for (i = 1; i <= imp_sth->n_ocols; i++)
         {
             SV      *sv;
@@ -512,7 +514,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
     {
         /* Should return CLI scale numbers. */
         av = newAV();
-        retsv = newRV((SV *)av);
+        retsv = newRV_inc((SV *)av);
         for (i = 1; i <= imp_sth->n_ocols; i++)
         {
             SV      *sv;
@@ -546,7 +548,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
         char buffer[SQLTYPENAME_BUFSIZ];
         SV      *sv;
         av = newAV();
-        retsv = newRV((SV *)av);
+        retsv = newRV_inc((SV *)av);
         for (i = 1; i <= imp_sth->n_ocols; i++)
         {
             EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
@@ -572,7 +574,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
     else if (KEY_MATCH(kl, key, ix_coltype))
     {
         av = newAV();
-        retsv = newRV((SV *)av);
+        retsv = newRV_inc((SV *)av);
         for (i = 1; i <= imp_sth->n_ocols; i++)
         {
             EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i
@@ -583,7 +585,7 @@ SV *dbd_ix_st_FETCH_attrib(SV *sth, imp_sth_t *imp_sth, SV *keysv)
     else if (KEY_MATCH(kl, key, ix_colleng))
     {
         av = newAV();
-        retsv = newRV((SV *)av);
+        retsv = newRV_inc((SV *)av);
         for (i = 1; i <= imp_sth->n_ocols; i++)
         {
             EXEC SQL GET DESCRIPTOR :nm_obind VALUE :i

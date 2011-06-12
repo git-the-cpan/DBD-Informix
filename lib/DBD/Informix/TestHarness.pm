@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: TestHarness.pm,v 2007.4 2007/08/27 02:55:11 jleffler Exp $
+#   @(#)$Id: TestHarness.pm,v 2011.1 2011/06/12 21:40:38 jleffler Exp $
 #
-#   Pure Perl Test Harness for IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+#   Pure Perl Test Harness for IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 #
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
@@ -58,8 +58,8 @@
 	require_version DBI 1.38;
 
 	my
-	$VERSION = "2008.0513";
-	# our $VERSION = "2008.0513"; # But 'our' not acceptable to Perl 5.005_03!
+	$VERSION = "2011.0612";
+	# our $VERSION = "2011.0612"; # But 'our' not acceptable to Perl 5.005_03!
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
@@ -591,10 +591,10 @@
         {
             # RT#14954: Only do smart blob testing if DBD_INFORMIX_SBSPACE is set.
             # Better - check whether there is an sbspace of the given name.
-            # sysmaster:sysdbspaces has (relevant) columns name and is_sbspace.
+            # sysmaster:"informix".sysdbspaces has (relevant) columns name and is_sbspace.
             $sbspace = $ENV{DBD_INFORMIX_SBSPACE};
             $sbspace = "sbspace" unless $sbspace;
-            my $sql = "select name from sysmaster:sysdbspaces where name = ? and is_sbspace = 1";
+            my $sql = 'select name from sysmaster:"informix".sysdbspaces where name = ? and is_sbspace = 1';
             my $ore = $dbh->{RaiseError};
             my $ope = $dbh->{PrintError};
             $dbh->{RaiseError} = 0;
@@ -791,7 +791,7 @@ DBD::Informix::TestHarness - Test Harness for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes DBD::Informix::TestHarness distributed with
-IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13).
+IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12).
 This is pure Perl code which exploits DBI and DBD::Informix to make it
 easier to write tests.
 Most notably, it provides a simple mechanism to connect to the user's

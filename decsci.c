@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: decsci.c,v $
-@(#)Version:        $Revision: 4.6 $
-@(#)Last changed:   $Date: 2008/01/28 05:25:26 $
+@(#)Version:        $Revision: 4.12 $
+@(#)Last changed:   $Date: 2008/09/23 05:37:31 $
 @(#)Purpose:        Exponential formatting of DECIMALs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005,2007-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 #ifdef TEST
@@ -25,7 +25,7 @@ enum { ERR_FMTBUFFERTOOSHORT = -1273 };
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_decsci_c[] = "@(#)$Id: decsci.c,v 4.6 2008/01/28 05:25:26 jleffler Exp $";
+const char jlss_id_decsci_c[] = "@(#)$Id: decsci.c,v 4.12 2008/09/23 05:37:31 jleffler Exp $";
 #endif /* lint */
 
 #ifdef USE_DEPRECATED_DECSCI_FUNCTIONS
@@ -64,8 +64,9 @@ char *decsci(const ifx_dec_t *d, int ndigits, int plus)
 */
 static void dec_sci_round(ifx_dec_t *dp, int ndigits)
 {
-    assert(!dec_is_zero(dp) && !dec_is_null(dp));
-    int e = 2 * (dp->dec_exp - 1) + (dp->dec_dgts[0] >= 10);
+    int e;
+    assert(!dec_eq_zero(dp) && !dec_eq_null(dp));
+    e = 2 * (dp->dec_exp - 1) + (dp->dec_dgts[0] >= 10);
     decround(dp, ndigits - (e + 1));
 }
 
@@ -78,7 +79,7 @@ int dec_sci(const ifx_dec_t *d, int ndigits, int plus, char *buffer, size_t bufl
     size_t    i;
     ifx_dec_t dv;
 
-    if (dec_is_null(d))
+    if (dec_eq_null(d))
     {
         *dst = '\0';
         return(0);
@@ -92,7 +93,7 @@ int dec_sci(const ifx_dec_t *d, int ndigits, int plus, char *buffer, size_t bufl
     }
 
     /* Rounding to n digits total cannot generate zero from a non-zero number */
-    if (dec_is_zero(d))
+    if (dec_eq_zero(d))
     {
         *dst++ = SIGN(DECPOSPOS, plus);    /* Sign */
         *dst++ = '0';
@@ -189,6 +190,11 @@ static p1_test values[] =
     { " 9.99999999999999999999e+123", 21, 0,     0, " 9.99999999999999999999E+123" },
     { "+1.00000000000000000000e+124", 12, 1,     0, "+1.00000000000E+124"          },
     { " 9.99999999999999999999e+124", 21, 0,     0, " 9.99999999999999999999E+124" },
+    { " 0.99999999999999999999e+125", 21, 0,     0, " 9.99999999999999999990E+124" },
+    { " 0.09999999999999999999e+126", 21, 0,     0, " 9.99999999999999999900E+124" },
+    { " 0.00999999999999999999e+127", 21, 0,     0, " 9.99999999999999999000E+124" },
+    { " 0.00099999999999999999e+128", 21, 0,     0, " 9.99999999999999990000E+124" },
+    { " 0.00009999999999999999e+129", 21, 0,     0, " 9.99999999999999900000E+124" },
     { "+1.00000000000000000000e+125", 14, 1, -1213, ""                             },
     { " 9.99999999999999999999e+125", 14, 0, -1213, ""                             },
     { "+1.00000000000000000000e+126", 14, 1, -1213, ""                             },
@@ -204,7 +210,11 @@ static p1_test values[] =
     { "-3.14159265358979323844e-127", 13, 1,     0, "-3.141592653590E-127"         },
     { " 1.00000000000000000000e-128", 13, 0,     0, " 1.000000000000E-128"         },
     { "+1.00000000000000000000e-129", 13, 1,     0, "+1.000000000000E-129"         },
-    { "-1.00000000000000000000e-130", 13, 0,     0, "-1.000000000000E-130"         },
+    { "-1.00000000000100000000e-130", 13, 0,     0, "-1.000000000001E-130"         },
+    { "+10.0000000000200000000e-131", 13, 0,     0, " 1.000000000002E-130"         },
+    { "+100.000000000300000000e-132", 13, 0,     0, " 1.000000000003E-130"         },
+    { "+1000.00000000400000000e-133", 13, 0,     0, " 1.000000000004E-130"         },
+    { "+10000.0000000500000000e-134", 13, 0,     0, " 1.000000000005E-130"         },
     { " 9.99999999999999999999e-131", 13, 1, -1213, ""                             },
 };
 
@@ -216,8 +226,14 @@ static void p1_tester(const void *data)
     int       err;
 
     err = deccvasc(CONST_CAST(char *, test->input), strlen(test->input), &d);
-    if (err != test->rc)
-        pt_fail("unexpected status %d from deccvasc() for %s\n", err, test->input);
+    /*
+    ** Relax condition to allow non-Informix deccvasc() to return
+    ** different error code.  Check that an error is received when one
+    ** is expected, and that none is received when none is expected.
+    */
+    if ((err == 0 && test->rc != 0) || (err != 0 && test->rc == 0))
+        pt_fail("unexpected status %d (wanted %d) from deccvasc() for %s\n",
+                err, test->rc, test->input);
     else if (err != 0)
         pt_pass("conversion failed %d as expected for %s\n", err, test->input);
     else

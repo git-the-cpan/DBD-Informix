@@ -1,7 +1,7 @@
 Frequently Asked Questions about IBM Informix Database Driver for Perl DBI
 ==========================================================================
 
-IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 
 --------------------------------------------------------------------------
 
@@ -74,12 +74,19 @@ consult the documentation:
 
 WHICH OTHER VERSIONS OF IBM INFORMIX ESQL/C EXIST?
 
-Informix ESQL/C exists in versions 5.0x (obsolete), 5.1x, 5.2x, 6.0x
-(obsolete), 7.0x (obsolete), 7.1x (obsolete), 7.2x (obsolete), 8.0x
-(obsolete), 8.1x, and 9.x.  Anything earlier than version 5.00 is very
-obsolete and cannot be used to build DBD::Informix.  Within the 9.x
-family, the 9.0x, 9.1x, 9.2x and 9.30 versions are obsolete, and the
-other available versions are mostly part of Client SDK.
+Informix ESQL/C exists in obsolete versions 5.0x, 5.1x, 5.2x, 6.0x,
+7.0x, 7.1x, 7.2x, 8.0x, 8.1x, and 9.x.  It also exists in the currently
+supported versions 5.2x (for Informix OnLine 5.2x, originally release
+circa 1991, but still available), and ESQL/C 3.00, 3.50, 3.70.
+
+Any of the old Informix (pre-IBM) versions earlier than version 5.00
+(such as ESQL/C 2.x, 4.x) is very obsolete and cannot be used to build
+DBD::Informix.
+
+NB: there is an extreme danger that IBM will (re)release ESQL/C 4.x as
+part of a CSDK 4.x; such versions are 'supported' by the version
+checking.  The original versions 4.00 and 4.1x date back to 1988 or
+1989.  Informix happened to skip versions 3.x back in the 80s.
 
     Former Name       Current Name
     -----------       ----------------------
@@ -93,21 +100,20 @@ other available versions are mostly part of Client SDK.
     ESQL/C 9.21     - Client SDK 2.30 (obsolete)
     ESQL/C 9.30     - Client SDK 2.40 (obsolete)
     ESQL/C 9.40     - Client SDK 2.50 (obsolete)
-    ESQL/C 9.50     - Client SDK 2.60
-    ESQL/C 9.51     - Client SDK 2.70
-    ESQL/C 9.52     - Client SDK 2.80
-    ESQL/C 9.53     - Client SDK 2.81
-    ESQL/C 2.90     - Client SDK 2.90 (Nov 2004)
+    ESQL/C 9.50     - Client SDK 2.60 (obsolete)
+    ESQL/C 9.51     - Client SDK 2.70 (obsolete)
+    ESQL/C 9.52     - Client SDK 2.80 (obsolete)
+    ESQL/C 9.53     - Client SDK 2.81 (obsolete)
+    ESQL/C 2.90     - Client SDK 2.90 (obsolete)
     ESQL/C 3.00     - Client SDK 3.00 (Jul 2007)
     ESQL/C 3.50     - Client SDK 3.50 (May 2008)
+    ESQL/C 3.70     - Client SDK 3.70 (Oct 2010)
 
-With the 7.3x servers, you would normally use Client SDK 2.80 or later.
-You should be planning to upgrade soon, too.  With the 8.2x or later
-servers, you would normally use Client SDK 2.70 or later.  If you have a
-9.40 server, you would normally use Client SDK 2.70 or later; for IDS
-10.00, you should use Client SDK 2.90 or later.  For IDS 11.10, you
-should use Client SDK 3.00; for IDS 11.50, you should use Client SDK
-3.50.  Finally, note that Client SDK is available free of charge, so you
+With the XPS 8.2x or later servers, you would normally use Client SDK
+2.70 or later.  If you have IDS 10.00, you should use Client SDK 2.90 or
+later.  For IDS 11.10, you should use Client SDK 3.00; for IDS 11.50,
+you should use Client SDK 3.50; for IDS 11.70, you should use ClientSDK
+3.70.  Finally, note that Client SDK is available free of charge, so you
 should use it if at all possible.  You can make Client SDK talk to the
 7.x and even 5.x servers.
 
@@ -184,6 +190,11 @@ In 2004, the current version of IDS was  9.40.
 In 2005, the current version of IDS was 10.00.
 In 2007, the current version of IDS was 11.10.
 In 2008, the current version of IDS was 11.50.
+In 2010, the current version of IDS was 11.70.
+
+Note that IDS 10.00 goes out of service at the end of September 2010.
+Thus, OnLine 5.20, SE 7.25, and IDS 11.10 or later are the supported
+Informix data servers.
 
 Version 9.2x merges the 7.x and 9.x code streams.  Basically, Informix
 Dynamic Server.2000 is the direct upgrade path if you use Informix Dynamic
@@ -276,13 +287,7 @@ using OnLine 5.0x is dangerous as the archives might not be restorable,
 which is not something you want to find out after the system has crashed
 and you need to restore it.
 
-If you use a 6.0x or 7.1x database server, you also need an Informix
-ESQL/C RunTime license.  However, you do not need a separate license for
-remote database access because the remote database access technology is
-part of the basic product.  If you use a 6.0x, 7.0x or 7.1x server, it
-is long past time to upgrade.
-
-If you use a 7.2x, 9.x or later database server, you need an Informix
+If you use a 10.00 or later database server, you need an Informix
 Connect license, and you do not need a separate license for remote
 database access because the remote database access technology is part of
 the basic product.  If you use a 7.2x server earlier than 7.24, you
@@ -494,4 +499,4 @@ what 'uname -n' gives is what you need for the local machine.
 Jonathan Leffler
 Informix Database Engineering, IBM Information Management
 
-@(#)$Id: FAQ,v 2008.1 2008/05/13 17:11:20 jleffler Exp $
+@(#)$Id: FAQ,v 2010.2 2011/06/12 22:12:05 jleffler Exp $

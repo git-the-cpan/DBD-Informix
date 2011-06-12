@@ -5,7 +5,7 @@
 @(#)Purpose:        Format the exponent of a DECIMAL
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 2001,2005,2007-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*TABSTOP=4*/

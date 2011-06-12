@@ -5,7 +5,7 @@
 @(#)Purpose:        Verify that library is built with correct version of ESQL/C
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1998,2003
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 */
 
 /*TABSTOP=4*/

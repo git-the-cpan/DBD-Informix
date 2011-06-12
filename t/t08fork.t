@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t08fork.t,v 2003.1 2003/09/09 18:45:35 jleffler Exp $
+#   @(#)$Id: t08fork.t,v 2011.1 2011/05/12 21:36:57 jleffler Exp $
 #
 #   Ensure that child processes cannot use parental database handles
 #
@@ -20,8 +20,11 @@ my $pid = fork;
 if ($pid)
 {
 	# Parent - should be OK
+    # MacOS X - has to set some sort of handler for SIGCHLD
+    $SIG{CHLD} = sub { return; };
 	wait;	# Wait for child to die!
 	my $rc = $?;
+    stmt_note "# Parent detected child status $rc\n";
 	stmt_fail unless ($rc == 0);
 	my $sth = $dbh->prepare($sql) or stmt_fail;
 	stmt_ok;

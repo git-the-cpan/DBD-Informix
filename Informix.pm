@@ -1,12 +1,12 @@
-#   @(#)$Id: Informix.pm,v 2008.2 2008/05/12 06:12:52 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2010.1 2010/09/01 20:10:57 jleffler Exp $
 #
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2001-03 IBM
-#   Copyright 2004-08 Jonathan Leffler
+#   Copyright 2004-10 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -48,10 +48,10 @@
                 ) ] );
     Exporter::export_ok_tags('ix_types');
 
-    $VERSION          = "2008.0513";
+    $VERSION          = "2011.0612";
 
     my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-    my $Revision         = '$Id: Informix.pm,v 2008.2 2008/05/12 06:12:52 jleffler Exp $';
+    my $Revision         = '$Id: Informix.pm,v 2010.1 2010/09/01 20:10:57 jleffler Exp $';
 
     # This is for development only - the code must be recompiled each day!
     $VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
@@ -300,7 +300,7 @@ DBD::Informix - IBM Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes IBM Informix Database Driver for Perl DBI Version 2008.0513 (2008-05-13).
+This document describes IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.
@@ -338,9 +338,9 @@ software and different types of Informix databases.
 The key factor is the version of ESQL/C used when building
 DBD::Informix.
 Basically, there are two groups of versions to worry about, the 5.x
-family of versions (5.00.UC1 through 5.10.UCx at the moment), and the
-6.x and later family of versions (6.00.UE1 through 9.52.UC1 at the
-moment).
+family of versions (5.00.UC1 through 5.20.UCx at the moment), and the 6.x
+and later family of versions (6.00 through 9.53, and then 2.90 through 3.70
+at the moment; yes, some clown in marketing decreased the version number).
 All version families acquire extra versions on occasion.
 
 Note that DBD::Informix does not work with Informix ESQL/C Version
@@ -362,7 +362,7 @@ Notes/bug.reports file as well.
 
 =head2 JAPANESE DOCUMENTATION
 
-For a Japanese translation of a recent version of this documentation
+For a Japanese translation of a version of this documentation
 (maintained by Kawai Takanori <kawai@nippon-rad.co.jp>), see the
 following Web site:
 

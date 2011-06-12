@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: t78varchar.t,v 1.2 2007/08/26 06:25:47 jleffler Exp $
+#   @(#)$Id: t78varchar.t,v 2010.1 2010/09/01 20:18:55 jleffler Exp $
 #
 #   Off-by-one bug in VARCHAR when used next to BLOB or CLOB fields
 #   Bug, basic test case and diagnosis provided by Tom Girsch.
@@ -9,7 +9,7 @@
 #
 #   Copyright 2006    Tom Girsch <tom_girsch@hilton.com>
 #   Copyright 2006    Doug Conrey <doug_conrey@oci.com>
-#   Copyright 2006-07 Jonathan Leffler
+#   Copyright 2006-10 Jonathan Leffler
 
 use strict;
 use DBD::Informix::TestHarness;
