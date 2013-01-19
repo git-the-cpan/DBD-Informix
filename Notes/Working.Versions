@@ -1,7 +1,7 @@
 Working Versions of DBD::Informix
 =================================
 
-@(#)$Id: Working.Versions,v 2011.1 2011/06/12 22:21:16 jleffler Exp $
+@(#)$Id: Working.Versions,v 2011.2 2011/09/26 02:04:38 jleffler Exp $
 
 This file documents combinations of machine, operating system, Perl, DBI,
 DBD::Informix and Informix-ESQL/C which have been reported as working,
@@ -1184,6 +1184,20 @@ Working Versions of DBD::Informix
     <SYS_LOADER>      env MACOSX_DEPLOYMENT_TARGET=10.3 cc </SYS_LOADER>
     <WHEN>            2011-06-12 </WHEN>
     <WHO>             Jonathan Leffler <jleffler@dyn744040.sanjose.ibm.com> </WHO>
+    <Z_NOTES>         Optional Notes </Z_NOTES>
+</WORKING_VERSION>
+
+<WORKING_VERSION VERSION="1.00">
+    <DBD_INFORMIX>    2011.0612 </DBD_INFORMIX>
+    <DBI>             1.616 </DBI>
+    <INFORMIX_ESQLC>  IBM Informix CSDK Version 3.70, IBM Informix-ESQL Version 3.70.FC2 </INFORMIX_ESQLC>
+    <INFORMIX_SERVER> 11.70 (IDS) </INFORMIX_SERVER>
+    <PERL>            5.014001 darwin-2level dl_dlopen.xs </PERL>
+    <SYSTEM>          darwin osiris-9.sanjose.ibm.com 10.7.0 darwin kernel version 10.7.0: sat jan 29 15:17:16 pst 2011; root:xnu-1504.9.37~1release_i386 i386  </SYSTEM>
+    <SYS_COMPILER>    gcc -m64 4.6.0 </SYS_COMPILER>
+    <SYS_LOADER>      env MACOSX_DEPLOYMENT_TARGET=10.3 cc </SYS_LOADER>
+    <WHEN>            2011-06-24 </WHEN>
+    <WHO>             Jonathan Leffler <jleffler@osiris-9.sanjose.ibm.com> </WHO>
     <Z_NOTES>         Optional Notes </Z_NOTES>
 </WORKING_VERSION>
 

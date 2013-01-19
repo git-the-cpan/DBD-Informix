@@ -1,15 +1,15 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2011.2 2011/06/12 21:47:44 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2013.3 2013/01/19 04:38:54 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12))
+# (IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
 # Copyright 2000    Informix Software Inc
 # Copyright 2002-04 IBM
-# Copyright 2004-11 Jonathan Leffler
+# Copyright 2004-13 Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
@@ -19,9 +19,9 @@
 BEGIN
 {
 $main::min_DBI_ver = "1.38";        # Minimum (mandatory) version of DBI
-$main::ref_DBI_ver = "1.616";       # Reference (recommended) version of DBI
+$main::ref_DBI_ver = "1.623";       # Reference (recommended) version of DBI
 $main::min_Perl_ver = "5.006001";   # Minimum (mandatory) version of Perl
-$main::ref_Perl_ver = "5.014000";   # Reference (recommended) version of Perl
+$main::ref_Perl_ver = "5.016002";   # Reference (recommended) version of Perl
 }
 
 ########################
@@ -106,7 +106,7 @@ if ($NTConfiguration)
     });
 }
 
-my $dbd_ix = "2011.0612";
+my $dbd_ix = "2013.0118";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -146,7 +146,7 @@ my %opts = (
            );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12) (aka $opts{NAME})
+Configuring IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -364,10 +364,11 @@ elsif ($effvernum >= 916 && $effvernum < 1000)
     # ESQL/C 9.51 was released in ClientSDK 2.70
     # ESQL/C 9.52 was released in ClientSDK 2.80
     # ESQL/C 9.53 was released in ClientSDK 2.81
-    # ESQL/C 2.90 was released in ClientSDK 2.90 (Nov 2004)
-    # ESQL/C 3.00 was released in ClientSDK 3.00
-    # ESQL/C 3.50 was released in ClientSDK 3.50
-    # ESQL/C 3.70 will be released in ClientSDK 3.70
+    # ESQL/C 2.90 was released in ClientSDK 2.90 (IDS 10.00) (Nov 2004)
+    # ESQL/C 3.00 was released in ClientSDK 3.00 (IDS 11.10)
+    # ESQL/C 3.50 was released in ClientSDK 3.50 (IDS 11.50)
+    # ESQL/C 3.70 was released in ClientSDK 3.70 (IDS 11.70)
+    # ESQL/C 4.10 will be released in ClientSDK 4.10 (IDS 12.10) (Mar 2013)
     print &nlws(qq%
             Please upgrade to a more recent version of ClientSDK.
             $opts{NAME} will probably work, but that is not guaranteed.
@@ -641,6 +642,7 @@ else
     my $sx = $ENV{DBD_INFORMIX_DEBUG_ESQLTEST} ? 1 : 0;
     my @ccflags = split / +/, trim($Config{ccflags});
     my @cppflags = split / +/, trim($opts{DEFINE});
+    my @ldflags = split / +/, trim($Config{ldflags});
     if ($sx)
     {
     my($v);
@@ -654,7 +656,7 @@ else
     execute_command($sx, "Failed to compile $vercode.ec to $vercode$objext\n",
                     [ "$EQ", "-c", @ccflags, @cppflags, "$vercode.ec" ], $EV);
     execute_command($sx, "Failed to link test program esqltest\n",
-                    [ "$EQ", "-o", "esqltest", "esqltest$objext", "$vercode$objext" ], $EV);
+                    [ "$EQ", "-o", "esqltest", @ldflags, "esqltest$objext", "$vercode$objext" ], $EV);
     execute_command($sx, "Failed to remove compilation debris\n",
                     [ "$RM esqltest$objext esqltest.c $vercode.c $vercode$objext" ], $EV)
         unless ($sx);
@@ -1172,7 +1174,7 @@ sub Write_DBD_Informix_Defaults
         or die "Cannot create $defaults ($!)";
 
     print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
+#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004-10 Jonathan Leffler
@@ -1186,7 +1188,7 @@ sub Write_DBD_Informix_Defaults
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
-    $VERSION = "2011.0612";
+    $VERSION = "2013.0118";
     $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1210,7 +1212,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)).
+(IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to,

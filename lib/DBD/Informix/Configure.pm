@@ -1,12 +1,12 @@
-#   @(#)$Id: Configure.pm,v 2005.1 2005/08/12 23:32:17 jleffler Exp $ 
+#   @(#)$Id: Configure.pm,v 2011.2 2012/05/19 19:09:24 jleffler Exp $ 
 #
 #   Informix ESQL/C Support Routines for DBD::Informix
-#   (IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12))
+#   (IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18))
 #
 #   Copyright 1999      Jonathan Leffler
 #   Copyright 2000      Informix Software Inc
 #   Copyright 2002      IBM
-#   Copyright 2003,2005 Jonathan Leffler
+#   Copyright 2003-2012 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -26,7 +26,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(find_informixdir_and_esql get_esqlc_version map_informix_lib_names);
 
-	$VERSION = "2011.0612";
+	$VERSION = "2013.0118";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -94,10 +94,13 @@
 				&did_not_read("No executable ESQL/C compiler $ID/bin/$esql")
 					unless (-x "$ID/bin/$esql");
 			}
+            # Allow for $INFORMIXDIR = "/opt/informix/ids1170+csdk350".
+            # Without the \Q...\E notation, the metacharacter '+' is active.
+            # Reported by Julian Bridle <julian.bridle@pacepetroleum.com>
 			&did_not_read('$INFORMIXDIR/bin is not in $PATH')
-				unless ($ENV{PATH} =~ m%:$ID/bin:% ||
-						$ENV{PATH} =~ m%^$ID/bin:% ||
-						$ENV{PATH} =~ m%:$ID/bin$%);
+				unless ($ENV{PATH} =~ m%:\Q$ID\E/bin:% ||
+						$ENV{PATH} =~ m%^\Q$ID\E/bin:% ||
+						$ENV{PATH} =~ m%:\Q$ID\E/bin$%);
 		}
 		print "Using INFORMIXDIR=$ID and ESQL/C compiler $esql\n";
 		return $ID, $esql;
@@ -174,9 +177,8 @@
 		my @o_libs = ();
 		my $ixd = $ENV{INFORMIXDIR};
 		my @ixlibdirs = ();
-		my $arg;
 
-		for $arg (@i_libs)
+		foreach my $arg (@i_libs)
 		{
 			if ($arg =~ m%^-L$ixd/%o)
 			{
@@ -202,17 +204,17 @@
 	sub map_library
 	{
 		my ($lib, @libdirs) = @_;
-		my ($dir, $ext, $path);
 		my $ar_ext = $Config{lib_ext};	# Regular, static libraries
 		my $dl_ext = ".$Config{dlext}";	# Shared, dynamic libraries
+		my $so_ext = ".$Config{so}";	# Shared, dynamic libraries
 		my $stub = $lib;
 		$stub =~ s/-l//;
 		$stub = "lib$stub";
-		for $dir (@libdirs)
+		foreach my $dir (@libdirs)
 		{
-			for $ext ($dl_ext, $ar_ext)
+			foreach my $ext ($so_ext, $dl_ext, $ar_ext)
 			{
-				$path = "$dir/$stub$ext";
+				my $path = "$dir/$stub$ext";
 				if (-f $path)
 				{
 					print "\t$0: map $lib to $path\n" if $ENV{DBD_INFORMIX_DEBUG_LIBMAP};
@@ -245,7 +247,7 @@ use DBD::Informix::Configure;
 
 =head1 DESCRIPTION
 
-This module is used by IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12) in the build and bug reporting code.
+This module is used by IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) in the build and bug reporting code.
 You will seldom if ever have cause to use this module directly.
 
 =head2 Using find_informixdir_and_esql

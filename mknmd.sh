@@ -1,8 +1,8 @@
 #!/bin/ksh
 #
-#   @(#)$Id: mknmd.sh,v 2007.2 2007/09/03 02:55:45 jleffler Exp $"
+#   @(#)$Id: mknmd.sh,v 2012.1 2012/05/28 21:46:20 jleffler Exp $"
 #
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
 #
 #   Create a Non-Modifiable Source Distribution
 #   Caution: uses test operator -ot (older than) which is not POSIX-compliant
@@ -95,7 +95,7 @@ do
 
     if [ ! -f $source ]
     then
-        echo "$0: cannot find $source" >&2
+        echo "$arg0: cannot find $source" >&2
         continue
     fi
 

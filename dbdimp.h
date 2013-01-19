@@ -1,11 +1,11 @@
 /*
- * @(#)$Id: dbdimp.h,v 2008.2 2008/05/10 23:50:13 jleffler Exp $
+ * @(#)$Id: dbdimp.h,v 2013.1 2013/01/18 19:39:15 jleffler Exp $
  *
  * Copyright 1994-95 Tim Bunce
  * Copyright 1996-99 Jonathan Leffler
  * Copyright 2000    Informix Software Inc
  * Copyright 2001-02 IBM
- * Copyright 2003-08 Jonathan Leffler
+ * Copyright 2003-13 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -18,7 +18,7 @@
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
 extern const char jlss_id_dbdimp_h[];
-const char jlss_id_dbdimp_h[] = "@(#)$Id: dbdimp.h,v 2008.2 2008/05/10 23:50:13 jleffler Exp $";
+const char jlss_id_dbdimp_h[] = "@(#)$Id: dbdimp.h,v 2013.1 2013/01/18 19:39:15 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
@@ -113,6 +113,7 @@ struct imp_dbh_st
     Link            chain;          /* Link in list of connections */
     Link            head;           /* Head of list of statements */
     long            dbh_pid;        /* PID of Perl process creating handle */
+    Boolean         enable_utf8;    /* Option ix_EnableUTF8 passed */
 };
 
 /* Define sth implementor data structure */
@@ -136,6 +137,8 @@ struct imp_sth_st
     int             n_oudts;    /* Number of UDTs in output descriptor */
     void          **a_iudts;    /* Array of lvarchar pointers for input UDTs */
     void          **a_oudts;    /* Array of lvarchar pointers for output UDTs */
+    int             n_lvcsz;    /* Number of LVARCHAR (not UDT) columns */
+    int            *a_lvcsz;    /* Array of integers holding LVARCHAR sizes */
     Boolean         is_holdcursor;  /* Using a hold Cursor */
     Boolean         is_scrollcursor;    /* Using a scroll Cursor */
     Boolean         is_insertcursor;    /* Using a insert Cursor */

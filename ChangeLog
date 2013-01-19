@@ -1,8 +1,31 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12) (aka DBD::Informix)
+Change Log for IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) (aka DBD::Informix)
 
-2011.0xyz Release
+2013.0118 Release
 -----------------
-2011-0x-yz: Upload to PAUSE and CPAN.
+2013-01-18: Upload to PAUSE and CPAN.
+2013-01-18: Workaround for CQ idsdb00247065, the error -1820 problem.  You
+            cannot reuse an SQL descriptor for LVARCHAR variables upon
+            reopening the cursor unless the size for the LVARCHAR variables
+            is set to the original size.  So, store the original size for
+            each LVARCHAR and reinstate that size in the SQL descriptor
+            before the first FETCH (actually, after the OPEN).  Reported
+            this time by Robert Carew <Robert.Carew@mpi.govt.nz>, but also
+            reported by a number of other people previously.
+2012-05-19: Use $Config{so} as well as $Config{dlext} searching for ESQL/C
+            libraries.  Ticket 77286 at rt.cpan.org, submitted by n4zmz.
+2011-09-25: Despite some misgivings, add a $dbh->ping method (using SELECT
+            1 FROM "informix".systables WHERE TabID = 1).  The misgivings
+            are for MODE ANSI databases; a transaction may be started.
+2011-09-25: Modify dbdattr.ec, dbdimp.ec, dbdimp.h to provide optional UTF8
+            support.  Patch from Sergey Leschenko <sergle.ua@gmail.com>.
+2011-06-20: Modify Makefile.PL build of test to include @ldflags (reported
+            and patched by Julian Bridle <julian.bridle@pacepetroleum.com>).
+2011-06-16: Handle Perl regex metacharacters in $INFORMIXDIR (reported and
+            patched by Julian Bridle <julian.bridle@pacepetroleum.com>).
+
+2011.0612 Release
+-----------------
+2011-06-12: Upload to PAUSE and CPAN.
 2011-06-12: Fix smart blob space detection to work with MODE ANSI.
 2011-06-12: Disable test of DISTINCT type of LVARCHAR with NOT NULL.
 2011-05-28: Check build against Perl 5.14.0 and DBI 1.616.
@@ -1219,4 +1242,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2010.2 2011/06/12 21:42:04 jleffler Exp $
+@(#)$Id: ChangeLog,v 2013.3 2013/01/19 04:30:49 jleffler Exp $

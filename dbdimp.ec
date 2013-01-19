@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec,v 2010.2 2010/08/31 21:25:14 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2013.1 2013/01/18 19:39:15 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12) $
+ * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
@@ -14,7 +14,7 @@
  * Copyright 2000    Paul Palacios, C-Group Inc
  * Copyright 2001-03 IBM
  * Copyright 2002    Bryan Castillo <Bryan_Castillo@eFunds.com>
- * Copyright 2003-10 Jonathan Leffler
+ * Copyright 2003-13 Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -24,7 +24,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2010.2 2010/08/31 21:25:14 jleffler Exp $";
+const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2013.1 2013/01/18 19:39:15 jleffler Exp $";
 #endif /* lint */
 
 #include <float.h>
@@ -42,6 +42,7 @@ const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2010.2 2010/08/31 21:25:1
 #include "decsci.h"
 #include "sqltoken.h"
 #include "esqlutil.h"
+#include "dumpesql.h"
 
 /* Beware omitting the semi-colon! */
 $include "esqlinfo.h";
@@ -60,7 +61,7 @@ $define SQL_USERLEN1     33;
 
 DBISTATE_DECLARE;
 
-static const Sqlca zero_sqlca = { 0 };
+static const Sqlca zero_sqlca;
 static const Link zero_link = { 0, 0, 0 };
 
 /*
@@ -259,39 +260,28 @@ dbd_ix_fmterror(ErrNum rc, char *msgbuf, size_t msgsiz)
     size_t sql_len;
     size_t isamlen;
 
+    assert(msgsiz >= sizeof(sql_buf) + sizeof(isambuf));
     /* Format SQL (primary) error */
     if (rgetmsg(rc, errbuf, sizeof(errbuf)) != 0)
         strcpy(errbuf, "<<Failed to locate SQL error message>>");
-    sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
-    sprintf(sql_buf, "SQL: %ld: %s", rc, fmtbuf);
+    snprintf(fmtbuf, sizeof(fmtbuf), errbuf, sqlca.sqlerrm);
+    snprintf(sql_buf, sizeof(sql_buf), "SQL: %ld: %s", rc, fmtbuf);
 
     /* Format ISAM (secondary) error */
     if (sqlca.sqlerrd[1] != 0)
     {
         if (rgetmsg(sqlca.sqlerrd[1], errbuf, sizeof(errbuf)) != 0)
             strcpy(errbuf, "<<Failed to locate ISAM error message>>");
-        sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
-        sprintf(isambuf, "ISAM: %ld: %s", (long)sqlca.sqlerrd[1], fmtbuf);
+        snprintf(fmtbuf, sizeof(fmtbuf), errbuf, sqlca.sqlerrm);
+        snprintf(isambuf, sizeof(isambuf), "ISAM: %ld: %s", (long)sqlca.sqlerrd[1], fmtbuf);
     }
     else
         isambuf[0] = '\0';
 
     /* Concatenate SQL and ISAM messages */
-    /* Note that the messages have trailing newlines */
+    /* Note that (untruncated) messages have trailing newlines */
     sql_len = strlen(sql_buf);
     isamlen = strlen(isambuf);
-    if (sql_len + isamlen > msgsiz)
-    {
-        if (sql_len >= msgsiz)
-        {
-            isambuf[0] = '\0';
-            sql_len = msgsiz - 1;
-            sql_buf[sql_len] = '\0';
-        }
-        else
-            isambuf[msgsiz-1-sql_len] = '\0';
-    }
-
     strcpy(msgbuf, sql_buf);
     strcpy(msgbuf + sql_len, isambuf);
     /* Chop the trailing newline so Perl appends line number info. */
@@ -303,10 +293,9 @@ dbd_ix_fmterror(ErrNum rc, char *msgbuf, size_t msgsiz)
 static void
 dbd_ix_dr_seterror(imp_drh_t *imp_drh, ErrNum rc)
 {
-    char msgbuf[512];
-
     if (rc < 0)
     {
+        char msgbuf[512];
         dbd_ix_fmterror(rc, msgbuf, sizeof(msgbuf));
         /* Record error number, error message, and error state */
         sv_setiv(DBIc_ERR(imp_drh), (IV)rc);
@@ -320,10 +309,9 @@ dbd_ix_dr_seterror(imp_drh_t *imp_drh, ErrNum rc)
 static void
 dbd_ix_db_seterror(imp_dbh_t *imp_dbh, ErrNum rc)
 {
-    char msgbuf[512];
-
     if (rc < 0)
     {
+        char msgbuf[512];
         dbd_ix_fmterror(rc, msgbuf, sizeof(msgbuf));
         /* Record error number, error message, and error state */
         sv_setiv(DBIc_ERR(imp_dbh), (IV)rc);
@@ -393,6 +381,7 @@ new_connection(imp_dbh_t *imp_dbh)
     imp_dbh->chain          = zero_link;
     imp_dbh->head           = zero_link;
     imp_dbh->dbh_pid        = getpid();
+    imp_dbh->enable_utf8    = False; /* UTF8 patch */
 }
 
 /* Get the server version number from DBINFO */
@@ -879,7 +868,6 @@ dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
     static const char function[] = "dbd_ix_db_disconnect";
     dTHR;
     D_imp_drh_from_dbh;
-    int junk;
 
     dbd_ix_enter(function);
 
@@ -897,7 +885,7 @@ dbd_ix_db_disconnect(SV *dbh, imp_dbh_t *imp_dbh)
 
     /* Rollback transaction before disconnecting */
     if (imp_dbh->is_loggeddb == True && imp_dbh->is_txactive == True)
-        junk = dbd_ix_rollback(imp_dbh);
+        (void)dbd_ix_rollback(imp_dbh);
 
 $ifdef ESQLC_CONNECT;
     dbd_ix_disconnect(imp_dbh->nm_connection);
@@ -967,6 +955,8 @@ new_statement(imp_dbh_t *imp_dbh, imp_sth_t *imp_sth)
     imp_sth->n_oudts  = 0;
     imp_sth->a_iudts  = 0;
     imp_sth->a_oudts  = 0;
+    imp_sth->n_lvcsz  = 0;
+    imp_sth->a_lvcsz  = 0;
     imp_sth->is_holdcursor   = False;
     imp_sth->is_scrollcursor = False;
     dbd_ix_link_add(&imp_dbh->head, &imp_sth->chain);
@@ -1134,6 +1124,8 @@ del_statement(imp_sth_t *imp_sth)
     }
 
 $ifdef ESQLC_IUSTYPES;
+    if (imp_sth->n_lvcsz > 0)
+        free(imp_sth->a_lvcsz);
     if (imp_sth->n_iudts > 0)
         free_udts(imp_sth->a_iudts, imp_sth->n_iudts);
     if (imp_sth->n_oudts > 0)
@@ -1442,6 +1434,7 @@ $endif; /* ESQLC_IUSTYPES */
 static int
 count_byte_text(char *descname, int ncols)
 {
+    static const char function[] = "count_byte_text";
     EXEC SQL BEGIN DECLARE SECTION;
     char           *nm_obind = descname;
     int colno;
@@ -1504,6 +1497,107 @@ dbd_ix_blobs(imp_sth_t *imp_sth)
 
 $ifdef ESQLC_IUSTYPES;
 
+/*
+** Workaround for CQ idsdb00247065: ESQL/C reporting error -1820 when
+** reusing SQL DESCRIPTOR after reopening cursor
+*/
+static int
+count_lvc(char *descname, int ncols)
+{
+    static const char function[] = "count_lvc";
+    EXEC SQL BEGIN DECLARE SECTION;
+    char *nm_obind = descname;
+    int   colno;
+    int   coltype;
+    EXEC SQL END DECLARE SECTION;
+    int n_lvc = 0;
+
+    for (colno = 1; colno <= ncols; colno++)
+    {
+        EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno :coltype = TYPE;
+        if (coltype == SQLLVARCHAR)
+        {
+            n_lvc++;
+        }
+    }
+    return(n_lvc);
+}
+
+static int
+dbd_ix_lvarchar(imp_sth_t *imp_sth)
+{
+    int nlvc;
+    static const char function[] = "dbd_ix_lvarchar";
+    EXEC SQL BEGIN DECLARE SECTION;
+    char *nm_obind = imp_sth->nm_obind;
+    int coltype;
+    int colno;
+    int collength;
+    EXEC SQL END DECLARE SECTION;
+
+    dbd_ix_enter(function);
+    nlvc = count_lvc(nm_obind, imp_sth->n_ocols);
+
+    if (nlvc > 0)
+    {
+        int i = 0;
+        void *result = malloc(nlvc * sizeof(int));
+        if (result == 0)
+            die("%s: malloc() failed\n", function);
+
+        imp_sth->n_lvcsz = nlvc;
+        imp_sth->a_lvcsz = (int *)result;
+        for (colno = 1; colno <= imp_sth->n_ocols; colno++)
+        {
+            EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno
+                :coltype = TYPE, :collength = LENGTH;
+            dbd_ix_sqlcode(imp_sth->dbh);
+            if (coltype == SQLLVARCHAR)
+            {
+                imp_sth->a_lvcsz[i++] = collength;
+            }
+        }
+        assert(i == nlvc);
+    }
+    dbd_ix_exit(function);
+    return(nlvc);
+}
+
+static int
+dbd_ix_reset_lvarchar_sizes(imp_sth_t *imp_sth)
+{
+    int nlvc;
+    static const char function[] = "dbd_ix_reset_lvarchar_sizes";
+    EXEC SQL BEGIN DECLARE SECTION;
+    char *nm_obind = imp_sth->nm_obind;
+    int coltype;
+    int colno;
+    int collength;
+    EXEC SQL END DECLARE SECTION;
+
+    dbd_ix_enter(function);
+
+    if (imp_sth->n_lvcsz > 0)
+    {
+        int i = 0;
+        for (colno = 1; colno <= imp_sth->n_ocols; colno++)
+        {
+            EXEC SQL GET DESCRIPTOR :nm_obind VALUE :colno
+                :coltype = TYPE, :collength = LENGTH;
+            dbd_ix_sqlcode(imp_sth->dbh);
+            if (coltype == SQLLVARCHAR)
+            {
+                imp_sth->a_lvcsz[i++] = collength;
+                EXEC SQL SET DESCRIPTOR :nm_obind VALUE :colno
+                    LENGTH = :collength;
+            }
+        }
+        assert(i == imp_sth->n_lvcsz);
+    }
+    dbd_ix_exit(function);
+    return(nlvc);
+}
+
 static int is_lvarcharptr_type(int coltype)
 {
     if (coltype == SQLLVARCHAR)
@@ -1514,6 +1608,7 @@ static int is_lvarcharptr_type(int coltype)
 static int
 count_udts(char *descname, int ncols)
 {
+    static const char function[] = "count_udts";
     EXEC SQL BEGIN DECLARE SECTION;
     char           *nm_obind = descname;
     int colno;
@@ -1626,6 +1721,7 @@ dbd_ix_declare(imp_sth_t *imp_sth)
 #endif /* SQ_EXECPROC */
     assert(imp_sth->st_state == Described);
     dbd_ix_blobs(imp_sth);
+    dbd_ix_lvarchar(imp_sth);    /* CQ idsdb00247065 */
 $ifdef ESQLC_IUSTYPES;
     dbd_ix_udts(imp_sth);
 $endif; /* ESQLC_IUSTYPES */
@@ -1881,7 +1977,6 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
     int             desc_count;
     char           *nm_stmnt;
     char           *nm_obind;
-    char           *nm_cursor;
     EXEC SQL END DECLARE SECTION;
 
     dbd_ix_enter(function);
@@ -1906,7 +2001,6 @@ dbd_ix_st_prepare(SV *sth, imp_sth_t *imp_sth, char *stmt, SV *attribs)
     new_statement(imp_dbh, imp_sth);
     nm_stmnt = imp_sth->nm_stmnt;
     nm_obind = imp_sth->nm_obind;
-    nm_cursor = imp_sth->nm_cursor;
     imp_sth->st_text = newSVpv(stmt, 0);
 
     /* Bill R. Code to allow the setting of Hold and Scroll Cursor Attribs */
@@ -2156,7 +2250,6 @@ decgen(dec_t *val, int collen)
     static char buffer[170];
     char *str;
     int dp = PRECDEC(collen);   /* Decimal places */
-    int sf = PRECTOT(collen);   /* Significant digits */
 
     if (dp == 0xFF)
         dp = -1;
@@ -2233,6 +2326,8 @@ $ifdef ESQLC_IUSTYPES;
 #endif
 $endif; -- ESQLC_IUSTYPES
     EXEC SQL END DECLARE SECTION;
+    D_imp_dbh_from_sth;
+    int             is_char_type = 0; /* UTF8 patch */
 
     dbd_ix_enter(function);
 
@@ -2265,14 +2360,14 @@ $endif; -- ESQLC_IUSTYPES
     {
         if (sqlca.sqlcode != SQLNOTFOUND)
         {
-            dbd_ix_debug(1, "\t<<-- %s -- fetch failed\n", function);
+            dbd_ix_debug(1, "\t---- %s -- FETCH failed\n", function);
         }
         else
         {
             /* Implicitly CLOSE cursor when no more data available */
             dbd_ix_close(imp_sth);
             imp_sth->st_state = NoMoreData;
-            dbd_ix_debug(1, "\t<<-- %s -- SQLNOTFOUND\n", function);
+            dbd_ix_debug(1, "\t---- %s -- SQLNOTFOUND\n", function);
         }
         dbd_ix_exit(function);
         return Nullav;
@@ -2290,6 +2385,8 @@ $endif; -- ESQLC_IUSTYPES
                 :colind = INDICATOR, :colname = NAME;
         dbd_ix_sqlcode(imp_sth->dbh);
         dbd_ix_debug(1, "\t---- %s colno %d: coltype = %d\n", function, index, coltype);
+
+        is_char_type = 0;   /* UTF8 patch */
 
         if (colind != 0)
         {
@@ -2432,6 +2529,9 @@ $ifdef ESQLC_IUSTYPES;
                             break;
                         }
                     default:
+                        length = 0;
+                        result = coldata;
+                        result[length] = '\0';
                         warn("IUS extended type (%ld) is not yet supported", extypeid);
                         break;
                     }
@@ -2486,6 +2586,7 @@ $ifdef ESQLC_IUSTYPES;
                 if (length >= 2 && result[length-1] == '\0' && result[length-2] == '\0')
                     length -= 2;
                 /*warn("LVARCHAR Data: %d <<%s>>\n", length, result);*/
+                is_char_type = 1;   /* UTF8 patch */
                 break;
 #endif  /* SQLLVARCHAR */
 
@@ -2502,6 +2603,7 @@ $endif; -- ESQLC_IUSTYPES
                 result = coldata;
                 length = strlen(result);
                 /* warn("VARCHAR Data: %d <<%s>>\n", length, result); */
+                is_char_type = 1;   /* UTF8 patch */
                 break;
 
             case SQLCHAR:
@@ -2529,6 +2631,7 @@ $endif; -- ESQLC_IUSTYPES
                     length = byleng(result, length);
                 result[length] = '\0';
                 /* warn("Character Data: %d <<%s>>\n", length, result); */
+                is_char_type = 1;   /* UTF8 patch */
                 break;
 
             case SQLTEXT:
@@ -2567,6 +2670,12 @@ $endif; -- ESQLC_IUSTYPES
             }
 
             sv_setpvn(sv, result, length);
+            /* UTF8 patch */
+            if(imp_dbh->enable_utf8 && is_char_type) {
+                dbd_ix_debug(1, "\t---- UTF8 decode - colno %d: coltype = %d\n", index, coltype);
+                sv_utf8_decode(sv);
+            }
+
             if (result != coldata)
             {
                 switch (coltype)
@@ -2630,6 +2739,7 @@ dbd_ix_open(imp_sth_t *imp_sth)
         dbd_ix_exit(function);
         return 0;
     }
+    dbd_ix_reset_lvarchar_sizes(imp_sth);
     imp_sth->st_state = Opened;
     if (imp_sth->dbh->is_modeansi == True)
         imp_sth->dbh->is_txactive = True;

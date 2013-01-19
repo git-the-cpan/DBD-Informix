@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.nmd,v 2011.2 2011/06/12 22:21:28 jleffler Exp $
+#   @(#)$Id: DBD-Informix.nmd,v 2013.1 2013/01/19 04:39:03 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2011.0612 (2011-06-12)
+#   @(#)IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
 #   @(#)Definitive list of files -- Non-Modifiable Source Distribution
 #
 #   -- The Source file column contains the name of the source file to be
@@ -28,7 +28,7 @@
 ##################################################################
 
 # Library Files
-debug.h                     RCS/debug.h,v               3.7
+debug.h                     RCS/debug.h,v               3.8
 decfix.c                    RCS/decfix.c,v              3.17
 decsci.c                    RCS/decsci.c,v              4.12
 decsci.h                    RCS/decsci.h,v              3.15
@@ -53,25 +53,25 @@ sqltoken.h                  RCS/sqltoken.h,v            2004.3
 sqltype.ec                  RCS/sqltype.ec,v            2011.1
 
 # Source Files
-Announce                        RCS/Announce,v          2011.1
+Announce                        RCS/Announce,v          2013.2
 BugReport                       RCS/BugReport,v         100.5
-ChangeLog                       RCS/ChangeLog,v         2010.2
+ChangeLog                       RCS/ChangeLog,v         2013.3
 
 InformixTechSupport             RCS/InformixTechSupport,v   100.9
 ItWorks                         RCS/ItWorks,v               100.5
 MANIFEST                        RCS/MANIFEST,v              2008.3
 MANIFEST.SKIP                   RCS/MANIFEST.SKIP,v         2004.2
 META.yml                        RCS/META.yml,v              2008.4
-Makefile.PL                     RCS/Makefile.PL,v           2011.2
+Makefile.PL                     RCS/Makefile.PL,v           2013.3
 README                          RCS/README,v                2011.1
 TODO                            RCS/TODO,v                  2003.1
 
 Informix.h                      RCS/Informix.h,v        100.3
-Informix.pm                     RCS/Informix.pm,v       2010.1
+Informix.pm                     RCS/Informix.pm,v       2011.1
 Informix.xs                     RCS/Informix.xs,v       2010.1
-dbdattr.ec                      RCS/dbdattr.ec,v        2010.2
-dbdimp.ec                       RCS/dbdimp.ec,v         2010.2
-dbdimp.h                        RCS/dbdimp.h,v          2008.2
+dbdattr.ec                      RCS/dbdattr.ec,v        2011.2
+dbdimp.ec                       RCS/dbdimp.ec,v         2013.1
+dbdimp.h                        RCS/dbdimp.h,v          2013.1
 dbdixmap.h                      RCS/dbdixmap.h,v        100.6
 eprintf.c                       RCS/eprintf.c,v         60.1
 esqlbasic.ec                    RCS/esqlbasic.ec,v      100.1
@@ -98,7 +98,7 @@ Release.Checklist               RCS/Release.Checklist,v 2008.1
 
 # Supporting tools
 lib/Bundle/DBD/Informix.pm          lib/Bundle/DBD/RCS/Informix.pm,v        2007.2
-lib/DBD/Informix/Configure.pm       lib/DBD/Informix/RCS/Configure.pm,v     2005.1
+lib/DBD/Informix/Configure.pm       lib/DBD/Informix/RCS/Configure.pm,v     2011.2
 lib/DBD/Informix/GetInfo.pm         lib/DBD/Informix/RCS/GetInfo.pm,v       2004.1
 lib/DBD/Informix/Metadata.pm        lib/DBD/Informix/RCS/Metadata.pm,v      2003.4
 lib/DBD/Informix/Summary.pm         lib/DBD/Informix/RCS/Summary.pm,v       100.6
@@ -173,7 +173,7 @@ t/t99clean.t                    t/RCS/t99clean.t,v      2003.2
 
 # Various scraps of documentation.
 Notes/FAQ                       Notes/RCS/FAQ,v                     2010.2
-Notes/Working.Versions          Notes/RCS/Working.Versions,v        2011.1
+Notes/Working.Versions          Notes/RCS/Working.Versions,v        2011.2
 Notes/bug.reports               Notes/RCS/bug.reports,v             100.7
 Notes/environment.variables     Notes/RCS/environment.variables,v   2007.1
 Notes/eprintf                   Notes/RCS/eprintf,v                 100.1
@@ -209,8 +209,8 @@ examples/fetchscroll.pl                 examples/RCS/fetchscroll.pl,v           
 
 inc/ExtUtils/AutoInstall.pm             inc/ExtUtils/AutoInstall.pm             -
 
-DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2011.1
+DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2011.2
 DBD-Informix.msd            RCS/DBD-Informix.msd,v      2011.1
-DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2011.2 $
-mknmd.sh                    RCS/mknmd.sh,v              2007.2
+DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2013.1 $
+mknmd.sh                    RCS/mknmd.sh,v              2012.1
 prodverstamp.sh             RCS/prodverstamp.sh,v       2010.9
