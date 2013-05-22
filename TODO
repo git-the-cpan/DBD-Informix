@@ -1,4 +1,4 @@
-A List of Things That Need to be Done to IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+A List of Things That Need to be Done to Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 
 At the moment, most items have an added date of 1999-12-29, even though
 many of the items have been valid issues since version 0.25 back in 1996.
@@ -85,6 +85,6 @@ T.016: Added 2002-02-28
 
 ---------------------------------------------------------------------------
 
-Jonathan Leffler <jleffler@us.ibm.com>
+Jonathan Leffler <jleffler@google.com>
 
-@(#)$Id: TODO,v 2003.1 2003/02/28 21:30:55 jleffler Exp $
+@(#)$Id: TODO,v 2013.1 2013/05/22 05:41:29 jleffler Exp $

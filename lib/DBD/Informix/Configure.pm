@@ -1,7 +1,7 @@
 #   @(#)$Id: Configure.pm,v 2011.2 2012/05/19 19:09:24 jleffler Exp $ 
 #
 #   Informix ESQL/C Support Routines for DBD::Informix
-#   (IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18))
+#   (Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21))
 #
 #   Copyright 1999      Jonathan Leffler
 #   Copyright 2000      Informix Software Inc
@@ -26,7 +26,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(find_informixdir_and_esql get_esqlc_version map_informix_lib_names);
 
-	$VERSION = "2013.0118";
+	$VERSION = "2013.0521";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -247,7 +247,7 @@ use DBD::Informix::Configure;
 
 =head1 DESCRIPTION
 
-This module is used by IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) in the build and bug reporting code.
+This module is used by Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) in the build and bug reporting code.
 You will seldom if ever have cause to use this module directly.
 
 =head2 Using find_informixdir_and_esql

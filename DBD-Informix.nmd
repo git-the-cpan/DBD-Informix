@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.nmd,v 2013.1 2013/01/19 04:39:03 jleffler Exp $
+#   @(#)$Id: DBD-Informix.nmd,v 2013.3 2013/05/22 05:51:44 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+#   @(#)Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 #   @(#)Definitive list of files -- Non-Modifiable Source Distribution
 #
 #   -- The Source file column contains the name of the source file to be
@@ -37,7 +37,7 @@ dumpesql.h                  RCS/dumpesql.h,v            1.18
 esql5_00.h                  RCS/esql5_00.h,v            2008.2
 esql7_20.h                  RCS/esql7_20.h,v            2009.1
 esql_ius.h                  RCS/esql_ius.h,v            2008.2
-esqlc.h                     RCS/esqlc.h,v               2008.5
+esqlc.h                     RCS/esqlc.h,v               2013.1
 esqlcver.ec                 RCS/esqlcver.ec,v           2003.1
 esqllib.h                   RCS/esqllib.h,v             2008.1
 esqltype.h                  RCS/esqltype.h,v            2008.3
@@ -53,24 +53,24 @@ sqltoken.h                  RCS/sqltoken.h,v            2004.3
 sqltype.ec                  RCS/sqltype.ec,v            2011.1
 
 # Source Files
-Announce                        RCS/Announce,v          2013.2
+Announce                        RCS/Announce,v          2013.6
 BugReport                       RCS/BugReport,v         100.5
-ChangeLog                       RCS/ChangeLog,v         2013.3
+ChangeLog                       RCS/ChangeLog,v         2013.6
 
-InformixTechSupport             RCS/InformixTechSupport,v   100.9
+InformixTechSupport             RCS/InformixTechSupport,v   2013.1
 ItWorks                         RCS/ItWorks,v               100.5
 MANIFEST                        RCS/MANIFEST,v              2008.3
 MANIFEST.SKIP                   RCS/MANIFEST.SKIP,v         2004.2
 META.yml                        RCS/META.yml,v              2008.4
-Makefile.PL                     RCS/Makefile.PL,v           2013.3
-README                          RCS/README,v                2011.1
-TODO                            RCS/TODO,v                  2003.1
+Makefile.PL                     RCS/Makefile.PL,v           2013.5
+README                          RCS/README,v                2013.1
+TODO                            RCS/TODO,v                  2013.1
 
 Informix.h                      RCS/Informix.h,v        100.3
-Informix.pm                     RCS/Informix.pm,v       2011.1
+Informix.pm                     RCS/Informix.pm,v       2013.1
 Informix.xs                     RCS/Informix.xs,v       2010.1
 dbdattr.ec                      RCS/dbdattr.ec,v        2011.2
-dbdimp.ec                       RCS/dbdimp.ec,v         2013.1
+dbdimp.ec                       RCS/dbdimp.ec,v         2013.3
 dbdimp.h                        RCS/dbdimp.h,v          2013.1
 dbdixmap.h                      RCS/dbdixmap.h,v        100.6
 eprintf.c                       RCS/eprintf.c,v         60.1
@@ -97,14 +97,14 @@ test.run.sh                     RCS/test.run.sh,v       2004.1
 Release.Checklist               RCS/Release.Checklist,v 2008.1
 
 # Supporting tools
-lib/Bundle/DBD/Informix.pm          lib/Bundle/DBD/RCS/Informix.pm,v        2007.2
+lib/Bundle/DBD/Informix.pm          lib/Bundle/DBD/RCS/Informix.pm,v        2013.1
 lib/DBD/Informix/Configure.pm       lib/DBD/Informix/RCS/Configure.pm,v     2011.2
 lib/DBD/Informix/GetInfo.pm         lib/DBD/Informix/RCS/GetInfo.pm,v       2004.1
-lib/DBD/Informix/Metadata.pm        lib/DBD/Informix/RCS/Metadata.pm,v      2003.4
+lib/DBD/Informix/Metadata.pm        lib/DBD/Informix/RCS/Metadata.pm,v      2013.1
 lib/DBD/Informix/Summary.pm         lib/DBD/Informix/RCS/Summary.pm,v       100.6
 lib/DBD/Informix/TechSupport.pm     lib/DBD/Informix/RCS/TechSupport.pm,v   2011.1
-lib/DBD/Informix/TestHarness.pm     lib/DBD/Informix/RCS/TestHarness.pm,v   2011.1
-lib/DBD/Informix/TypeInfo.pm        lib/DBD/Informix/RCS/TypeInfo.pm,v      2003.4
+lib/DBD/Informix/TestHarness.pm     lib/DBD/Informix/RCS/TestHarness.pm,v   2013.2
+lib/DBD/Informix/TypeInfo.pm        lib/DBD/Informix/RCS/TypeInfo.pm,v      2013.1
 
 # Test scripts
 bug-lvcnn.ec                    RCS/bug-lvcnn.ec,v      1.4
@@ -209,8 +209,8 @@ examples/fetchscroll.pl                 examples/RCS/fetchscroll.pl,v           
 
 inc/ExtUtils/AutoInstall.pm             inc/ExtUtils/AutoInstall.pm             -
 
-DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2011.2
+DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2013.4
 DBD-Informix.msd            RCS/DBD-Informix.msd,v      2011.1
-DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2013.1 $
+DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2013.3 $
 mknmd.sh                    RCS/mknmd.sh,v              2012.1
 prodverstamp.sh             RCS/prodverstamp.sh,v       2010.9

@@ -1,8 +1,8 @@
-# @(#)$Id: Informix.pm,v 2007.2 2007/09/03 00:20:56 jleffler Exp $
+# @(#)$Id: Informix.pm,v 2013.1 2013/05/22 05:41:29 jleffler Exp $
 
 package Bundle::DBD::Informix;
 
-$VERSION = '2013.0118';
+$VERSION = '2013.0521';
 
 1;
 
@@ -49,7 +49,7 @@ Bundle::DBI
 
 =head1 AUTHOR
 
-Jonathan Leffler E<lt>F<jleffler@us.ibm.com>E<gt>
+Jonathan Leffler E<lt>F<jleffler@google.com>E<gt>
 
 =head1 THANKS
 
@@ -60,6 +60,6 @@ with some information from Jochen Wiedmann E<lt>F<joe@ispsoft.de>E<gt>.
   Copyright 1998-1999 Jonathan Leffler
   Copyright 2000      Informix Software Inc
   Copyright 2002      IBM
-  Copyright 2007      Jonathan Leffler
+  Copyright 2007-2013 Jonathan Leffler
 
 =cut

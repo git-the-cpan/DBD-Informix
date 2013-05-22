@@ -1,4 +1,4 @@
-README file for IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+README file for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 
     You may distribute under the terms of either the GNU General Public
     License or the Artistic License, as specified in the Perl README file.
@@ -19,7 +19,7 @@ README file for IBM Informix Database Driver for Perl DBI Version 2013.0118 (201
 
 PREREQUISITES
 
-    You need the following five items to build IBM Informix Database Driver for Perl DBI:
+    You need the following five items to build Informix Database Driver for Perl DBI:
 
     1.  Perl 5.6.1 or later.
     2.  DBI 1.38 or later.
@@ -428,7 +428,7 @@ BUILDING DBD::Informix
     Please consult the Notes/Working.Versions file for information about
     known working versions of the software (and specific problem versions).
     If you are using a combination of versions which is different from any
-    previously recorded, please send me (jleffler@us.ibm.com) the details
+    previously recorded, please send me (jleffler@google.com) the details
     for your new, successful port.
 
     If you run into major problems even getting the esqltest program to
@@ -524,9 +524,9 @@ IF YOU HAVE PROBLEMS USING DBD::INFORMIX
 
 REMEMBER IT IS SUPPOSED TO BE FUN!
 
-Jonathan Leffler (jleffler@us.ibm.com)
+Jonathan Leffler (jleffler@google.com)
 
-@(#)$Id: README,v 2011.1 2011/06/12 22:15:50 jleffler Exp $
+@(#)$Id: README,v 2013.1 2013/05/22 05:41:29 jleffler Exp $
 
 ---------------------------------------------------------------------------
 
@@ -537,4 +537,5 @@ Copyright 1998    Jonathan Leffler <j.leffler@acm.org>
 Copyright 1998-99 Jonathan Leffler <jleffler@informix.com>
 Copyright 2000-01 Informix Software Inc
 Copyright 2002    IBM
-Copyright 2003-11 Jonathan Leffler <jleffler@us.ibm.com>
+Copyright 2003-13 Jonathan Leffler <jleffler@us.ibm.com>
+Copyright 2013    Jonathan Leffler <jleffler@google.com>

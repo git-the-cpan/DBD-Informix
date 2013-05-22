@@ -1,4 +1,16 @@
-Change Log for IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) (aka DBD::Informix)
+Change Log for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) (aka DBD::Informix)
+
+2013.0521 Release
+-----------------
+2013-05-21: Upload to PAUSE and CPAN.
+2013-05-21: Fix up after change of email to <jleffler@google.com>.
+
+2013.0206 Release
+-----------------
+2013-02-06: Release to a few parties; there's another fix pending for GA.
+2013-02-06: Recognize ESQL/C 4.10 from 2013 as valid.  Do not try this with
+            ESQL/C 4.10 from 1989; the code will not compile using the
+            archaic ESQL/C.  I had no say in the reuse of version numbers.
 
 2013.0118 Release
 -----------------
@@ -1241,5 +1253,5 @@ Pre-Release
 
 --------------
 
-Jonathan Leffler <jleffler@us.ibm.com>
-@(#)$Id: ChangeLog,v 2013.3 2013/01/19 04:30:49 jleffler Exp $
+Jonathan Leffler <jleffler@google.com>
+@(#)$Id: ChangeLog,v 2013.6 2013/05/22 05:41:29 jleffler Exp $

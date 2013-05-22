@@ -1,8 +1,8 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, dbd.informix@gmail.com
-Subject: ANNOUNCE: IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) released
+Subject: ANNOUNCE: Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) released
 
-IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) has been uploaded to CPAN.
+Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
 the driver code that enables Perl 5.6.1 or later to access Informix
@@ -21,7 +21,15 @@ http://dbi.perl.org/
 ** The ItWorks script does not send email to anybody; you have to do
 ** that yourself.
 
-New in release :PRODVER::
+New in release 2013.0521
+* Support CSDK 4.10 for IDS 12.10
+* Change work email address to jleffler@google.com
+
+New in release 2013.0206:
+* Bug fix release (not generally available).
+* Properly handle the new ESQL/C version 4.10.
+
+New in release 2013.0113:
 * Bug fix release.
 * Workaround for bug in ESQL/C 3.70 and earlier that generates error -1820
   when reopening a cursor that previously fetched LVARCHAR data.
@@ -57,6 +65,6 @@ Support email address:
 
 As always, see the ChangeLog file for details about what has changed.
 
-Jonathan Leffler (jleffler@us.ibm.com, jleffler@earthlink.net)
+Jonathan Leffler (jleffler@google.com, jonathan.leffler@gmail.com)
 
-@(#)$Id: Announce,v 2013.2 2013/01/18 19:55:18 jleffler Exp $
+@(#)$Id: Announce,v 2013.6 2013/05/22 05:41:29 jleffler Exp $

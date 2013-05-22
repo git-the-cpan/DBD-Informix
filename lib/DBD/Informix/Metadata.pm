@@ -1,4 +1,4 @@
-#   @(#)$Id: Metadata.pm,v 2003.4 2003/03/04 22:55:05 jleffler Exp $
+#   @(#)$Id: Metadata.pm,v 2013.1 2013/05/22 05:41:29 jleffler Exp $
 #
 #   @(#)DBD::Informix Metadata Methods
 #
@@ -9,7 +9,7 @@
 #
 #-------------------------------------------------------------------------
 # Code and explanations follow for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18))
+# (Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21))
 #-------------------------------------------------------------------------
 
 {
@@ -34,14 +34,14 @@
 	use strict;
 
 	my
-	$VERSION         = "2013.0118";
-	my $ATTRIBUTION = 'Jonathan Leffler <jleffler@us.ibm.com>';
-	my $Revision    = '$Id: Metadata.pm,v 2003.4 2003/03/04 22:55:05 jleffler Exp $';
+	$VERSION         = "2013.0521";
+	my $ATTRIBUTION = 'Jonathan Leffler <jleffler@google.com>';
+	my $Revision    = '$Id: Metadata.pm,v 2013.1 2013/05/22 05:41:29 jleffler Exp $';
 	# Perl 5.005_03 does not accept 'our'
 	#our
-	#$VERSION         = "2013.0118";
-	#our $ATTRIBUTION = 'Jonathan Leffler <jleffler@us.ibm.com>';
-	#our $Revision    = '$Id: Metadata.pm,v 2003.4 2003/03/04 22:55:05 jleffler Exp $';
+	#$VERSION         = "2013.0521";
+	#our $ATTRIBUTION = 'Jonathan Leffler <jleffler@google.com>';
+	#our $Revision    = '$Id: Metadata.pm,v 2013.1 2013/05/22 05:41:29 jleffler Exp $';
 
 	$VERSION = "1.01.009" if ($VERSION =~ m%[:]VERSION[:]%);
 
@@ -334,7 +334,7 @@ DBD::Informix::Metadata - Metadata Methods for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes the metadata methods for DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)).
+(Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)).
 
 Note that you would seldom actually use this package directly (despite
 the synopsis above); the methods you would use are defined in the
@@ -471,7 +471,7 @@ correctly.
 
 =head1 AUTHOR
 
-Jonathan Leffler (jleffler@us.ibm.com)
+Jonathan Leffler (jleffler@google.com)
 
 =head1 SEE ALSO
 

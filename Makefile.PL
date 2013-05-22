@@ -1,9 +1,9 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2013.3 2013/01/19 04:38:54 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2013.5 2013/05/22 05:40:27 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18))
+# (Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -19,9 +19,9 @@
 BEGIN
 {
 $main::min_DBI_ver = "1.38";        # Minimum (mandatory) version of DBI
-$main::ref_DBI_ver = "1.623";       # Reference (recommended) version of DBI
+$main::ref_DBI_ver = "1.627";       # Reference (recommended) version of DBI
 $main::min_Perl_ver = "5.006001";   # Minimum (mandatory) version of Perl
-$main::ref_Perl_ver = "5.016002";   # Reference (recommended) version of Perl
+$main::ref_Perl_ver = "5.016003";   # Reference (recommended) version of Perl
 }
 
 ########################
@@ -106,7 +106,7 @@ if ($NTConfiguration)
     });
 }
 
-my $dbd_ix = "2013.0118";
+my $dbd_ix = "2013.0521";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -146,7 +146,7 @@ my %opts = (
            );
 
 print qq%
-Configuring IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) (aka $opts{NAME})
+Configuring Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -208,15 +208,16 @@ die "Your build will fail because Perl is a $perl_bits-bit version but ESQL/C is
 # To simplify swathes of code below, treat the 2.90..2.99 as equivalent
 # to 9.60 (a non-existent release) and 3.00..3.49 releases as equivalent
 # to 9.70 (also a non-existent release), and 3.50..3.99 releases as
-# equivalent to 9.75 (yet another non-existent release).
+# equivalent to 9.75 (yet another non-existent release).  Rinse and repeat.
 # CSDK 3.50 was released with IDS 11.50.
-# The forthcoming IDS 11.70 release uses CSDK 3.70.
-# This will be extended as necessary.  The impending transition to CSDK
-# 4.00 worries me.
+# CSDK 3.70 was released with IDS 11.70.
+# CSDK 4.10 was released with IDS 12.10.
+# This will be extended as necessary.
 my ($effvernum) = $vernum;
 $effvernum = 960 if ($vernum >= 290 && $vernum < 300);
 $effvernum = 970 if ($vernum >= 300 && $vernum < 350);
 $effvernum = 975 if ($vernum >= 350 && $vernum < 400);
+$effvernum = 980 if ($vernum >= 400 && $vernum < 500);
 
 dbd_ix_die "\n*** Environment variable \$INFORMIXSERVER is not set and should be!\n\n"
     if ($effvernum >= 600 && !defined $ENV{INFORMIXSERVER});
@@ -227,9 +228,7 @@ Beware: $opts{NAME} is not yet aware of all the new IUS data types.
 
 };
 
-# NB: If using ESQL/C 4.xy, use -I$ID/incl, not -I$ID/incl/esql!
-# However, you've got other major work to do to handle 4.xy ESQL/C.
-# Also, it appears that NT ESQL/C 5.x used -I$ID/incl, too.
+# NB: If using ESQL/C 5.xy, use -I$ID/incl, not -I$ID/incl/esql!
 my $INC1 = "-I$ID/incl/esql$auxincl";
 
 my $esql = "$esqlprog";
@@ -246,6 +245,10 @@ if ($effvernum < 100)
 }
 elsif ($effvernum < 500)
 {
+    # ESQL/C 2.00 was released circa 1986
+    # ESQL/C 2.10 was released circa 1987
+    # ESQL/C 4.00 was released circa 1988
+    # ESQL/C 4.10 was released circa 1989 (and then a 'new' version 4.10 was released circa 2013)
     dbd_ix_die &nlws(qq{
     $infversion does not support string-named cursors.
     This version of $opts{NAME} requires this facility.
@@ -257,6 +260,8 @@ elsif ($effvernum < 500)
 }
 elsif ($effvernum >= 500 && $effvernum < 510)
 {
+    # ESQL/C 5.00 was released at the end of 1990
+    # ESQL/C 5.01..5.08 were released between 1990 and about 1998.
     dbd_ix_die &nlws(qq%
             This version of ESQL/C ($infversion) is obsolete.
             It is also not considered Y2K-safe by Informix.
@@ -265,6 +270,9 @@ elsif ($effvernum >= 500 && $effvernum < 510)
 }
 elsif ($effvernum >= 510 && $effvernum < 600)
 {
+    # ESQL/C 5.10 was released about 1999 for Y2K compliance
+    # ESQL/C 5.11 may have existed; it would have been released circa 2000.
+    # ESQL/C 5.20 was released circa 2002 and is still (2013) available for use with OnLine 5.20.
     $vercode = "esqlc_v5";
     $multiconn = 0;
     if ($NTConfiguration)
@@ -293,6 +301,10 @@ elsif ($effvernum >= 510 && $effvernum < 600)
 }
 elsif ($effvernum >= 600 && $effvernum < 724)
 {
+    # ESQL/C 6.00 was released in 1995
+    # ESQL/C 7.00 was released in 1996
+    # ESQL/C 7.1x was released in 1996-7.
+    # ESQL/C 7.2x was released in 1997-9.  ESQL/C 7.24 was Y2K compiant.
     dbd_ix_die &nlws(qq%
             This version of ESQL/C ($infversion) is obsolete.
             Please upgrade to ESQL/C version 7.24 or ClientSDK.
@@ -1174,7 +1186,7 @@ sub Write_DBD_Informix_Defaults
         or die "Cannot create $defaults ($!)";
 
     print DEFAULTS <<'EOF';
-#   Default Environment Variables for IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+#   Default Environment Variables for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004-10 Jonathan Leffler
@@ -1188,7 +1200,7 @@ sub Write_DBD_Informix_Defaults
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
-    $VERSION = "2013.0118";
+    $VERSION = "2013.0521";
     $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1212,7 +1224,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)).
+(Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to,

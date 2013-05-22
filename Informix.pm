@@ -1,12 +1,12 @@
-#   @(#)$Id: Informix.pm,v 2011.1 2011/09/26 00:48:06 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2013.1 2013/05/22 05:41:29 jleffler Exp $
 #
-#   @(#)IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+#   @(#)Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2001-03 IBM
-#   Copyright 2004-11 Jonathan Leffler
+#   Copyright 2004-13 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -48,10 +48,10 @@
                 ) ] );
     Exporter::export_ok_tags('ix_types');
 
-    $VERSION          = "2013.0118";
+    $VERSION          = "2013.0521";
 
-    my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-    my $Revision         = '$Id: Informix.pm,v 2011.1 2011/09/26 00:48:06 jleffler Exp $';
+    my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@google.com>';
+    my $Revision         = '$Id: Informix.pm,v 2013.1 2013/05/22 05:41:29 jleffler Exp $';
 
     # This is for development only - the code must be recompiled each day!
     $VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
@@ -304,7 +304,7 @@ __END__
 
 =head1 NAME
 
-DBD::Informix - IBM Informix Database Driver for Perl DBI
+DBD::Informix - Informix Database Driver for Perl DBI
 
 =head1 SYNOPSIS
 
@@ -312,7 +312,7 @@ DBD::Informix - IBM Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18).
+This document describes Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.
@@ -361,15 +361,15 @@ strings for cursor names and statement names, and these features were
 not available before Version 5.00.
 
 For information about Informix software, you should also read the
-Notes/FAQ file that is distributed with IBM Informix Database Driver for Perl DBI.
+Notes/FAQ file that is distributed with Informix Database Driver for Perl DBI.
 
 =head2 TECHNICAL SUPPORT
 
-For information on technical support for IBM Informix Database Driver for Perl DBI, please run:
+For information on technical support for Informix Database Driver for Perl DBI, please run:
 
         perldoc DBD::Informix::TechSupport
 
-For information on reporting bugs in IBM Informix Database Driver for Perl DBI, please review the
+For information on reporting bugs in Informix Database Driver for Perl DBI, please review the
 Notes/bug.reports file as well.
 
 =head2 JAPANESE DOCUMENTATION
@@ -1505,7 +1505,11 @@ Jonathan Leffler (jleffler@informix.com) # Obsolete email address
 
 =item *
 
-Jonathan Leffler (jleffler@us.ibm.com)
+Jonathan Leffler (jleffler@us.ibm.com)  # Obsolete email address
+
+=item *
+
+Jonathan Leffler (jleffler@google.com)
 
 =back
 

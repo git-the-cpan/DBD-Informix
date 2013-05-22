@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: esqlc.h,v $
-@(#)Version:        $Revision: 2008.5 $
-@(#)Last changed:   $Date: 2008/06/11 05:35:00 $
+@(#)Version:        $Revision: 2013.1 $
+@(#)Last changed:   $Date: 2013/02/06 18:59:31 $
 @(#)Purpose:        Include all relevant ESQL/C type definitions
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1992-93,1995-2004,2006-08
-@(#)Product:        IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+@(#)Product:        Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 */
 
 /*
@@ -66,6 +66,8 @@
 ** 2.91         Client SDK 2.91 (internal only?)
 ** 3.00         Client SDK 3.00 (Jul 2007)
 ** 3.50         Client SDK 3.50 (Apr 2008)
+** 3.70         Client SDK 3.70 (Oct 2010)
+** 4.10         Client SDK 4.10 (Mar 2013)
 **
 ** All versions of ESQL/C prior to 5.10, plus versions 6.x, 7.x
 ** (with the possible, marginal, exception of 7.24), 8.x, 9.0x,
@@ -78,7 +80,7 @@
 #ifdef MAIN_PROGRAM
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2008.5 2008/06/11 05:35:00 jleffler Exp $";
+const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2013.1 2013/02/06 18:59:31 jleffler Exp $";
 #endif /* lint */
 #endif /* MAIN_PROGRAM */
 
@@ -103,6 +105,8 @@ const char jlss_id_esqlc_h[] = "@(#)$Id: esqlc.h,v 2008.5 2008/06/11 05:35:00 jl
 #define ESQLC_EFFVERSION 970
 #elif   ESQLC_VERSION >= 350 && ESQLC_VERSION < 400
 #define ESQLC_EFFVERSION 975
+#elif   ESQLC_VERSION >= 400 && ESQLC_VERSION < 500
+#define ESQLC_EFFVERSION 980
 #else
 #define ESQLC_EFFVERSION ESQLC_VERSION
 #endif /* ESQLC_VERSION */

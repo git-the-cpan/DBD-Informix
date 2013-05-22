@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: dbdimp.ec,v 2013.1 2013/01/18 19:39:15 jleffler Exp $
+ * @(#)$Id: dbdimp.ec,v 2013.3 2013/05/22 05:51:39 jleffler Exp $
  *
- * @(#)$Product: IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) $
+ * @(#)$Product: Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) $
  * @(#)Implementation details
  *
  * Copyright 1994-95 Tim Bunce
@@ -24,7 +24,7 @@
 
 #ifndef lint
 /* Prevent over-aggressive optimizers from eliminating ID string */
-const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2013.1 2013/01/18 19:39:15 jleffler Exp $";
+const char jlss_id_dbdimp_ec[] = "@(#)$Id: dbdimp.ec,v 2013.3 2013/05/22 05:51:39 jleffler Exp $";
 #endif /* lint */
 
 #include <float.h>
@@ -258,14 +258,14 @@ dbd_ix_fmterror(ErrNum rc, char *msgbuf, size_t msgsiz)
     char sql_buf[256];
     char isambuf[256];
     size_t sql_len;
-    size_t isamlen;
+    size_t isamlen = 0;
 
     assert(msgsiz >= sizeof(sql_buf) + sizeof(isambuf));
     /* Format SQL (primary) error */
     if (rgetmsg(rc, errbuf, sizeof(errbuf)) != 0)
         strcpy(errbuf, "<<Failed to locate SQL error message>>");
     snprintf(fmtbuf, sizeof(fmtbuf), errbuf, sqlca.sqlerrm);
-    snprintf(sql_buf, sizeof(sql_buf), "SQL: %ld: %s", rc, fmtbuf);
+    sql_len = snprintf(sql_buf, sizeof(sql_buf), "SQL: %ld: %s", rc, fmtbuf);
 
     /* Format ISAM (secondary) error */
     if (sqlca.sqlerrd[1] != 0)
@@ -273,17 +273,20 @@ dbd_ix_fmterror(ErrNum rc, char *msgbuf, size_t msgsiz)
         if (rgetmsg(sqlca.sqlerrd[1], errbuf, sizeof(errbuf)) != 0)
             strcpy(errbuf, "<<Failed to locate ISAM error message>>");
         snprintf(fmtbuf, sizeof(fmtbuf), errbuf, sqlca.sqlerrm);
-        snprintf(isambuf, sizeof(isambuf), "ISAM: %ld: %s", (long)sqlca.sqlerrd[1], fmtbuf);
+        isamlen = snprintf(isambuf, sizeof(isambuf), "ISAM: %ld: %s", (long)sqlca.sqlerrd[1], fmtbuf);
     }
     else
         isambuf[0] = '\0';
 
     /* Concatenate SQL and ISAM messages */
     /* Note that (untruncated) messages have trailing newlines */
-    sql_len = strlen(sql_buf);
-    isamlen = strlen(isambuf);
-    strcpy(msgbuf, sql_buf);
-    strcpy(msgbuf + sql_len, isambuf);
+    if (sql_len + isamlen >= msgsiz)
+    {
+        sql_len = MIN(msgsiz-1, sql_len);
+        isamlen = MIN(msgsiz-sql_len-1, isamlen);
+    }
+    memmove(msgbuf, sql_buf, sql_len + 1);
+    memmove(msgbuf + sql_len, isambuf, isamlen);
     /* Chop the trailing newline so Perl appends line number info. */
     /* Problem reported by Andrew Pimlott <pimlott@abel.math.harvard.edu> */
     msgbuf[sql_len+isamlen-1] = '\0';
@@ -1434,7 +1437,7 @@ $endif; /* ESQLC_IUSTYPES */
 static int
 count_byte_text(char *descname, int ncols)
 {
-    static const char function[] = "count_byte_text";
+    /*static const char function[] = "count_byte_text";*/
     EXEC SQL BEGIN DECLARE SECTION;
     char           *nm_obind = descname;
     int colno;
@@ -1504,7 +1507,7 @@ $ifdef ESQLC_IUSTYPES;
 static int
 count_lvc(char *descname, int ncols)
 {
-    static const char function[] = "count_lvc";
+    /*static const char function[] = "count_lvc";*/
     EXEC SQL BEGIN DECLARE SECTION;
     char *nm_obind = descname;
     int   colno;
@@ -1566,7 +1569,7 @@ dbd_ix_lvarchar(imp_sth_t *imp_sth)
 static int
 dbd_ix_reset_lvarchar_sizes(imp_sth_t *imp_sth)
 {
-    int nlvc;
+    int nlvc = 0;
     static const char function[] = "dbd_ix_reset_lvarchar_sizes";
     EXEC SQL BEGIN DECLARE SECTION;
     char *nm_obind = imp_sth->nm_obind;
@@ -1608,7 +1611,7 @@ static int is_lvarcharptr_type(int coltype)
 static int
 count_udts(char *descname, int ncols)
 {
-    static const char function[] = "count_udts";
+    /*static const char function[] = "count_udts";*/
     EXEC SQL BEGIN DECLARE SECTION;
     char           *nm_obind = descname;
     int colno;

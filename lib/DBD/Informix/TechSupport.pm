@@ -1,6 +1,6 @@
 #   @(#)$Id: TechSupport.pm,v 2011.1 2011/06/12 22:16:41 jleffler Exp $
 #
-#	Technical Support Tools for IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+#	Technical Support Tools for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 #
 #   Copyright 2000-01 Informix Software Inc
 #   Copyright 2002-03 IBM
@@ -16,7 +16,7 @@
 	@ISA = qw(Exporter);
 	@EXPORT = qw(print_versions bug_report it_works);
 
-	$VERSION = "2013.0118";
+	$VERSION = "2013.0521";
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	use strict;
@@ -311,14 +311,14 @@ use DBD::Informix::TechSupport;
 =head1 DESCRIPTION
 
 This document describes how to obtain technical support for
-IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 (which is also known as DBD::Informix).
 It also describes how to use the Perl module to report information to
 any of technical support channels.
 
 =head1 IBM INFORMIX TECHNICAL SUPPORT
 
-IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 is not officially supported by IBM Informix Technical Support.
 If you are using a supported configuration, they will route problem
 reports to the maintenance team listed below.
@@ -347,7 +347,7 @@ weekends.
 
 =head1 CONFIGURATIONS SUPPORTED
 
-We normally only support IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+We normally only support Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 if you are using certain supported versions of ESQL/C or Client SDK:
 
 =over 2
@@ -369,7 +369,7 @@ above.
 
 =head1 OTHER CONFIGURATIONS WHICH PROBABLY WORK
 
-IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) is believed to work with all versions of ESQL/C and ClientSDK
+Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) is believed to work with all versions of ESQL/C and ClientSDK
 from ESQL/C 5.00.UC1 upwards.
 However, you may run into problems with shared libraries if you use
 versions of ESQL/C which are not explicitly supported.
@@ -424,7 +424,7 @@ builds it (classes B, C, D) and tests it (classes C, D).
 =head2 Using it_works
 
 This generates the information needed for a report that you have managed
-to get IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) working.
+to get Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) working.
 
 	it_works;
 

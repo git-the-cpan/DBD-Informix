@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: TestHarness.pm,v 2011.1 2011/06/12 21:40:38 jleffler Exp $
+#   @(#)$Id: TestHarness.pm,v 2013.2 2013/05/22 05:41:29 jleffler Exp $
 #
-#   Pure Perl Test Harness for IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+#   Pure Perl Test Harness for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 #
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
@@ -58,8 +58,8 @@
 	require_version DBI 1.38;
 
 	my
-	$VERSION = "2013.0118";
-	# our $VERSION = "2013.0118"; # But 'our' not acceptable to Perl 5.005_03!
+	$VERSION = "2013.0521";
+	# our $VERSION = "2013.0521"; # But 'our' not acceptable to Perl 5.005_03!
 	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 	# Report on the connect command and any attributes being set.
@@ -377,7 +377,7 @@
 	}
 
 	# Check that both the ESQL/C and the database server are IUS-aware
-	# Handles ESQL/C 2.90 .. 3.99 - which are IUS-aware.
+	# Handles ESQL/C 2.90 .. 4.99 - which are IUS-aware.
 	# Return database handle if all is OK.
 	sub test_for_ius
 	{
@@ -390,7 +390,7 @@
 		print "#     Product:               $drh->{ix_ProductName}\n";
 		print "#     Product Version:       $drh->{ix_ProductVersion}\n";
 		my ($ev) = $drh->{ix_ProductVersion};
-		if ($ev < 900 && !($ev >= 290 && $ev < 400))
+		if ($ev < 900 && !($ev >= 290 && $ev < 500))
 		{
 			&stmt_note("1..0 # Skip: IUS data types are not supported by $drh->{ix_ProductName}\n");
 			exit(0);
@@ -791,7 +791,7 @@ DBD::Informix::TestHarness - Test Harness for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes DBD::Informix::TestHarness distributed with
-IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18).
+Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21).
 This is pure Perl code which exploits DBI and DBD::Informix to make it
 easier to write tests.
 Most notably, it provides a simple mechanism to connect to the user's
@@ -1251,6 +1251,9 @@ Jonathan Leffler (jleffler@informix.com) # obsolete email address
 
 =item *
 Jonathan Leffler (jleffler@us.ibm.com)
+
+=item *
+Jonathan Leffler (jleffler@google.com)
 
 =back
 

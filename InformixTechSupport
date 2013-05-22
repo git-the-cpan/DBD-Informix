@@ -1,8 +1,8 @@
 #!/usr/bin/perl -w
 #
-#   @(#)$Id: InformixTechSupport,v 100.9 2002/11/20 01:24:42 jleffler Exp $
+#   @(#)$Id: InformixTechSupport,v 2013.1 2013/05/22 05:41:29 jleffler Exp $
 #
-#   Tech Support Tool for IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18)
+#   Tech Support Tool for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
 #
 #   Copyright 1999 Jonathan Leffler
 #   Copyright 2000 Informix Software Inc
@@ -54,7 +54,7 @@ __END__
 
 =head1 NAME
 
-InformixTechSupport - Technical Support tool for IBM Informix Database Driver for Perl DBI
+InformixTechSupport - Technical Support tool for Informix Database Driver for Perl DBI
 
 =head1 SYNOPSIS
 
@@ -69,7 +69,7 @@ C<InformixTechSupport -w>
 =head1 DESCRIPTION
 
 The InformixTechSupport script is used for a variety of purposes
-related to technical support of IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18).
+related to technical support of Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21).
 
 =head2 CHECKING SOFTWARE VERSIONS
 
@@ -122,19 +122,19 @@ with your bug report.
 
 =head2 CREATING A REPORT THAT IT WORKS
 
-Use C<InformixTechSupport -w> to create a report that IBM Informix Database Driver for Perl DBI Version 2013.0118 (2013-01-18) works.
+Use C<InformixTechSupport -w> to create a report that Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) works.
 You may need to edit the output; you may certainly add comments in the
 'Optional comments' section.
 The output is written to standard output only.
 It is never sent anywhere unless you actually choose to send it.
 
 If you do send the report, please put "DBD::Informix - It Works" in the
-subject line and send the report to C<dbdinfmx@us.ibm.com> (this is a
-change of email address from the instructions in the 1.00.PC2 version of
+subject line and send the report to C<dbd.informix@gmail.com> (this is a
+change of email address from the instructions in previous versions of
 DBD::Informix).
 
 =head1 AUTHOR
 
-Jonathan Leffler <jleffler@us.ibm.com>
+Jonathan Leffler <jleffler@google.com>
 
 =cut
