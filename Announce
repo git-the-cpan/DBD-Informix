@@ -1,15 +1,15 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, dbd.informix@gmail.com
-Subject: ANNOUNCE: Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) released
+Subject: ANNOUNCE: Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25) released
 
-Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) has been uploaded to CPAN.
+Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
-the driver code that enables Perl 5.6.1 or later to access Informix
+the driver code that enables Perl 5.8.1 or later to access Informix
 databases via the DBI module (but if you are not already using Perl
-5.10.0 - or any later version - you should be planning to upgrade to
-Perl 5.16.2 or later).  You will need the code for DBI version 1.38 or
-later as well (v1.623 - or any later version - is recommended).  The
+5.22.0 - or a later version - you should be planning to upgrade Perl).
+You will to install DBI version 1.607 or later as well (v1.634 - or any
+later version - is recommended) before installing DBD::Informix.  The
 code for DBD::Informix is available for download via:
 
 http://www.perl.org/CPAN/modules/by-category/07_Database_Interfaces
@@ -20,6 +20,11 @@ http://dbi.perl.org/
 ** Jonathan Leffler) at dbd.informix@gmail.com.
 ** The ItWorks script does not send email to anybody; you have to do
 ** that yourself.
+
+New in release 2015.0821
+* Deal with changes to ExtUtils::MakeMaker that broke the build.
+* Update to require Perl 5.8.1 and DBI 1.607.
+* Change work email address back to jleffler@us.ibm.com
 
 New in release 2013.0521
 * Support CSDK 4.10 for IDS 12.10
@@ -42,20 +47,6 @@ New in release 2013.0113:
   those still using Informix OnLine 5.20, but there is no
   testing on that platform.
 
-New in release 2011.0612:
-* Minor bug fix release.
-* Main change is related to Perl internals and avoids the need for
-  PERL_POLLUTE.  This change is not visible to users except that Perl
-  5.14.x can use the fixed code.
-* Fixed problem with string that is not null terminated by ESQL/C library.
-* Clean up some 64-bit compilation warnings.
-* Build on AIX.
-* Evade problem with a DISTINCT type of LVARCHAR with NOT NULL (probably
-  ESQL/C bug).
-* Fewer versions of Informix products are supported.  You may try
-  building DBD::Informix with other versions.  If it works, great; if
-  not, please upgrade to a supported Informix version.
-
 Support email address:
 * This release is supported by Jonathan Leffler <dbd.informix@gmail.com>.
 * You may also report your bugs via the CPAN resolution tracking system:
@@ -65,6 +56,6 @@ Support email address:
 
 As always, see the ChangeLog file for details about what has changed.
 
-Jonathan Leffler (jleffler@google.com, jonathan.leffler@gmail.com)
+Jonathan Leffler (jleffler@us.ibm.com, jonathan.leffler@gmail.com)
 
-@(#)$Id: Announce,v 2013.6 2013/05/22 05:41:29 jleffler Exp $
+@(#)$Id: Announce,v 2015.1 2015/08/22 00:03:41 jleffler Exp $

@@ -1,18 +1,19 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t77varchar.t,v 2007.1 2007/08/25 00:36:26 jleffler Exp $
+#   @(#)$Id: t77varchar.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Off-by-one bug in VARCHAR when used next to BYTE or TEXT fields
 #   Bug, basic test case and diagnosis provided by Tom Girsch.
 #   Second source of bug provided by Doug Conrey a day or so earlier,
 #   without the diagnosis.
 #
-#   Copyright 2006 Tom Girsch <tom_girsch@hilton.com>
-#   Copyright 2006 Doug Conrey <doug_conrey@oci.com>
-#   Copyright 2006 Jonathan Leffler
+#   Copyright 2006    Tom Girsch <tom_girsch@hilton.com>
+#   Copyright 2006    Doug Conrey <doug_conrey@oci.com>
+#   Copyright 2006-14 Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
+use warnings;
 
 my $tablename = "dbd_ix_varcharblob";
 
@@ -55,9 +56,9 @@ else
         or stmt_fail;
     $sth->execute() or stmt_fail;
 
-    &validate_unordered_unique_data($sth, 'col1', $res1);
+    validate_unordered_unique_data($sth, 'col1', $res1);
 }
 
-$dbh->disconnect ? &stmt_ok : &stmt_fail;
+$dbh->disconnect ? stmt_ok : stmt_fail;
 
-&all_ok();
+all_ok();

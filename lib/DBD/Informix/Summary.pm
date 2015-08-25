@@ -1,23 +1,27 @@
-# $Id: Summary.pm,v 100.6 2002/12/17 01:20:18 jleffler Exp $
+# $Id: Summary.pm,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
-# Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+# Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
 #
 # This driver summary is for DBD::Informix
 #
 # Copyright 1999-2000 Tim Bunce and Jonathan Leffler.
 # Copyright 2000      Informix Software Inc.
 # Copyright 2002      IBM
+# Copyright 2014      Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
 
 {
-	package DBD::Informix::Summary;
+    package DBD::Informix::Summary;
+    use strict;
+    use warnings;
+    use vars qw( $VERSION );
 
-	$VERSION = "2013.0521";
-	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
+    $VERSION = "2015.0825";
+    $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
-	1;
+    1;
 }
 
 __END__
@@ -38,7 +42,7 @@ This file is an updated version of the information about DBD::Informix in the DB
 
 =head2 Driver Version
 
-DBD::Informix (Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21))
+DBD::Informix (Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25))
 
 =head2 Feature Summary
 

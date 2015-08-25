@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t78varchar.t,v 2010.1 2010/09/01 20:18:55 jleffler Exp $
+#   @(#)$Id: t78varchar.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Off-by-one bug in VARCHAR when used next to BLOB or CLOB fields
 #   Bug, basic test case and diagnosis provided by Tom Girsch.
@@ -9,9 +9,10 @@
 #
 #   Copyright 2006    Tom Girsch <tom_girsch@hilton.com>
 #   Copyright 2006    Doug Conrey <doug_conrey@oci.com>
-#   Copyright 2006-10 Jonathan Leffler
+#   Copyright 2006-14 Jonathan Leffler
 
 use strict;
+use warnings;
 use DBD::Informix::TestHarness;
 use IO::File;
 
@@ -43,7 +44,7 @@ else
     stmt_ok(0);
 
     my $sth = $dbh->prepare("insert into $tablename(faxid, file, subject)
-                                     values(?, filetoblob(?, 'server'), ?)");
+                                     values(?, filetoblob(?, 'client'), ?)");
 
     my $file = "/tmp/t78varchar.unl";
     my $fh = new IO::File "> $file";
@@ -56,12 +57,12 @@ else
     stmt_ok(0);
 
     $dbh->do("insert into $tablename(faxid, file, subject) values(382391,
-                filetoblob('$file', 'server'), 'a')") or stmt_fail;
+                filetoblob('$file', 'client'), 'a')") or stmt_fail;
     stmt_ok(0);
 
     unlink $file;
 }
 
-$dbh->disconnect ? &stmt_ok : &stmt_fail;
+$dbh->disconnect ? stmt_ok : stmt_fail;
 
-&all_ok();
+all_ok();

@@ -1,14 +1,15 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t91udts.t,v 2007.6 2007/08/26 06:26:40 jleffler Exp $
+#   @(#)$Id: t91udts.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Test basic handling of user-defined data types
 #
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
-#   Copyright 2004-07 Jonathan Leffler
+#   Copyright 2004-14 Jonathan Leffler
 
 use strict;
+use warnings;
 use DBD::Informix::TestHarness;
 
 if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
@@ -17,11 +18,11 @@ if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
     exit 0;
 }
 
-my ($dbh) = &test_for_ius;
+my ($dbh) = test_for_ius;
 
 $dbh->{ChopBlanks} = 1;
 
-&stmt_note("1..16\n");
+stmt_note("1..16\n");
 
 my ($sbspace) = smart_blob_space_name($dbh);
 

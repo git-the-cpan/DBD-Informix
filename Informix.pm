@@ -1,6 +1,6 @@
-#   @(#)$Id: Informix.pm,v 2013.1 2013/05/22 05:41:29 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2015.1 2015/08/22 00:05:43 jleffler Exp $
 #
-#   @(#)Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+#   @(#)Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
@@ -20,6 +20,7 @@
     package DBD::Informix;
 
     use strict;
+    use warnings;
     use vars qw($VERSION $drh @ISA %EXPORT_TAGS @EXPORT @EXPORT_OK);
 
     use DBI 1.38;   # Requires features from DBI 1.38 release
@@ -48,10 +49,10 @@
                 ) ] );
     Exporter::export_ok_tags('ix_types');
 
-    $VERSION          = "2013.0521";
+    $VERSION          = "2015.0825";
 
-    my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@google.com>';
-    my $Revision         = '$Id: Informix.pm,v 2013.1 2013/05/22 05:41:29 jleffler Exp $';
+    my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
+    my $Revision         = '$Id: Informix.pm,v 2015.1 2015/08/22 00:05:43 jleffler Exp $';
 
     # This is for development only - the code must be recompiled each day!
     $VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
@@ -312,7 +313,7 @@ DBD::Informix - Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21).
+This document describes Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.
@@ -1505,11 +1506,11 @@ Jonathan Leffler (jleffler@informix.com) # Obsolete email address
 
 =item *
 
-Jonathan Leffler (jleffler@us.ibm.com)  # Obsolete email address
+Jonathan Leffler (jleffler@google.com)  # Obsolete email address
 
 =item *
 
-Jonathan Leffler (jleffler@google.com)
+Jonathan Leffler (jleffler@us.ibm.com)
 
 =back
 

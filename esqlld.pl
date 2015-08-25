@@ -1,8 +1,8 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-# @(#)$Id: esqlld,v 2005.1 2005/07/25 18:44:55 jleffler Exp $ 
+# @(#)$Id: esqlld.pl,v 2015.1 2015/08/21 22:55:19 jleffler Exp $ 
 #
-# Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+# Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
 #
 # Surrogate Linker for Informix ESQL/C versions 4.10.UC1 upwards
 # -- Used to create shared libraries.
@@ -24,6 +24,7 @@ use constant debug => ($ENV{DBD_INFORMIX_DEBUG_ESQLLD} ? 1 : 0);
 }
 
 use strict;
+use warnings;
 use DBD::Informix::Configure;	# &map_informix_lib_names()
 
 my $map = ($ENV{DBD_INFORMIX_RELOCATABLE_INFORMIXDIR}) ? 0 : 1;

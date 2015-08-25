@@ -1,15 +1,15 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2013.5 2013/05/22 05:40:27 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2015.5 2015/08/25 12:17:00 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21))
+# (Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
 # Copyright 2000    Informix Software Inc
 # Copyright 2002-04 IBM
-# Copyright 2004-13 Jonathan Leffler
+# Copyright 2004-15 Jonathan Leffler
 #
 # You may distribute under the terms of either the GNU General Public
 # License or the Artistic License, as specified in the Perl README file.
@@ -18,10 +18,10 @@
 
 BEGIN
 {
-$main::min_DBI_ver = "1.38";        # Minimum (mandatory) version of DBI
-$main::ref_DBI_ver = "1.627";       # Reference (recommended) version of DBI
-$main::min_Perl_ver = "5.006001";   # Minimum (mandatory) version of Perl
-$main::ref_Perl_ver = "5.016003";   # Reference (recommended) version of Perl
+$main::min_DBI_ver = "1.607";       # Minimum (mandatory) version of DBI
+$main::ref_DBI_ver = "1.634";       # Reference (recommended) version of DBI
+$main::min_Perl_ver = "5.008001";   # Minimum (mandatory) version of Perl
+$main::ref_Perl_ver = "5.022000";   # Reference (recommended) version of Perl
 }
 
 ########################
@@ -106,7 +106,7 @@ if ($NTConfiguration)
     });
 }
 
-my $dbd_ix = "2013.0521";
+my $dbd_ix = "2015.0825";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -146,7 +146,7 @@ my %opts = (
            );
 
 print qq%
-Configuring Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) (aka $opts{NAME})
+Configuring Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -503,7 +503,8 @@ print "$infofile written OK\n\n";
 #$opts{DEFINE} .= ' -Wall -pedantic -Wno-comment -Wpointer-arith -Wcast-align'
 #       . ' -Wconversion -Wtraditional -Wcast-qual'
 #       . ' -Wmissing-prototypes -Wstrict-prototypes -Wredundant-decl'
-$opts{DEFINE} .= ' -Wall -pedantic -Wno-comment'
+# Neither Perl (DBI) nor DBD-Informix is really ready for -Wextra.
+$opts{DEFINE} .= ' -Wall -pedantic -Wextra -Wno-comment'
     if $Config{cc} eq 'gcc' and $ENV{DBD_INFORMIX_DEBUG_GCC};
 
 # Workaround Informix bug B08223 (aka B14937, and other numbers too)
@@ -562,6 +563,21 @@ my $INC2 = join ' ', map { "-I\$($_)/auto/DBI" }
 
 $opts{INC} .= " $INC1 $INC2";
 $opts{OBJECT} = $objects;
+
+# Create esqlcc, esqlld, esqlsed from the Perl source, ensuring that the
+# files are executable and use the correct Perl interpreter.
+for my $file (qw(esqlcc esqlld esqlsed))
+{
+    print "# Creating $file\n";
+    unlink($file);
+    system "$Perl setperl.pl '$Perl' '$file.pl' '$file'";
+    if (! -x $file)
+    {
+        my $mode = (stat $file)[2] | 0111;
+        chmod $mode, $file;
+    }
+}
+print "\n";
 
 ##############################
 # - Start of ESQLTEST code - #
@@ -647,7 +663,7 @@ else
         $EX = "";
         $RM = "rm -f";
         $EQ = "$esql";
-        $EV = [ "INFORMIXC=$Config{perlpath} esqlcc", "ESQLCC=$Config{cc}" ];
+        $EV = [ "INFORMIXC=./esqlcc", "ESQLCC=$Config{cc}" ];
     }
 
     $opts{DEFINE} =~ s/^\s+//;
@@ -710,7 +726,7 @@ else
 # the files list...
 
 # Default version of $opts{LD}
-$opts{LD} = "INFORMIXC='\$(FULLPERL) esqlld' " .
+$opts{LD} = "INFORMIXC=./esqlld\ " .
             "ESQLLD='$Config{ld} \$(LDDLFLAGS)' \$(ESQL)";
 
 my $esql_nt = "";
@@ -743,7 +759,7 @@ if ($NTConfiguration)
         # Do not override default version of $opts{LD}
     }
 }
-elsif (($Config{ld} !~ /cc$/ && $Config{ld} ne $Config{cc}) ||
+elsif (($Config{ld} !~ /cc\b/ && $Config{ld} ne $Config{cc}) ||
         defined $ENV{DBD_INFORMIX_DEBUG_LIBDETECTION})
 {
     # Unix configuration (awkward squad subset of Unix configurations)
@@ -832,17 +848,6 @@ Look at Notes/environment.variables and esqlld for more information.\n\n%)
     if ($Config{cccdlflags} =~ m/$lazy/ ||
         $Config{lddlflags} =~ m/$lazy/ ||
         $Config{ccflags}   =~ m/$lazy/);
-
-# Ensure that esqlcc, esqlld, esqlsed are executable
-my $file;
-for $file (qw(esqlcc esqlld esqlsed))
-{
-    if (! -x $file)
-    {
-        my $mode = (stat $file)[2] | 0111;
-        chmod $mode, $file;
-    }
-}
 
 # Probably cause for being thrown out of The Perl Institute, but TMTOWTDI!
 system "$Perl t/dtgen.pl > t/dtgen.sql";
@@ -947,7 +952,7 @@ sub dbd_informix_postamble
     else
     {
         $p3 = q%
-        ESQL_CC     = INFORMIXC="$(FULLPERL) esqlcc" ESQLCC="$(CC)" $(ESQL)
+        ESQL_CC     = INFORMIXC="./esqlcc" ESQLCC="$(CC)" $(ESQL)
         %;
     }
 
@@ -1186,7 +1191,7 @@ sub Write_DBD_Informix_Defaults
         or die "Cannot create $defaults ($!)";
 
     print DEFAULTS <<'EOF';
-#   Default Environment Variables for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+#   Default Environment Variables for Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004-10 Jonathan Leffler
@@ -1200,7 +1205,7 @@ sub Write_DBD_Informix_Defaults
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
-    $VERSION = "2013.0521";
+    $VERSION = "2015.0825";
     $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1224,7 +1229,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)).
+(Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to,

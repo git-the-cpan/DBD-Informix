@@ -1,4 +1,25 @@
-Change Log for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) (aka DBD::Informix)
+Change Log for Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25) (aka DBD::Informix)
+
+2015.0825 Release
+-----------------
+2015-08-25: Upload to PAUSE and CPAN.
+2015-08-25: Partially resolve RT$55100 (improve compiler detection).
+            Unresolved: Command line override of OTHERLDFLAGS.
+2015-08-21: Update minimum version of Perl to 5.8.1 and DBI to 1.607.
+2015-08-21: Rework esqlcc, esqlld, esqlsed to deal with modified
+            ExtUtils::MakeMaker behaviour of enclosing FULLPERL in double
+            quotes, after multiple reports and much cogitation.
+            Resolve: RT#101802, RT#101803, RT#101804, RT#103834.
+2015-08-21: Upgrade esqltest.ec and esqlbasic.ec to compile more cleanly.
+2015-07-13: Fix up after change of email back to <jleffler@us.ibm.com>.
+2015-07-07: Demonstrate that DBD::Informix works with threaded Perl on
+            Mac OS X 10.10.4 with Perl 5.18.2 (multi, thread, 64-bit),
+            and with Perl 5.10.1 (multi, thread, 64-bit).
+2014-04-21: All Perl files contain use strict and use warn.
+2013-11-12: Fix RT#90263 from John Beranek <john@redux.org.uk>.  Handle
+            non-transactional temporary tables because of TEMPTBL_NOLOG
+            configuration parameter (also John Beranek).  Clean test files
+            of &function() calls.
 
 2013.0521 Release
 -----------------
@@ -1254,4 +1275,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@google.com>
-@(#)$Id: ChangeLog,v 2013.6 2013/05/22 05:41:29 jleffler Exp $
+@(#)$Id: ChangeLog,v 2015.2 2015/08/25 12:08:23 jleffler Exp $

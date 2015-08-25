@@ -1,12 +1,14 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t51getinfo.t,v 2003.4 2003/01/03 19:18:50 jleffler Exp $
+#   @(#)$Id: t51getinfo.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Test get_info metadata function for DBD::Informix
 #
 #   Copyright 2002-03 IBM
+#   Copyright 2013-14 Jonathan Leffler
 
 use strict;
+use warnings;
 use DBD::Informix::TestHarness;
 
 # This test generates the number of tests at the end!
@@ -228,29 +230,29 @@ my %sql_info_type_map =
 my($dbname, $dbuser, $dbpass) = ("","","");
 foreach my $connector (\&primary_connection, \&secondary_connection, \&tertiary_connection)
 {
-	# Test connection
-	my ($newname, $newuser, $newpass) = &$connector();
-	if ($newname ne $dbname)
-	{
-		($dbname, $dbuser, $dbpass) = ($newname, $newuser, $newpass);
-		my $dbh = &connect_controllably(1, { AutoCommit => 1, PrintError => 1 }, $connector);
-		print_dbinfo($dbh);
+    # Test connection
+    my ($newname, $newuser, $newpass) = &$connector();
+    if ($newname ne $dbname)
+    {
+        ($dbname, $dbuser, $dbpass) = ($newname, $newuser, $newpass);
+        my $dbh = connect_controllably(1, { AutoCommit => 1, PrintError => 1 }, $connector);
+        print_dbinfo($dbh);
 
-		foreach my $key (sort keys %sql_info_type_map)
-		{
-			my @arr = @{$sql_info_type_map{$key}};
-			my $idx = $arr[0];
-			my $val = $dbh->get_info($idx);
-			$val = 'undef' unless defined $val;
-			printf "# %-35s = %5d => <<%s>>\n", $key, $idx, $val;
-			($val ne 'undef' || $arr[1] eq 'undef') ? &stmt_ok : &stmt_nok;
-		}
+        foreach my $key (sort keys %sql_info_type_map)
+        {
+            my @arr = @{$sql_info_type_map{$key}};
+            my $idx = $arr[0];
+            my $val = $dbh->get_info($idx);
+            $val = 'undef' unless defined $val;
+            printf "# %-35s = %5d => <<%s>>\n", $key, $idx, $val;
+            ($val ne 'undef' || $arr[1] eq 'undef') ? stmt_ok : stmt_nok;
+        }
 
-		$dbh->disconnect ? &stmt_ok : &stmt_nok;
-	}
+        $dbh->disconnect ? stmt_ok : stmt_nok;
+    }
 }
 
-my $cnt = &stmt_counter;
+my $cnt = stmt_counter;
 
 print "1..$cnt\n";
 

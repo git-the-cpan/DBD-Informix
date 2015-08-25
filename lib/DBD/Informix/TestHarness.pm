@@ -1,578 +1,581 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: TestHarness.pm,v 2013.2 2013/05/22 05:41:29 jleffler Exp $
+#   @(#)$Id: TestHarness.pm,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
-#   Pure Perl Test Harness for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+#   Pure Perl Test Harness for Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
 #
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
-#   Copyright 2004-07 Jonathan Leffler
+#   Copyright 2004-14 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
 
 # Exploit this by saying "use DBD::Informix::TestHarness;"
 {
-	package DBD::Informix::TestHarness;
-	require Exporter;
-	@ISA = qw(Exporter);
-	@EXPORT = qw(
-		all_ok
-		cleanup_database
-		connect_controllably
-		connect_to_test_database
-		connect_to_primary
-		connect_to_secondary
-		connect_to_tertiary
-		get_date_as_string
-		is_shared_memory_connection
-		memory_leak_test
-		primary_connection
-		print_dbinfo
-		print_sqlca
+    package DBD::Informix::TestHarness;
+    use strict;
+    use warnings;
+    use vars qw( @ISA @EXPORT );
+    require Exporter;
+    @ISA = qw(Exporter);
+    @EXPORT = qw(
+        all_ok
+        cleanup_database
+        connect_controllably
+        connect_to_test_database
+        connect_to_primary
+        connect_to_secondary
+        connect_to_tertiary
+        get_date_as_string
+        is_shared_memory_connection
+        memory_leak_test
+        primary_connection
+        print_dbinfo
+        print_sqlca
         smart_blob_space_name
-		secondary_connection
-		select_zero_data
-		set_verbosity
-		stmt_comment
-		stmt_err
-		stmt_fail
-		stmt_note
-		stmt_ok
-		stmt_nok
-		stmt_counter
-		stmt_retest
-		stmt_test
-		stmt_skip
-		test_for_ius
-		tertiary_connection
-		validate_unordered_unique_data
-		);
+        secondary_connection
+        select_zero_data
+        set_verbosity
+        stmt_comment
+        stmt_err
+        stmt_fail
+        stmt_note
+        stmt_ok
+        stmt_nok
+        stmt_counter
+        stmt_retest
+        stmt_test
+        stmt_skip
+        test_for_ius
+        tertiary_connection
+        validate_unordered_unique_data
+        );
 
-	use DBI;
-	use Carp;
-	use Config;
-	use strict;
+    use DBI;
+    use Carp;
+    use Config;
+    use strict;
 
-	require_version DBI 1.38;
+    require_version DBI 1.38;
 
-	my
-	$VERSION = "2013.0521";
-	# our $VERSION = "2013.0521"; # But 'our' not acceptable to Perl 5.005_03!
-	$VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
+    my
+    $VERSION = "2015.0825";
+    # our $VERSION = "2015.0825"; # But 'our' not acceptable to Perl 5.005_03!
+    $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
-	# Report on the connect command and any attributes being set.
-	sub print_connection
-	{
-		my ($dbase, $user, $pass, $attr) = @_;
-		my ($xxpass) = (defined $pass) ? 'X' x length($pass) : "";
+    # Report on the connect command and any attributes being set.
+    sub print_connection
+    {
+        my ($dbase, $user, $pass, $attr) = @_;
+        my ($xxpass) = (defined $pass) ? 'X' x length($pass) : "";
 
-		&stmt_note("# DBI->connect('dbi:Informix:$dbase', '$user', '$xxpass');\n");
-		if (defined $attr)
-		{
-			my ($key);
-			foreach $key (keys %$attr)
-			{
-				&stmt_note("#\tConnect Attribute: $key => $$attr{$key}\n");
-			}
-		}
-	}
+        &stmt_note("# DBI->connect('dbi:Informix:$dbase', '$user', '$xxpass');\n");
+        if (defined $attr)
+        {
+            my ($key);
+            foreach $key (keys %$attr)
+            {
+                &stmt_note("#\tConnect Attribute: $key => $$attr{$key}\n");
+            }
+        }
+    }
 
-	sub primary_connection
-	{
-		# This section may need rigging for some versions of Informix.
-		# It will should be OK for 6.0x and later versions of OnLine.
-		# You may run into problems with SE and 5.00 systems.
-		# If you do, send details to the maintenance team.
-		my ($dbname) = $ENV{DBD_INFORMIX_DATABASE};
-		my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME};
-		my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD};
+    sub primary_connection
+    {
+        # This section may need rigging for some versions of Informix.
+        # It will should be OK for 6.0x and later versions of OnLine.
+        # You may run into problems with SE and 5.00 systems.
+        # If you do, send details to the maintenance team.
+        my ($dbname) = $ENV{DBD_INFORMIX_DATABASE};
+        my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME};
+        my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD};
 
-		# Clear undefs
-		$dbpass = "" unless ($dbpass);
-		$dbuser = "" unless ($dbuser);
-		# Either both username and password are set or neither are set
-		$dbpass = "" unless ($dbuser && $dbpass);
-		$dbuser = "" unless ($dbuser && $dbpass);
+        # Clear undefs
+        $dbpass = "" unless ($dbpass);
+        $dbuser = "" unless ($dbuser);
+        # Either both username and password are set or neither are set
+        $dbpass = "" unless ($dbuser && $dbpass);
+        $dbuser = "" unless ($dbuser && $dbpass);
 
-		# Respect $DBI_DBNAME since the esqltest code does.
-		# Problem reported by Paul Watson <paulw@wfsoftware.com>
-		$dbname = $ENV{DBI_DBNAME} if (!$dbname);
-		$dbname = "stores" if (!$dbname);
-		return ($dbname, $dbuser, $dbpass);
-	}
+        # Respect $DBI_DBNAME since the esqltest code does.
+        # Problem reported by Paul Watson <paulw@wfsoftware.com>
+        $dbname = $ENV{DBI_DBNAME} if (!$dbname);
+        $dbname = "stores" if (!$dbname);
+        return ($dbname, $dbuser, $dbpass);
+    }
 
-	sub secondary_connection
-	{
-		my ($dbname) = $ENV{DBD_INFORMIX_DATABASE2};
-		my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME2};
-		my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD2};
+    sub secondary_connection
+    {
+        my ($dbname) = $ENV{DBD_INFORMIX_DATABASE2};
+        my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME2};
+        my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD2};
 
-		if (!defined $dbname || !defined $dbuser || !defined $dbpass)
-		{
-			my ($dbname1, $dbuser1, $dbpass1) = &primary_connection();
-			$dbname = $dbname1 unless defined $dbname;
-			$dbuser = $dbuser1 unless defined $dbuser;
-			$dbpass = $dbpass1 unless defined $dbpass;
-		}
+        if (!defined $dbname || !defined $dbuser || !defined $dbpass)
+        {
+            my ($dbname1, $dbuser1, $dbpass1) = &primary_connection();
+            $dbname = $dbname1 unless defined $dbname;
+            $dbuser = $dbuser1 unless defined $dbuser;
+            $dbpass = $dbpass1 unless defined $dbpass;
+        }
 
-		# Clear undefs
-		$dbpass = "" unless ($dbpass);
-		$dbuser = "" unless ($dbuser);
-		# Either both username and password are set or neither are set
-		$dbpass = "" unless ($dbuser && $dbpass);
-		$dbuser = "" unless ($dbuser && $dbpass);
+        # Clear undefs
+        $dbpass = "" unless ($dbpass);
+        $dbuser = "" unless ($dbuser);
+        # Either both username and password are set or neither are set
+        $dbpass = "" unless ($dbuser && $dbpass);
+        $dbuser = "" unless ($dbuser && $dbpass);
 
-		return ($dbname, $dbuser, $dbpass);
-	}
+        return ($dbname, $dbuser, $dbpass);
+    }
 
-	sub tertiary_connection
-	{
-		my ($dbname) = $ENV{DBD_INFORMIX_DATABASE3};
-		my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME3};
-		my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD3};
+    sub tertiary_connection
+    {
+        my ($dbname) = $ENV{DBD_INFORMIX_DATABASE3};
+        my ($dbuser) = $ENV{DBD_INFORMIX_USERNAME3};
+        my ($dbpass) = $ENV{DBD_INFORMIX_PASSWORD3};
 
-		if (!defined $dbname || !defined $dbuser || !defined $dbpass)
-		{
-			my ($dbname1, $dbuser1, $dbpass1) = &primary_connection();
-			$dbname = $dbname1 unless defined $dbname;
-			$dbuser = $dbuser1 unless defined $dbuser;
-			$dbpass = $dbpass1 unless defined $dbpass;
-		}
+        if (!defined $dbname || !defined $dbuser || !defined $dbpass)
+        {
+            my ($dbname1, $dbuser1, $dbpass1) = &primary_connection();
+            $dbname = $dbname1 unless defined $dbname;
+            $dbuser = $dbuser1 unless defined $dbuser;
+            $dbpass = $dbpass1 unless defined $dbpass;
+        }
 
-		# Clear undefs
-		$dbpass = "" unless ($dbpass);
-		$dbuser = "" unless ($dbuser);
-		# Either both username and password are set or neither are set
-		$dbpass = "" unless ($dbuser && $dbpass);
-		$dbuser = "" unless ($dbuser && $dbpass);
+        # Clear undefs
+        $dbpass = "" unless ($dbpass);
+        $dbuser = "" unless ($dbuser);
+        # Either both username and password are set or neither are set
+        $dbpass = "" unless ($dbuser && $dbpass);
+        $dbuser = "" unless ($dbuser && $dbpass);
 
-		return ($dbname, $dbuser, $dbpass);
-	}
+        return ($dbname, $dbuser, $dbpass);
+    }
 
-	sub connect_to_test_database
-	{
-		my ($attr) = @_;
-		connect_to_primary(1, $attr);
-	}
+    sub connect_to_test_database
+    {
+        my ($attr) = @_;
+        connect_to_primary(1, $attr);
+    }
 
-	sub connect_to_primary
-	{
-		my ($verbose, $attr) = @_;
-		connect_controllably($verbose, $attr, \&primary_connection);
-	}
+    sub connect_to_primary
+    {
+        my ($verbose, $attr) = @_;
+        connect_controllably($verbose, $attr, \&primary_connection);
+    }
 
-	sub connect_to_secondary
-	{
-		my ($verbose, $attr) = @_;
-		connect_controllably($verbose, $attr, \&secondary_connection);
-	}
+    sub connect_to_secondary
+    {
+        my ($verbose, $attr) = @_;
+        connect_controllably($verbose, $attr, \&secondary_connection);
+    }
 
-	sub connect_to_tertiary
-	{
-		my ($verbose, $attr) = @_;
-		connect_controllably($verbose, $attr, \&tertiary_connection);
-	}
+    sub connect_to_tertiary
+    {
+        my ($verbose, $attr) = @_;
+        connect_controllably($verbose, $attr, \&tertiary_connection);
+    }
 
-	sub connect_controllably
-	{
-		my ($verbose, $attr, $func) = @_;
-		my ($dbname, $dbuser, $dbpass) = &$func();
+    sub connect_controllably
+    {
+        my ($verbose, $attr, $func) = @_;
+        my ($dbname, $dbuser, $dbpass) = &$func();
 
-		# Chop trailing blanks by default, unless user explicitly chooses otherwise.
-		${$attr}{ChopBlanks} = 1 unless defined ${$attr}{ChopBlanks};
-		&print_connection($dbname, $dbuser, $dbpass, $attr)
-			if ($verbose);
+        # Chop trailing blanks by default, unless user explicitly chooses otherwise.
+        ${$attr}{ChopBlanks} = 1 unless defined ${$attr}{ChopBlanks};
+        &print_connection($dbname, $dbuser, $dbpass, $attr)
+            if ($verbose);
 
-		my ($dbh) = DBI->connect("dbi:Informix:$dbname", $dbuser, $dbpass, $attr);
+        my ($dbh) = DBI->connect("dbi:Informix:$dbname", $dbuser, $dbpass, $attr);
 
-		# Unconditionally fail if connection does not work!
-		&stmt_fail() unless (defined $dbh);
+        # Unconditionally fail if connection does not work!
+        &stmt_fail() unless (defined $dbh);
 
-		$dbh;
-	}
+        $dbh;
+    }
 
-	# Get both client-side and server-side
-	# result of evaluating a date as a string.
-	sub get_date_as_string
-	{
-		my ($dbh, $mm, $dd, $yyyy) = @_;
-		my ($sth, $sel1, @row);
+    # Get both client-side and server-side
+    # result of evaluating a date as a string.
+    sub get_date_as_string
+    {
+        my ($dbh, $mm, $dd, $yyyy) = @_;
+        my ($sth, $sel1, @row);
 
-		$dd = 10 unless defined $dd;
-		$mm = 20 unless defined $mm;
-		$yyyy = 1930 unless defined $yyyy;
-		# How to insert date values even when you cannot be bothered to sort out
-		# what DBDATE will do...  You cannot insert an MDY() expression directly.
-		# JL 2002-11-05: String concatenation is available in all supported
-		# servers.  The date value has to be returned as string; otherwise,
-		# you run into problems when the server has DBDATE set to a
-		# non-default value (such as "Y4MD-") and the client side does not
-		# set DBDATE at all.  This problem reported previously by others,
-		# but this fix introduced in response to questions from Arlene
-		# Gelbolingo <Gelbolingo.Arlene@menlolog.com>.  Note that the
-		# string returned by default is unambiguous.
-		$sel1 = qq% SELECT MDY($mm,$dd,$yyyy) || '', MDY($mm,$dd,$yyyy) FROM "informix".SysTables WHERE Tabid = 1%;
-		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth = $dbh->prepare($sel1);
-		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth->execute;
-		(&stmt_nok(), return "$yyyy-$mm-$dd") unless @row = $sth->fetchrow_array;
-		(&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth->finish;
-		&stmt_ok(0);
-		return @row;
-	}
+        $dd = 10 unless defined $dd;
+        $mm = 20 unless defined $mm;
+        $yyyy = 1930 unless defined $yyyy;
+        # How to insert date values even when you cannot be bothered to sort out
+        # what DBDATE will do...  You cannot insert an MDY() expression directly.
+        # JL 2002-11-05: String concatenation is available in all supported
+        # servers.  The date value has to be returned as string; otherwise,
+        # you run into problems when the server has DBDATE set to a
+        # non-default value (such as "Y4MD-") and the client side does not
+        # set DBDATE at all.  This problem reported previously by others,
+        # but this fix introduced in response to questions from Arlene
+        # Gelbolingo <Gelbolingo.Arlene@menlolog.com>.  Note that the
+        # string returned by default is unambiguous.
+        $sel1 = qq% SELECT MDY($mm,$dd,$yyyy) || '', MDY($mm,$dd,$yyyy) FROM "informix".SysTables WHERE Tabid = 1%;
+        (&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth = $dbh->prepare($sel1);
+        (&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth->execute;
+        (&stmt_nok(), return "$yyyy-$mm-$dd") unless @row = $sth->fetchrow_array;
+        (&stmt_nok(), return "$yyyy-$mm-$dd") unless $sth->finish;
+        &stmt_ok(0);
+        return @row;
+    }
 
-	sub print_dbinfo
-	{
-		my ($dbh) = @_;
-		print  "# Database Information\n";
-		printf "#     Database Name:           %s\n", $dbh->{Name};
-		printf "#     DBMS Version:            %d\n", $dbh->{ix_ServerVersion};
-		printf "#     AutoCommit:              %d\n", $dbh->{AutoCommit};
-		printf "#     PrintError:              %d\n", $dbh->{PrintError};
-		printf "#     RaiseError:              %d\n", $dbh->{RaiseError};
-		printf "#     Informix-OnLine:         %d\n", $dbh->{ix_InformixOnLine};
-		printf "#     Logged Database:         %d\n", $dbh->{ix_LoggedDatabase};
-		printf "#     Mode ANSI Database:      %d\n", $dbh->{ix_ModeAnsiDatabase};
-		printf "#     Transaction Active:      %d\n", $dbh->{ix_InTransaction};
-		print  "#\n";
-	}
+    sub print_dbinfo
+    {
+        my ($dbh) = @_;
+        print  "# Database Information\n";
+        printf "#     Database Name:           %s\n", $dbh->{Name};
+        printf "#     DBMS Version:            %d\n", $dbh->{ix_ServerVersion};
+        printf "#     AutoCommit:              %d\n", $dbh->{AutoCommit};
+        printf "#     PrintError:              %d\n", $dbh->{PrintError};
+        printf "#     RaiseError:              %d\n", $dbh->{RaiseError};
+        printf "#     Informix-OnLine:         %d\n", $dbh->{ix_InformixOnLine};
+        printf "#     Logged Database:         %d\n", $dbh->{ix_LoggedDatabase};
+        printf "#     Mode ANSI Database:      %d\n", $dbh->{ix_ModeAnsiDatabase};
+        printf "#     Transaction Active:      %d\n", $dbh->{ix_InTransaction};
+        print  "#\n";
+    }
 
-	sub print_sqlca
-	{
-		my ($sth) = @_;
-		print "# Testing SQLCA handling\n";
-		print "#     SQLCA.SQLCODE    = $sth->{ix_sqlcode}\n";
-		print "#     SQLCA.SQLERRM    = '$sth->{ix_sqlerrm}'\n";
-		print "#     SQLCA.SQLERRP    = '$sth->{ix_sqlerrp}'\n";
-		my ($i) = 0;
-		my @errd = @{$sth->{ix_sqlerrd}};
-		for ($i = 0; $i < @errd; $i++)
-		{
-			print "#     SQLCA.SQLERRD[$i] = $errd[$i]\n";
-		}
-		my @warn = @{$sth->{ix_sqlwarn}};
-		for ($i = 0; $i < @warn; $i++)
-		{
-			print "#     SQLCA.SQLWARN[$i] = '$warn[$i]'\n";
-		}
-		print "# SQLSTATE             = '$DBI::state'\n";
-		my ($rows) = $sth->rows();
-		print "# ROWS                 = $rows\n";
-	}
+    sub print_sqlca
+    {
+        my ($sth) = @_;
+        print "# Testing SQLCA handling\n";
+        print "#     SQLCA.SQLCODE    = $sth->{ix_sqlcode}\n";
+        print "#     SQLCA.SQLERRM    = '$sth->{ix_sqlerrm}'\n";
+        print "#     SQLCA.SQLERRP    = '$sth->{ix_sqlerrp}'\n";
+        my ($i) = 0;
+        my @errd = @{$sth->{ix_sqlerrd}};
+        for ($i = 0; $i < @errd; $i++)
+        {
+            print "#     SQLCA.SQLERRD[$i] = $errd[$i]\n";
+        }
+        my @warn = @{$sth->{ix_sqlwarn}};
+        for ($i = 0; $i < @warn; $i++)
+        {
+            print "#     SQLCA.SQLWARN[$i] = '$warn[$i]'\n";
+        }
+        print "# SQLSTATE             = '$DBI::state'\n";
+        my ($rows) = $sth->rows();
+        print "# ROWS                 = $rows\n";
+    }
 
-	my $test_counter = 0;
-	my $fail_counter = 0;
+    my $test_counter = 0;
+    my $fail_counter = 0;
 
-	sub stmt_err
-	{
-		# NB: error message in $DBI::errstr no longer ends with a newline.
-		my ($str) = @_;
-		my ($err, $state);
-		$str = "Error Message" unless ($str);
-		$err = (defined $DBI::errstr) ? $DBI::errstr : "<<no error string>>";
-		$state = (defined $DBI::state) ? $DBI::state : "<<no state string>>";
-		$str .= ":\n${err}\nSQLSTATE = ${state}\n";
-		$str =~ s/^/# /gm;
-		&stmt_note($str);
-	}
+    sub stmt_err
+    {
+        # NB: error message in $DBI::errstr no longer ends with a newline.
+        my ($str) = @_;
+        my ($err, $state);
+        $str = "Error Message" unless ($str);
+        $err = (defined $DBI::errstr) ? $DBI::errstr : "<<no error string>>";
+        $state = (defined $DBI::state) ? $DBI::state : "<<no state string>>";
+        $str .= ":\n${err}\nSQLSTATE = ${state}\n";
+        $str =~ s/^/# /gm;
+        &stmt_note($str);
+    }
 
-	sub stmt_skip
-	{
-		my ($reason) = @_;
-		$test_counter++;
-		&stmt_note("ok $test_counter # $reason\n");
-	}
+    sub stmt_skip
+    {
+        my ($reason) = @_;
+        $test_counter++;
+        &stmt_note("ok $test_counter # $reason\n");
+    }
 
-	sub stmt_ok
-	{
-		my ($warn) = @_;
-		$test_counter++;
-		&stmt_note("ok $test_counter\n");
-		&stmt_err("Warning Message") if ($warn);
-	}
+    sub stmt_ok
+    {
+        my ($warn) = @_;
+        $test_counter++;
+        &stmt_note("ok $test_counter\n");
+        &stmt_err("Warning Message") if ($warn);
+    }
 
-	sub stmt_nok
-	{
-		my ($warn) = @_;
-		&stmt_note($warn) if ($warn);
-		$test_counter++;
-		$fail_counter++;
-		&stmt_note("not ok $test_counter\n");
-	}
+    sub stmt_nok
+    {
+        my ($warn) = @_;
+        &stmt_note($warn) if ($warn);
+        $test_counter++;
+        $fail_counter++;
+        &stmt_note("not ok $test_counter\n");
+    }
 
-	sub stmt_fail
-	{
-		my ($warn) = @_;
-		&stmt_nok($warn);
-		&stmt_err("Error Message");
-		confess "!! Terminating Test !!\n";
-	}
+    sub stmt_fail
+    {
+        my ($warn) = @_;
+        &stmt_nok($warn);
+        &stmt_err("Error Message");
+        confess "!! Terminating Test !!\n";
+    }
 
-	sub stmt_counter
-	{
-		return $test_counter;
-	}
+    sub stmt_counter
+    {
+        return $test_counter;
+    }
 
-	sub all_ok
-	{
-		&stmt_note("# *** Testing of DBD::Informix complete ***\n");
-		if ($fail_counter == 0)
-		{
-			&stmt_note("# ***     You appear to be normal!      ***\n");
-			exit(0);
-		}
-		else
-		{
-			&stmt_note("# !!!!!! There appear to be problems !!!!!!\n");
-			exit(1);
-		}
-	}
+    sub all_ok
+    {
+        &stmt_note("# *** Testing of DBD::Informix complete ***\n");
+        if ($fail_counter == 0)
+        {
+            &stmt_note("# ***     You appear to be normal!      ***\n");
+            exit(0);
+        }
+        else
+        {
+            &stmt_note("# !!!!!! There appear to be problems !!!!!!\n");
+            exit(1);
+        }
+    }
 
-	sub stmt_comment
-	{
-		my($str) = @_;
-		$str =~ s/^[^#]/# $&/gmo;
-		$str =~ s/^$/#/gmo;
-		chomp $str;
-		stmt_note("$str\n");
-	}
+    sub stmt_comment
+    {
+        my($str) = @_;
+        $str =~ s/^[^#]/# $&/gmo;
+        $str =~ s/^$/#/gmo;
+        chomp $str;
+        stmt_note("$str\n");
+    }
 
-	sub stmt_note
-	{
-		print STDOUT @_;
-	}
+    sub stmt_note
+    {
+        print STDOUT @_;
+    }
 
-	sub stmt_test
-	{
-		my ($dbh, $stmt, $ok, $test) = @_;
-		$test = "Test" unless $test;
-		&stmt_comment("$test: do('$stmt'):\n");
-		if ($dbh->do($stmt)) { &stmt_ok(0); }
-		elsif ($ok)          { &stmt_ok(1); }
-		else                 { &stmt_nok(); }
-	}
+    sub stmt_test
+    {
+        my ($dbh, $stmt, $ok, $test) = @_;
+        $test = "Test" unless $test;
+        &stmt_comment("$test: do('$stmt'):\n");
+        if ($dbh->do($stmt)) { &stmt_ok(0); }
+        elsif ($ok)          { &stmt_ok(1); }
+        else                 { &stmt_nok(); }
+    }
 
-	sub stmt_retest
-	{
-		my ($dbh, $stmt, $ok) = @_;
-		&stmt_test($dbh, $stmt, $ok, "Retest");
-	}
+    sub stmt_retest
+    {
+        my ($dbh, $stmt, $ok) = @_;
+        &stmt_test($dbh, $stmt, $ok, "Retest");
+    }
 
-	# Check that there is no data
-	sub select_zero_data
-	{
-		my($dbh, $sql) = @_;
-		my($sth) = $dbh->prepare($sql);
-		(&stmt_nok, return) unless $sth;
-		(&stmt_nok, return) unless $sth->execute;
-		my $ref;
-		while ($ref = $sth->fetchrow_arrayref)
-		{
-			# No data should have been selected!
-			&stmt_nok("Unexpected data returned from $sql: @$ref\n");
-			return;
-		}
-		&stmt_ok;
-	}
+    # Check that there is no data
+    sub select_zero_data
+    {
+        my($dbh, $sql) = @_;
+        my($sth) = $dbh->prepare($sql);
+        (&stmt_nok, return) unless $sth;
+        (&stmt_nok, return) unless $sth->execute;
+        my $ref;
+        while ($ref = $sth->fetchrow_arrayref)
+        {
+            # No data should have been selected!
+            &stmt_nok("Unexpected data returned from $sql: @$ref\n");
+            return;
+        }
+        &stmt_ok;
+    }
 
-	# Check that both the ESQL/C and the database server are IUS-aware
-	# Handles ESQL/C 2.90 .. 4.99 - which are IUS-aware.
-	# Return database handle if all is OK.
-	sub test_for_ius
-	{
-		my ($dbase1, $user1, $pass1) = &primary_connection();
+    # Check that both the ESQL/C and the database server are IUS-aware
+    # Handles ESQL/C 2.90 .. 4.99 - which are IUS-aware.
+    # Return database handle if all is OK.
+    sub test_for_ius
+    {
+        my ($dbase1, $user1, $pass1) = &primary_connection();
 
-		my $drh = DBI->install_driver('Informix');
-		print "# Driver Information\n";
-		print "#     Name:                  $drh->{Name}\n";
-		print "#     Version:               $drh->{Version}\n";
-		print "#     Product:               $drh->{ix_ProductName}\n";
-		print "#     Product Version:       $drh->{ix_ProductVersion}\n";
-		my ($ev) = $drh->{ix_ProductVersion};
-		if ($ev < 900 && !($ev >= 290 && $ev < 500))
-		{
-			&stmt_note("1..0 # Skip: IUS data types are not supported by $drh->{ix_ProductName}\n");
-			exit(0);
-		}
+        my $drh = DBI->install_driver('Informix');
+        print "# Driver Information\n";
+        print "#     Name:                  $drh->{Name}\n";
+        print "#     Version:               $drh->{Version}\n";
+        print "#     Product:               $drh->{ix_ProductName}\n";
+        print "#     Product Version:       $drh->{ix_ProductVersion}\n";
+        my ($ev) = $drh->{ix_ProductVersion};
+        if ($ev < 900 && !($ev >= 290 && $ev < 500))
+        {
+            &stmt_note("1..0 # Skip: IUS data types are not supported by $drh->{ix_ProductName}\n");
+            exit(0);
+        }
 
-		my ($dbh, $sth, $numtabs);
-		&stmt_note("# Connect to: $dbase1\n");
-		&stmt_fail() unless ($dbh = DBI->connect("DBI:Informix:$dbase1", $user1, $pass1));
-		&stmt_fail() unless ($sth = $dbh->prepare(q%
-			SELECT COUNT(*) FROM "informix".SysTables WHERE TabID < 100
-			%));
-		&stmt_fail() unless ($sth->execute);
-		&stmt_fail() unless (($numtabs) = $sth->fetchrow_array);
-		if ($numtabs < 40)
-		{
-			&stmt_note("1..0 # Skip IUS data types are not supported by database server.\n");
-			$dbh->disconnect;
-			exit(0);
-		}
-		&stmt_note("# IUS data types can be tested!\n");
-		return $dbh;
-	}
+        my ($dbh, $sth, $numtabs);
+        &stmt_note("# Connect to: $dbase1\n");
+        &stmt_fail() unless ($dbh = DBI->connect("DBI:Informix:$dbase1", $user1, $pass1));
+        &stmt_fail() unless ($sth = $dbh->prepare(q%
+            SELECT COUNT(*) FROM "informix".SysTables WHERE TabID < 100
+            %));
+        &stmt_fail() unless ($sth->execute);
+        &stmt_fail() unless (($numtabs) = $sth->fetchrow_array);
+        if ($numtabs < 40)
+        {
+            &stmt_note("1..0 # Skip IUS data types are not supported by database server.\n");
+            $dbh->disconnect;
+            exit(0);
+        }
+        &stmt_note("# IUS data types can be tested!\n");
+        return $dbh;
+    }
 
-	# Remove test debris created by DBD::Informix tests
-	sub cleanup_database
-	{
-		my ($dbh) = @_;
-		my ($old_p) = $dbh->{PrintError};
-		my ($old_r) = $dbh->{RaiseError};
-		my ($type);
-		my ($sth);
+    # Remove test debris created by DBD::Informix tests
+    sub cleanup_database
+    {
+        my ($dbh) = @_;
+        my ($old_p) = $dbh->{PrintError};
+        my ($old_r) = $dbh->{RaiseError};
+        my ($type);
+        my ($sth);
 
-		# Do not report any errors.
-		$dbh->{PrintError} = 0;
-		$dbh->{RaiseError} = 0;
+        # Do not report any errors.
+        $dbh->{PrintError} = 0;
+        $dbh->{RaiseError} = 0;
 
-		# Clean up synonyms (private and public), views, and base tables.
-		my(%map) = ('P' => 'SYNONYM', 'S' => 'SYNONYM', 'V' => 'VIEW', 'T' => 'TABLE');
-		foreach $type ('P', 'S', 'V', 'T')	# Private synonyms, public synonyms, views, tables.
-		{
-			my $kw = $map{$type};
-			$sth = $dbh->prepare(qq%SELECT owner, tabname FROM "informix".systables WHERE tabname MATCHES  'dbd_ix_*' AND tabtype = '$type'%);
-			$sth->execute;
-			my($owner, $name);
-			$sth->bind_col(1, \$owner);
-			$sth->bind_col(2, \$name);
-			while ($sth->fetchrow_array)
-			{
-				my($sql) = qq%DROP $kw "$owner".$name%;
-				&stmt_note("# $sql\n");
-				$dbh->do($sql);
-			}
-		}
+        # Clean up synonyms (private and public), views, and base tables.
+        my(%map) = ('P' => 'SYNONYM', 'S' => 'SYNONYM', 'V' => 'VIEW', 'T' => 'TABLE');
+        foreach $type ('P', 'S', 'V', 'T')  # Private synonyms, public synonyms, views, tables.
+        {
+            my $kw = $map{$type};
+            $sth = $dbh->prepare(qq%SELECT owner, tabname FROM "informix".systables WHERE tabname MATCHES  'dbd_ix_*' AND tabtype = '$type'%);
+            $sth->execute;
+            my($owner, $name);
+            $sth->bind_col(1, \$owner);
+            $sth->bind_col(2, \$name);
+            while ($sth->fetchrow_array)
+            {
+                my($sql) = qq%DROP $kw "$owner".$name%;
+                &stmt_note("# $sql\n");
+                $dbh->do($sql);
+            }
+        }
 
-		# Clean up stored procedures.
-		$sth = $dbh->prepare(q%SELECT owner, procname FROM "informix".sysprocedures WHERE name MATCHES 'dbd_ix_*'%);
-		if ($sth)
-		{
-			$sth->execute;
-			my($owner, $name);
-			$sth->bind_col(1, \$owner);
-			$sth->bind_col(2, \$name);
-			while ($sth->fetchrow_array)
-			{
-				my($sql) = qq%DROP PROCEDURE "$owner".$name%;
-				&stmt_note("# $sql\n");
-				$dbh->do($sql);
-			}
-		}
+        # Clean up stored procedures.
+        $sth = $dbh->prepare(q%SELECT owner, procname FROM "informix".sysprocedures WHERE name MATCHES 'dbd_ix_*'%);
+        if ($sth)
+        {
+            $sth->execute;
+            my($owner, $name);
+            $sth->bind_col(1, \$owner);
+            $sth->bind_col(2, \$name);
+            while ($sth->fetchrow_array)
+            {
+                my($sql) = qq%DROP PROCEDURE "$owner".$name%;
+                &stmt_note("# $sql\n");
+                $dbh->do($sql);
+            }
+        }
 
-		# Clean up IUS types debris!
-		$sth = $dbh->prepare(q%SELECT mode, owner, name FROM "informix".sysxtdtypes WHERE name MATCHES 'dbd_ix_*'%);
-		if ($sth)
-		{
-			$sth->execute;
-			my($mode, $owner, $name);
-			$sth->bind_col(1, \$mode);
-			$sth->bind_col(2, \$owner);
-			$sth->bind_col(3, \$name);
-			while ($sth->fetchrow_array)
-			{
-				my($sql);
-				$sql = qq%DROP ROW TYPE "$owner".$name RESTRICT%
-					if ($mode eq "R");	# ROW types (to point out the obvious)
-				$sql = qq%DROP     TYPE "$owner".$name RESTRICT%
-					if ($mode eq "D");	# DISTINCT types
-				&stmt_note("# $sql\n");
-				$dbh->do($sql);
-			}
-		}
+        # Clean up IUS types debris!
+        $sth = $dbh->prepare(q%SELECT mode, owner, name FROM "informix".sysxtdtypes WHERE name MATCHES 'dbd_ix_*'%);
+        if ($sth)
+        {
+            $sth->execute;
+            my($mode, $owner, $name);
+            $sth->bind_col(1, \$mode);
+            $sth->bind_col(2, \$owner);
+            $sth->bind_col(3, \$name);
+            while ($sth->fetchrow_array)
+            {
+                my($sql);
+                $sql = qq%DROP ROW TYPE "$owner".$name RESTRICT%
+                    if ($mode eq "R");  # ROW types (to point out the obvious)
+                $sql = qq%DROP     TYPE "$owner".$name RESTRICT%
+                    if ($mode eq "D");  # DISTINCT types
+                &stmt_note("# $sql\n");
+                $dbh->do($sql);
+            }
+        }
 
-		# Reinstate original error handling
-		$dbh->{PrintError} = $old_p;
-		$dbh->{RaiseError} = $old_r;
-		1;
-	}
+        # Reinstate original error handling
+        $dbh->{PrintError} = $old_p;
+        $dbh->{RaiseError} = $old_r;
+        1;
+    }
 
-	# Verify whether specified database name will use a shared memory connection.
-	# AFAIK, NT does not support shared memory connections.
-	# The use of grep (the Unix command) probably renders this worthless on NT.
-	# Obviously, if it became desirable, we could write a grep-like function in
-	# Perl (but beware the built-in grep which is different).
-	# NB: Error checking is minimal and assumes that esqltest at least ran OK.
-	sub is_shared_memory_connection
-	{
-		return 0 if $Config{archname} =~ /MSWin32/;
-		my($dbs) = @_;
-		my ($server) = $dbs;
-		if ($dbs !~ /.*@/)
-		{
-			my ($ixsrvr) = $ENV{INFORMIXSERVER};
-			$ixsrvr = 'unknown server name' unless $ixsrvr;
-			$server = "$dbs\@$ixsrvr";
-		}
-		$server =~ s/.*@//;
-		my($sqlhosts) = $ENV{INFORMIXSQLHOSTS};
-		$sqlhosts = "$ENV{INFORMIXDIR}/etc/sqlhosts" unless $sqlhosts;
-		# Implications for NT?
-		my($ent) = qx(grep "^$server\[ 	][ 	]*" $sqlhosts 2>/dev/null);
-		$ent = 'server protocol host service' unless $ent;
-		my(@ent) = split ' ', $ent;
-		return (($ent[1] =~ /o[ln]ipcshm/) ? 1 : 0);
-	}
+    # Verify whether specified database name will use a shared memory connection.
+    # AFAIK, NT does not support shared memory connections.
+    # The use of grep (the Unix command) probably renders this worthless on NT.
+    # Obviously, if it became desirable, we could write a grep-like function in
+    # Perl (but beware the built-in grep which is different).
+    # NB: Error checking is minimal and assumes that esqltest at least ran OK.
+    sub is_shared_memory_connection
+    {
+        return 0 if $Config{archname} =~ /MSWin32/;
+        my($dbs) = @_;
+        my ($server) = $dbs;
+        if ($dbs !~ /.*@/)
+        {
+            my ($ixsrvr) = $ENV{INFORMIXSERVER};
+            $ixsrvr = 'unknown server name' unless $ixsrvr;
+            $server = "$dbs\@$ixsrvr";
+        }
+        $server =~ s/.*@//;
+        my($sqlhosts) = $ENV{INFORMIXSQLHOSTS};
+        $sqlhosts = "$ENV{INFORMIXDIR}/etc/sqlhosts" unless $sqlhosts;
+        # Implications for NT?
+        my($ent) = qx(grep "^$server\[  ][  ]*" $sqlhosts 2>/dev/null);
+        $ent = 'server protocol host service' unless $ent;
+        my(@ent) = split ' ', $ent;
+        return (($ent[1] =~ /o[ln]ipcshm/) ? 1 : 0);
+    }
 
-	# Run a memory leak test.
-	# The main program will normally read:
-	#		use strict;
-	#		use DBD::Informix::TestHarness;
-	#		&memory_leak_test(\&test_subroutine);
-	#		exit;
-	# The remaining code in the test file will implement a test
-	# which shows the memory leak.  You should not connect to the
-	# test database before invoking memory_leak_test.
-	sub memory_leak_test
-	{
-		my($sub, $nap, $pscmd) = @_;
-		use vars qw($ppid $cpid $nap);
+    # Run a memory leak test.
+    # The main program will normally read:
+    #       use strict;
+    #       use DBD::Informix::TestHarness;
+    #       &memory_leak_test(\&test_subroutine);
+    #       exit;
+    # The remaining code in the test file will implement a test
+    # which shows the memory leak.  You should not connect to the
+    # test database before invoking memory_leak_test.
+    sub memory_leak_test
+    {
+        my($sub, $nap, $pscmd) = @_;
+        use vars qw($ppid $cpid $nap);
 
-		$|=1;
-		print "# Bug is fixed if size of process stabilizes (fairly quickly!)\n";
-		$ppid = $$;
-		$nap  = 5 unless defined $nap;
-		$pscmd = "ps -lp" unless defined $pscmd;
-		$pscmd .= " $ppid";
+        $|=1;
+        print "# Bug is fixed if size of process stabilizes (fairly quickly!)\n";
+        $ppid = $$;
+        $nap  = 5 unless defined $nap;
+        $pscmd = "ps -lp" unless defined $pscmd;
+        $pscmd .= " $ppid";
 
-		$cpid = fork();
-		die "failed to fork\n" unless (defined $cpid);
-		if ($cpid)
-		{
-			# Parent
-			print "# Parent: $ppid, Child: $cpid\n";
-			# Invoke the subroutine given by reference to do the real database work.
-			&$sub();
-			# Try to ensure that the child gets a chance to report at least once more...
-			sleep ($nap * 2);
-			kill 15, $cpid;
-			exit(0);
-		}
-		else
-		{
-			# Child -- monitor size of parent, while parent exists!
-			system "$pscmd | sed 's/^/# /'";
-			sleep $nap;
-			while (kill 0, $ppid)
-			{
-				system "$pscmd | sed -e 1d -e 's/^/# /'";
-				sleep $nap;
-			}
-		}
-	}
+        $cpid = fork();
+        die "failed to fork\n" unless (defined $cpid);
+        if ($cpid)
+        {
+            # Parent
+            print "# Parent: $ppid, Child: $cpid\n";
+            # Invoke the subroutine given by reference to do the real database work.
+            &$sub();
+            # Try to ensure that the child gets a chance to report at least once more...
+            sleep ($nap * 2);
+            kill 15, $cpid;
+            exit(0);
+        }
+        else
+        {
+            # Child -- monitor size of parent, while parent exists!
+            system "$pscmd | sed 's/^/# /'";
+            sleep $nap;
+            while (kill 0, $ppid)
+            {
+                system "$pscmd | sed -e 1d -e 's/^/# /'";
+                sleep $nap;
+            }
+        }
+    }
 
-	# Valid values for $DBD::Informix::TestHarness::verbose are:
-	#	0 -> don't say anything
-	#	1 -> overall status for each row
-	#	2 -> field-by-field detailed commentary
-	# Note that errors are always reported.
-	# our $verbose = 0; # But 'our' not acceptable to Perl 5.005_03!
-	my $verbose = 0;
-	sub set_verbosity
-	{
-		$verbose = $_[0];
-	}
+    # Valid values for $DBD::Informix::TestHarness::verbose are:
+    #   0 -> don't say anything
+    #   1 -> overall status for each row
+    #   2 -> field-by-field detailed commentary
+    # Note that errors are always reported.
+    # our $verbose = 0; # But 'our' not acceptable to Perl 5.005_03!
+    my $verbose = 0;
+    sub set_verbosity
+    {
+        $verbose = $_[0];
+    }
 
     sub smart_blob_space_name
     {
@@ -625,157 +628,157 @@
         return $sbspace;
     }
 
-	# Validate that the data returned from the database is correct.
-	# Assume each row in result set is supposed to appear exactly once.
-	# Extra results are erroneous; missing results are erroneous.
-	# The results from fetchrow_hashref() must be unambiguous.
-	# The key data must be a single column.
-	# The data in $val is a hash indexed by the key value containing the
-	# expected values for each column corresponding to the key value:-
-	# &validate_unordered_unique_data($sth, 'c1',
-	# {
-	#	'c1-value1' => { 'c1' => 'c1-value1', 'c2' => 'c2-value1', 'c3' => 'c3-value1' },
-	#	'c1-value2' => { 'c1' => 'c1-value1', 'c2' => 'c2-value2', 'c3' => 'c3-value2' },
-	# });
-	# Note that the key (c1) and expected value (c1-value1) are repeated;
-	# this is a test consistency check.
+    # Validate that the data returned from the database is correct.
+    # Assume each row in result set is supposed to appear exactly once.
+    # Extra results are erroneous; missing results are erroneous.
+    # The results from fetchrow_hashref() must be unambiguous.
+    # The key data must be a single column.
+    # The data in $val is a hash indexed by the key value containing the
+    # expected values for each column corresponding to the key value:-
+    # &validate_unordered_unique_data($sth, 'c1',
+    # {
+    #   'c1-value1' => { 'c1' => 'c1-value1', 'c2' => 'c2-value1', 'c3' => 'c3-value1' },
+    #   'c1-value2' => { 'c1' => 'c1-value1', 'c2' => 'c2-value2', 'c3' => 'c3-value2' },
+    # });
+    # Note that the key (c1) and expected value (c1-value1) are repeated;
+    # this is a test consistency check.
 
-	sub validate_unordered_unique_data
-	{
-		my($sth, $key, $val) = @_;
-		my(%values) = %$val;
-		my($numexp) = 0;
+    sub validate_unordered_unique_data
+    {
+        my($sth, $key, $val) = @_;
+        my(%values) = %$val;
+        my($numexp) = 0;
 
-		# Validate expected values array!
-		foreach my $col (sort keys %values)
-		{
-			my(%columns) = %{$values{$col}};
-			printf "# Key: %-20s = %s\n", "$key:", $col if $verbose >= 2;
-			stmt_fail "### TEST ERROR: key column not in expected data: $key = $col\n"
-				if !defined $columns{$key};
-			stmt_fail "### TEST ERROR: inconsistent expected data: $key = $col and $key = $columns{$key}\n"
-				if $col ne $columns{$key};
-			foreach my $col (sort keys %columns)
-			{
-				printf "#      %-20s = %s\n", "$col:", $columns{$col} if $verbose >= 2;
-			}
-			$numexp++;
-		}
+        # Validate expected values array!
+        foreach my $col (sort keys %values)
+        {
+            my(%columns) = %{$values{$col}};
+            printf "# Key: %-20s = %s\n", "$key:", $col if $verbose >= 2;
+            stmt_fail "### TEST ERROR: key column not in expected data: $key = $col\n"
+                if !defined $columns{$key};
+            stmt_fail "### TEST ERROR: inconsistent expected data: $key = $col and $key = $columns{$key}\n"
+                if $col ne $columns{$key};
+            foreach my $col (sort keys %columns)
+            {
+                printf "#      %-20s = %s\n", "$col:", $columns{$col} if $verbose >= 2;
+            }
+            $numexp++;
+        }
 
-		# Collect the data
-		my ($ref);
-		my (%state) = ('fail' => 0, 'pass' => 0, 'xtra' => 0, 'miss' => 0);
-		my $rownum = 0;
-		while ($ref = $sth->fetchrow_hashref)
-		{
-			$rownum++;
-			my %row = %{$ref};
-			if (defined $row{$key} && defined $values{$row{$key}})
-			{
-				my $pass = 0;
-				my $fail = 0;
-				my %expect = %{$values{$row{$key}}};
+        # Collect the data
+        my ($ref);
+        my (%state) = ('fail' => 0, 'pass' => 0, 'xtra' => 0, 'miss' => 0);
+        my $rownum = 0;
+        while ($ref = $sth->fetchrow_hashref)
+        {
+            $rownum++;
+            my %row = %{$ref};
+            if (defined $row{$key} && defined $values{$row{$key}})
+            {
+                my $pass = 0;
+                my $fail = 0;
+                my %expect = %{$values{$row{$key}}};
 
-				# Verify that each returned column has the expected value.
-				foreach my $col (keys %row)
-				{
-					my($got, $want) = ($row{$col}, $expect{$col});
-					if (defined $got && defined $want)
-					{
-						if ($got ne $want)
-						{
-							print "# Row $rownum: Got unexpected value <<$got>> for $col (key value = $row{$key}) when <<$want>> expected!\n";
-							$fail++;
-						}
-						else
-						{
-							print "# Row $rownum: Got expected value $got for $col (key value = $row{$key})\n" if ($verbose >= 2);
-							$pass++;
-						}
-					}
-					elsif (!defined $got && !defined $want)
-					{
-						# Both values NULL - OK.
-						print "# Row $rownum: Got NULL which was wanted for $col\n" if ($verbose >= 2);
-						$pass++;
-					}
-					elsif (!defined $got)
-					{
-						print "# Row $rownum: Got NULL for $col (key value = $row{$key}) when $want expected!\n";
-						$fail++;
-					}
-					else
-					{
-						print "# Row $rownum: Got $got for $col (key value = $row{$key}) when NULL expected!\n";
-						$fail++;
-					}
-				}
+                # Verify that each returned column has the expected value.
+                foreach my $col (keys %row)
+                {
+                    my($got, $want) = ($row{$col}, $expect{$col});
+                    if (defined $got && defined $want)
+                    {
+                        if ($got ne $want)
+                        {
+                            print "# Row $rownum: Got unexpected value <<$got>> for $col (key value = $row{$key}) when <<$want>> expected!\n";
+                            $fail++;
+                        }
+                        else
+                        {
+                            print "# Row $rownum: Got expected value $got for $col (key value = $row{$key})\n" if ($verbose >= 2);
+                            $pass++;
+                        }
+                    }
+                    elsif (!defined $got && !defined $want)
+                    {
+                        # Both values NULL - OK.
+                        print "# Row $rownum: Got NULL which was wanted for $col\n" if ($verbose >= 2);
+                        $pass++;
+                    }
+                    elsif (!defined $got)
+                    {
+                        print "# Row $rownum: Got NULL for $col (key value = $row{$key}) when $want expected!\n";
+                        $fail++;
+                    }
+                    else
+                    {
+                        print "# Row $rownum: Got $got for $col (key value = $row{$key}) when NULL expected!\n";
+                        $fail++;
+                    }
+                }
 
-				# Verify that each expected value is returned.
-				foreach my $col (keys %expect)
-				{
-					my($got, $want) = ($row{$col}, $expect{$col});
-					next if (defined $got && defined $want);	# Errors already reported
-					next if (!defined $got && !defined $want);
-					if (!defined $got)
-					{
-						print "# Row $rownum: Did not get result for $col (key value = $row{$key}) when $want expected!\n";
-						$fail++;
-					}
-					# The 'else' clause "cannot happen".
-				}
+                # Verify that each expected value is returned.
+                foreach my $col (keys %expect)
+                {
+                    my($got, $want) = ($row{$col}, $expect{$col});
+                    next if (defined $got && defined $want);    # Errors already reported
+                    next if (!defined $got && !defined $want);
+                    if (!defined $got)
+                    {
+                        print "# Row $rownum: Did not get result for $col (key value = $row{$key}) when $want expected!\n";
+                        $fail++;
+                    }
+                    # The 'else' clause "cannot happen".
+                }
 
-				if ($pass > 0 && $fail == 0)
-				{
-					$state{pass}++;
-					print "# Row $rownum: PASS\n" if ($verbose >= 1);
-					delete $values{$row{$key}};
-				}
-				else
-				{
-					$state{fail}++;
-					print "# Row $rownum: FAIL (erroneous content)\n" if ($verbose >= 1);
-					# Since the key was found (hence $ok > 0), it is OK to undef this row.
-					delete $values{$row{$key}} if $pass > 0;
-				}
-			}
-			else
-			{
-				print "# Row $rownum: Got unexpected row of data!\n";
-				foreach my $col (sort keys %row)
-				{
-					printf "#     %-20s = %s\n", "$col:", $row{$col};
-				}
-				$state{xtra}++;
-				print "# Row $rownum: FAIL (unexpected key value)\n" if ($verbose >= 1);
-			}
-		}
+                if ($pass > 0 && $fail == 0)
+                {
+                    $state{pass}++;
+                    print "# Row $rownum: PASS\n" if ($verbose >= 1);
+                    delete $values{$row{$key}};
+                }
+                else
+                {
+                    $state{fail}++;
+                    print "# Row $rownum: FAIL (erroneous content)\n" if ($verbose >= 1);
+                    # Since the key was found (hence $ok > 0), it is OK to undef this row.
+                    delete $values{$row{$key}} if $pass > 0;
+                }
+            }
+            else
+            {
+                print "# Row $rownum: Got unexpected row of data!\n";
+                foreach my $col (sort keys %row)
+                {
+                    printf "#     %-20s = %s\n", "$col:", $row{$col};
+                }
+                $state{xtra}++;
+                print "# Row $rownum: FAIL (unexpected key value)\n" if ($verbose >= 1);
+            }
+        }
 
-		# Verify that entire expected hash was consumed.
-		foreach my $val (sort keys %values)
-		{
-			print "# Did not get a row corresponding to expected key $val\n";
-			$state{miss}++;
-		}
+        # Verify that entire expected hash was consumed.
+        foreach my $val (sort keys %values)
+        {
+            print "# Did not get a row corresponding to expected key $val\n";
+            $state{miss}++;
+        }
 
-		# Determine whether test passed or failed overall.
-		if ($state{fail} == 0 && $state{miss} == 0 && $state{xtra} == 0 && $state{pass} == $numexp)
-		{
-			stmt_note "# PASSED: $state{pass} row(s) found with expected values\n";
-			stmt_ok;
-		}
-		else
-		{
-			my($msg) = "# FAILED";
-			$msg .= ": $state{pass} rows were correct";
-			$msg .= "; $state{fail} rows had faulty data" if ($state{fail} != 0);
-			$msg .= "; $state{miss} rows did not get selected" if ($state{miss} != 0);
-			$msg .= "; $state{xtra} rows were selected unexpectedly" if ($state{xtra} != 0);
-			stmt_nok "$msg\n";
-		}
-	}
+        # Determine whether test passed or failed overall.
+        if ($state{fail} == 0 && $state{miss} == 0 && $state{xtra} == 0 && $state{pass} == $numexp)
+        {
+            stmt_note "# PASSED: $state{pass} row(s) found with expected values\n";
+            stmt_ok;
+        }
+        else
+        {
+            my($msg) = "# FAILED";
+            $msg .= ": $state{pass} rows were correct";
+            $msg .= "; $state{fail} rows had faulty data" if ($state{fail} != 0);
+            $msg .= "; $state{miss} rows did not get selected" if ($state{miss} != 0);
+            $msg .= "; $state{xtra} rows were selected unexpectedly" if ($state{xtra} != 0);
+            stmt_nok "$msg\n";
+        }
+    }
 
-	1;
+    1;
 }
 
 __END__
@@ -791,7 +794,7 @@ DBD::Informix::TestHarness - Test Harness for DBD::Informix
 =head1 DESCRIPTION
 
 This document describes DBD::Informix::TestHarness distributed with
-Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21).
+Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25).
 This is pure Perl code which exploits DBI and DBD::Informix to make it
 easier to write tests.
 Most notably, it provides a simple mechanism to connect to the user's
@@ -862,7 +865,7 @@ method removes any tables, views, synonyms (or IUS types) created by the
 DBD::Informix test suite.
 These are all identified by the 'dbd_ix_' prefix.
 
-	&cleanup_database($dbh);
+    &cleanup_database($dbh);
 
 This is not used in all tests by any stretch of the imagination.
 In fact, the only test to use it routinely is t/t99clean.t.
@@ -875,7 +878,7 @@ or IDS/UDO (Informix Dynamic Server with Universal Data Option --
 essentially the product as IUS, but with a longer, more recent,
 name), then the mechanism to use is:
 
-	my ($dbh) = &test_for_ius();
+    my ($dbh) = &test_for_ius();
 
 If this returns, then the ESQL/C is capable of handling IUS data
 types, the database connection worked, and the database server is
@@ -890,7 +893,7 @@ have shared memory connections.
 This Unix-centric test provides such a test and allows the tests to report that
 'skipping test on this platform'.
 
-	if (&is_shared_memory_connection($dbase1)) { ... }
+    if (&is_shared_memory_connection($dbase1)) { ... }
 
 =head2 Using stmt_test
 
@@ -947,7 +950,7 @@ It exits with status 0 if everything was OK, and with status 1 if not.
 This function returns the current test counter (without altering it).
 It is most frequently used when the number of tests cannot be told in advance.
 
-	$n = &stmt_counter;
+    $n = &stmt_counter;
 
 =head2 Using stmt_ok
 
@@ -996,7 +999,7 @@ contents of DBI::errstr, ensuring that each line is prefixed by "# ".
 This routine is used internally by the DBD::Informix::TestHarness module, but is
 also available for your use.
 
-	&stmt_err('Warning Message');
+    &stmt_err('Warning Message');
 
 =head2 Using stmt_skip
 
@@ -1078,10 +1081,10 @@ the memory leak.
 You should not connect to the test database before invoking
 memory_leak_test.
 
-	use strict;
-	use DBD::Informix::TestHarness;
-	&memory_leak_test(\&test_subroutine);
-	exit;
+    use strict;
+    use DBD::Informix::TestHarness;
+    &memory_leak_test(\&test_subroutine);
+    exit;
 
 When it is called, memory_leak_test forks, and the parent process runs
 the given subroutine with no arguments.
@@ -1225,7 +1228,7 @@ for separate routine for unique and duplicate ordered data.
 The C<set_verbosity> function takes a value 0, 1 or 2 and sets the
 verbosity of the validate_* functions accordingly.
 
-	&set_verbosity(0);
+    &set_verbosity(0);
 
 =head2 Note
 

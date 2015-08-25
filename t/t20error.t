@@ -1,29 +1,31 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t20error.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t20error.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Test error on EXECUTE for DBD::Informix
 #
-#   Copyright 1997,1999 Jonathan Leffler
-#   Copyright 2000      Informix Software Inc
-#   Copyright 2002-03   IBM
+#   Copyright 1997-99 Jonathan Leffler
+#   Copyright 2000    Informix Software Inc
+#   Copyright 2002-03 IBM
+#   Copyright 2013-14 Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
+use warnings;
 
 # Test install...
-my $dbh = &connect_to_test_database();
+my $dbh = connect_to_test_database();
 
 my $tabname = "dbd_ix_err01";
 
-&stmt_note("1..5\n");
-&stmt_ok();
+stmt_note("1..5\n");
+stmt_ok();
 
 stmt_test $dbh, qq{
 CREATE TEMP TABLE $tabname
 (
-	Col01	SERIAL NOT NULL PRIMARY KEY,
-	Col02	CHAR(20) NOT NULL
+    Col01   SERIAL NOT NULL PRIMARY KEY,
+    Col02   CHAR(20) NOT NULL
 )
 };
 
@@ -44,10 +46,10 @@ $SIG{__WARN__} = sub { $msg = $_[0]; };
 $rv = $sth->execute();
 if (defined $rv)
 {
-	print "# Return from failed execute = <<$rv>>\n";
-	stmt_fail();
+    print "# Return from failed execute = <<$rv>>\n";
+    stmt_fail();
 }
-&stmt_fail() unless ($msg && $msg =~ /-100:/ && $msg =~ /-239:/);
+stmt_fail() unless ($msg && $msg =~ /-100:/ && $msg =~ /-239:/);
 $SIG{__WARN__} = 'DEFAULT';
 
 my @isam = @{$sth->{ix_sqlerrd}};
@@ -60,6 +62,6 @@ stmt_ok();
 my $sel = $dbh->prepare("SELECT * FROM $tabname") or stmt_fail;
 $sel->execute or stmt_fail;
 validate_unordered_unique_data($sel, 'col01',
-	{	1 => { 'col01' => 1, 'col02' => 'Gee Whizz!' }, });
+    {   1 => { 'col01' => 1, 'col02' => 'Gee Whizz!' }, });
 
 all_ok();

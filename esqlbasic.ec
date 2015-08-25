@@ -1,5 +1,5 @@
 /*
- * @(#)$Id: esqlbasic.ec,v 100.1 2002/02/08 22:49:13 jleffler Exp $
+ * @(#)$Id: esqlbasic.ec,v 2015.1 2015/08/21 21:18:25 jleffler Exp $
  *
  * DBD::Informix for Perl Version 5 -- Test Informix-ESQL/C environment
  *
@@ -14,6 +14,7 @@
  *
  * Copyright 1997-99 Jonathan Leffler
  * Copyright 2002    IBM
+ * Copyright 2015    Jonathan Leffler
  *
  * You may distribute under the terms of either the GNU General Public
  * License or the Artistic License, as specified in the Perl README file.
@@ -36,8 +37,10 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqlbasic.ec,v 100.1 2002/02/08 22:49:13 jleffler Exp $";
-#endif
+/* Prevent over-aggressive optimizers from eliminating ID string */
+extern const char jlss_id_esqlbasic_ec[];
+const char jlss_id_esqlbasic_ec[] = "@(#)$Id: esqlbasic.ec,v 2015.1 2015/08/21 21:18:25 jleffler Exp $";
+#endif /* lint */
 
 /*
 ** Various people ran into problems testing DBD::Informix because the
@@ -45,6 +48,13 @@ static const char rcs[] = "@(#)$Id: esqlbasic.ec,v 100.1 2002/02/08 22:49:13 jle
 ** This code was written as a self-defense measure to try and ensure
 ** that DBD::Informix had some chance of being tested successfully
 ** before the tests are run.
+**
+** What type is sqlca.sqlerrd[1]?  It is now 'int4', but used to be
+** (directly) 'long' or 'int'.  And int4 maps to long on 32-bit and int
+** on 64-bit platforms.  So, what's the correct printf() conversion
+** specifier?  It's hard to say.  Ideally, the esqltype.h header would
+** be used along with PRId_ixInt4.  Let's save the value in a long and
+** print accordingly.
 */
 
 /* Format and print an Informix error message (both SQL and ISAM parts) */
@@ -67,10 +77,11 @@ void            ix_printerr(FILE *fp, long rc)
 		/* Format ISAM (secondary) error */
 		if (sqlca.sqlerrd[1] != 0)
 		{
+            long sqlerrd1 = sqlca.sqlerrd[1];
 			if (rgetmsg(sqlca.sqlerrd[1], errbuf, sizeof(errbuf)) != 0)
 				strcpy(errbuf, "<<Failed to locate ISAM error message>>");
 			sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
-			sprintf(isambuf, "ISAM: %ld: %s", sqlca.sqlerrd[1], fmtbuf);
+			sprintf(isambuf, "ISAM: %ld: %s", sqlerrd1, fmtbuf);
 		}
 		else
 			isambuf[0] = '\0';
@@ -118,7 +129,7 @@ static void test_permissions(char *dbname)
 	EXEC SQL ROLLBACK WORK;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
 	/* Command-line arguments are ignored at the moment */
 	char *dbidsn = getenv("DBI_DSN");

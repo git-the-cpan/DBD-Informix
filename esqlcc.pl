@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-# @(#)$Id: esqlcc,v 2007.3 2007/09/02 21:54:49 jleffler Exp $ 
+# @(#)$Id: esqlcc.pl,v 2015.1 2015/08/21 22:54:47 jleffler Exp $ 
 #
 # DBD::Informix for Perl Version 5
 #
@@ -29,12 +29,14 @@ BEGIN
 $ENV{DBD_INFORMIX_DEBUG_ESQLCC} = 0 unless defined $ENV{DBD_INFORMIX_DEBUG_ESQLCC};
 }
 
+use strict;
+use warnings;
 use constant debug => ($ENV{DBD_INFORMIX_DEBUG_ESQLCC} =~ m/^\d+$/) ? $ENV{DBD_INFORMIX_DEBUG_ESQLCC} : 1;
 
 { printf STDERR "$0: Num args = %d\n", scalar(@ARGV) if debug; }
 
-@ARGS = ();
-$libs = 1;
+my @ARGS = ();
+my $libs = 1;
 
 sub firstline
 {
@@ -45,16 +47,16 @@ sub firstline
 }
 
 # Cannot use for $arg (@ARGV) because of '-[Ll] name' processing!
-for ($i = 0; $i < @ARGV; $i++)
+for (my $i = 0; $i < @ARGV; $i++)
 {
-	$arg = $ARGV[$i];
+	my $arg = $ARGV[$i];
 	if ($arg =~ /^[^-].*\.c$/o)
 	{
 		# C file
 		# Use $^X rather than perl to avoid problems with
 		# inappropriate versions of perl in system directories
 		# (Roderick Schertler <roderick@argon.org> 1999-07-25).
-		system "$^X esqlsed $arg"
+		system "$^X -i ./esqlsed $arg"
 			if (-w $arg && &firstline($arg) eq "#include <sqlhdr.h>");
 		push @ARGS, $arg;
 	}
@@ -107,9 +109,9 @@ warn "You might need to set DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX because of 
 # Sort out the real compiler.
 # Note that if $ENV{ESQLCC} contains, for example, 'cc -G', then we
 # need to split this into two words for the exec to work correctly.
-$cmd = $ENV{ESQLCC};
-$cmd = 'cc' unless ($cmd);
-@cmd = split /\s+/, $cmd;
+my $cmd = $ENV{ESQLCC};
+   $cmd = 'cc' unless ($cmd);
+my @cmd = split /\s+/, $cmd;
 
 print STDERR "@cmd @ARGS\n" if debug;
 if (debug > 1)

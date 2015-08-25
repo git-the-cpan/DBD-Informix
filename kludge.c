@@ -1,11 +1,11 @@
 /*
 @(#)File:           $RCSfile: kludge.c,v $
-@(#)Version:        $Revision: 1.8 $
-@(#)Last changed:   $Date: 2005/10/10 07:41:26 $
+@(#)Version:        $Revision: 1.10 $
+@(#)Last changed:   $Date: 2015/02/21 06:21:52 $
 @(#)Purpose:        Library support for KLUDGE macro
 @(#)Author:         J Leffler
-@(#)Copyright:      (C) JLSS 1995,1997-98,2003,2005
-@(#)Product:        Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+@(#)Copyright:      (C) JLSS 1995,1997-98,2003,2005,2015
+@(#)Product:        Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
 */
 
 /*TABSTOP=4*/
@@ -18,17 +18,21 @@
 
 #include "kludge.h"
 
-static const char rcs[] = "@(#)$Id: kludge.c,v 1.8 2005/10/10 07:41:26 jleffler Exp $";
+#ifndef lint
+/* Prevent over-aggressive optimizers from eliminating ID string */
+extern const char jlss_id_kludge_c[];
+const char jlss_id_kludge_c[] = "@(#)$Id: kludge.c,v 1.10 2015/02/21 06:21:52 jleffler Exp $";
+#endif /* lint */
 
 /* Report on kludges used at run-time */
 void kludge_use(const char *str)
 {
 #ifdef KLUDGE_VERBOSE
-	/* Condition is vacuous, but prevents rcs from being optimized away */
-	if (rcs != 0)
-		fprintf(stderr, "%s\n", str);
+    /* Condition is vacuous, but prevents jlss_id_kludge_c from being optimized away */
+    if (jlss_id_kludge_c != 0)
+        fprintf(stderr, "%s\n", str);
 #else
-	if (rcs == (char *)0)
-		(void)strcmp(str, rcs);
+    if (jlss_id_kludge_c != (char *)0)
+        (void)strcmp(str, jlss_id_kludge_c);
 #endif /* KLUDGE_VERBOSE */
 }

@@ -1,4 +1,4 @@
-Key Environment Variables for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+Key Environment Variables for Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
 
 There are many possible environment variables which affect Informix
 software and therefore which affect DBD::Informix.  All of the ones

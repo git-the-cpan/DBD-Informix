@@ -1,19 +1,21 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t94bool.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t94bool.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Test basic handling of Boolean data type
 #
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
+#   Copyright 2013-14 Jonathan Leffler
 
 use strict;
+use warnings;
 use DBD::Informix::TestHarness;
 
 my ($table) = "dbd_ix_bool";
-my ($dbh) = &test_for_ius;
+my ($dbh) = test_for_ius;
 
-&stmt_note("1..7\n");
+stmt_note("1..7\n");
 
 # Test BOOLEAN literals.
 $dbh->{RaiseError} = 1;
@@ -23,18 +25,18 @@ $dbh->do(qq% insert into $table values('t') %);
 
 sub check_two_rows
 {
-	my($sth) = $dbh->prepare(qq% select b from $table order by b%);
-	$sth->execute;
-	stmt_ok;
+    my($sth) = $dbh->prepare(qq% select b from $table order by b%);
+    $sth->execute;
+    stmt_ok;
 
-	my($row1) = $sth->fetchrow_arrayref;
-	stmt_fail unless ($$row1[0] eq 'f');
-	stmt_comment "Bool 1: $$row1[0]\n";
-	stmt_ok;
-	my($row2) = $sth->fetchrow_arrayref;
-	stmt_fail unless ($$row2[0] eq 't');
-	stmt_comment "Bool 2: $$row2[0]\n";
-	stmt_ok;
+    my($row1) = $sth->fetchrow_arrayref;
+    stmt_fail unless ($$row1[0] eq 'f');
+    stmt_comment "Bool 1: $$row1[0]\n";
+    stmt_ok;
+    my($row2) = $sth->fetchrow_arrayref;
+    stmt_fail unless ($$row2[0] eq 't');
+    stmt_comment "Bool 2: $$row2[0]\n";
+    stmt_ok;
 }
 
 check_two_rows;

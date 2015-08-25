@@ -1,15 +1,16 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t61varchar.t,v 2007.2 2007/08/27 02:00:47 jleffler Exp $
+#   @(#)$Id: t61varchar.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Test that DBD::Informix handles empty VARCHAR values correctly
 #
-#   Copyright 2005 Jonathan Leffler
-#   Copyright 2005 Vaclav Ovsik <vaclav.ovsik@i.cz>
+#   Copyright 2005    Vaclav Ovsik <vaclav.ovsik@i.cz>
+#   Copyright 2005-14 Jonathan Leffler
 
 use DBI qw(:sql_types);
 use DBD::Informix::TestHarness;
 use strict;
+use warnings;
 
 my $tbl = "dbd_ix_empty_vc";
 my $dbh = connect_to_test_database({ RaiseError => 1 });
@@ -24,7 +25,7 @@ if ($dbh->{ix_ServerVersion} < 600)
     exit 0;
 }
 #$dbh->trace(10);
-&stmt_note("1..2\n");
+stmt_note("1..2\n");
 
 $dbh->do("CREATE TEMP TABLE $tbl ( id int, vc varchar(20) )");
 
@@ -54,7 +55,7 @@ $sth->execute;
 #$sth->bind_param(2, '  ', SQL_VARCHAR);
 #$sth->execute;
 }
-&stmt_ok;
+stmt_ok;
 
 {
 my $row1 = { 'id' => 1, 'vc' => ''    };
@@ -68,15 +69,15 @@ my $row7 = { 'id' => 7, 'vc' => '  '  };
 #my $row9 = { 'id' => 9, 'vc' => '  '  };
 
 my $res1 =
-	{	1 => $row1, 2 => $row2, 3 => $row3, 4 => $row4, 5 => $row5,
-		6 => $row6, 7 => $row7, #8 => $row8, 9 => $row9
-	};
+    {   1 => $row1, 2 => $row2, 3 => $row3, 4 => $row4, 5 => $row5,
+        6 => $row6, 7 => $row7, #8 => $row8, 9 => $row9
+    };
 
 my $sth = $dbh->prepare("SELECT * FROM $tbl");
-$sth->execute ? validate_unordered_unique_data($sth, 'id', $res1) : &stmt_nok;
+$sth->execute ? validate_unordered_unique_data($sth, 'id', $res1) : stmt_nok;
 }
 
 $dbh->disconnect;
 
-&all_ok();
+all_ok();
 

@@ -1,37 +1,38 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t92rows.t,v 2005.2 2005/07/27 23:59:50 jleffler Exp $
+#   @(#)$Id: t92rows.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Test basic handling of ROW types
 #
 #   Copyright 2001    Informix Software Inc
 #   Copyright 2002-03 IBM
-#   Copyright 2004-05 Jonathan Leffler
+#   Copyright 2004-14 Jonathan Leffler
 #
 # Extracted from t91udts.t
 
 use strict;
+use warnings;
 use DBD::Informix::TestHarness;
 
 if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
 {
-	stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
-	exit 0;
+    stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
+    exit 0;
 }
 
-my ($dbh) = &test_for_ius;
+my ($dbh) = test_for_ius;
 
 $dbh->{ChopBlanks} = 1;
 my($table) = "dbd_ix_t92rows";
 my($rowtype) = "dbd_ix_t92rowtype";
 
-&stmt_note("1..11\n");
+stmt_note("1..11\n");
 
 sub do_stmt
 {
-	my($dbh,$stmt) = @_;
-	print "# $stmt\n";
-	$dbh->do($stmt) or stmt_err;
+    my($dbh,$stmt) = @_;
+    print "# $stmt\n";
+    $dbh->do($stmt) or stmt_err;
 }
 
 # Drop any pre-existing versions of any of these test types
@@ -89,14 +90,14 @@ stmt_note "# PREPARE: $sel\n";
 $sth = $dbh->prepare($sel)
     or stmt_fail;
 $sth->execute
-	or stmt_fail;
+    or stmt_fail;
 stmt_ok;
 
 my ($results) = $sth->fetchall_arrayref;
 my ($row);
 foreach $row (@$results) {
     $fetched++;
-	grep { $_ = "." if !defined $_; } @$row;
+    grep { $_ = "." if !defined $_; } @$row;
     print "# ROW-$fetched: @$row\n";
 }
 $sth->finish;

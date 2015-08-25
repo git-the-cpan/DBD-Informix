@@ -1,17 +1,19 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t29update.t,v 2003.2 2003/01/03 19:02:36 jleffler Exp $
+#   @(#)$Id: t29update.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Simple test for UPDATE with attributes listed in execute call
 #
 #   Copyright 1998-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2002-03 IBM
+#   Copyright 2013-14 Jonathan Leffler
 
 use DBD::Informix::TestHarness;
 use strict;
+use warnings;
 
-&stmt_note("1..3\n");
+stmt_note("1..3\n");
 
 my $tabname = "dbd_ix_t1";
 
@@ -40,5 +42,5 @@ validate_unordered_unique_data($sel, 'c3', {  3 => { 'c1' => 12, 'c2' => 14, 'c3
 
 $dbh->disconnect;
 
-&all_ok;
+all_ok;
 

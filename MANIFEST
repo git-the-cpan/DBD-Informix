@@ -1,5 +1,5 @@
-# @(#)$Id: MANIFEST,v 2008.3 2008/04/02 14:24:00 jleffler Exp $
-# MANIFEST for Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+# @(#)$Id: MANIFEST,v 2015.1 2015/08/21 22:57:13 jleffler Exp $
+# MANIFEST for Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
 Announce
 BugReport
 ChangeLog
@@ -51,12 +51,12 @@ esqlbasic.ec
 esqlc.h
 esqlc_v5.ec
 esqlc_v6.ec
-esqlcc
+esqlcc.pl
 esqlcver.ec
-esqlld
+esqlld.pl
 esqllib.h
 esqlperl.h
-esqlsed
+esqlsed.pl
 esqltest.ec
 esqltype.h
 esqlutil.h
@@ -97,6 +97,7 @@ mknmd.sh
 odbctype.c
 odbctype.h
 prodverstamp.sh
+setperl.pl
 sqltoken.c
 sqltoken.h
 sqltype.ec

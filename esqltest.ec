@@ -1,7 +1,7 @@
 /*
- * @(#)$Id: esqltest.ec,v 2008.1 2008/05/13 23:13:10 jleffler Exp $
+ * @(#)$Id: esqltest.ec,v 2015.1 2014/07/28 07:16:36 jleffler Exp $
  *
- * Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21)
+ * Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
  *
  * Test Informix-ESQL/C environment
  *
@@ -50,7 +50,7 @@
 static int estat = EXIT_SUCCESS;
 
 #ifndef lint
-static const char rcs[] = "@(#)$Id: esqltest.ec,v 2008.1 2008/05/13 23:13:10 jleffler Exp $";
+static const char rcs[] = "@(#)$Id: esqltest.ec,v 2015.1 2014/07/28 07:16:36 jleffler Exp $";
 #endif
 
 /*
@@ -87,7 +87,7 @@ void            ix_printerr(FILE *fp, long rc)
             if (rgetmsg(sqlca.sqlerrd[1], errbuf, (int)sizeof(errbuf)) != 0)
                 strcpy(errbuf, "<<Failed to locate ISAM error message>>");
             sprintf(fmtbuf, errbuf, sqlca.sqlerrm);
-            sprintf(isambuf, "ISAM: %ld: %s", sqlca.sqlerrd[1], fmtbuf);
+            sprintf(isambuf, "ISAM: %" PRId_ixInt4 ": %s", sqlca.sqlerrd[1], fmtbuf);
         }
         else
             isambuf[0] = '\0';
@@ -140,7 +140,7 @@ void dbd_ix_debug(int level, const char *fmt, ...)
 {
     va_list args;
 
-    putchar('\t');
+    printf("\t%d: ", level);
     va_start(args, fmt);
     vprintf(fmt, args);
     va_end(args);
@@ -292,7 +292,7 @@ int main(void)
     conn_ok = dbd_ix_opendatabase(dbase1);
 #endif  /* USE_CONNECT == 1 */
 
-    if (sqlca.sqlcode != 0)
+    if (!conn_ok || sqlca.sqlcode != 0)
     {
         ix_printerr(stderr, sqlca.sqlcode);
     }
@@ -320,7 +320,7 @@ int main(void)
     conn_ok = dbd_ix_opendatabase(dbase2);
 #endif  /* USE_CONNECT == 1 */
 
-    if (sqlca.sqlcode != 0)
+    if (!conn_ok || sqlca.sqlcode != 0)
     {
         if (sqlca.sqlcode == -27000)
         {

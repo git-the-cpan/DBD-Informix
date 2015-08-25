@@ -1,12 +1,14 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t35cursor.t,v 2003.3 2003/01/04 00:36:38 jleffler Exp $
+#   @(#)$Id: t35cursor.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Test handling of cursors and cursor states
 #
 #   Copyright 2002-03 IBM
+#   Copyright 2013-14 Jonathan Leffler
 
 use strict;
+use warnings;
 use DBD::Informix::TestHarness;
 
 # Test install...
@@ -20,11 +22,11 @@ my ($table) = "dbd_ix_cursorstate";
 stmt_test $dbh, qq{
 CREATE TEMP TABLE $table
 (
-	Col01	SERIAL(1000) NOT NULL,
-	Col02	CHAR(20) NOT NULL,
-	Col03	INTEGER NOT NULL,
-	Col04	DATETIME YEAR TO FRACTION(5) NOT NULL,
-	Col05   DECIMAL(10,9) NOT NULL
+    Col01   SERIAL(1000) NOT NULL,
+    Col02   CHAR(20) NOT NULL,
+    Col03   INTEGER NOT NULL,
+    Col04   DATETIME YEAR TO FRACTION(5) NOT NULL,
+    Col05   DECIMAL(10,9) NOT NULL
 )
 };
 
@@ -33,29 +35,29 @@ my $e  = 2.718281828;
 
 # Expected results.
 my $row1 = { 'col01' => 1000,
-			 'col02' => 'Another value',
-			 'col03' => 987654321,
-			 'col04' => '2002-02-28 00:11:22.55555',
-			 'col05' => $e
-		   };
+             'col02' => 'Another value',
+             'col03' => 987654321,
+             'col04' => '2002-02-28 00:11:22.55555',
+             'col05' => $e
+           };
 my $row2 = { 'col01' => 1001,
-			 'col02' => 'Different data',
-			 'col03' => 88888888,
-			 'col04' => '1900-01-01 00:00:00.00000',
-			 'col05' => '0.000000000'
-		   };
+             'col02' => 'Different data',
+             'col03' => 88888888,
+             'col04' => '1900-01-01 00:00:00.00000',
+             'col05' => '0.000000000'
+           };
 my $row3 = { 'col01' => 1002,
-			 'col02' => 'Some other data',
-			 'col03' => 88888888,
-			 'col04' => '1900-01-01 00:00:00.00000',
-			 'col05' => $pi
-		   };
+             'col02' => 'Some other data',
+             'col03' => 88888888,
+             'col04' => '1900-01-01 00:00:00.00000',
+             'col05' => $pi
+           };
 my $row4 = { 'col01' => 1003,
-			 'col02' => 'Some other data',
-			 'col03' => 123456789,
-			 'col04' => '2000-02-29 23:59:59.99999',
-			 'col05' => $pi
-		   };
+             'col02' => 'Some other data',
+             'col03' => 123456789,
+             'col04' => '2000-02-29 23:59:59.99999',
+             'col05' => $pi
+           };
 my $res1 = { 1000 => $row1 };
 my $res2 = { 1000 => $row1, 1001 => $row2 };
 my $res3 = { 1000 => $row1, 1001 => $row2, 1002 => $row3 };
@@ -92,10 +94,10 @@ $sth->execute or stmt_fail;
 stmt_ok;
 
 my $sel = $dbh->prepare($select) or stmt_fail;
-&stmt_ok;
+stmt_ok;
 
 # Check that there are now four rows of data
-$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res4) : &stmt_nok;
+$sel->execute ? validate_unordered_unique_data($sel, 'col01', $res4) : stmt_nok;
 }
 
 {
@@ -165,4 +167,4 @@ stmt_ok;
 # Implicitly undefine prepard statement - no error
 }
 
-&all_ok();
+all_ok();

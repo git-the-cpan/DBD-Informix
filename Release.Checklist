@@ -31,21 +31,16 @@ Checklist for Releasing a New Version of DBD::Informix
       variables.
     - Run some tests (especially on HP-UX) with
       DBD_INFORMIX_RELOCATABLE_INFORMIXDIR set.
-    - Run some tests with no ESQL/C and using "ESQL=c4gl perl Makefile.PL".
-      Note that this only works reliably if you're using the same compiler
-      that the c4gl script expects to use.  For example, on Solaris 7,
-      using Perl built with GCC fails because the '-K PIC' options passed
-      by c4gl are not understood by GCC.  You can fix this with the two
-      environment variables:
-          DBD_INFORMIX_ESQLCC_REMOVE_OPTIONS_REGEX
-          DBD_INFORMIX_ESQLLD_REMOVE_OPTIONS_REGEX
     - Ensure that username and password are not always the same to spot
       test failures better.
     - Run regression tests from regression sub-directory.
 10. Make the release using jdcrelease with the -F flag.
     - Send the announcement with PTS and checksum information to the
       names listed in the Announce file (dbi-dev is overkill).
+11. META.yml
+    - Correct pre-requisite version number
+    - Up to date email address
 
 --
 
-@(#)$Id: Release.Checklist,v 2008.1 2008/03/01 00:47:06 jleffler Exp $
+@(#)$Id: Release.Checklist,v 2015.1 2015/08/25 12:16:21 jleffler Exp $

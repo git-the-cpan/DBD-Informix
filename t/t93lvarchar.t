@@ -1,11 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
-#   @(#)$Id: t93lvarchar.t,v 2011.1 2011/06/12 21:34:31 jleffler Exp $
+#   @(#)$Id: t93lvarchar.t,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   Test basic handling of LVARCHAR data
 #
 #   Copyright 2002-03 IBM
-#   Copyright 2005-11 Jonathan Leffler
+#   Copyright 2005-14 Jonathan Leffler
 #
 # Beware of IBM Informix ESQL/C bug idsdb00139040 "SQL DESCRIPTOR
 # mishandles LVARCVHAR NOT NULL in non-temp tables on 32-bit ESQL/C".
@@ -21,41 +21,42 @@
 #             of LVARCHAR with NOT NULL.  This is evaded at the moment.
 
 use strict;
+use warnings;
 use DBD::Informix::TestHarness;
 
 if (defined $ENV{DBD_INFORMIX_NO_RESOURCE} && $ENV{DBD_INFORMIX_NO_RESOURCE})
 {
-	stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
-	exit 0;
+    stmt_note "1..0 # Skip: requires RESOURCE privileges but DBD_INFORMIX_NO_RESOURCE set.\n";
+    exit 0;
 }
 
-my ($dbh) = &test_for_ius;
+my ($dbh) = test_for_ius;
 
 print STDERR "Warning! This test may fail for 32-bit ESQL/C 2.81 or 2.90\n"
     if ($dbh->{ix_ProductName} =~ m/ 2\.(81|90)\.U/);
 
 $dbh->{ChopBlanks} = 1;
 
-&stmt_note("1..12\n");
+stmt_note("1..12\n");
 
 my ($table) = "dbd_ix_t93lvarchar";
 my ($disttype) = "dbd_ix_t93distoflvc";
 
 sub do_stmt
 {
-	my($dbh, $stmt) = @_;
-	print "# $stmt\n";
-	$dbh->do($stmt) or stmt_err;
+    my($dbh, $stmt) = @_;
+    print "# $stmt\n";
+    $dbh->do($stmt) or stmt_err;
 }
 
 sub verify_fetched_data
 {
-	my ($dbh, $sel, $res) = @_;
-	stmt_note "# PREPARE: $sel\n";
-	my ($sth) = $dbh->prepare($sel) or stmt_fail;
-	$sth->execute or stmt_fail;
-    &validate_unordered_unique_data($sth, 's', $res);
-	$sth->finish;
+    my ($dbh, $sel, $res) = @_;
+    stmt_note "# PREPARE: $sel\n";
+    my ($sth) = $dbh->prepare($sel) or stmt_fail;
+    $sth->execute or stmt_fail;
+    validate_unordered_unique_data($sth, 's', $res);
+    $sth->finish;
 }
 
 # Drop any pre-existing versions of the test table and test types

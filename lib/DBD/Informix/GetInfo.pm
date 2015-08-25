@@ -1,4 +1,4 @@
-#   @(#)$Id: GetInfo.pm,v 2004.1 2004/12/01 20:32:53 jleffler Exp $
+#   @(#)$Id: GetInfo.pm,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
 #
 #   @(#)DBD::Informix::GetInfo
 #
@@ -8,14 +8,14 @@
 #   2.80.UC1 on Solaris 7.
 #
 #   Copyright 2002-03 IBM
-#   Copyright 2004    Jonathan Leffler
+#   Copyright 2004-14 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
 #
 #-------------------------------------------------------------------------
 # Code and explanations follow for DBD::Informix
-# (Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21))
+# (Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25))
 #-------------------------------------------------------------------------
 #
 # NB: The Informix CLI (ODBC) driver did not provide a list of keywords.
@@ -26,6 +26,7 @@
 package DBD::Informix::GetInfo;
 
 use strict;
+use warnings;
 use POSIX qw(strftime);
 use DBD::Informix; 
 use DBI::Const::GetInfoType qw(%GetInfoType);
@@ -35,7 +36,7 @@ use DBI::Const::GetInfoReturn qw(%GetInfoReturnTypes %GetInfoReturnValues);
 # Do not fold the 'my' onto the assignment line - antique CPAN related
 # code gets confused.
 my
-$VERSION = "2013.0521";
+$VERSION = "2015.0825";
 # Fixup for development system.
 $VERSION = "2003.00.0000" if ($VERSION =~ m%[:]VERSION[:]%);
 
@@ -51,7 +52,7 @@ my $sql_driver_ver = sprintf $sql_ver_fmt, split(/[.]/, $dbd_ver_str);
 sub sql_data_source_name
 {
     my $dbh = shift;
-	my $dsn = $dbh->FETCH(qw{Name});
+    my $dsn = $dbh->FETCH(qw{Name});
     return "dbi:$sql_driver:$dsn";
 }
 
@@ -132,15 +133,15 @@ sub sql_servername
 {
     my $dbh = shift;
     my ($rv) = $ENV{INFORMIXSERVER};
-	$rv = $1 if (defined $dbh->FETCH(qw{Name}) && $dbh->FETCH(qw{Name}) =~ m/@\(\w[-a-zA-Z_0-9.]*\)$/);
+    $rv = $1 if (defined $dbh->FETCH(qw{Name}) && $dbh->FETCH(qw{Name}) =~ m/@\(\w[-a-zA-Z_0-9.]*\)$/);
     return $rv;
 }
 
 sub sql_dbms_version
 {
     my $dbh = shift;
-    my $sv = $dbh->FETCH(qw{ix_ServerVersion});	# Integer: eg 930 for 9.30.xxx
-	$sv = 0 unless defined $sv;
+    my $sv = $dbh->FETCH(qw{ix_ServerVersion}); # Integer: eg 930 for 9.30.xxx
+    $sv = 0 unless defined $sv;
     my @av = (int($sv/100), int($sv%100), 0);
     my $rv = sprintf("$sql_ver_fmt %s", $av[0], $av[1], 0, $av[2]);
     return $rv;
@@ -149,7 +150,7 @@ sub sql_dbms_version
 sub sql_driver_name
 {
     my $dbh = shift;
-	return "DBD::$sql_driver";
+    return "DBD::$sql_driver";
 }
 
 sub sql_identquote
@@ -165,7 +166,7 @@ sub sql_storedprocs
     return $dbh->FETCH(qw{ix_StoredProcedures}) ? 'Y' : 'N';
 }
 
-# our %info = (	# Perl 5.005_03 does not accept 'our'
+# our %info = ( # Perl 5.005_03 does not accept 'our'
 no strict;
 %info = (
      20 => 'Y',                           # SQL_ACCESSIBLE_PROCEDURES
@@ -404,7 +405,7 @@ use DBI;
 
 =head1 DESCRIPTION
 
-This module is used by Informix Database Driver for Perl DBI Version 2013.0521 (2013-05-21) if you invoke the DBI metadata methods
+This module is used by Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25) if you invoke the DBI metadata methods
 on a DBD::Informix handle.
 You will seldom if ever have cause to use this module directly.
 
