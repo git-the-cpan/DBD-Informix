@@ -1,9 +1,9 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2015.5 2015/08/25 12:17:00 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2015.7 2015/08/27 02:28:24 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25))
+# (Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -16,13 +16,11 @@
 
 #TABSTOP=4
 
-BEGIN
-{
-$main::min_DBI_ver = "1.607";       # Minimum (mandatory) version of DBI
-$main::ref_DBI_ver = "1.634";       # Reference (recommended) version of DBI
-$main::min_Perl_ver = "5.008001";   # Minimum (mandatory) version of Perl
-$main::ref_Perl_ver = "5.022000";   # Reference (recommended) version of Perl
-}
+use 5.008_001;
+use strict;
+use warnings;
+use lib 'lib';
+use DBD::Informix::Configure;
 
 ########################
 ### AUTOINSTALL CODE ###
@@ -35,7 +33,7 @@ use ExtUtils::AutoInstall (
         make_args   => '--hello',   # Suppress hello message from CPAN
     },
     -core           => [
-        'DBI'       => "$main::min_DBI_ver",
+        'DBI'       => "$DBD::Informix::Configure::DBI_MINVERSION",
     ],
     'High Resolution Timing' => [
         -default      => 1,         # Install Time::HiRes by default
@@ -66,18 +64,16 @@ sub MY::postamble
 
 # A sufficiently recent version of Perl and DBI must be installed before
 # we can build the DBD module.  The code in DBI, and hence the code in
-# DBD::Informix, needs the features present in Perl 5.6.0.  Note that
-# the Perl version cannot be tested with 'use' or 'require' and the
-# variable $main::min_Perl_ver; 'use' fails with a syntax error and
-# 'require' cannot find the module the with version number as its name.
-use 5.006;
-use strict;
+# DBD::Informix, needs the features present in Perl 5.8.1.
 use Config;
-use lib 'lib';
 use DBI::DBD;               # dbd_postamble()
-use DBD::Informix::Configure;
 use POSIX qw(strftime);
 sub dbd_ix_die;
+
+my $min_DBI_ver  = $DBD::Informix::Configure::DBI_MINVERSION;    # Minimum (mandatory) version of DBI
+my $ref_DBI_ver  = $DBD::Informix::Configure::DBI_REFVERSION;    # Reference (recommended) version of DBI
+my $min_Perl_ver = $DBD::Informix::Configure::PERL_MINVERSION;   # Minimum (mandatory) version of Perl
+my $ref_Perl_ver = $DBD::Informix::Configure::PERL_REFVERSION;   # Reference (recommended) version of Perl
 
 $| = 1;     # Ensure that Perl output is interleaved with test output.
 
@@ -106,7 +102,7 @@ if ($NTConfiguration)
     });
 }
 
-my $dbd_ix = "2015.0825";
+my $dbd_ix = "2015.0826";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -124,7 +120,7 @@ my %opts = (
                       COMPRESS     => 'gzip -v9',
                       SUFFIX       => 'gz'
                     },
-    'PREREQ_PM'  => { 'DBI' => "$main::min_DBI_ver",
+    'PREREQ_PM'  => { 'DBI' => "$min_DBI_ver",
                       'Time::HiRes' => 0
                     },
     'PM'         => {
@@ -146,7 +142,7 @@ my %opts = (
            );
 
 print qq%
-Configuring Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25) (aka $opts{NAME})
+Configuring Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
@@ -160,16 +156,16 @@ print "System:   @Config{qw(myuname)}\n";
 
 # Sometimes the 'use' commands above enforce the same restriction as
 # these two lines below.
-&did_not_read("Perl is out of date") unless ($] >= $main::min_Perl_ver);
-&did_not_read("DBI is out of date") unless ($DBI::VERSION >= $main::min_DBI_ver);
+&did_not_read("Perl is out of date") unless ($] >= $min_Perl_ver);
+&did_not_read("DBI is out of date") unless ($DBI::VERSION >= $min_DBI_ver);
 
 # Compare installed version of DBI with version which DBD::Informix was
 # last tested with.
 # The required and reference versions are the same for this release.
-warn "*** Ideally, you should upgrade to Perl version $main::ref_Perl_ver or later.\n\n"
-    unless ($] >= $main::ref_Perl_ver);
-warn "*** Ideally, you should upgrade to DBI version $main::ref_DBI_ver or later.\n\n"
-    unless ($DBI::VERSION >= $main::ref_DBI_ver);
+warn "*** Ideally, you should upgrade to Perl version $ref_Perl_ver or later.\n\n"
+    unless ($] >= $ref_Perl_ver);
+warn "*** Ideally, you should upgrade to DBI version $ref_DBI_ver or later.\n\n"
+    unless ($DBI::VERSION >= $ref_DBI_ver);
 
 my ($ID, $esqlprog) = &find_informixdir_and_esql($NTConfiguration);
 my ($epp) = "$ID/bin/$esqlprog";
@@ -1191,7 +1187,7 @@ sub Write_DBD_Informix_Defaults
         or die "Cannot create $defaults ($!)";
 
     print DEFAULTS <<'EOF';
-#   Default Environment Variables for Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+#   Default Environment Variables for Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004-10 Jonathan Leffler
@@ -1205,7 +1201,7 @@ sub Write_DBD_Informix_Defaults
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
-    $VERSION = "2015.0825";
+    $VERSION = "2015.0826";
     $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1229,7 +1225,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)).
+(Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to,

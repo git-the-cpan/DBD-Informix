@@ -5,7 +5,7 @@
 @(#)Purpose:        Internal declarations for DECIMAL functions
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 2003-08
-@(#)Product:        Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+@(#)Product:        Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
 */
 
 /*TABSTOP=4*/

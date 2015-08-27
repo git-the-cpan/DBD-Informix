@@ -5,7 +5,7 @@
 @(#)Purpose:        Supply key macros from IUS version of sqltypes.h
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1998,2003-06,2008
-@(#)Product:        Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+@(#)Product:        Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
 */
 
 /*TABSTOP=4*/

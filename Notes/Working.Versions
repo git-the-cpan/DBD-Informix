@@ -1,7 +1,7 @@
 Working Versions of DBD::Informix
 =================================
 
-@(#)$Id: Working.Versions,v 2011.2 2011/09/26 02:04:38 jleffler Exp $
+@(#)$Id: Working.Versions,v 2015.1 2015/08/26 06:14:49 jleffler Exp $
 
 This file documents combinations of machine, operating system, Perl, DBI,
 DBD::Informix and Informix-ESQL/C which have been reported as working,
@@ -652,7 +652,7 @@ Working Versions of DBD::Informix
     <SYS_COMPILER>    Unknown </SYS_COMPILER>
     <SYS_LOADER>      Unknown </SYS_LOADER>
     <WHEN>            1999-11-08 </WHEN>
-    <WHO>             "José Santos Reyes de la Garza" <ambar@mpsnet.com.mx> </WHO>
+    <WHO>             "JosÃ© Santos Reyes de la Garza" <ambar@mpsnet.com.mx> </WHO>
     <Z_NOTES>         Optional Notes</Z_NOTES>
 </WORKING_VERSION>
 
@@ -1058,7 +1058,7 @@ Working Versions of DBD::Informix
     <SYS_COMPILER>    Unknown </SYS_COMPILER>
     <SYS_LOADER>      Unknown </SYS_LOADER>
     <WHEN>            1999-12-08 </WHEN>
-    <WHO>             Aglef Stüwe <a.stuewe@gmx.de> </WHO>
+    <WHO>             Aglef StÃ¼we <a.stuewe@gmx.de> </WHO>
     <Z_NOTES>         Optional Notes</Z_NOTES>
 </WORKING_VERSION>
 
@@ -1198,6 +1198,21 @@ Working Versions of DBD::Informix
     <SYS_LOADER>      env MACOSX_DEPLOYMENT_TARGET=10.3 cc </SYS_LOADER>
     <WHEN>            2011-06-24 </WHEN>
     <WHO>             Jonathan Leffler <jleffler@osiris-9.sanjose.ibm.com> </WHO>
+    <Z_NOTES>         Optional Notes </Z_NOTES>
+</WORKING_VERSION>
+
+
+<WORKING_VERSION VERSION="1.00">
+    <DBD_INFORMIX>    2015.0826 </DBD_INFORMIX>
+    <DBI>             1.634 </DBI>
+    <INFORMIX_ESQLC>  IBM Informix CSDK Version 3.70, IBM Informix-ESQL Version 3.70.FC6 </INFORMIX_ESQLC>
+    <INFORMIX_SERVER> 11.70 (IDS) </INFORMIX_SERVER>
+    <PERL>            5.022000 darwin-2level dl_dlopen.xs </PERL>
+    <SYSTEM>          darwin osiris-2 14.3.0 darwin kernel version 14.3.0: mon mar 23 11:59:05 pdt 2015; root:xnu-2782.20.48~5release_x86_64 x86_64  </SYSTEM>
+    <SYS_COMPILER>    gcc 5.1.0 </SYS_COMPILER>
+    <SYS_LOADER>      env MACOSX_DEPLOYMENT_TARGET=10.3 cc </SYS_LOADER>
+    <WHEN>            2015-08-26 </WHEN>
+    <WHO>             Jonathan Leffler <jleffler@osiris-2.local> </WHO>
     <Z_NOTES>         Optional Notes </Z_NOTES>
 </WORKING_VERSION>
 

@@ -1,7 +1,7 @@
 /*
  * @(#)$Id: esqltest.ec,v 2015.1 2014/07/28 07:16:36 jleffler Exp $
  *
- * Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+ * Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
  *
  * Test Informix-ESQL/C environment
  *

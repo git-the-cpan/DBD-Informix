@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                DBD-Informix
-version:             2015.0825
+version:             2015.0826
 abstract:            IBM Informix Database Driver for Perl DBI
 license:             perl
 author:

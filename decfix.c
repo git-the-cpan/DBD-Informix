@@ -5,7 +5,7 @@
 @(#)Purpose:        Fixed formatting of DECIMALs
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1991-93,1996-97,1999,2001,2003,2005,2007-08
-@(#)Product:        Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+@(#)Product:        Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
 */
 
 #include <assert.h>

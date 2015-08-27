@@ -1,12 +1,12 @@
-#   @(#)$Id: Configure.pm,v 2014.1 2014/04/21 06:38:37 jleffler Exp $
+#   @(#)$Id: Configure.pm,v 2015.2 2015/08/27 02:28:24 jleffler Exp $
 #
 #   Informix ESQL/C Support Routines for DBD::Informix
-#   (Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25))
+#   (Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26))
 #
 #   Copyright 1999      Jonathan Leffler
 #   Copyright 2000      Informix Software Inc
 #   Copyright 2002      IBM
-#   Copyright 2003-2014 Jonathan Leffler
+#   Copyright 2003-2015 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -18,21 +18,35 @@
 # -- find_informixdir_and_esql
 # -- get_esqlc_version
 # -- map_informix_lib_names
+# It also defines the DBI and Perl minimum and reference versions,
+# centralizing this information.  It is used by Makefile.PL and
+# setmincur.pl (and the values end up in various bits of documentation).
 
 {
     package DBD::Informix::Configure;
+
     use strict;
     use warnings;
     use vars qw( @ISA @EXPORT $VERSION );
+    use vars qw( $DBI_MINVERSION $DBI_REFVERSION );
+    use vars qw( $PERL_MINVERSION $PERL_REFVERSION );
 
     require Exporter;
+
     @ISA = qw(Exporter);
     @EXPORT = qw(find_informixdir_and_esql get_esqlc_version map_informix_lib_names);
 
-    $VERSION = "2015.0825";
+    # Minimum and reference versions of DBI and Perl
+    $DBI_MINVERSION = "1.607";
+    $DBI_REFVERSION = "1.634";
+    $PERL_MINVERSION = "5.008001";
+    $PERL_REFVERSION = "5.022000";
+
+    $VERSION = "2015.0826";
+
+    # Fettle version for DBD::Informix development
     $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
-    use strict;
     use Config;
     use DBI;
 
@@ -250,7 +264,7 @@ use DBD::Informix::Configure;
 
 =head1 DESCRIPTION
 
-This module is used by Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25) in the build and bug reporting code.
+This module is used by Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26) in the build and bug reporting code.
 You will seldom if ever have cause to use this module directly.
 
 =head2 Using find_informixdir_and_esql

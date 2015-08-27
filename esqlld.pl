@@ -2,7 +2,7 @@
 #
 # @(#)$Id: esqlld.pl,v 2015.1 2015/08/21 22:55:19 jleffler Exp $ 
 #
-# Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+# Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
 #
 # Surrogate Linker for Informix ESQL/C versions 4.10.UC1 upwards
 # -- Used to create shared libraries.

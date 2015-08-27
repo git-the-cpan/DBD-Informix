@@ -1,12 +1,12 @@
-#   @(#)$Id: Informix.pm,v 2015.1 2015/08/22 00:05:43 jleffler Exp $
+#   @(#)$Id: Informix.pm,v 2015.2 2015/08/26 05:26:09 jleffler Exp $
 #
-#   @(#)Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+#   @(#)Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
 #
 #   Copyright 1994-95 Tim Bunce
 #   Copyright 1996-99 Jonathan Leffler
 #   Copyright 2000    Informix Software Inc
 #   Copyright 2001-03 IBM
-#   Copyright 2004-13 Jonathan Leffler
+#   Copyright 2004-15 Jonathan Leffler
 #
 #   You may distribute under the terms of either the GNU General Public
 #   License or the Artistic License, as specified in the Perl README file.
@@ -23,7 +23,7 @@
     use warnings;
     use vars qw($VERSION $drh @ISA %EXPORT_TAGS @EXPORT @EXPORT_OK);
 
-    use DBI 1.38;   # Requires features from DBI 1.38 release
+    use DBI;
     use DynaLoader;
     use Exporter;
     use POSIX qw(strftime);
@@ -49,10 +49,10 @@
                 ) ] );
     Exporter::export_ok_tags('ix_types');
 
-    $VERSION          = "2015.0825";
+    $VERSION          = "2015.0826";
 
     my $ATTRIBUTION      = 'Jonathan Leffler <jleffler@us.ibm.com>';
-    my $Revision         = '$Id: Informix.pm,v 2015.1 2015/08/22 00:05:43 jleffler Exp $';
+    my $Revision         = '$Id: Informix.pm,v 2015.2 2015/08/26 05:26:09 jleffler Exp $';
 
     # This is for development only - the code must be recompiled each day!
     $VERSION = strftime("%Y.%m%d", localtime time) if ($VERSION =~ m%[:]VERSION[:]%);
@@ -313,7 +313,7 @@ DBD::Informix - Informix Database Driver for Perl DBI
 
 =head1 DESCRIPTION
 
-This document describes Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25).
+This document describes Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26).
 
 You should also read the documentation for DBI C<perldoc DBI> as this
 document qualifies what is stated there.

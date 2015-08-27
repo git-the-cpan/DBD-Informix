@@ -2,7 +2,7 @@
 #
 #   @(#)$Id: mknmd.sh,v 2012.1 2012/05/28 21:46:20 jleffler Exp $"
 #
-#   @(#)Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+#   @(#)Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
 #
 #   Create a Non-Modifiable Source Distribution
 #   Caution: uses test operator -ot (older than) which is not POSIX-compliant

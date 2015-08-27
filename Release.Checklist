@@ -23,8 +23,11 @@ Checklist for Releasing a New Version of DBD::Informix
     - Correct cross-references
 7.  lib/DBD/Informix/TechSupport.pm
     - Up to date email addresses
+    - Correct pre-requisite version of DBI
+    - Correct version information, generally
 8.  Notes/FAQ
     - Up to date versions, etc.
+    - Up to date emails.
 9.  QA Tests
     - Run some tests specifying username and password via
       DBD_INFORMIX_USERNAME and DBD_INFORMIX_PASSWORD environment
@@ -40,7 +43,9 @@ Checklist for Releasing a New Version of DBD::Informix
 11. META.yml
     - Correct pre-requisite version number
     - Up to date email address
+12. lib/DBD/Informix/TechHarness.pm
+    - Correct pre-requisite version of DBI
 
 --
 
-@(#)$Id: Release.Checklist,v 2015.1 2015/08/25 12:16:21 jleffler Exp $
+@(#)$Id: Release.Checklist,v 2015.2 2015/08/26 05:26:09 jleffler Exp $

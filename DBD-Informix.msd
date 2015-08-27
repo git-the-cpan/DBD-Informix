@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.msd,v 2015.1 2015/08/21 22:49:30 jleffler Exp $
+#   @(#)$Id: DBD-Informix.msd,v 2015.3 2015/08/27 02:47:58 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)Informix Database Driver for Perl DBI Version 2015.0825 (2015-08-25)
+#   @(#)Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
 #   @(#)Definitive list of files -- Modifiable Source Distribution
 #
 #   -- The MSD RCS file column contains the name of the RCS file to be
@@ -92,6 +92,7 @@ RCS/esqlsed.pl,v                RCS/esqlsed.pl,v
 RCS/esqltest.ec,v               RCS/esqltest.ec,v
 RCS/link.c,v                    RCS/link.c,v
 RCS/link.h,v                    RCS/link.h,v
+RCS/setminref.pl,v              RCS/setminref.pl,v
 RCS/setperl.pl,v                RCS/setperl.pl,v
 
 RCS/odbctype.c,v                RCS/odbctype.c,v
