@@ -1,5 +1,5 @@
-# @(#)$Id: MANIFEST,v 2015.3 2015/10/29 04:03:53 jleffler Exp $
-# MANIFEST for Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31)
+# @(#)$Id: MANIFEST,v 2015.5 2015/11/01 07:37:01 jleffler Exp $
+# MANIFEST for Informix Database Driver for Perl DBI Version 2015.1101 (2015-11-01)
 Announce
 BugReport
 ChangeLog
@@ -12,6 +12,7 @@ Informix.xs
 InformixTechSupport
 ItWorks
 MANIFEST
+MANIFEST.SKIP
 META.yml
 Makefile.PL
 Notes/FAQ
@@ -31,6 +32,7 @@ Notes/web.servers
 README
 Release.Checklist
 TODO
+apply.setminref.sh
 bug-lvcnn.ec
 bug-lvcnn.pl
 dbdattr.ec
@@ -160,6 +162,7 @@ t/t92rows.t
 t/t93lvarchar.t
 t/t94bool.t
 t/t95int8.t
+t/t96bigint.t
 t/t98pod.t
 t/t99clean.t
 test.all.sh

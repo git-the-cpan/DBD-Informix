@@ -1,14 +1,32 @@
-Change Log for Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31) (aka DBD::Informix)
+Change Log for Informix Database Driver for Perl DBI Version 2015.1101 (2015-11-01) (aka DBD::Informix)
+
+2015.1101 Release
+-----------------
+2015-11-01: Upload to PAUSE and CPAN.
+2015-10-31: Revise notes on release process to use apply.setminref.pl and
+            setminref.pl.  Update release tools on release platform so it
+            works.  Otherwise, no change to the product.
 
 2015.1031 Release
 -----------------
-2015-10-31: Upload to PAUSE and CPAN.
+2015-10-31: Upload to PAUSE and CPAN.  Announcement not sent.
 2015-10-28: Resolve RT#108030.  Use code fragment from 'perldoc perlvar' to
             find Perl executable via Config module.  Problem reported by
             Curtis Leach <CLEACH@cpan.org>.
 2015-10-28: Resolve RT#108031.  MANIFEST listed setmincur.pl but file was
             renamed to setminref.pl before prior release.  Problem reported
             by Curtis Leach <CLEACH@cpan.org>.
+
+2015.0826 Release
+-----------------
+2015-08-26: Upload to PAUSE and CPAN.
+2015-08-26: Automatically deal with Perl and DBI minimum versions since the
+            previous releases had a mish-mash of version numbers scattered
+            through the code.
+2015-08-26: Fix DBD::Informix::TechSupport module, thereby fixing the
+            TechSupport and ItWorks scripts too.
+2015-08-26: Announce that IBM Informix ClientSDK (CSDK) 3.50 will be the
+            oldest supported version from 2016-01-01 onwards.
 
 2015.0825 Release
 -----------------
@@ -1285,4 +1303,4 @@ Pre-Release
 --------------
 
 Jonathan Leffler <jleffler@google.com>
-@(#)$Id: ChangeLog,v 2015.3 2015/10/29 11:47:34 jleffler Exp $
+@(#)$Id: ChangeLog,v 2015.4 2015/11/01 06:49:48 jleffler Exp $

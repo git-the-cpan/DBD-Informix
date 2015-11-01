@@ -1,34 +1,37 @@
 Checklist for Releasing a New Version of DBD::Informix
 ======================================================
 
-1.  Announce
+*   Announce
     - Up to date email addresses
     - Up to date summary of ChangeLog
     - Up to date summary of future directions
-2.  Makefile.PL
+*   Makefile.PL
+    - Up to date information
+*   lib/DBD/Informix/Configure.pm
     - Correct pre-requisite version of Perl
     - Correct pre-requisite version of DBI
     - Correct latest version of DBI
-3.  Informix.pm
+    - Correct latest version of Perl
+*   Informix.pm
     - Correct version number
     - Correct pre-requisite version of DBI
-4.  ChangeLog
+*   ChangeLog
     - All details up to date.
     - Release date annotated.
-5.  Notes/Working.Versions
+*   Notes/Working.Versions
     - Current working versions
-6.  README
+*   README
     - Correct information
     - Correct pre-requisites
     - Correct cross-references
-7.  lib/DBD/Informix/TechSupport.pm
+*   lib/DBD/Informix/TechSupport.pm
     - Up to date email addresses
     - Correct pre-requisite version of DBI
     - Correct version information, generally
-8.  Notes/FAQ
+*   Notes/FAQ
     - Up to date versions, etc.
     - Up to date emails.
-9.  QA Tests
+*   QA Tests
     - Run some tests specifying username and password via
       DBD_INFORMIX_USERNAME and DBD_INFORMIX_PASSWORD environment
       variables.
@@ -37,15 +40,17 @@ Checklist for Releasing a New Version of DBD::Informix
     - Ensure that username and password are not always the same to spot
       test failures better.
     - Run regression tests from regression sub-directory.
-10. Make the release using jdcrelease with the -F flag.
+*   Make the release using:
+    - jdcrelease -F -N $PWD/apply.setminref
     - Send the announcement with PTS and checksum information to the
       names listed in the Announce file (dbi-dev is overkill).
-11. META.yml
+    - Upload to pause.cpan.org
+*   META.yml
     - Correct pre-requisite version number
     - Up to date email address
-12. lib/DBD/Informix/TechHarness.pm
+*   lib/DBD/Informix/TechHarness.pm
     - Correct pre-requisite version of DBI
 
 --
 
-@(#)$Id: Release.Checklist,v 2015.2 2015/08/26 05:26:09 jleffler Exp $
+@(#)$Id: Release.Checklist,v 2015.3 2015/11/01 06:40:19 jleffler Exp $

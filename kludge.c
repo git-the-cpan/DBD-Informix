@@ -5,7 +5,7 @@
 @(#)Purpose:        Library support for KLUDGE macro
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1995,1997-98,2003,2005,2015
-@(#)Product:        Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31)
+@(#)Product:        Informix Database Driver for Perl DBI Version 2015.1101 (2015-11-01)
 */
 
 /*TABSTOP=4*/

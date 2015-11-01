@@ -1,12 +1,12 @@
 #!/bin/ksh
 #
-#   @(#)$Id: prodverstamp.sh,v 2010.9 2010/03/14 13:27:36 jleffler Exp $
+#   @(#)$Id: prodverstamp.sh,v 2015.1 2015/08/31 00:55:23 jleffler Exp $
 #
-#   $Product: Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31) $
+#   $Product: Informix Database Driver for Perl DBI Version 2015.1101 (2015-11-01) $
 #
 #   Product version stamping tool
 #
-#   (C) Copyright JLSS 2003,2007-10
+#   (C) Copyright JLSS 2003,2007-10,2015
 
 # Ensure we do not pick up stray environment variables!
 BASEVRSN=
@@ -45,42 +45,42 @@ if [ "X$PRODVERSTAMPFLAGS" != "X" ]
 then eval set -- "$@" $PRODVERSTAMPFLAGS
 fi
 
-usestr="Usage: $0 [-F][-huzCDELMNPTVX] [-A attribute] [-j file.jdc] \\
+usestr="Usage: $(basename $0 .sh) [-F][-huzCDELMNPTVX] [-A attribute] [-j file.jdc] \\
        [-c code][-d date][-e email][-l licence][-m cmdirs][-n name] \\
        [-r copyright][-s suffix][-t tarfile][-v version][-x tar-extn] \\
        [file ...]"
 
 helpinfo()
 {
-    echo "$usestr"
-    echo "\nCommand options:\n"
-    echo "  -A attr Echo the named attribute"
-    echo "  -C      Echo the product code (PRODCODE)"
-    echo "  -D      Echo the product date (today)"
-    echo "  -E      Echo the email address (jonathan.leffler@gmail.com)"
-    echo "  -F      Final release (no date suffix to version number)"
-    echo "  -L      Echo the licence string (GNU GPL v2)"
-    echo "  -M      Echo the CM directories for the product"
-    echo "  -N      Echo the product name (PRODUCT)"
-    echo "  -P      Echo the product identifier string (PRODUCT Version VERSION (DATE))"
-    echo "  -T      Echo the product tar file name (PRODCODE.VERSION.DATE.tgz)"
-    echo "  -V      Echo the version number (VERSION.DATE)"
-    echo "  -X      Echo the tar extension (.tgz)"
-    echo "  -c code Set the product code"
-    echo "  -d date Set the product date"
-    echo "  -e mail Set the email address"
-    echo "  -h      Echo this help information"
-    echo "  -j file Name of JLSS Distribution Configuration file"
-    echo "  -l lic  Set the licence string"
-    echo "  -n name Set the product name"
-    echo "  -r copy Set the copyright information string"
-    echo "  -s sffx Set suffix to version number"
-    echo "  -t tar  Set the product tar file name"
-    echo "  -u      Delete licence (:LICEN[SC]E:) information"
-    echo "  -v vrsn Set the version number"
-    echo "  -x ext  Set the product tar file extension"
-    echo "  -z      Delete licence file names (LICEN[CS]E, COPYING)"
-    echo "\nNote that $0 can be used as a pure filter too"
+    printf "$usestr\n"
+    printf "\nCommand options:\n"
+    printf "  -A attr Echo the named attribute\n"
+    printf "  -C      Echo the product code (PRODCODE)\n"
+    printf "  -D      Echo the product date (today)\n"
+    printf "  -E      Echo the email address (jonathan.leffler@gmail.com)\n"
+    printf "  -F      Final release (no date suffix to version number)\n"
+    printf "  -L      Echo the licence string (GNU GPL v2)\n"
+    printf "  -M      Echo the CM directories for the product\n"
+    printf "  -N      Echo the product name (PRODUCT)\n"
+    printf "  -P      Echo the product identifier string (PRODUCT Version VERSION (DATE))\n"
+    printf "  -T      Echo the product tar file name (PRODCODE.VERSION.DATE.tgz)\n"
+    printf "  -V      Echo the version number (VERSION.DATE)\n"
+    printf "  -X      Echo the tar extension (.tgz)\n"
+    printf "  -c code Set the product code\n"
+    printf "  -d date Set the product date\n"
+    printf "  -e mail Set the email address\n"
+    printf "  -h      Echo this help information\n"
+    printf "  -j file Name of JLSS Distribution Configuration file\n"
+    printf "  -l lic  Set the licence string\n"
+    printf "  -n name Set the product name\n"
+    printf "  -r copy Set the copyright information string\n"
+    printf "  -s sffx Set suffix to version number\n"
+    printf "  -t tar  Set the product tar file name\n"
+    printf "  -u      Delete licence (:LICEN[SC]E:) information\n"
+    printf "  -v vrsn Set the version number\n"
+    printf "  -x ext  Set the product tar file extension\n"
+    printf "  -z      Delete licence file names (LICEN[CS]E, COPYING)\n"
+    printf "\nNote that $(basename $0 .sh) can be used as a pure filter too\n"
     exit 0
 }
 
