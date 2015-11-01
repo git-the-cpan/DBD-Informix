@@ -1,9 +1,9 @@
-# @(#)$Id: DBD-Informix.jdc,v 2015.4 2015/08/26 05:07:29 jleffler Exp $
+# @(#)$Id: DBD-Informix.jdc,v 2015.5 2015/10/29 20:17:04 jleffler Exp $
 #
-# JLSS Distribution Configuration File for Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
+# JLSS Distribution Configuration File for Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31)
 
 NAME    = Informix Database Driver for Perl DBI
 CODE    = DBD-Informix
-VERSION = 2015.0826
+VERSION = 2015.1031
 LICENCE = "Perl Artistic License or GNU General Public License"
 CMDIRECTORIES = "RCS Notes/RCS examples/RCS lib/Bundle/DBD/RCS lib/DBD/Informix/RCS regression/RCS t/RCS"

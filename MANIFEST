@@ -1,5 +1,5 @@
-# @(#)$Id: MANIFEST,v 2015.2 2015/08/26 05:26:09 jleffler Exp $
-# MANIFEST for Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
+# @(#)$Id: MANIFEST,v 2015.3 2015/10/29 04:03:53 jleffler Exp $
+# MANIFEST for Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31)
 Announce
 BugReport
 ChangeLog
@@ -97,7 +97,7 @@ mknmd.sh
 odbctype.c
 odbctype.h
 prodverstamp.sh
-setmincur.pl
+setminref.pl
 setperl.pl
 sqltoken.c
 sqltoken.h

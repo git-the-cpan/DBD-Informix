@@ -1,9 +1,9 @@
 #!/usr/bin/perl -sw
 #
-# @(#)$Id: Makefile.PL,v 2015.7 2015/08/27 02:28:24 jleffler Exp $
+# @(#)$Id: Makefile.PL,v 2015.8 2015/10/29 11:47:34 jleffler Exp $
 #
 # Configuration script for DBD::Informix
-# (Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26))
+# (Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31))
 #
 # Copyright 1996-99 Jonathan Leffler
 # Copyright 1996    Alligator Descartes
@@ -102,7 +102,7 @@ if ($NTConfiguration)
     });
 }
 
-my $dbd_ix = "2015.0826";
+my $dbd_ix = "2015.1031";
 
 # This is for development only - the code must be recompiled each day!
 $dbd_ix = strftime("%Y.%m%d", localtime time) if $dbd_ix =~ m/^[:]VERSION[:]$/;
@@ -142,16 +142,21 @@ my %opts = (
            );
 
 print qq%
-Configuring Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26) (aka $opts{NAME})
+Configuring Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31) (aka $opts{NAME})
         You are using DBI version $DBI::VERSION and Perl version $]
 Remember to actually read the README file!
 
 %;
 
-my($Perl) = $^X;    # Translate inscrutable to scrutable!
+# See http://perldoc.perl.org/perlvar.html#%24EXECUTABLE_NAME
+my $Perl = $Config{perlpath};
+if ($^O ne 'VMS')
+{
+    $Perl .= $Config{_exe} unless $Perl =~ m/$Config{_exe}$/i;
+}
 
 # log key platform information to help me help you quickly
-print "Perl:     $Perl v$] @Config{qw(archname dlsrc)}\n";
+print "Perl:     $^X v$] @Config{qw(archname dlsrc)}\n";
 print "System:   @Config{qw(myuname)}\n";
 
 # Sometimes the 'use' commands above enforce the same restriction as
@@ -1187,7 +1192,7 @@ sub Write_DBD_Informix_Defaults
         or die "Cannot create $defaults ($!)";
 
     print DEFAULTS <<'EOF';
-#   Default Environment Variables for Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
+#   Default Environment Variables for Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31)
 #
 #   Copyright 2002-03 IBM
 #   Copyright 2004-10 Jonathan Leffler
@@ -1201,7 +1206,7 @@ sub Write_DBD_Informix_Defaults
     require Exporter;
     @ISA = qw(Exporter);
     @EXPORT = qw(default_INFORMIXDIR default_INFORMIXSERVER);
-    $VERSION = "2015.0826";
+    $VERSION = "2015.1031";
     $VERSION = "0.97002" if ($VERSION =~ m%[:]VERSION[:]%);
 
 EOF
@@ -1225,7 +1230,7 @@ use DBD::Informix::Defaults;
 =head1 DESCRIPTION
 
 This module was generated automatically by DBD::Informix
-(Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)).
+(Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31)).
 It records the default values of INFORMIXDIR and INFORMIXSERVER
 that were in use when DBD::Informix was built.
 You can edit the returned values if you need to,

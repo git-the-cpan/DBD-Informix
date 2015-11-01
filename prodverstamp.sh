@@ -2,7 +2,7 @@
 #
 #   @(#)$Id: prodverstamp.sh,v 2010.9 2010/03/14 13:27:36 jleffler Exp $
 #
-#   $Product: Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26) $
+#   $Product: Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31) $
 #
 #   Product version stamping tool
 #

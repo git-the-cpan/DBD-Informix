@@ -1,14 +1,14 @@
 To: dbi-announce@perl.org, dbi-dev@perl.org, dbi-users@perl.org,
         informix-list@iiug.org, dbd.informix@gmail.com
-Subject: ANNOUNCE: Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26) released
+Subject: ANNOUNCE: Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31) released
 
-Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26) has been uploaded to CPAN.
+Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31) has been uploaded to CPAN.
 
 IBM Informix Database Driver for Perl (also known as DBD::Informix) is
-the driver code that enables Perl 5.008001 or later to access Informix
+the driver code that enables Perl :PERL_MINVERSION: or later to access Informix
 databases via the DBI module (but if you are not already using Perl
-5.022000 - or a later version - you should be planning to upgrade Perl).
-You will to install DBI version 1.607 or later as well (version 1.634 - or any
+:PERL_REFVERSION: - or a later version - you should be planning to upgrade Perl).
+You will to install DBI version :DBI_MINVERSION: or later as well (version :DBI_REFVERSION: - or any
 later version - is recommended) before installing DBD::Informix.  The
 code for DBD::Informix is available for download via:
 
@@ -20,6 +20,12 @@ http://dbi.perl.org/
 ** Jonathan Leffler) at dbd.informix@gmail.com.
 ** The ItWorks script does not send email to anybody; you have to do
 ** that yourself.
+
+New in release 2015.1031:
+* This is basically a minor bug-fix release.
+* RT#108030 about mismanaging the name of the Perl binary in Makefile.PL
+  is fixed.
+* RT#108031 is about a missing (actually, misnamed) file in the MANIFEST.
 
 New in release 2015.0826:
 * Automatically deal with Perl and DBI minimum versions since the previous
@@ -42,23 +48,6 @@ New in release 2013.0521:
 * Support CSDK 4.10 for IDS 12.10
 * Change work email address to jleffler@google.com
 
-New in release 2013.0206:
-* Bug fix release (not generally available).
-* Properly handle the new ESQL/C version 4.10.
-
-New in release 2013.0113:
-* Bug fix release.
-* Workaround for bug in ESQL/C 3.70 and earlier that generates error -1820
-  when reopening a cursor that previously fetched LVARCHAR data.
-* Fix for INFORMIXDIR containing Perl regex metacharacters.
-* Other minor improvements as documented in the ChangeLog.
-* Formal support for ESQL/C 7.x and 8.x (don't ask why the
-  current version numbers are smaller) will be dropped after this
-  release.  The code won't go away yet, but it is beyond time to
-  get off those versions.  ESQL/C 5.20 is nominally supported for
-  those still using Informix OnLine 5.20, but there is no
-  testing on that platform.
-
 Support email address:
 * This release is supported by Jonathan Leffler <dbd.informix@gmail.com>.
 * You may also report your bugs via the CPAN resolution tracking system:
@@ -70,4 +59,4 @@ As always, see the ChangeLog file for details about what has changed.
 
 Jonathan Leffler (jleffler@us.ibm.com, jonathan.leffler@gmail.com)
 
-@(#)$Id: Announce,v 2015.3 2015/08/27 02:28:24 jleffler Exp $
+@(#)$Id: Announce,v 2015.4 2015/10/29 11:47:34 jleffler Exp $

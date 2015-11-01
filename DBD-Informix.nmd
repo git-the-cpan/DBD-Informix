@@ -1,6 +1,6 @@
-#   @(#)$Id: DBD-Informix.nmd,v 2015.7 2015/08/27 02:48:06 jleffler Exp $
+#   @(#)$Id: DBD-Informix.nmd,v 2015.9 2015/10/29 20:18:10 jleffler Exp $
 #   @(#)DBD::Informix - Perl Database Driver for Informix
-#   @(#)Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
+#   @(#)Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31)
 #   @(#)Definitive list of files -- Non-Modifiable Source Distribution
 #
 #   -- The Source file column contains the name of the source file to be
@@ -53,16 +53,16 @@ sqltoken.h                  RCS/sqltoken.h,v            2004.3
 sqltype.ec                  RCS/sqltype.ec,v            2011.1
 
 # Source Files
-Announce                        RCS/Announce,v          2015.3
+Announce                        RCS/Announce,v          2015.4
 BugReport                       RCS/BugReport,v         100.5
-ChangeLog                       RCS/ChangeLog,v         2015.2
+ChangeLog                       RCS/ChangeLog,v         2015.3
 
 InformixTechSupport             RCS/InformixTechSupport,v   2013.1
 ItWorks                         RCS/ItWorks,v               100.5
-MANIFEST                        RCS/MANIFEST,v              2015.2
+MANIFEST                        RCS/MANIFEST,v              2015.3
 MANIFEST.SKIP                   RCS/MANIFEST.SKIP,v         2004.2
 META.yml                        RCS/META.yml,v              2015.3
-Makefile.PL                     RCS/Makefile.PL,v           2015.7
+Makefile.PL                     RCS/Makefile.PL,v           2015.8
 README                          RCS/README,v                2015.3
 TODO                            RCS/TODO,v                  2013.1
 
@@ -88,11 +88,11 @@ odbctype.c                      RCS/odbctype.c,v        2008.1
 odbctype.h                      RCS/odbctype.h,v        100.1
 setminref.pl                    RCS/setminref.pl,v      2015.3
 setperl.pl                      RCS/setperl.pl,v        2015.1
-test.all.sh                     RCS/test.all.sh,v       100.1
-test.c4gl.sh                    RCS/test.c4gl.sh,v      100.1
-test.one.sh                     RCS/test.one.sh,v       100.1
-test.quiet.sh                   RCS/test.quiet.sh,v     100.1
-test.run.sh                     RCS/test.run.sh,v       2004.1
+test.all.sh                     RCS/test.all.sh,v       2015.1
+test.c4gl.sh                    RCS/test.c4gl.sh,v      2015.1
+test.one.sh                     RCS/test.one.sh,v       2015.1
+test.quiet.sh                   RCS/test.quiet.sh,v     2015.1
+test.run.sh                     RCS/test.run.sh,v       2015.1
 
 # Release mechanism stuff - not needed elsewhere, mostly.
 Release.Checklist               RCS/Release.Checklist,v 2015.2
@@ -210,8 +210,8 @@ examples/fetchscroll.pl                 examples/RCS/fetchscroll.pl,v           
 
 inc/ExtUtils/AutoInstall.pm             inc/ExtUtils/AutoInstall.pm             -
 
-DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2015.4
+DBD-Informix.jdc            RCS/DBD-Informix.jdc,v      2015.5
 DBD-Informix.msd            RCS/DBD-Informix.msd,v      2015.3
-DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2015.7 $
+DBD-Informix.nmd            RCS/DBD-Informix.nmd,v      $Revision: 2015.9 $
 mknmd.sh                    RCS/mknmd.sh,v              2012.1
 prodverstamp.sh             RCS/prodverstamp.sh,v       2010.9

@@ -5,7 +5,7 @@
 @(#)Purpose:        Function prototypes for ESQL/C Versions 7.20..7.24
 @(#)Author:         J Leffler
 @(#)Copyright:      (C) JLSS 1997,1999-2000,2003-06,2008-09
-@(#)Product:        Informix Database Driver for Perl DBI Version 2015.0826 (2015-08-26)
+@(#)Product:        Informix Database Driver for Perl DBI Version 2015.1031 (2015-10-31)
 */
 
 /*TABSTOP=4*/
